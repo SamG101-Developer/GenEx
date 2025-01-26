@@ -24,19 +24,27 @@ namespace genex::iterators {
     concept has_rend = has_member_rend<Rng> || has_std_rend<Rng>;
 
     struct end_fn {
-        template <typename Rng> requires iterators::has_member_end<Rng>
-        constexpr auto operator()(Rng &&r) const noexcept -> decltype(r.end());
+        template <typename Rng> requires has_member_end<Rng>
+        constexpr auto operator()(Rng &&r) const noexcept -> decltype(r.end()) {
+            return r.end();
+        }
 
-        template <typename Rng> requires not iterators::has_member_end<Rng> and iterators::has_std_end<Rng>
-        constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::end(r));
+        template <typename Rng> requires not has_member_end<Rng> and has_std_end<Rng>
+        constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::end(r)) {
+            return std::end(r);
+        }
     };
 
     struct rend_fn {
-        template <typename Rng> requires iterators::has_member_rend<Rng>
-        constexpr auto operator()(Rng &&r) const noexcept -> decltype(r.rend());
+        template <typename Rng> requires has_member_rend<Rng>
+        constexpr auto operator()(Rng &&r) const noexcept -> decltype(r.rend()) {
+            return r.rend();
+        }
 
-        template <typename Rng> requires not iterators::has_member_rend<Rng> and iterators::has_std_rend<Rng>
-        constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::rend(r));
+        template <typename Rng> requires not has_member_rend<Rng> and has_std_rend<Rng>
+        constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::rend(r)) {
+            return std::rend(r);
+        }
     };
 
     export template <typename Rng>
@@ -47,25 +55,4 @@ namespace genex::iterators {
 
     export inline constexpr end_fn end;
     export inline constexpr rend_fn rend;
-}
-
-
-template <typename Rng> requires genex::iterators::has_member_end<Rng>
-constexpr auto genex::iterators::end_fn::operator()(Rng &&r) const noexcept -> decltype(r.end()) {
-    return r.end();
-}
-
-template <typename Rng> requires not genex::iterators::has_member_end<Rng> and genex::iterators::has_std_end<Rng>
-constexpr auto genex::iterators::end_fn::operator()(Rng &&r) const noexcept -> decltype(std::end(r)) {
-    return std::end(r);
-}
-
-template <typename Rng> requires genex::iterators::has_member_rend<Rng>
-constexpr auto genex::iterators::rend_fn::operator()(Rng &&r) const noexcept -> decltype(r.rend()) {
-    return r.rend();
-}
-
-template <typename Rng> requires not genex::iterators::has_member_rend<Rng> and genex::iterators::has_std_rend<Rng>
-constexpr auto genex::iterators::rend_fn::operator()(Rng &&r) const noexcept -> decltype(std::rend(r)) {
-    return std::rend(r);
 }
