@@ -47,3 +47,10 @@ depending on the design of the container.
 
 In the future, there will be a specialization API, allowing for iteration compatibility on custom containers that don't
 conform to regular standards.
+
+## Future
+
+Add more concepts regarding the type of generator, such as `forward_generator`, `bidirectional_generator` etc. This
+will allow optimizations, for example for `find_last` with a `reversible_generator`, the generator can be reversed then
+the first match found, rather than iterating over the entire generator.
+

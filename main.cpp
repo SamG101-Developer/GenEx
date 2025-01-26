@@ -10,6 +10,9 @@ import genex.algorithms.all_of;
 import genex.algorithms.any_of;
 import genex.algorithms.binary_search;
 import genex.algorithms.contains;
+import genex.algorithms.find;
+import genex.iterators.begin;
+import genex.views.chunk;
 import genex.views.concat;
 import genex.views.cycle;
 import genex.views.drop;
@@ -20,6 +23,7 @@ import genex.views.iota;
 import genex.views.map;
 import genex.views.remove;
 import genex.views.reverse;
+import genex.views.set_algorithms;
 import genex.views.take;
 import genex.views.to;
 
@@ -196,6 +200,11 @@ int main() {
             | genex::views::to<std::vector>();
         auto expected1 = std::vector<size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         assert(a == expected1);
+
+        const auto b = genex::views::iota(10)
+            | genex::views::to<std::vector>();
+        auto expected2 = std::vector<size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        assert(b == expected2);
     }
 
     {
@@ -270,5 +279,102 @@ int main() {
             | genex::algorithms::binary_search(10);
         auto expected2 = false;
         assert(d == expected2);
+    }
+
+    // {
+    //     const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    //     const auto b = a
+    //         | genex::views::chunk(3)
+    //         | genex::views::to<std::vector>();
+    //     const auto expected1 = std::vector<std::vector<int>>{{0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {9}};
+    //     assert(b == expected1);
+    // }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = std::vector{5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+        const auto c = a
+            | genex::views::set_difference(b)
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0, 1, 2, 3, 4};
+        assert(c == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = std::vector{5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+        const auto c = a
+            | genex::views::set_intersection(b)
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{5, 6, 7, 8, 9};
+        assert(c == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = std::vector{5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+        const auto c = a
+            | genex::views::set_symmetric_difference(b)
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0, 1, 2, 3, 4, 10, 11, 12, 13, 14};
+        assert(c == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = std::vector{5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+        const auto c = a
+            | genex::views::set_union(b)
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+        assert(c == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::algorithms::find(5);
+        const auto expected1 = genex::iterators::begin(a) + 5;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 5};
+        const auto b = a
+            | genex::algorithms::find_last(5);
+        const auto expected1 = genex::iterators::begin(a) + 9;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::algorithms::find_if([](const int x) { return x > 5; });
+        const auto expected1 = genex::iterators::begin(a) + 6;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 5};
+        const auto b = a
+            | genex::algorithms::find_last_if([](const int x) { return x < 5; });
+        const auto expected1 = genex::iterators::begin(a) + 4;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 5};
+        const auto b = a
+            | genex::algorithms::find_if_not([](const int x) { return x < 5; });
+        const auto expected1 = genex::iterators::begin(a) + 5;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 5};
+        const auto b = a
+            | genex::algorithms::find_last_if_not([](const int x) { return x > 5; });
+        const auto expected1 = genex::iterators::begin(a) + 9;
+        assert(b == expected1);
     }
 }
