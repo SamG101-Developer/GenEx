@@ -16,8 +16,8 @@ using namespace genex::type_traits;
 namespace genex::views {
     struct reverse_base_fn : detail::view_base {
         template <range Rng>
-        auto operator()(Rng &&rng1) const -> generator<range_value_t<Rng>> {
-            for (auto it = iterators::rbegin(rng1); it != iterators::rend(rng1); ++it) {
+        auto operator()(Rng &&rng) const -> generator<range_value_t<Rng>> {
+            for (auto it = iterators::rbegin(rng); it != iterators::rend(rng); ++it) {
                 co_yield *it;
             }
         }
@@ -27,8 +27,8 @@ namespace genex::views {
         using reverse_base_fn::operator();
 
         auto operator()() const -> decltype(auto) {
-            return [this]<range Rng>(Rng &&rng1) mutable {
-                return (*this)(std::forward<Rng>(rng1));
+            return [this]<range Rng>(Rng &&rng) mutable {
+                return (*this)(std::forward<Rng>(rng));
             };
         }
     };
