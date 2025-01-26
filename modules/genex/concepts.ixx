@@ -6,6 +6,7 @@ export module genex.concepts;
 import genex.iterators.begin;
 import genex.iterators.end;
 import genex.type_traits;
+import genex.generator;
 
 using namespace genex::type_traits;
 
