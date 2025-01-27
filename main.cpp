@@ -10,14 +10,19 @@ import genex.algorithms.all_of;
 import genex.algorithms.any_of;
 import genex.algorithms.binary_search;
 import genex.algorithms.contains;
+import genex.algorithms.count;
 import genex.algorithms.find;
 import genex.iterators.begin;
 import genex.views.chunk;
 import genex.views.concat;
+import genex.views.copied;
 import genex.views.cycle;
 import genex.views.drop;
 import genex.views.enumerate;
 import genex.views.filter;
+import genex.views.flat;
+import genex.views.fold;
+import genex.views.for_each;
 import genex.views.intersperse;
 import genex.views.iota;
 import genex.views.map;
@@ -30,7 +35,7 @@ import genex.views.to;
 
 // Custom "<<" for "std::vector<int>"
 template <typename T>
-auto operator<<(std::ostream &os, const std::vector<T> &v) -> std::ostream & {
+auto operator<<(std::ostream &os, const std::vector<T> &v) -> std::ostream& {
     os << "[";
     for (size_t i = 0; i < v.size(); ++i) {
         os << v[i];
@@ -173,7 +178,7 @@ int main() {
         const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         const auto b = std::vector{9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
         const auto c = a
-            | genex::views::intersperse(b)
+            | genex::views::interleave(b)
             | genex::views::to<std::vector>();
         const auto expected1 = std::vector{0, 9, 1, 8, 2, 7, 3, 6, 4, 5, 5, 4, 6, 3, 7, 2, 8, 1, 9, 0};
         assert(c == expected1);
@@ -181,7 +186,7 @@ int main() {
         const auto d = std::vector{0, 1, 2, 3, 4};
         const auto e = std::vector{9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
         const auto f = d
-            | genex::views::intersperse(e)
+            | genex::views::interleave(e)
             | genex::views::to<std::vector>();
         const auto expected2 = std::vector{0, 9, 1, 8, 2, 7, 3, 6, 4, 5, 4, 3, 2, 1, 0};
         assert(f == expected2);
@@ -189,7 +194,7 @@ int main() {
         const auto g = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         const auto h = std::vector{9, 8, 7, 6, 5};
         const auto i = g
-            | genex::views::intersperse(h)
+            | genex::views::interleave(h)
             | genex::views::to<std::vector>();
         const auto expected3 = std::vector{0, 9, 1, 8, 2, 7, 3, 6, 4, 5, 5, 6, 7, 8, 9};
         assert(i == expected3);
@@ -375,6 +380,66 @@ int main() {
         const auto b = a
             | genex::algorithms::find_last_if_not([](const int x) { return x > 5; });
         const auto expected1 = genex::iterators::begin(a) + 9;
+        assert(b == expected1);
+    }
+
+    {
+        // const auto a = std::vector<std::string>{"0"};
+        // const auto b = a
+        //     | genex::views::copied
+        //     | genex::views::to<std::vector>();
+        // const auto expected1 = std::vector<std::string>{"0"};
+        // const auto expected2 = a[0] == a[1] and &a[0] != &a[1];
+        // assert(b == expected1 and expected2);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 5};
+        const auto b = a
+            | genex::algorithms::count(5);
+        const auto expected1 = 2;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector<std::vector<int>>{{0, 1, 2, 3}, {4, 5}, {6, 7, 8}, {9}};
+        const auto b = a
+            | genex::views::flat
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::fold_left(0, std::minus<int>{});
+        const auto expected1 = -45;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::fold_right(0, std::minus<int>{});
+        const auto expected1 = -5;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::fold(0, std::minus<int>{});
+        const auto expected1 = -45;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        auto b = std::vector<int>{};
+        a |
+            genex::views::for_each([&b](const int x) { b.push_back(x); });
+        const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         assert(b == expected1);
     }
 }
