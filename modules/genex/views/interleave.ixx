@@ -15,7 +15,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::views {
-    struct intersperse_base_fn : detail::view_base {
+    struct interleave_base_fn : detail::view_base {
         template <range Rng>
         auto operator()(Rng &&rng1, Rng &&rng2) const -> generator<range_value_t<Rng>> {
             auto it1 = iterators::begin(rng1);
@@ -31,8 +31,8 @@ namespace genex::views {
         }
     };
 
-    struct intersperse_fn final : intersperse_base_fn {
-        using intersperse_base_fn::operator();
+    struct interleave_fn final : interleave_base_fn {
+        using interleave_base_fn::operator();
 
         template <range Rng>
         auto operator()(Rng &&rng2) const -> decltype(auto) {
@@ -42,5 +42,5 @@ namespace genex::views {
         }
     };
 
-    export inline constexpr intersperse_fn intersperse;
+    export inline constexpr interleave_fn interleave;
 }
