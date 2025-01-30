@@ -23,6 +23,7 @@ import genex.views.filter;
 import genex.views.flat;
 import genex.views.fold;
 import genex.views.for_each;
+import genex.views.interleave;
 import genex.views.intersperse;
 import genex.views.iota;
 import genex.views.map;
@@ -440,6 +441,24 @@ int main() {
         a |
             genex::views::for_each([&b](const int x) { b.push_back(x); });
         const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::intersperse(10)
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0, 10, 1, 10, 2, 10, 3, 10, 4, 10, 5, 10, 6, 10, 7, 10, 8, 10, 9};
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::intersperse_with([] { return 10; })
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0, 10, 1, 10, 2, 10, 3, 10, 4, 10, 5, 10, 6, 10, 7, 10, 8, 10, 9};
         assert(b == expected1);
     }
 }

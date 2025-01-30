@@ -12,6 +12,7 @@ target_sources(GenEx_All PUBLIC FILE_SET CXX_MODULES
         ${CMAKE_CURRENT_LIST_DIR}/iterators/begin.ixx
         ${CMAKE_CURRENT_LIST_DIR}/iterators/distance.ixx
         ${CMAKE_CURRENT_LIST_DIR}/iterators/end.ixx
+        ${CMAKE_CURRENT_LIST_DIR}/iterators/next.ixx
 
         ${CMAKE_CURRENT_LIST_DIR}/operations/insert.ixx
         ${CMAKE_CURRENT_LIST_DIR}/operations/push_back.ixx
@@ -30,6 +31,7 @@ target_sources(GenEx_All PUBLIC FILE_SET CXX_MODULES
         ${CMAKE_CURRENT_LIST_DIR}/views/fold.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/for_each.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/interleave.ixx
+        ${CMAKE_CURRENT_LIST_DIR}/views/intersperse.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/iota.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/map.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/remove.ixx

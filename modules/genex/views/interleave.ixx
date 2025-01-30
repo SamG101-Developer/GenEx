@@ -2,7 +2,7 @@ module;
 #include <coroutine>
 #include <functional>
 
-export module genex.views.intersperse;
+export module genex.views.interleave;
 import genex.concepts;
 import genex.generator;
 import genex.iterators.begin;
