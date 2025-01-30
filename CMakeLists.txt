@@ -7,3 +7,7 @@ add_subdirectory(modules/genex)
 
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE GenEx::All)
+
+add_library(GenEx INTERFACE)
+target_link_libraries(GenEx INTERFACE GenEx::All)
+add_library(GenEx::GenEx ALIAS GenEx)
