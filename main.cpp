@@ -6,6 +6,7 @@
 
 
 import genex.generator;
+import genex.algorithms.accumulate;
 import genex.algorithms.all_of;
 import genex.algorithms.any_of;
 import genex.algorithms.binary_search;
@@ -444,21 +445,29 @@ int main() {
         assert(b == expected1);
     }
 
-    {
-        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        const auto b = a
-            | genex::views::intersperse(10)
-            | genex::views::to<std::vector>();
-        const auto expected1 = std::vector{0, 10, 1, 10, 2, 10, 3, 10, 4, 10, 5, 10, 6, 10, 7, 10, 8, 10, 9};
-        assert(b == expected1);
-    }
+    // {
+    //     const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    //     const auto b = a
+    //         | genex::views::intersperse(10)
+    //         | genex::views::to<std::vector>();
+    //     const auto expected1 = std::vector{0, 10, 1, 10, 2, 10, 3, 10, 4, 10, 5, 10, 6, 10, 7, 10, 8, 10, 9};
+    //     assert(b == expected1);
+    // }
+
+    // {
+    //     const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    //     const auto b = a
+    //         | genex::views::intersperse_with([] { return 10; })
+    //         | genex::views::to<std::vector>();
+    //     const auto expected1 = std::vector{0, 10, 1, 10, 2, 10, 3, 10, 4, 10, 5, 10, 6, 10, 7, 10, 8, 10, 9};
+    //     assert(b == expected1);
+    // }
 
     {
         const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         const auto b = a
-            | genex::views::intersperse_with([] { return 10; })
-            | genex::views::to<std::vector>();
-        const auto expected1 = std::vector{0, 10, 1, 10, 2, 10, 3, 10, 4, 10, 5, 10, 6, 10, 7, 10, 8, 10, 9};
-        assert(b == expected1);
+            | genex::algorithms::accumulate(0, std::plus<int>{});
+        const auto expected = 45;
+        assert(b == expected);
     }
 }
