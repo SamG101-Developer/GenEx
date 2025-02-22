@@ -3,7 +3,7 @@ module;
 #include <functional>
 
 export module genex.views.iota;
-import genex.generator;
+export import genex.generator;
 import genex.iterators.begin;
 import genex.iterators.end;
 import genex.type_traits;

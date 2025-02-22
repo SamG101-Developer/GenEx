@@ -3,8 +3,8 @@ module;
 #include <functional>
 
 export module genex.views.interleave;
+export import genex.generator;
 import genex.concepts;
-import genex.generator;
 import genex.iterators.begin;
 import genex.iterators.end;
 import genex.type_traits;

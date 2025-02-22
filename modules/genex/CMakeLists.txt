@@ -2,6 +2,8 @@ add_library(GenEx_All STATIC)
 
 target_sources(GenEx_All PUBLIC FILE_SET CXX_MODULES
         BASE_DIRS ${CMAKE_CURRENT_LIST_DIR} FILES
+        ${CMAKE_CURRENT_LIST_DIR}/actions/_action_base.ixx
+
         ${CMAKE_CURRENT_LIST_DIR}/algorithms/accumulate.ixx
         ${CMAKE_CURRENT_LIST_DIR}/algorithms/all_of.ixx
         ${CMAKE_CURRENT_LIST_DIR}/algorithms/any_of.ixx

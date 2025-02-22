@@ -4,8 +4,8 @@ module;
 #include <utility>
 
 export module genex.views.slice;
+export import genex.generator;
 import genex.concepts;
-import genex.generator;
 import genex.iterators.begin;
 import genex.iterators.distance;
 import genex.iterators.end;

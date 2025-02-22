@@ -2,9 +2,9 @@ module;
 #include <coroutine>
 
 export module genex.views.set_algorithms;
+export import genex.generator;
 import genex.algorithms.contains;
 import genex.concepts;
-import genex.generator;
 import genex.type_traits;
 import genex.views._view_base;
 

@@ -3,8 +3,8 @@ module;
 #include <functional>
 
 export module genex.views.intersperse;
+export import genex.generator;
 import genex.concepts;
-import genex.generator;
 import genex.iterators.begin;
 import genex.iterators.next;
 import genex.iterators.end;

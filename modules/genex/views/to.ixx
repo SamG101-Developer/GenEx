@@ -2,8 +2,8 @@ module;
 #include <functional>
 
 export module genex.views.to;
+export import genex.generator;
 import genex.concepts;
-import genex.generator;
 import genex.type_traits;
 import genex.iterators.begin;
 import genex.iterators.end;

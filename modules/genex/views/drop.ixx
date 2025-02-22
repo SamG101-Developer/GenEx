@@ -3,8 +3,8 @@ module;
 #include <functional>
 
 export module genex.views.drop;
+export import genex.generator;
 import genex.concepts;
-import genex.generator;
 import genex.iterators.distance;
 import genex.meta;
 import genex.type_traits;

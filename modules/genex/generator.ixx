@@ -18,7 +18,15 @@ namespace genex {
 }
 
 
+// auto range = vector | genex::views::___
 export template <typename T, std::invocable<T> F>
 auto operator|(T &&lhs, F &&rhs) {
+    return std::forward<F>(rhs)(std::forward<T>(lhs));
+}
+
+
+// vector |= genex::actions::___
+export template <typename T, std::invocable<T> F>
+auto operator|=(T &&lhs, F &&rhs) {
     return std::forward<F>(rhs)(std::forward<T>(lhs));
 }

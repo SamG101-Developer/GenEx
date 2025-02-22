@@ -3,8 +3,8 @@ module;
 #include <functional>
 
 export module genex.views.concat;
+export import genex.generator;
 import genex.concepts;
-import genex.generator;
 import genex.type_traits;
 import genex.views._view_base;
 
