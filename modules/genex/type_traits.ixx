@@ -11,7 +11,7 @@ namespace genex::type_traits {
     template <typename Rng>
     struct range_value;
 
-    template <typename I>
+    export template <typename I>
     struct iter_value;
 
     export template <typename Rng>

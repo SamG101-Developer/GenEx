@@ -2,42 +2,32 @@ module;
 #include <iterator>
 
 export module genex.iterators.next;
+import genex.iterators.advance;
+import genex.iterators.begin;
+import genex.concepts;
+import genex.type_traits;
 
 
 namespace genex::iterators {
-    template <typename Rng>
-    concept has_std_next = requires(Rng &&r) { std::next(r); };
+    template <typename I>
+    concept has_std_next = requires(I &&it) { std::next(std::forward<I>(it)); };
 
-    template <typename Rng>
-    concept has_std_advance = requires(Rng &&r) { std::advance(r, std::declval<size_t>()); };
-
-    template <typename Rng>
-    concept has_operator_plusplus = requires(Rng &&r) { ++r; };
-
-    export template <typename Rng>
-    concept has_next = has_std_next<Rng> || has_std_advance<Rng> || has_operator_plusplus<Rng>;
+    export template <typename I>
+    concept has_next = has_std_next<I> || has_operator_plusplus<I>;
 
     struct next_fn {
-        template <typename Rng> requires has_std_next<Rng>
-        constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::next(r)) {
-            return std::next(r);
+        template <concepts::iterator I> requires has_std_next<I>
+        constexpr auto operator()(I it, const std::size_t n = 1) const noexcept -> decltype(auto) {
+            return std::next(it, n);
         }
 
-        template <typename Rng> requires not has_std_next<Rng> && has_std_advance<Rng>
-        constexpr auto operator()(Rng &&r) const noexcept -> Rng {
-            std::advance(r, 1);
-            return r;
-        }
-
-        template <typename Rng> requires not has_std_next<Rng> && not has_std_advance<Rng> && has_operator_plusplus<Rng>
-        constexpr auto operator()(Rng &&r) const noexcept -> Rng {
-            (void)++r;
-            return r;
+        template <concepts::iterator I> requires not has_std_next<I> && has_operator_plusplus<I>
+        constexpr auto operator()(I it, const std::size_t n = 1) const noexcept -> decltype(auto) {
+            auto copy_it = it;
+            for (std::size_t i = 0; i < n; ++i) { ++copy_it; }
+            return copy_it;
         }
     };
-
-    export template <typename Rng>
-    using next_t = decltype(std::declval<next_fn>()(std::declval<Rng>()));
 
     export inline constexpr next_fn next;
 }

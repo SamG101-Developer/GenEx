@@ -29,7 +29,7 @@ namespace genex::views {
     struct drop_last_base_fn : detail::view_base {
         template <range Rng>
         auto operator()(Rng &&rng, size_t n) const -> generator<range_value_t<Rng>> {
-            const auto length = iterators::distance(rng);
+            const auto length = iterators::distance(std::forward<Rng>(rng));
             size_t i = 0;
             for (auto &&x : rng) {
                 if (i++ < length - n) { co_yield std::forward<decltype(x)>(x); }

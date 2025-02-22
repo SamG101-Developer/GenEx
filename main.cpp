@@ -31,6 +31,7 @@ import genex.views.map;
 import genex.views.remove;
 import genex.views.reverse;
 import genex.views.set_algorithms;
+import genex.views.slice;
 import genex.views.take;
 import genex.views.to;
 
@@ -469,5 +470,22 @@ int main() {
             | genex::algorithms::accumulate(0, std::plus<int>{});
         const auto expected = 45;
         assert(b == expected);
+    }
+
+    {
+        const auto a = std::vector{'a', 'b', 'c', 'd', 'e'};
+        const auto b = a
+            | genex::views::to<std::string>();
+        const auto expected1 = std::string{"abcde"};
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::slice(3, 7)
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{3, 4, 5, 6};
+        assert(b == expected1);
     }
 }

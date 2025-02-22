@@ -12,10 +12,10 @@ namespace genex::iterators {
     concept has_member_rend = requires(Rng &&r) { r.rend(); };
 
     export template <typename Rng>
-    concept has_std_end = requires(Rng &&r) { std::end(r); };
+    concept has_std_end = requires(Rng &&r) { std::end(std::forward<Rng>(r)); };
 
     export template <typename Rng>
-    concept has_std_rend = requires(Rng &&r) { std::rend(r); };
+    concept has_std_rend = requires(Rng &&r) { std::rend(std::forward<Rng>(r)); };
 
     export template <typename Rng>
     concept has_end = has_member_end<Rng> || has_std_end<Rng>;
@@ -30,8 +30,8 @@ namespace genex::iterators {
         }
 
         template <typename Rng> requires not has_member_end<Rng> and has_std_end<Rng>
-        constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::end(r)) {
-            return std::end(r);
+        constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::end(std::forward<Rng>(r))) {
+            return std::end(std::forward<Rng>(r));
         }
     };
 
@@ -42,8 +42,8 @@ namespace genex::iterators {
         }
 
         template <typename Rng> requires not has_member_rend<Rng> and has_std_rend<Rng>
-        constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::rend(r)) {
-            return std::rend(r);
+        constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::rend(std::forward<Rng>(r))) {
+            return std::rend(std::forward<Rng>(r));
         }
     };
 

@@ -14,7 +14,7 @@ using namespace genex::type_traits;
 
 namespace genex::algorithms {
     struct count_base_fn {
-        template <iterator I, sentinel S, typename E, std::invocable<E> Proj>
+        template <iterator I, sentinel S, typename E, std::invocable<E> Proj = meta::identity>
         auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> size_t {
             auto count = size_t{0};
             for (auto it = first; it != last; ++it) {

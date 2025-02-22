@@ -21,7 +21,7 @@ namespace genex::concepts {
     export template <typename I>
     concept iterator = requires(I i)
     {
-        { *i } -> std::convertible_to<typename I::value_type>;
+        { *i } -> std::convertible_to<iter_value_t<I>>;
         { ++i } -> std::same_as<I&>;
     };
 

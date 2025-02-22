@@ -17,7 +17,7 @@ using namespace genex::type_traits;
 namespace genex::views {
     struct take_base_fn : detail::view_base {
         template <range Rng>
-        auto operator()(Rng &&rng, size_t n) const -> generator<range_value_t<Rng>> {
+        auto operator()(Rng &&rng, const size_t n) const -> generator<range_value_t<Rng>> {
             auto i = 0;
             for (auto &&x : rng) {
                 if (i++ >= n) { break; }

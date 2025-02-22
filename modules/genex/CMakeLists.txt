@@ -10,6 +10,7 @@ target_sources(GenEx_All PUBLIC FILE_SET CXX_MODULES
         ${CMAKE_CURRENT_LIST_DIR}/algorithms/count.ixx
         ${CMAKE_CURRENT_LIST_DIR}/algorithms/find.ixx
 
+        ${CMAKE_CURRENT_LIST_DIR}/iterators/advance.ixx
         ${CMAKE_CURRENT_LIST_DIR}/iterators/begin.ixx
         ${CMAKE_CURRENT_LIST_DIR}/iterators/distance.ixx
         ${CMAKE_CURRENT_LIST_DIR}/iterators/end.ixx
@@ -38,6 +39,7 @@ target_sources(GenEx_All PUBLIC FILE_SET CXX_MODULES
         ${CMAKE_CURRENT_LIST_DIR}/views/remove.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/reverse.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/set_algorithms.ixx
+        ${CMAKE_CURRENT_LIST_DIR}/views/slice.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/take.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/to.ixx
 
