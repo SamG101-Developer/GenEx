@@ -39,6 +39,7 @@ target_sources(GenEx_All PUBLIC FILE_SET CXX_MODULES
         ${CMAKE_CURRENT_LIST_DIR}/views/iota.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/map.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/remove.ixx
+        ${CMAKE_CURRENT_LIST_DIR}/views/replace.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/reverse.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/set_algorithms.ixx
         ${CMAKE_CURRENT_LIST_DIR}/views/slice.ixx

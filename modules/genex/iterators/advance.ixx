@@ -17,13 +17,13 @@ namespace genex::iterators {
 
     struct advance_fn {
         template <concepts::iterator I> requires has_std_advance<I>
-        constexpr auto operator()(I &&it, const std::size_t n) const noexcept -> I {
+        constexpr auto operator()(I &&it, const std::size_t n = 1) const noexcept -> I {
             std::advance(it, n);
             return it;
         }
 
         template <concepts::iterator I> requires not has_std_advance<I> && has_operator_plusplus<I>
-        constexpr auto operator()(I &&it, const std::size_t n) const noexcept -> I {
+        constexpr auto operator()(I &&it, const std::size_t n = 1) const noexcept -> I {
             for (std::size_t i = 0; i < n; ++i) { ++it; }
             return it;
         }

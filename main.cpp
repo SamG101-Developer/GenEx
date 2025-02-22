@@ -29,6 +29,7 @@ import genex.views.intersperse;
 import genex.views.iota;
 import genex.views.map;
 import genex.views.remove;
+import genex.views.replace;
 import genex.views.reverse;
 import genex.views.set_algorithms;
 import genex.views.slice;
@@ -446,23 +447,23 @@ int main() {
         assert(b == expected1);
     }
 
-    // {
-    //     const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    //     const auto b = a
-    //         | genex::views::intersperse(10)
-    //         | genex::views::to<std::vector>();
-    //     const auto expected1 = std::vector{0, 10, 1, 10, 2, 10, 3, 10, 4, 10, 5, 10, 6, 10, 7, 10, 8, 10, 9};
-    //     assert(b == expected1);
-    // }
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::intersperse(10)
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0, 10, 1, 10, 2, 10, 3, 10, 4, 10, 5, 10, 6, 10, 7, 10, 8, 10, 9};
+        assert(b == expected1);
+    }
 
-    // {
-    //     const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    //     const auto b = a
-    //         | genex::views::intersperse_with([] { return 10; })
-    //         | genex::views::to<std::vector>();
-    //     const auto expected1 = std::vector{0, 10, 1, 10, 2, 10, 3, 10, 4, 10, 5, 10, 6, 10, 7, 10, 8, 10, 9};
-    //     assert(b == expected1);
-    // }
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::intersperse_with([] { return 10; })
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0, 10, 1, 10, 2, 10, 3, 10, 4, 10, 5, 10, 6, 10, 7, 10, 8, 10, 9};
+        assert(b == expected1);
+    }
 
     {
         const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -475,8 +476,10 @@ int main() {
     {
         const auto a = std::vector{'a', 'b', 'c', 'd', 'e'};
         const auto b = a
+            | genex::views::slice(1, 4)
+            | genex::views::map([](auto&& x) { return std::toupper(x); })
             | genex::views::to<std::string>();
-        const auto expected1 = std::string{"abcde"};
+        const auto expected1 = std::string{"BCD"};
         assert(b == expected1);
     }
 
@@ -486,6 +489,15 @@ int main() {
             | genex::views::slice(3, 7)
             | genex::views::to<std::vector>();
         const auto expected1 = std::vector{3, 4, 5, 6};
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 0, 0};
+        const auto b = a
+            | genex::views::replace(0, 1)
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{1, 1, 2, 3, 4, 5, 6, 7, 1, 1};
         assert(b == expected1);
     }
 }
