@@ -15,16 +15,17 @@ using namespace genex::type_traits;
 namespace genex::algorithms {
     struct accumulate_base_fn {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::invocable<iter_value_t<I>, iter_value_t<I>> BinaryOp>
-        auto operator()(I &&first, S &&last, iter_value_t<I> &&init, BinaryOp &&binary_op, Proj &&proj = {}) const -> iter_value_t<I> {
+        auto operator()(I &&first, S &&last, iter_value_t<I> const &init, BinaryOp &&binary_op, Proj &&proj = {}) const -> iter_value_t<I> {
+            auto acc = init;
             for (auto it = first; it != last; ++it) {
-                init = std::invoke(std::forward<BinaryOp>(binary_op), std::forward<iter_value_t<I>>(init), std::invoke(std::forward<Proj>(proj), *it));
+                acc = std::invoke(std::forward<BinaryOp>(binary_op), std::move(acc), std::invoke(std::forward<Proj>(proj), *it));
             }
-            return init;
+            return acc;
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::invocable<range_value_t<Rng>, range_value_t<Rng>> BinaryOp>
-        auto operator()(Rng &&rng, range_value_t<Rng> &&init, BinaryOp &&binary_op, Proj &&proj = {}) const -> range_value_t<Rng> {
-            return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<range_value_t<Rng>>(init), std::forward<BinaryOp>(binary_op), std::forward<Proj>(proj));
+        auto operator()(Rng &&rng, range_value_t<Rng> const &init, BinaryOp &&binary_op, Proj &&proj = {}) const -> range_value_t<Rng> {
+            return (*this)(iterators::begin(rng), iterators::end(rng), init, std::forward<BinaryOp>(binary_op), std::forward<Proj>(proj));
         }
     };
 

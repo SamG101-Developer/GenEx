@@ -18,7 +18,7 @@ using namespace genex::type_traits;
 namespace genex::views {
     struct replace_base_fn : detail::view_base {
         template <range Rng>
-        auto operator()(Rng &&rng, range_value_t<Rng> &&old_val, range_value_t<Rng> &&new_val) const -> generator<range_value_t<Rng>> {
+        auto operator()(Rng &&rng, range_value_t<Rng> const &old_val, range_value_t<Rng> const &new_val) const -> generator<range_value_t<Rng>> {
             for (auto &&x : rng) {
                 if (x == old_val) { co_yield new_val; }
                 else { co_yield std::forward<decltype(x)>(x); }

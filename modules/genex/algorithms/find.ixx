@@ -23,8 +23,8 @@ namespace genex::algorithms {
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity>
-        auto operator()(Rng &&rng, range_value_t<Rng> &&elem, Proj &&proj = {}) const -> decltype(auto) {
-            return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<range_value_t<Rng>>(elem), std::forward<Proj>(proj));
+        auto operator()(Rng &&rng, range_value_t<Rng> const &elem, Proj &&proj = {}) const -> decltype(auto) {
+            return (*this)(iterators::begin(rng), iterators::end(rng), elem, std::forward<Proj>(proj));
         }
     };
 
@@ -39,8 +39,8 @@ namespace genex::algorithms {
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity>
-        auto operator()(Rng &&rng, range_value_t<Rng> &&elem, Proj &&proj = {}) const -> decltype(auto) {
-            return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<range_value_t<Rng>>(elem), std::forward<Proj>(proj));
+        auto operator()(Rng &&rng, range_value_t<Rng> const &elem, Proj &&proj = {}) const -> decltype(auto) {
+            return (*this)(iterators::begin(rng), iterators::end(rng), elem, std::forward<Proj>(proj));
         }
     };
 

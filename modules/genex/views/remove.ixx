@@ -18,7 +18,7 @@ using namespace genex::type_traits;
 namespace genex::views {
     struct remove_base_fn : detail::view_base {
         template <range Rng>
-        auto operator()(Rng &&rng, range_value_t<Rng> &&elem) const -> generator<range_value_t<Rng>> {
+        auto operator()(Rng &&rng, range_value_t<Rng> const &elem) const -> generator<range_value_t<Rng>> {
             for (auto &&x : rng) {
                 if (x == elem) { continue; }
                 co_yield std::forward<decltype(x)>(x);

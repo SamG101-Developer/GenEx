@@ -412,6 +412,12 @@ int main() {
             | genex::views::to<std::vector>();
         const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         assert(b == expected1);
+
+        const auto c = std::vector<std::string>{"hello", "world"};
+        const auto d = c
+            | genex::views::flat
+            | genex::views::to<std::string>();
+        assert(d == "helloworld");
     }
 
     {

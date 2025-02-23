@@ -16,8 +16,8 @@ using namespace genex::type_traits;
 namespace genex::views {
     struct fold_left_base_fn : detail::view_base {
         template <range Rng, std::invocable<range_value_t<Rng>, range_value_t<Rng>> F>
-        auto operator()(Rng &&rng, range_value_t<Rng> &&init, F &&f) const -> range_value_t<Rng> {
-            auto acc = std::forward<range_value_t<Rng>>(init);
+        auto operator()(Rng &&rng, range_value_t<Rng> const &init, F &&f) const -> range_value_t<Rng> {
+            auto acc = init;
             for (auto &&x : rng) {
                 acc = std::invoke(std::forward<F>(f), std::move(acc), std::forward<decltype(x)>(x));
             }
@@ -27,8 +27,8 @@ namespace genex::views {
 
     struct fold_right_base_fn : detail::view_base {
         template <range Rng, std::invocable<range_value_t<Rng>, range_value_t<Rng>> F>
-        auto operator()(Rng &&rng, range_value_t<Rng> &&init, F &&f) const -> range_value_t<Rng> {
-            auto acc = std::forward<range_value_t<Rng>>(init);
+        auto operator()(Rng &&rng, range_value_t<Rng> const &init, F &&f) const -> range_value_t<Rng> {
+            auto acc = init;
             for (auto it = iterators::rbegin(rng); it != iterators::rend(rng); ++it) {
                 acc = std::invoke(std::forward<F>(f), *it, std::move(acc));
             }
@@ -38,8 +38,8 @@ namespace genex::views {
 
     struct fold_base_fn : detail::view_base {
         template <range Rng, std::invocable<range_value_t<Rng>, range_value_t<Rng>> F>
-        auto operator()(Rng &&rng, range_value_t<Rng> &&init, F &&f) const -> range_value_t<Rng> {
-            auto acc = std::forward<range_value_t<Rng>>(init);
+        auto operator()(Rng &&rng, range_value_t<Rng> const &init, F &&f) const -> range_value_t<Rng> {
+            auto acc = init;
             for (auto &&x : rng) {
                 acc = std::invoke(std::forward<F>(f), std::move(acc), std::forward<decltype(x)>(x));
             }

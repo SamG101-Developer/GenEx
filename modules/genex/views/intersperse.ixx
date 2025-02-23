@@ -19,12 +19,12 @@ using namespace genex::type_traits;
 namespace genex::views {
     struct intersperse_base_fn : detail::view_base {
         template <range Rng>
-        auto operator()(Rng &&rng, range_value_t<Rng> &&separator) const -> generator<range_value_t<Rng>> {
+        auto operator()(Rng &&rng, range_value_t<Rng> const &separator) const -> generator<range_value_t<Rng>> {
             if (iterators::distance(std::forward<Rng>(rng)) == 0) { co_return; }
             auto first = iterators::begin(rng);
             co_yield *first;
             for (auto it = iterators::advance(first); it != iterators::end(rng); iterators::advance(it)) {
-                co_yield std::forward<range_value_t<Rng>>(separator);
+                co_yield separator;
                 co_yield *it;
             }
         }
