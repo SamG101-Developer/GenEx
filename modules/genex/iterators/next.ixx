@@ -16,12 +16,12 @@ namespace genex::iterators {
     concept has_next = has_std_next<I> || has_operator_plusplus<I>;
 
     struct next_fn {
-        template <concepts::iterator I> requires has_std_next<I>
+        template <concepts::iterator I> requires (has_std_next<I>)
         constexpr auto operator()(I it, const std::size_t n = 1) const noexcept -> decltype(auto) {
             return std::next(it, n);
         }
 
-        template <concepts::iterator I> requires not has_std_next<I> && has_operator_plusplus<I>
+        template <concepts::iterator I> requires (not has_std_next<I> && has_operator_plusplus<I>)
         constexpr auto operator()(I it, const std::size_t n = 1) const noexcept -> decltype(auto) {
             auto copy_it = it;
             for (std::size_t i = 0; i < n; ++i) { ++copy_it; }

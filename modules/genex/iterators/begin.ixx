@@ -24,24 +24,24 @@ namespace genex::iterators {
     concept has_rbegin = has_member_rbegin<Rng> || has_std_rbegin<Rng>;
 
     struct begin_fn {
-        template <typename Rng> requires has_member_begin<Rng>
+        template <typename Rng> requires (has_member_begin<Rng>)
         constexpr auto operator()(Rng &&r) const noexcept -> decltype(r.begin()) {
             return r.begin();
         }
 
-        template <typename Rng> requires not has_member_begin<Rng> and has_std_begin<Rng>
+        template <typename Rng> requires (not has_member_begin<Rng> and has_std_begin<Rng>)
         constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::begin(std::forward<Rng>(r))) {
             return std::begin(std::forward<Rng>(r));
         }
     };
 
     struct rbegin_fn {
-        template <typename Rng> requires has_member_rbegin<Rng>
+        template <typename Rng> requires (has_member_rbegin<Rng>)
         constexpr auto operator()(Rng &&r) const noexcept -> decltype(r.rbegin()) {
             return r.rbegin();
         }
 
-        template <typename Rng> requires not has_member_rbegin<Rng> and has_std_rbegin<Rng>
+        template <typename Rng> requires (not has_member_rbegin<Rng> and has_std_rbegin<Rng>)
         constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::rbegin(std::forward<Rng>(r))) {
             return std::rbegin(std::forward<Rng>(r));
         }

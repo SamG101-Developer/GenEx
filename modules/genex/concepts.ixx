@@ -1,5 +1,6 @@
 module;
 #include <iterator>
+#include <functional>
 
 
 export module genex.concepts;
@@ -32,9 +33,10 @@ namespace genex::concepts {
         { s != s } -> std::convertible_to<bool>;
     };
 
-    export template <typename T>
-    concept callable = requires(T callable, auto &&... args)
+    // TODO: use this instead of std::invocable across project.
+    export template <typename T, typename... Args>
+    concept callable = requires(T callable, Args &&... args)
     {
-        std::invoke(callable, std::forward<decltype(args)>(args)...);
+        std::invoke(callable, std::forward<Args>(args)...);
     };
 }

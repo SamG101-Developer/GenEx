@@ -36,11 +36,11 @@ struct genex::type_traits::range_value<Rng> {
 
 template <typename T>
 struct genex::type_traits::range_value<genex::generator<T>> {
-    using type = typename generator<T>::iterator::value_type;
+    using type = typename decltype(std::declval<generator<T>>().begin())::value_type;
 };
 
 
-template <typename Rng> requires genex::iterators::has_begin<Rng> and not requires { typename Rng::value_type; }
+template <typename Rng> requires (genex::iterators::has_begin<Rng> and not requires { typename Rng::value_type; })
 struct genex::type_traits::range_value<Rng> {
     using type = iterators::begin_t<Rng>;
 };

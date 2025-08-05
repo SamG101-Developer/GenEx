@@ -1,5 +1,6 @@
 module;
 #include <coroutine>
+#include <utility>
 
 export module genex.views.set_algorithms;
 export import genex.generator;
