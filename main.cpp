@@ -74,9 +74,9 @@ int main() {
     {
         const auto x = std::vector{std::string("hello"), std::string("world")};
         const auto h = x
-            | genex::views::map([](const std::string &s) { return s.size(); })
+            | genex::views::map([](const std::string &s) { return static_cast<std::size_t>(s.size()); })
             | genex::views::to<std::vector>();
-        const auto expected3 = std::vector{5ull, 5ull};
+        const auto expected3 = std::vector{5uz, 5uz};
         assert(h == expected3);
     }
 
