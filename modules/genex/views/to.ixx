@@ -26,6 +26,15 @@ namespace genex::views {
         return Out<range_value_t<Rng>>{iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng))};
     }
 
+    template <template <typename> typename Out, typename T>
+    auto to_base_fn(generator<T> &&gen) -> Out<T> {
+        Out<T> out;
+        for (auto &&x : gen) {
+            out.push_back(std::forward<T>(x));
+        }
+        return out;
+    }
+
     template <template <typename> typename Out, range Rng> requires is_generator<range_value_t<Rng>>
     auto to_base_fn(Rng &&rng) -> Out<InnerRangeTypeT<Rng>> {
         auto inner = rng | views::map([]<typename Inner>(Inner &&x) { return to_base_fn<Out>(std::forward<Inner>(x)); });
@@ -35,6 +44,15 @@ namespace genex::views {
     template <typename Out, range Rng>
     auto to_base_fn(Rng &&rng) -> Out {
         return Out{iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng))};
+    }
+
+    template <typename Out, typename T>
+    auto to_base_fn(generator<T> &&gen) -> Out {
+        Out out;
+        for (auto &&x : gen) {
+            out.push_back(std::forward<T>(x));
+        }
+        return out;
     }
 
     template <template <typename> typename Out>

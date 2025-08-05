@@ -1,5 +1,5 @@
 module;
-#include <experimental/generator>
+#include <generator>
 
 
 export module genex.generator;
@@ -7,7 +7,7 @@ export module genex.generator;
 
 namespace genex {
     export template <typename T>
-    using generator = std::experimental::generator<T>;
+    using generator = std::generator<T>;
 
     export template <typename T>
     concept is_generator = requires(T g)
