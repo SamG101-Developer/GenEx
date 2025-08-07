@@ -10,9 +10,9 @@ using namespace genex::concepts;
 using namespace genex::type_traits;
 
 
-template <iterator I, sentinel S, std::invocable<iter_value_t<I>, iter_value_t<I>> F>
-auto do_fold_left(I &&first, S &&last, iter_value_t<I> &&init, F &&f) -> iter_value_t<I> {
-    auto &&acc = std::forward<iter_value_t<I>>(init);
+template <iterator I, sentinel S, typename E, std::invocable<E, iter_value_t<I>> F>
+auto do_fold_left(I &&first, S &&last, E &&init, F &&f) -> E {
+    auto &&acc = std::forward<E>(init);
     for (; first != last; ++first) {
         acc = std::invoke(std::forward<F>(f), std::move(acc), *first);
     }
@@ -20,9 +20,9 @@ auto do_fold_left(I &&first, S &&last, iter_value_t<I> &&init, F &&f) -> iter_va
 }
 
 
-template <range Rng, std::invocable<range_value_t<Rng>, range_value_t<Rng>> F>
-auto do_fold_left(Rng &&rng, range_value_t<Rng> &&init, F &&f) -> range_value_t<Rng> {
-    auto &&acc = std::forward<range_value_t<Rng>>(init);
+template <range Rng, typename E, std::invocable<E, range_value_t<Rng>> F>
+auto do_fold_left(Rng &&rng, E &&init, F &&f) -> E {
+    auto &&acc = std::forward<E>(init);
     for (auto &&x : rng) {
         acc = std::invoke(std::forward<F>(f), std::move(acc), std::forward<decltype(x)>(x));
     }
@@ -30,9 +30,9 @@ auto do_fold_left(Rng &&rng, range_value_t<Rng> &&init, F &&f) -> range_value_t<
 }
 
 
-template <iterator I, sentinel S, std::invocable<iter_value_t<I>, iter_value_t<I>> F>
-auto do_fold_right(I &&first, S &&last, iter_value_t<I> &&init, F &&f) -> iter_value_t<I> {
-    auto &&acc = std::forward<iter_value_t<I>>(init);
+template <iterator I, sentinel S, typename E, std::invocable<E, iter_value_t<I>> F>
+auto do_fold_right(I &&first, S &&last, E &&init, F &&f) -> E {
+    auto &&acc = std::forward<E>(init);
     for (; first != last; --last) {
         acc = std::invoke(std::forward<F>(f), *last, std::move(acc));
     }
@@ -40,9 +40,9 @@ auto do_fold_right(I &&first, S &&last, iter_value_t<I> &&init, F &&f) -> iter_v
 }
 
 
-template <range Rng, std::invocable<range_value_t<Rng>, range_value_t<Rng>> F>
-auto do_fold_right(Rng &&rng, range_value_t<Rng> &&init, F &&f) -> range_value_t<Rng> {
-    auto &&acc = std::forward<range_value_t<Rng>>(init);
+template <range Rng, typename E, std::invocable<E, range_value_t<Rng>> F>
+auto do_fold_right(Rng &&rng, E &&init, F &&f) -> E {
+    auto &&acc = std::forward<E>(init);
     for (auto it = genex::iterators::end(rng); it != genex::iterators::begin(rng); --it) {
         acc = std::invoke(std::forward<F>(f), *genex::iterators::next(it, -1), std::move(acc));
     }
@@ -52,13 +52,13 @@ auto do_fold_right(Rng &&rng, range_value_t<Rng> &&init, F &&f) -> range_value_t
 
 namespace genex::views {
     struct fold_left_fn final : detail::view_base {
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>, iter_value_t<I>> F>
-        auto operator()(I &&first, S &&last, iter_value_t<I> &&init, F &&f) const -> iter_value_t<I> {
+        template <iterator I, sentinel S, typename E, std::invocable<E, iter_value_t<I>> F>
+        auto operator()(I &&first, S &&last, E &&init, F &&f) const -> E {
             MAP_TO_IMPL(do_fold_left, first, last, init, f);
         }
 
-        template <range Rng, std::invocable<range_value_t<Rng>, range_value_t<Rng>> F>
-        auto operator()(Rng &&rng, range_value_t<Rng> &&init, F &&f) const -> range_value_t<Rng> {
+        template <range Rng, typename E, std::invocable<E, range_value_t<Rng>> F>
+        auto operator()(Rng &&rng, E &&init, F &&f) const -> E {
             MAP_TO_IMPL(do_fold_left, rng, init, f);
         }
 
@@ -69,13 +69,13 @@ namespace genex::views {
     };
 
     struct fold_right_fn final : detail::view_base {
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>, iter_value_t<I>> F>
-        auto operator()(I &&first, S &&last, iter_value_t<I> &&init, F &&f) const -> iter_value_t<I> {
+        template <iterator I, sentinel S, typename E, std::invocable<E, iter_value_t<I>> F>
+        auto operator()(I &&first, S &&last, E &&init, F &&f) const -> E {
             MAP_TO_IMPL(do_fold_right, first, last, init, f);
         }
 
-        template <range Rng, std::invocable<range_value_t<Rng>, range_value_t<Rng>> F>
-        auto operator()(Rng &&rng, range_value_t<Rng> &&init, F &&f) const -> range_value_t<Rng> {
+        template <range Rng, typename E, std::invocable<E, range_value_t<Rng>> F>
+        auto operator()(Rng &&rng, E &&init, F &&f) const -> E {
             MAP_TO_IMPL(do_fold_right, rng, init, f);
         }
 
