@@ -2,6 +2,7 @@
 #include <coroutine>
 #include <functional>
 #include <genex/concepts.hpp>
+#include <genex/views/map.hpp>
 
 using namespace genex::concepts;
 using namespace genex::type_traits;
