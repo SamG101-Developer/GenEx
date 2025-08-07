@@ -11,6 +11,7 @@
 #include <genex/algorithms/count.hpp>
 #include <genex/algorithms/binary_search.hpp>
 #include <genex/algorithms/find.hpp>
+#include <genex/algorithms/position.hpp>
 #include <genex/views/chunk.hpp>
 #include <genex/views/concat.hpp>
 #include <genex/views/cycle.hpp>
@@ -399,6 +400,38 @@ int main() {
         const auto b = a
             | genex::algorithms::find_last_if_not([](const int x) { return x > 5; });
         const auto expected1 = genex::iterators::begin(a) + 9;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{4, 5, 6, 1, 2, 3, 5};
+        const auto b = a
+            | genex::algorithms::position([](auto x) { return x == 5; });
+        const auto expected1 = 1;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{4, 5, 6, 1, 2, 3, 5};
+        const auto b = a
+            | genex::algorithms::position([](auto x) { return x == 7; });
+        const auto expected1 = -1;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{4, 5, 6, 1, 2, 3, 5};
+        const auto b = a
+            | genex::algorithms::position_last([](auto x) { return x == 5; });
+        const auto expected1 = 6;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{4, 5, 6, 1, 2, 3, 5};
+        const auto b = a
+            | genex::algorithms::position_last([](auto x) { return x == 7; });
+        const auto expected1 = -1;
         assert(b == expected1);
     }
 
