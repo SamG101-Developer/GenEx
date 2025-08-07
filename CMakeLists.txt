@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.31)
 project(GenEx)
+set(PROJECT_VERSION 0.1.0)
 
 # Set standard and include some common packages.
 set(CMAKE_CXX_STANDARD 26)
@@ -21,6 +22,10 @@ target_include_directories(GenExLib INTERFACE
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(TARGETS GenExLib EXPORT GenExTargets)
 install(EXPORT GenExTargets FILE GenExTargets.cmake NAMESPACE GenEx:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GenEx)
+
+write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/GenExConfigVersion.cmake" VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion)
+configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/GenExConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/GenExConfig.cmake" INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GenEx)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GenExConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/GenExConfigVersion.cmake" DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GenEx)
 
 # Create the test executable.
 add_executable(${PROJECT_NAME} main.cpp)
