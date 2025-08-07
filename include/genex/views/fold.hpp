@@ -62,7 +62,7 @@ namespace genex::views {
             MAP_TO_IMPL(do_fold_left, rng, init, f);
         }
 
-        template <typename E, std::invocable<E, E> F>
+        template <typename E, typename F>
         auto operator()(E &&init, F &&f) const -> decltype(auto) {
             MAP_TO_BASE(init, f);
         }
@@ -79,7 +79,7 @@ namespace genex::views {
             MAP_TO_IMPL(do_fold_right, rng, init, f);
         }
 
-        template <typename E, std::invocable<E, E> F>
+        template <typename E, typename F>
         auto operator()(E &&init, F &&f) const -> decltype(auto) {
             MAP_TO_BASE(init, f);
         }
