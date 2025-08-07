@@ -4,37 +4,33 @@
 #include <string>
 #include <vector>
 
-
-import genex.generator;
-import genex.algorithms.accumulate;
-import genex.algorithms.all_of;
-import genex.algorithms.any_of;
-import genex.algorithms.binary_search;
-import genex.algorithms.contains;
-import genex.algorithms.count;
-import genex.algorithms.find;
-import genex.iterators.begin;
-import genex.views.chunk;
-import genex.views.concat;
-import genex.views.copied;
-import genex.views.cycle;
-import genex.views.drop;
-import genex.views.enumerate;
-import genex.views.filter;
-import genex.views.flat;
-import genex.views.fold;
-import genex.views.for_each;
-import genex.views.interleave;
-import genex.views.intersperse;
-import genex.views.iota;
-import genex.views.map;
-import genex.views.remove;
-import genex.views.replace;
-import genex.views.reverse;
-import genex.views.set_algorithms;
-import genex.views.slice;
-import genex.views.take;
-import genex.views.to;
+#include <genex/algorithms/accumulate.hpp>
+#include <genex/algorithms/all_of.hpp>
+#include <genex/algorithms/any_of.hpp>
+#include <genex/algorithms/contains.hpp>
+#include <genex/algorithms/count.hpp>
+#include <genex/algorithms/binary_search.hpp>
+#include <genex/algorithms/find.hpp>
+#include <genex/views/chunk.hpp>
+#include <genex/views/concat.hpp>
+#include <genex/views/cycle.hpp>
+#include <genex/views/drop.hpp>
+#include <genex/views/enumerate.hpp>
+#include <genex/views/filter.hpp>
+#include <genex/views/flat.hpp>
+#include <genex/views/fold.hpp>
+#include <genex/views/for_each.hpp>
+#include <genex/views/interleave.hpp>
+#include <genex/views/intersperse.hpp>
+#include <genex/views/iota.hpp>
+#include <genex/views/map.hpp>
+#include <genex/views/remove.hpp>
+#include <genex/views/replace.hpp>
+#include <genex/views/reverse.hpp>
+#include <genex/views/set_algorithms.hpp>
+#include <genex/views/slice.hpp>
+#include <genex/views/take.hpp>
+#include <genex/views/to.hpp>
 
 
 // Custom "<<" for "std::vector<int>"
