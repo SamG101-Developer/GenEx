@@ -1,6 +1,7 @@
 module;
+#include <cstdint>
 #include <coroutine>
-#include <functional>
+#include <genex/macros.hpp>
 
 export module genex.views.iota;
 export import genex.generator;
@@ -12,14 +13,14 @@ import genex.views._view_base;
 
 namespace genex::views {
     struct iota_fn final : detail::view_base {
-        auto operator()(const size_t hi) const -> generator<size_t> {
+        auto operator()(const std::size_t hi) const -> generator<std::size_t> {
             return (*this)(0, hi);
         }
 
-        auto operator()(const size_t lo, const size_t hi, const size_t step = 1) const -> generator<size_t> {
+        auto operator()(const std::size_t lo, const std::size_t hi, const std::size_t step = 1) const -> generator<std::size_t> {
             for (auto i = lo; i < hi; i += step) { co_yield i; }
         }
     };
 
-    export inline constexpr iota_fn iota;
+    EXPORT_GENEX_STRUCT(iota);
 }

@@ -4,6 +4,7 @@ target_sources(GenEx_All PUBLIC FILE_SET CXX_MODULES
         BASE_DIRS ${CMAKE_CURRENT_LIST_DIR} FILES
         ${CMAKE_CURRENT_LIST_DIR}/actions/_action_base.ixx
 
+        ${CMAKE_CURRENT_LIST_DIR}/algorithms/_algorithm_base.ixx
         ${CMAKE_CURRENT_LIST_DIR}/algorithms/accumulate.ixx
         ${CMAKE_CURRENT_LIST_DIR}/algorithms/all_of.ixx
         ${CMAKE_CURRENT_LIST_DIR}/algorithms/any_of.ixx
@@ -50,5 +51,7 @@ target_sources(GenEx_All PUBLIC FILE_SET CXX_MODULES
         ${CMAKE_CURRENT_LIST_DIR}/generator.ixx
         ${CMAKE_CURRENT_LIST_DIR}/meta.ixx
         ${CMAKE_CURRENT_LIST_DIR}/type_traits.ixx)
+
+include_directories(${CMAKE_SOURCE_DIR}/headers)
 
 add_library(GenEx::All ALIAS GenEx_All)

@@ -1,10 +1,13 @@
 module;
 #include <cstdint>
 #include <utility>
+#include <genex/macros.hpp>
 
 export module genex.operations.insert;
+import genex.concepts;
 import genex.type_traits;
 
+using namespace genex::concepts;
 using namespace genex::type_traits;
 
 
@@ -19,5 +22,5 @@ namespace genex::operations {
         }
     };
 
-    export inline constexpr insert_fn insert;
+    EXPORT_GENEX_STRUCT(insert);
 }

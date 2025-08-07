@@ -22,49 +22,49 @@ namespace genex::type_traits {
 }
 
 
-template <typename Rng> requires requires { typename Rng::value_type; }
+export template <typename Rng> requires requires { typename Rng::value_type; }
 struct genex::type_traits::range_value<Rng> {
     using type = typename Rng::value_type;
 };
 
 
-template <typename Rng> requires requires { typename Rng::element_type; }
+export template <typename Rng> requires requires { typename Rng::element_type; }
 struct genex::type_traits::range_value<Rng> {
     using type = typename Rng::element_type;
 };
 
 
-template <typename T>
+export template <typename T>
 struct genex::type_traits::range_value<genex::generator<T>> {
     using type = typename decltype(std::declval<generator<T>>().begin())::value_type;
 };
 
 
-template <typename Rng> requires (genex::iterators::has_begin<Rng> and not requires { typename Rng::value_type; })
+export template <typename Rng> requires (genex::iterators::has_begin<Rng> and not requires { typename Rng::value_type; })
 struct genex::type_traits::range_value<Rng> {
     using type = iterators::begin_t<Rng>;
 };
 
 
-template <typename I> requires requires(I &&i) { *i; }
+export template <typename I> requires requires(I &&i) { *i; }
 struct genex::type_traits::iter_value<I> {
     using type = std::remove_cvref_t<decltype(*std::declval<I>())>;
 };
 
 
-template <typename I> requires requires(I &&i) { *i; }
+export template <typename I> requires requires(I &&i) { *i; }
 struct genex::type_traits::iter_value<I*> {
     using type = std::remove_cvref_t<decltype(*std::declval<I*>())>;
 };
 
 
-template <typename I> requires requires(I &&i) { *i; }
+export template <typename I> requires requires(I &&i) { *i; }
 struct genex::type_traits::iter_value<I const*> {
-    using type = std::remove_cvref_t<decltype(*std::declval<I const*>())>;
+    using type = const std::remove_cvref_t<decltype(*std::declval<I const*>())>;
 };
 
 
-template <typename I> requires requires(I &&i) { *i; }
+export template <typename I> requires requires(I &&i) { *i; }
 struct genex::type_traits::iter_value<I const> {
-    using type = std::remove_cvref_t<decltype(*std::declval<I const>())>;
+    using type = const std::remove_cvref_t<decltype(*std::declval<I const>())>;
 };

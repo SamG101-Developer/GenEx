@@ -1,10 +1,11 @@
 module;
 #include <utility>
+#include <genex/macros.hpp>
 
 export module genex.operations.push_back;
-import genex.type_traits;
-import genex.operations.insert;
 import genex.operations.size;
+import genex.operations.insert;
+import genex.type_traits;
 
 using namespace genex::type_traits;
 
@@ -25,5 +26,5 @@ namespace genex::operations {
         }
     };
 
-    export inline constexpr push_back_fn push_back;
+    EXPORT_GENEX_STRUCT(push_back);
 }

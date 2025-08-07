@@ -1,6 +1,7 @@
 module;
 #include <coroutine>
 #include <functional>
+#include <genex/macros.hpp>
 
 export module genex.views.chunk;
 export import genex.generator;
@@ -13,29 +14,47 @@ import genex.views._view_base;
 using namespace genex::concepts;
 using namespace genex::type_traits;
 
+
+template <iterator I, sentinel S>
+auto do_chunk(I &&first, S &&last, size_t size) -> genex::generator<genex::generator<iter_value_t<I>>> {
+    for (auto it = first; it != last;) {
+        co_yield [it = std::move(it), last = std::forward<S>(last), size]() mutable -> genex::generator<iter_value_t<I>> {
+            for (size_t i = 0; i < size && it != last; ++i, ++it) {
+                co_yield *it;
+            }
+        }();
+    }
+}
+
+
+template <range Rng>
+auto do_chunk(Rng &&rng, size_t size) -> genex::generator<genex::generator<range_value_t<Rng>>> {
+    for (auto it = genex::iterators::begin(rng); it != genex::iterators::end(rng);) {
+        co_yield [it = it, size, rng]() mutable -> genex::generator<range_value_t<Rng>> {
+            for (size_t i = 0; i < size && it != genex::iterators::end(rng); ++i, ++it) {
+                co_yield *it;
+            }
+        }();
+    }
+}
+
+
 namespace genex::views {
-    struct chunk_base_fn : detail::view_base {
+    struct chunk_fn final : detail::view_base {
+        template <iterator I, sentinel S>
+        auto operator()(I &&first, S &&last, size_t size) const -> generator<generator<iter_value_t<I>>> {
+            MAP_TO_IMPL(do_chunk, first, last, size);
+        }
+
         template <range Rng>
         auto operator()(Rng &&rng, size_t size) const -> generator<generator<range_value_t<Rng>>> {
-            for (auto it = iterators::begin(rng); it != iterators::end(rng);) {
-                co_yield [it = it, size, rng, this]() mutable -> generator<range_value_t<Rng>> {
-                    for (size_t i = 0; i < size && it != iterators::end(rng); ++i, ++it) {
-                        co_yield *it;
-                    }
-                }();
-            }
+            MAP_TO_IMPL(do_chunk, rng, size);
         }
-    };
-
-    struct chunk_fn final : chunk_base_fn {
-        using chunk_base_fn::operator();
 
         auto operator()(size_t n) const -> decltype(auto) {
-            return [this, n]<range Rng>(Rng &&rng) mutable {
-                return (*this)(std::forward<Rng>(rng), n);
-            };
+            MAP_TO_BASE(n);
         }
     };
 
-    export inline constexpr chunk_fn chunk;
+    EXPORT_GENEX_STRUCT(chunk);
 }

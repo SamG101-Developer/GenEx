@@ -29,8 +29,8 @@ namespace genex::views {
     template <template <typename> typename Out, typename T>
     auto to_base_fn(generator<T> &&gen) -> Out<T> {
         Out<T> out;
-        for (auto &&x : gen) {
-            out.push_back(std::forward<T>(x));
+        for (auto it = gen.begin(); it != gen.end(); ++it) {
+            out.push_back(*it);
         }
         return out;
     }

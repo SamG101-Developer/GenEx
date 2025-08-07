@@ -1,7 +1,10 @@
 module;
 #include <functional>
+#include <genex/macros.hpp>
 
 export module genex.algorithms.accumulate;
+export import genex.generator;
+import genex.algorithms._algorithm_base;
 import genex.concepts;
 import genex.iterators.begin;
 import genex.iterators.end;
@@ -12,33 +15,43 @@ using namespace genex::concepts;
 using namespace genex::type_traits;
 
 
+template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = genex::meta::identity, std::invocable<iter_value_t<I>, iter_value_t<I>> BinaryOp>
+auto do_accumulate(I &&first, S &&last, iter_value_t<I> const &init, BinaryOp &&binary_op, Proj &&proj = {}) -> iter_value_t<I> {
+    auto acc = init;
+    for (; first != last; ++first) {
+        acc = std::invoke(std::forward<BinaryOp>(binary_op), std::move(acc), std::invoke(std::forward<Proj>(proj), *first));
+    }
+    return acc;
+}
+
+
+template <range Rng, std::invocable<range_value_t<Rng>> Proj = genex::meta::identity, std::invocable<range_value_t<Rng>, range_value_t<Rng>> BinaryOp>
+auto do_accumulate(Rng &&rng, range_value_t<Rng> const &init, BinaryOp &&binary_op, Proj &&proj = {}) -> range_value_t<Rng> {
+    auto acc = init;
+    for (auto &&x : rng) {
+        acc = std::invoke(std::forward<BinaryOp>(binary_op), std::move(acc), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)));
+    }
+    return acc;
+}
+
+
 namespace genex::algorithms {
-    struct accumulate_base_fn {
+    struct accumulate_fn final : detail::algorithm_base {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::invocable<iter_value_t<I>, iter_value_t<I>> BinaryOp>
         auto operator()(I &&first, S &&last, iter_value_t<I> const &init, BinaryOp &&binary_op, Proj &&proj = {}) const -> iter_value_t<I> {
-            auto acc = init;
-            for (auto it = first; it != last; ++it) {
-                acc = std::invoke(std::forward<BinaryOp>(binary_op), std::move(acc), std::invoke(std::forward<Proj>(proj), *it));
-            }
-            return acc;
+            MAP_TO_IMPL(do_accumulate, first, last, init, binary_op, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::invocable<range_value_t<Rng>, range_value_t<Rng>> BinaryOp>
         auto operator()(Rng &&rng, range_value_t<Rng> const &init, BinaryOp &&binary_op, Proj &&proj = {}) const -> range_value_t<Rng> {
-            return (*this)(iterators::begin(rng), iterators::end(rng), init, std::forward<BinaryOp>(binary_op), std::forward<Proj>(proj));
+            MAP_TO_IMPL(do_accumulate, rng, init, binary_op, proj);
         }
-    };
-
-    struct accumulate_fn final : accumulate_base_fn {
-        using accumulate_base_fn::operator();
 
         template <typename T, typename BinaryOp, typename Proj = meta::identity>
         auto operator()(T &&init, BinaryOp &&binary_op, Proj &&proj = {}) const -> decltype(auto) {
-            return [init = std::forward<T>(init), binary_op = std::forward<BinaryOp>(binary_op), proj = std::forward<Proj>(proj), this]<range Rng>(Rng &&rng) mutable {
-                return (*this)(std::forward<Rng>(rng), std::forward<T>(init), std::forward<BinaryOp>(binary_op), std::forward<Proj>(proj));
-            };
+            MAP_TO_BASE(init, binary_op, proj);
         }
     };
 
-    export inline constexpr accumulate_fn accumulate;
+    EXPORT_GENEX_STRUCT(accumulate);
 }

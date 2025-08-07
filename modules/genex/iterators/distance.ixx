@@ -1,5 +1,6 @@
 module;
 #include <iterator>
+#include <genex/macros.hpp>
 
 export module genex.iterators.distance;
 import genex.iterators.begin;
@@ -21,5 +22,5 @@ namespace genex::iterators {
         }
     };
 
-    export inline constexpr distance_fn distance;
+    EXPORT_GENEX_STRUCT(distance);
 }

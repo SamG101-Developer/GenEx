@@ -1,9 +1,10 @@
 module;
 #include <utility>
+#include <genex/macros.hpp>
 
 export module genex.operations.push_front;
-import genex.type_traits;
 import genex.operations.insert;
+import genex.type_traits;
 
 using namespace genex::type_traits;
 
@@ -24,5 +25,5 @@ namespace genex::operations {
         }
     };
 
-    export inline constexpr push_front_fn push_front;
+    EXPORT_GENEX_STRUCT(push_front);
 }

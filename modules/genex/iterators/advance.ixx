@@ -1,5 +1,6 @@
 module;
 #include <iterator>
+#include <genex/macros.hpp>
 
 export module genex.iterators.advance;
 import genex.concepts;
@@ -32,5 +33,5 @@ namespace genex::iterators {
     export template <typename Rng>
     using advance_t = decltype(std::declval<advance_fn>()(std::declval<Rng>()));
 
-    export inline constexpr advance_fn advance;
+    EXPORT_GENEX_STRUCT(advance);
 }

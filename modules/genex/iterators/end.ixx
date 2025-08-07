@@ -1,5 +1,6 @@
 module;
 #include <iterator>
+#include <genex/macros.hpp>
 
 export module genex.iterators.end;
 
@@ -53,6 +54,6 @@ namespace genex::iterators {
     export template <typename Rng>
     using rend_t = decltype(std::declval<rend_fn>()(std::declval<Rng>()));
 
-    export inline constexpr end_fn end;
-    export inline constexpr rend_fn rend;
+    EXPORT_GENEX_STRUCT(end);
+    EXPORT_GENEX_STRUCT(rend);
 }

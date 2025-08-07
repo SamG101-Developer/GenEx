@@ -1,5 +1,6 @@
 module;
 #include <iterator>
+#include <genex/macros.hpp>
 
 export module genex.iterators.next;
 import genex.iterators.advance;
@@ -29,5 +30,5 @@ namespace genex::iterators {
         }
     };
 
-    export inline constexpr next_fn next;
+    EXPORT_GENEX_STRUCT(next);
 }

@@ -1,6 +1,7 @@
 module;
 #include <coroutine>
 #include <functional>
+#include <genex/macros.hpp>
 
 export module genex.views.for_each;
 export import genex.generator;
@@ -13,26 +14,40 @@ import genex.views._view_base;
 using namespace genex::concepts;
 using namespace genex::type_traits;
 
+
+template <iterator I, sentinel S, std::invocable<iter_value_t<I>> F>
+auto do_for_each(I &&first, S &&last, F &&f) -> void {
+    for (; first != last; ++first) {
+        std::invoke(std::forward<F>(f), std::forward<decltype(*first)>(*first));
+    }
+}
+
+
+template <range Rng, std::invocable<range_value_t<Rng>> F>
+auto do_for_each(Rng &&rng, F &&f) -> void {
+    for (auto &&x : rng) {
+        std::invoke(std::forward<F>(f), std::forward<decltype(x)>(x));
+    }
+}
+
+
 namespace genex::views {
-    struct for_each_base_fn : detail::view_base {
+    struct for_each_fn final : detail::view_base {
+        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> F>
+        auto operator()(I &&first, S &&last, F &&f) const -> void {
+            MAP_TO_IMPL(do_for_each, first, last, f);
+        }
+
         template <range Rng, std::invocable<range_value_t<Rng>> F>
         auto operator()(Rng &&rng, F &&f) const -> void {
-            for (auto &&x : rng) {
-                std::invoke(std::forward<F>(f), std::forward<decltype(x)>(x));
-            }
+            MAP_TO_IMPL(do_for_each, rng, f);
         }
-    };
-
-    struct for_each_fn final : for_each_base_fn {
-        using for_each_base_fn::operator();
 
         template <typename F>
         auto operator()(F &&f) const -> decltype(auto) {
-            return [f = std::forward<F>(f), this]<range Rng>(Rng &&rng) mutable {
-                return (*this)(std::forward<Rng>(rng), std::forward<F>(f));
-            };
+            MAP_TO_BASE(f);
         }
     };
 
-    export inline constexpr for_each_fn for_each;
+    EXPORT_GENEX_STRUCT(for_each);
 }

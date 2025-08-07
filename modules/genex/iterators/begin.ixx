@@ -1,5 +1,6 @@
 module;
 #include <iterator>
+#include <genex/macros.hpp>
 
 export module genex.iterators.begin;
 
@@ -53,6 +54,6 @@ namespace genex::iterators {
     export template <typename Rng>
     using rbegin_t = decltype(std::declval<rbegin_fn>()(std::declval<Rng>()));
 
-    export inline constexpr begin_fn begin;
-    export inline constexpr rbegin_fn rbegin;
+    EXPORT_GENEX_STRUCT(begin);
+    EXPORT_GENEX_STRUCT(rbegin);
 }

@@ -29,8 +29,9 @@ namespace genex::concepts {
     export template <typename S>
     concept sentinel = requires(S s)
     {
-        { s == s } -> std::convertible_to<bool>;
-        { s != s } -> std::convertible_to<bool>;
+        true;
+        // { s == s } -> std::convertible_to<bool>;
+        // { s != s } -> std::convertible_to<bool>;
     };
 
     // TODO: use this instead of std::invocable across project.

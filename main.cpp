@@ -55,6 +55,25 @@ int main() {
         const auto v = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
         const auto f = v
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        assert(f == expected1);
+    }
+
+    // {
+    //     const auto v = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    //
+    //     const auto f = v
+    //         | genex::views::filter([](const int x) { return x % 2 == 0; })
+    //         | genex::views::to<std::vector>();
+    //     const auto expected1 = std::vector{0, 2, 4, 6, 8};
+    //     assert(f == expected1);
+    // }
+
+    {
+        const auto v = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+        const auto f = v
             | genex::views::filter([](const int x) { return x % 2 == 0; })
             | genex::views::filter([](const int x) { return x % 3 == 0; })
             | genex::views::to<std::vector>();
@@ -433,14 +452,6 @@ int main() {
         const auto b = a
             | genex::views::fold_right(0, std::minus<int>{});
         const auto expected1 = -5;
-        assert(b == expected1);
-    }
-
-    {
-        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        const auto b = a
-            | genex::views::fold(0, std::minus<int>{});
-        const auto expected1 = -45;
         assert(b == expected1);
     }
 

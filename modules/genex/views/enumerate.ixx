@@ -1,6 +1,7 @@
 module;
 #include <coroutine>
 #include <functional>
+#include <genex/macros.hpp>
 
 export module genex.views.enumerate;
 export import genex.generator;
@@ -14,26 +15,40 @@ using namespace genex::concepts;
 using namespace genex::type_traits;
 
 
-namespace genex::views {
-    struct enumerate_base_fn : detail::view_base {
-        template <range Rng>
-        auto operator()(Rng &&rng1) const -> generator<std::pair<size_t, range_value_t<Rng>>> {
-            auto i = 0;
-            for (auto &&x : rng1) {
-                co_yield std::make_pair(i++, std::forward<decltype(x)>(x));
-            }
-        }
-    };
+template <iterator I, sentinel S>
+auto do_enumerate(I &&first, S &&last) -> genex::generator<std::pair<size_t, iter_value_t<I>>> {
+    auto i = 0;
+    for (; first != last; ++first) {
+        co_yield std::make_pair(i++, *first);
+    }
+}
 
-    struct enumerate_fn final : enumerate_base_fn {
-        using enumerate_base_fn::operator();
+
+template <range Rng>
+auto do_enumerate(Rng &&rng) -> genex::generator<std::pair<size_t, range_value_t<Rng>>> {
+    auto i = 0;
+    for (auto &&x : rng) {
+        co_yield std::make_pair(i++, std::forward<decltype(x)>(x));
+    }
+}
+
+
+namespace genex::views {
+    struct enumerate_fn final : detail::view_base {
+        template <iterator I, sentinel S>
+        auto operator()(I &&first, S &&last) const -> generator<std::pair<size_t, iter_value_t<I>>> {
+            MAP_TO_IMPL(do_enumerate, first, last);
+        }
+
+        template <range Rng>
+        auto operator()(Rng &&rng) const -> generator<std::pair<size_t, range_value_t<Rng>>> {
+            MAP_TO_IMPL(do_enumerate, rng);
+        }
 
         auto operator()() const -> decltype(auto) {
-            return [this]<range Rng>(Rng &&rng1) mutable {
-                return (*this)(std::forward<Rng>(rng1));
-            };
+            MAP_TO_BASE();
         }
     };
 
-    export inline constexpr enumerate_fn enumerate;
+    EXPORT_GENEX_STRUCT(enumerate);
 }

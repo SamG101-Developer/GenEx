@@ -1,7 +1,9 @@
 module;
 #include <functional>
+#include <genex/macros.hpp>
 
 export module genex.algorithms.contains;
+import genex.algorithms._algorithm_base;
 import genex.concepts;
 import genex.iterators.begin;
 import genex.iterators.end;
@@ -12,32 +14,41 @@ using namespace genex::concepts;
 using namespace genex::type_traits;
 
 
+template <iterator I, sentinel S, typename E, std::invocable<E> Proj>
+auto do_contains(I &&first, S &&last, E &&elem, Proj &&proj = {}) -> bool {
+    for (; first != last; ++first) {
+        if (std::invoke(std::forward<Proj>(proj), *first) == elem) { return true; }
+    }
+    return false;
+}
+
+
+template <range Rng, typename E, std::invocable<E> Proj>
+auto do_contains(Rng &&rng, E &&elem, Proj &&proj = {}) -> bool {
+    for (auto &&x : rng) {
+        if (std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)) == elem) { return true; }
+    }
+    return false;
+}
+
+
 namespace genex::algorithms {
-    struct contains_base_fn {
-        template <iterator I, sentinel S, typename E, std::invocable<E> Proj>
+    struct contains_fn final : detail::algorithm_base {
+        template <iterator I, sentinel S, typename E, std::invocable<E> Proj = meta::identity>
         auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> bool {
-            for (auto it = first; it != last; ++it) {
-                if (std::invoke(std::forward<Proj>(proj), *it) == elem) { return true; }
-            }
-            return false;
+            MAP_TO_IMPL(do_contains, first, last, elem, proj);
         }
 
         template <range Rng, typename E, std::invocable<E> Proj = meta::identity>
         auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> bool {
-            return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<E>(elem), std::forward<Proj>(proj));
+            MAP_TO_IMPL(do_contains, rng, elem, proj);
         }
-    };
-
-    struct contains_fn final : contains_base_fn {
-        using contains_base_fn::operator();
 
         template <typename E, std::invocable<E> Proj = meta::identity>
         auto operator()(E &&elem, Proj &&proj = {}) const -> decltype(auto) {
-            return [elem = std::forward<E>(elem), proj = std::forward<Proj>(proj), this]<range Rng>(Rng &&rng) mutable {
-                return (*this)(std::forward<Rng>(rng), std::forward<E>(elem), std::forward<Proj>(proj));
-            };
+            MAP_TO_BASE(elem, proj);
         }
     };
 
-    export inline constexpr contains_fn contains;
+    EXPORT_GENEX_STRUCT(contains);
 }

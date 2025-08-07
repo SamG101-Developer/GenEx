@@ -1,5 +1,6 @@
 module;
 #include <iterator>
+#include <genex/macros.hpp>
 
 export module genex.operations.size;
 import genex.type_traits;
@@ -26,5 +27,5 @@ namespace genex::operations {
         }
     };
 
-    export inline constexpr size_fn size;
+    EXPORT_GENEX_STRUCT(size);
 }
