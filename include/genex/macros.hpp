@@ -21,28 +21,6 @@
 #define SPLIT_RANGE_TO_ITER(_1, _2, i, range) \
     BOOST_PP_COMMA_IF(i) iterators::begin(range), iterators::end(range)
 
-// #define SPLIT_RANGE_TO_ITER_REVERSE(_1, _2, i, range) \
-//     BOOST_PP_COMMA_IF(i) iterators::rbegin(range), iterators::rend(range)
-//
-// #define TUPLE_TO_SEQ(tuple) \
-//     BOOST_PP_TUPLE_TO_SEQ(BOOST_PP_TUPLE_SIZE(tuple), tuple)
-//
-// #define MAP_TO_ITER_TRUE_BRANCH(arg_tup) \
-//     , BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(FORWARD_OBJECT, BOOST_PP_EMPTY, TUPLE_TO_SEQ(arg_tup)))
-//
-// #define MAP_TO_ITER_FALSE_BRANCH(arg_tup) \
-//     BOOST_PP_EMPTY()
-//
-// #define MAP_TO_ITER(rng_tup, arg_tup) \
-//     return (*this)( \
-//         BOOST_PP_SEQ_FOR_EACH_I(SPLIT_RANGE_TO_ITER, BOOST_PP_EMPTY, TUPLE_TO_SEQ(rng_tup)) \
-//         BOOST_PP_IF(IS_TUPLE_EMPTY(arg_tup), MAP_TO_ITER_FALSE_BRANCH, MAP_TO_ITER_TRUE_BRANCH)(arg_tup))
-//
-// #define MAP_TO_ITER_REVERSE(rng_tup, arg_tup) \
-//     return (*this)( \
-//         BOOST_PP_SEQ_FOR_EACH_I(SPLIT_RANGE_TO_ITER_REVERSE, BOOST_PP_EMPTY, TUPLE_TO_SEQ(rng_tup)) \
-//         BOOST_PP_IF(IS_TUPLE_EMPTY(arg_tup), MAP_TO_ITER_FALSE_BRANCH, MAP_TO_ITER_TRUE_BRANCH)(arg_tup))
-
 #define MAP_TO_IMPL(fn, ...) \
     return fn(BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(FORWARD_OBJECT, BOOST_PP_EMPTY, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__))))
 
