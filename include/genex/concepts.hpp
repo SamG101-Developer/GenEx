@@ -10,9 +10,6 @@ namespace genex::concepts {
     template <typename Rng>
     concept range = iterators::has_begin<Rng> and iterators::has_end<Rng>;
 
-    // template <typename E, typename Rng>
-    // concept fixed_type_range = range<Rng> and std::same_as<range_value_t<Rng>, E>;
-
     template <typename I>
     concept iterator = requires(I i)
     {

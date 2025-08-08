@@ -33,6 +33,7 @@
 #include <genex/views/slice.hpp>
 #include <genex/views/take.hpp>
 #include <genex/views/to.hpp>
+#include <genex/strings/cases.hpp>
 
 
 // Custom "<<" for "std::vector<int>"
@@ -563,6 +564,24 @@ int main() {
             | genex::views::replace(0, 1)
             | genex::views::to<std::vector>();
         const auto expected1 = std::vector{1, 1, 2, 3, 4, 5, 6, 7, 1, 1};
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::string("hello world");
+        const auto b = a
+            | genex::strings::upper_case
+            | genex::views::to<std::string>();
+        const auto expected1 = std::string("HELLO WORLD");
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::string("HELLO WORLD");
+        const auto b = a
+            | genex::strings::lower_case
+            | genex::views::to<std::string>();
+        const auto expected1 = std::string("hello world");
         assert(b == expected1);
     }
 }
