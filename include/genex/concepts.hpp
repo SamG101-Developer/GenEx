@@ -1,5 +1,6 @@
 #pragma once
 #include <genex/type_traits.hpp>
+#include <genex/iterators/begin.hpp>
 #include <genex/iterators/end.hpp>
 
 using namespace genex::type_traits;
