@@ -33,17 +33,17 @@ auto do_accumulate(Rng &&rng, range_value_t<Rng> const &init, BinaryOp &&binary_
 namespace genex::algorithms {
     struct accumulate_fn final : detail::algorithm_base {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::invocable<iter_value_t<I>, iter_value_t<I>> BinaryOp>
-        auto operator()(I &&first, S &&last, iter_value_t<I> const &init, BinaryOp &&binary_op, Proj &&proj = {}) const -> iter_value_t<I> {
+        constexpr auto operator()(I &&first, S &&last, iter_value_t<I> const &init, BinaryOp &&binary_op, Proj &&proj = {}) const -> iter_value_t<I> {
             MAP_TO_IMPL(do_accumulate, first, last, init, binary_op, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::invocable<range_value_t<Rng>, range_value_t<Rng>> BinaryOp>
-        auto operator()(Rng &&rng, range_value_t<Rng> const &init, BinaryOp &&binary_op, Proj &&proj = {}) const -> range_value_t<Rng> {
+        constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &init, BinaryOp &&binary_op, Proj &&proj = {}) const -> range_value_t<Rng> {
             MAP_TO_IMPL(do_accumulate, rng, init, binary_op, proj);
         }
 
         template <typename T, typename BinaryOp, typename Proj = meta::identity>
-        auto operator()(T &&init, BinaryOp &&binary_op, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(T &&init, BinaryOp &&binary_op, Proj &&proj = {}) const -> decltype(auto) {
             MAP_TO_BASE(init, binary_op, proj);
         }
     };

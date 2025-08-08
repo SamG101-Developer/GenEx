@@ -33,17 +33,17 @@ auto do_count(Rng &&rng, E &&elem, Proj &&proj = {}) -> size_t {
 namespace genex::algorithms {
     struct count_fn final : detail::algorithm_base {
         template <iterator I, sentinel S, typename E, std::invocable<E> Proj = meta::identity>
-        auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> size_t {
+        constexpr auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> size_t {
             MAP_TO_IMPL(do_count, first, last, elem, proj);
         }
 
         template <range Rng, typename E, std::invocable<E> Proj = meta::identity>
-        auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> decltype(auto) {
             MAP_TO_IMPL(do_count, rng, elem, proj);
         }
 
         template <typename E, std::invocable<E> Proj = meta::identity>
-        auto operator()(E &&elem, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> decltype(auto) {
             MAP_TO_BASE(elem, proj);
         }
     };

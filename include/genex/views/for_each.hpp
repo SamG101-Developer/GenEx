@@ -28,17 +28,17 @@ auto do_for_each(Rng &&rng, F &&f) -> void {
 namespace genex::views {
     struct for_each_fn final : detail::view_base {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> F>
-        auto operator()(I &&first, S &&last, F &&f) const -> void {
+        constexpr auto operator()(I &&first, S &&last, F &&f) const -> void {
             MAP_TO_IMPL(do_for_each, first, last, f);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> F>
-        auto operator()(Rng &&rng, F &&f) const -> void {
+        constexpr auto operator()(Rng &&rng, F &&f) const -> void {
             MAP_TO_IMPL(do_for_each, rng, f);
         }
 
         template <typename F>
-        auto operator()(F &&f) const -> decltype(auto) {
+        constexpr auto operator()(F &&f) const -> decltype(auto) {
             MAP_TO_BASE(f);
         }
     };

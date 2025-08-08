@@ -53,34 +53,34 @@ auto do_fold_right(Rng &&rng, E &&init, F &&f) -> E {
 namespace genex::views {
     struct fold_left_fn final : detail::view_base {
         template <iterator I, sentinel S, typename E, std::invocable<E, iter_value_t<I>> F>
-        auto operator()(I &&first, S &&last, E &&init, F &&f) const -> E {
+        constexpr auto operator()(I &&first, S &&last, E &&init, F &&f) const -> E {
             MAP_TO_IMPL(do_fold_left, first, last, init, f);
         }
 
         template <range Rng, typename E, std::invocable<E, range_value_t<Rng>> F>
-        auto operator()(Rng &&rng, E &&init, F &&f) const -> E {
+        constexpr auto operator()(Rng &&rng, E &&init, F &&f) const -> E {
             MAP_TO_IMPL(do_fold_left, rng, init, f);
         }
 
         template <typename E, typename F>
-        auto operator()(E &&init, F &&f) const -> decltype(auto) {
+        constexpr auto operator()(E &&init, F &&f) const -> decltype(auto) {
             MAP_TO_BASE(init, f);
         }
     };
 
     struct fold_right_fn final : detail::view_base {
         template <iterator I, sentinel S, typename E, std::invocable<E, iter_value_t<I>> F>
-        auto operator()(I &&first, S &&last, E &&init, F &&f) const -> E {
+        constexpr auto operator()(I &&first, S &&last, E &&init, F &&f) const -> E {
             MAP_TO_IMPL(do_fold_right, first, last, init, f);
         }
 
         template <range Rng, typename E, std::invocable<E, range_value_t<Rng>> F>
-        auto operator()(Rng &&rng, E &&init, F &&f) const -> E {
+        constexpr auto operator()(Rng &&rng, E &&init, F &&f) const -> E {
             MAP_TO_IMPL(do_fold_right, rng, init, f);
         }
 
         template <typename E, typename F>
-        auto operator()(E &&init, F &&f) const -> decltype(auto) {
+        constexpr auto operator()(E &&init, F &&f) const -> decltype(auto) {
             MAP_TO_BASE(init, f);
         }
     };

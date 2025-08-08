@@ -56,34 +56,34 @@ auto do_intersperse_with(Rng &&rng, F &&separator) -> genex::generator<range_val
 namespace genex::views {
     struct intersperse_fn final : detail::view_base {
         template <iterator I, sentinel S>
-        auto operator()(I &&first, S &&last, iter_value_t<I> const &sep) const -> generator<iter_value_t<I>> {
+        constexpr auto operator()(I &&first, S &&last, iter_value_t<I> const &sep) const -> generator<iter_value_t<I>> {
             MAP_TO_IMPL(do_intersperse, first, last, sep);
         }
 
         template <range Rng>
-        auto operator()(Rng &&rng, range_value_t<Rng> const &sep) const -> generator<range_value_t<Rng>> {
+        constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &sep) const -> generator<range_value_t<Rng>> {
             MAP_TO_IMPL(do_intersperse, rng, sep);
         }
 
         template <typename E>
-        auto operator()(E &&sep) const -> decltype(auto) {
+        constexpr auto operator()(E &&sep) const -> decltype(auto) {
             MAP_TO_BASE(sep);
         }
     };
 
     struct intersperse_with_fn final : detail::view_base {
         template <iterator I, sentinel S, std::invocable F> requires (std::same_as<std::invoke_result_t<F>, iter_value_t<I>>)
-        auto operator()(I &&first, S &&last, F &&sep) const -> generator<iter_value_t<I>> {
+        constexpr auto operator()(I &&first, S &&last, F &&sep) const -> generator<iter_value_t<I>> {
             MAP_TO_IMPL(do_intersperse_with, first, last, sep);
         }
 
         template <range Rng, std::invocable F> requires (std::same_as<std::invoke_result_t<F>, range_value_t<Rng>>)
-        auto operator()(Rng &&rng, F &&sep) const -> generator<range_value_t<Rng>> {
+        constexpr auto operator()(Rng &&rng, F &&sep) const -> generator<range_value_t<Rng>> {
             MAP_TO_IMPL(do_intersperse_with, rng, sep);
         }
 
         template <std::invocable F>
-        auto operator()(F &&sep) const -> decltype(auto) {
+        constexpr auto operator()(F &&sep) const -> decltype(auto) {
             MAP_TO_BASE(sep);
         }
     };

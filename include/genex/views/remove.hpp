@@ -48,34 +48,34 @@ auto do_remove_if(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> genex::generator<
 namespace genex::views {
     struct remove_fn final : detail::view_base {
         template <iterator I, sentinel S>
-        auto operator()(I &&first, S &&last, iter_value_t<I> const &elem) const -> generator<iter_value_t<I>> {
+        constexpr auto operator()(I &&first, S &&last, iter_value_t<I> const &elem) const -> generator<iter_value_t<I>> {
             MAP_TO_IMPL(do_remove, first, last, elem);
         }
 
         template <range Rng>
-        auto operator()(Rng &&rng, range_value_t<Rng> const &elem) const -> generator<range_value_t<Rng>> {
+        constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &elem) const -> generator<range_value_t<Rng>> {
             MAP_TO_IMPL(do_remove, rng, elem);
         }
 
         template <typename E>
-        auto operator()(E &&elem) const -> decltype(auto) {
+        constexpr auto operator()(E &&elem) const -> decltype(auto) {
             MAP_TO_BASE(elem);
         }
     };
 
     struct remove_if_fn final : detail::view_base {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> generator<iter_value_t<I>> {
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> generator<iter_value_t<I>> {
             MAP_TO_IMPL(do_remove_if, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> generator<range_value_t<Rng>> {
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> generator<range_value_t<Rng>> {
             MAP_TO_IMPL(do_remove_if, rng, pred, proj);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        auto operator()(Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
             MAP_TO_BASE(pred, proj);
         }
     };

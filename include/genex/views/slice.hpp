@@ -28,16 +28,16 @@ auto do_slice(Rng &&rng, const std::size_t start_index, const std::size_t end_in
 namespace genex::views {
     struct slice_fn final : detail::view_base {
         template <iterator I, sentinel S>
-        auto operator()(I &&first, S &&last, const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> generator<iter_value_t<I>> {
+        constexpr auto operator()(I &&first, S &&last, const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> generator<iter_value_t<I>> {
             MAP_TO_IMPL(do_slice, first, last, start_index, end_index, step);
         }
 
         template <range Rng>
-        auto operator()(Rng &&rng, const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> generator<range_value_t<Rng>> {
+        constexpr auto operator()(Rng &&rng, const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> generator<range_value_t<Rng>> {
             MAP_TO_IMPL(do_slice, rng, start_index, end_index, step);
         }
 
-        auto operator()(const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> decltype(auto) {
+        constexpr auto operator()(const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> decltype(auto) {
             MAP_TO_BASE(start_index, end_index, step);
         }
     };

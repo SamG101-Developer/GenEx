@@ -36,16 +36,16 @@ auto do_chunk(Rng &&rng, size_t size) -> genex::generator<genex::generator<range
 namespace genex::views {
     struct chunk_fn final : detail::view_base {
         template <iterator I, sentinel S>
-        auto operator()(I &&first, S &&last, size_t size) const -> generator<generator<iter_value_t<I>>> {
+        constexpr auto operator()(I &&first, S &&last, size_t size) const -> generator<generator<iter_value_t<I>>> {
             MAP_TO_IMPL(do_chunk, first, last, size);
         }
 
         template <range Rng>
-        auto operator()(Rng &&rng, size_t size) const -> generator<generator<range_value_t<Rng>>> {
+        constexpr auto operator()(Rng &&rng, size_t size) const -> generator<generator<range_value_t<Rng>>> {
             MAP_TO_IMPL(do_chunk, rng, size);
         }
 
-        auto operator()(size_t n) const -> decltype(auto) {
+        constexpr auto operator()(size_t n) const -> decltype(auto) {
             MAP_TO_BASE(n);
         }
     };

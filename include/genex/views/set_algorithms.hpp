@@ -85,68 +85,68 @@ auto do_set_union(Rng1 &&rng1, Rng2 &&rng2) -> genex::generator<range_value_t<Rn
 namespace genex::views {
     struct set_difference_fn final : detail::view_base {
         template <iterator I1, sentinel S1, iterator I2, sentinel S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
-        auto operator()(I1 &&first1, S1 &&last1, I2 &&first2, S2 &&last2) const -> generator<iter_value_t<I1>> {
+        constexpr auto operator()(I1 &&first1, S1 &&last1, I2 &&first2, S2 &&last2) const -> generator<iter_value_t<I1>> {
             MAP_TO_IMPL(do_set_difference, first1, last1, first2, last2);
         }
 
         template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
-        auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> generator<range_value_t<Rng1>> {
+        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> generator<range_value_t<Rng1>> {
             MAP_TO_IMPL(do_set_difference, rng1, rng2);
         }
 
         template <range Rng2>
-        auto operator()(Rng2 &&rng2) const -> decltype(auto) {
+        constexpr auto operator()(Rng2 &&rng2) const -> decltype(auto) {
             MAP_TO_BASE(rng2);
         }
     };
 
     struct set_intersection_fn final : detail::view_base {
         template <iterator I1, sentinel S1, iterator I2, sentinel S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
-        auto operator()(I1 &&first1, S1 &&last1, I2 &&first2, S2 &&last2) const -> generator<iter_value_t<I2>> {
+        constexpr auto operator()(I1 &&first1, S1 &&last1, I2 &&first2, S2 &&last2) const -> generator<iter_value_t<I2>> {
             MAP_TO_IMPL(do_set_intersection, first1, last1, first2, last2);
         }
 
         template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
-        auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> generator<range_value_t<Rng1>> {
+        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> generator<range_value_t<Rng1>> {
             MAP_TO_IMPL(do_set_intersection, rng1, rng2);
         }
 
         template <range Rng2>
-        auto operator()(Rng2 &&rng2) const -> decltype(auto) {
+        constexpr auto operator()(Rng2 &&rng2) const -> decltype(auto) {
             MAP_TO_BASE(rng2);
         }
     };
 
     struct set_symmetric_difference_fn final : detail::view_base {
         template <iterator I1, sentinel S1, iterator I2, sentinel S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
-        auto operator()(I1 &&first1, S1 &&last1, I2 &&first2, S2 &&last2) const -> generator<iter_value_t<I1>> {
+        constexpr auto operator()(I1 &&first1, S1 &&last1, I2 &&first2, S2 &&last2) const -> generator<iter_value_t<I1>> {
             MAP_TO_IMPL(do_set_symmetric_difference, first1, last1, first2, last2);
         }
 
         template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
-        auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> generator<range_value_t<Rng1>> {
+        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> generator<range_value_t<Rng1>> {
             MAP_TO_IMPL(do_set_symmetric_difference, rng1, rng2);
         }
 
         template <range Rng2>
-        auto operator()(Rng2 &&rng2) const -> decltype(auto) {
+        constexpr auto operator()(Rng2 &&rng2) const -> decltype(auto) {
             MAP_TO_BASE(rng2);
         }
     };
 
     struct set_union_fn final : detail::view_base {
         template <iterator I1, sentinel S1, iterator I2, sentinel S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
-        auto operator()(I1 &&first1, S1 &&last1, I2 &&first2, S2 &&last2) const -> generator<iter_value_t<I1>> {
+        constexpr auto operator()(I1 &&first1, S1 &&last1, I2 &&first2, S2 &&last2) const -> generator<iter_value_t<I1>> {
             MAP_TO_IMPL(do_set_union, first1, last1, first2, last2);
         }
 
         template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
-        auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> generator<range_value_t<Rng1>> {
+        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> generator<range_value_t<Rng1>> {
             MAP_TO_IMPL(do_set_union, rng1, rng2);
         }
 
         template <range Rng2>
-        auto operator()(Rng2 &&rng2) const -> decltype(auto) {
+        constexpr auto operator()(Rng2 &&rng2) const -> decltype(auto) {
             MAP_TO_BASE(rng2);
         }
     };

@@ -31,17 +31,17 @@ auto do_contains(Rng &&rng, E &&elem, Proj &&proj = {}) -> bool {
 namespace genex::algorithms {
     struct contains_fn final : detail::algorithm_base {
         template <iterator I, sentinel S, typename E, std::invocable<E> Proj = meta::identity>
-        auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> bool {
+        constexpr auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> bool {
             MAP_TO_IMPL(do_contains, first, last, elem, proj);
         }
 
         template <range Rng, typename E, std::invocable<E> Proj = meta::identity>
-        auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> bool {
+        constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> bool {
             MAP_TO_IMPL(do_contains, rng, elem, proj);
         }
 
         template <typename E, std::invocable<E> Proj = meta::identity>
-        auto operator()(E &&elem, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> decltype(auto) {
             MAP_TO_BASE(elem, proj);
         }
     };

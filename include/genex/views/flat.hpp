@@ -32,16 +32,16 @@ auto do_flat(Rng &&rng) -> genex::generator<range_value_t<range_value_t<Rng>>> {
 namespace genex::views {
     struct flat_fn final : detail::view_base {
         template <iterator I, sentinel S> requires range<iter_value_t<I>>
-        auto operator()(I &&first, S &&last) const -> generator<range_value_t<iter_value_t<I>>> {
+        constexpr auto operator()(I &&first, S &&last) const -> generator<range_value_t<iter_value_t<I>>> {
             MAP_TO_IMPL(do_flat, first, last);
         }
 
         template <range Rng> requires range<range_value_t<Rng>>
-        auto operator()(Rng &&rng) const -> generator<range_value_t<range_value_t<Rng>>> {
+        constexpr auto operator()(Rng &&rng) const -> generator<range_value_t<range_value_t<Rng>>> {
             MAP_TO_IMPL(do_flat, rng);
         }
 
-        auto operator()() const -> decltype(auto) {
+        constexpr auto operator()() const -> decltype(auto) {
             MAP_TO_BASE();
         }
     };
