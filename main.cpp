@@ -24,6 +24,7 @@
 #include <genex/views/interleave.hpp>
 #include <genex/views/intersperse.hpp>
 #include <genex/views/iota.hpp>
+#include <genex/views/join.hpp>
 #include <genex/views/map.hpp>
 #include <genex/views/remove.hpp>
 #include <genex/views/replace.hpp>
@@ -48,6 +49,8 @@ auto operator<<(std::ostream &os, const std::vector<T> &v) -> std::ostream& {
 
 
 int main() {
+    using namespace std::string_literals;
+
     {
         const auto v = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
@@ -230,6 +233,22 @@ int main() {
             | genex::views::to<std::vector>();
         auto expected2 = std::vector<size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         assert(b == expected2);
+    }
+
+    {
+        const auto a = std::vector{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+        const auto b = a
+            | genex::views::join;
+        const auto expected1 = "0123456789"s;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+        const auto b = a
+            | genex::views::join_with(",");
+        const auto expected1 = "0,1,2,3,4,5,6,7,8,9"s;
+        assert(b == expected1);
     }
 
     {
