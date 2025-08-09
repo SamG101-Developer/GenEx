@@ -1,10 +1,7 @@
-/**
- * TODO: THIS DOESNT WORK
- */
-
 #pragma once
 #include <coroutine>
 #include <functional>
+#include <memory>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
@@ -25,6 +22,14 @@ template <range Rng>
 auto do_copied(Rng &&rng) -> genex::generator<range_value_t<Rng>> {
     for (auto &&x : rng) {
         co_yield std::forward<decltype(x)>(x);
+    }
+}
+
+
+template <range Rng> requires (unique_ptr<range_value_t<Rng>>)
+auto do_copied(Rng &&rng) -> genex::generator<range_value_t<Rng>> {
+    for (auto &&x : rng) {
+        co_yield std::make_unique<decltype(x)>(std::forward<decltype(x)>(x));
     }
 }
 
