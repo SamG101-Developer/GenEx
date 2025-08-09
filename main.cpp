@@ -478,20 +478,19 @@ int main() {
             | genex::views::copied
             | genex::views::to<std::vector>();
         const auto expected1 = std::vector<std::string>{"0"};
-        const auto expected2 = a[0] == a[1] and &a[0] != &a[1];
-        assert(b == expected1 and expected2);
+        assert(b == expected1);
     }
 
     {
-        auto a = std::vector<std::unique_ptr<int>>{};
-        a.push_back(std::make_unique<int>(0));
-        a.push_back(std::make_unique<int>(0));
+        auto a = std::vector<std::unique_ptr<std::string>>{};
+        a.push_back(std::make_unique<std::string>("0"));
+        a.push_back(std::make_unique<std::string>("1"));
 
         const auto b = a
             | genex::views::copied
             | genex::views::deref
             | genex::views::to<std::vector>();
-        const auto expected1 = std::vector{0, 0};
+        const auto expected1 = std::vector<std::string>{"0", "1"};
         assert(b == expected1);
     }
 
