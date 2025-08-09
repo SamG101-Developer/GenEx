@@ -11,11 +11,17 @@ namespace genex::type_traits {
     template <typename I>
     struct iter_value;
 
+    template <typename T>
+    struct deref_value;
+
     template <typename Rng>
     using range_value_t = typename range_value<std::remove_cvref_t<Rng>>::type;
 
     template <typename I>
     using iter_value_t = typename iter_value<I>::type;
+
+    template <typename T>
+    using deref_value_t = typename deref_value<T>::type;
 }
 
 
@@ -64,4 +70,10 @@ struct genex::type_traits::iter_value<I const*> {
 template <typename I> requires requires(I &&i) { *i; }
 struct genex::type_traits::iter_value<I const> {
     using type = const std::remove_cvref_t<decltype(*std::declval<I const>())>;
+};
+
+
+template <typename T> requires requires(T &&t) { *std::declval<T>(); }
+struct genex::type_traits::deref_value<T> {
+    using type = std::remove_cvref_t<decltype(*std::declval<T>())>;
 };

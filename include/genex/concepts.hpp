@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <genex/type_traits.hpp>
 #include <genex/iterators/begin.hpp>
 #include <genex/iterators/end.hpp>
@@ -24,4 +25,15 @@ namespace genex::concepts {
         // { s == s } -> std::convertible_to<bool>;
         // { s != s } -> std::convertible_to<bool>;
     };
+
+    template <typename T>
+    struct is_unique_ptr : std::false_type {
+    };
+
+    template <typename U, typename Deleter>
+    struct is_unique_ptr<std::unique_ptr<U, Deleter>> : std::true_type {
+    };
+
+    template <typename T>
+    concept unique_ptr = is_unique_ptr<std::remove_cvref_t<T>>::value;
 }

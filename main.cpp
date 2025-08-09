@@ -13,8 +13,11 @@
 #include <genex/algorithms/find.hpp>
 #include <genex/algorithms/position.hpp>
 #include <genex/views/chunk.hpp>
+#include <genex/views/copied.hpp>
 #include <genex/views/concat.hpp>
 #include <genex/views/cycle.hpp>
+#include <genex/views/deref.hpp>
+#include <genex/views/deref.hpp>
 #include <genex/views/drop.hpp>
 #include <genex/views/enumerate.hpp>
 #include <genex/views/filter.hpp>
@@ -109,6 +112,19 @@ int main() {
             | genex::views::to<std::vector>();
         const auto expected4 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
         assert(i == expected4);
+    }
+
+    {
+        const auto a = std::vector{new int(1), new int(2), new int(3)};
+        const auto b = a
+            | genex::views::deref
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{*a[0], *a[1], *a[2]};
+        assert(b == expected1);
+
+        for (auto ptr : a) {
+            delete ptr; // Clean up dynamically allocated memory
+        }
     }
 
     {
@@ -457,13 +473,26 @@ int main() {
     }
 
     {
-        // const auto a = std::vector<std::string>{"0"};
-        // const auto b = a
-        //     | genex::views::copied
-        //     | genex::views::to<std::vector>();
-        // const auto expected1 = std::vector<std::string>{"0"};
-        // const auto expected2 = a[0] == a[1] and &a[0] != &a[1];
-        // assert(b == expected1 and expected2);
+        const auto a = std::vector<std::string>{"0"};
+        const auto b = a
+            | genex::views::copied
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector<std::string>{"0"};
+        const auto expected2 = a[0] == a[1] and &a[0] != &a[1];
+        assert(b == expected1 and expected2);
+    }
+
+    {
+        auto a = std::vector<std::unique_ptr<int>>{};
+        a.push_back(std::make_unique<int>(0));
+        a.push_back(std::make_unique<int>(0));
+
+        const auto b = a
+            | genex::views::copied
+            | genex::views::deref
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0, 0};
+        assert(b == expected1);
     }
 
     {
