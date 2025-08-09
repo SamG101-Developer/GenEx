@@ -3,6 +3,7 @@
 #include <functional>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/views/_view_base.hpp>
 
 using namespace genex::concepts;
