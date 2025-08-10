@@ -36,6 +36,7 @@
 #include <genex/views/slice.hpp>
 #include <genex/views/take.hpp>
 #include <genex/views/to.hpp>
+#include <genex/views/view.hpp>
 #include <genex/views/zip.hpp>
 #include <genex/strings/cases.hpp>
 
@@ -572,7 +573,7 @@ int main() {
         const auto a = std::vector{'a', 'b', 'c', 'd', 'e'};
         const auto b = a
             | genex::views::slice(1, 4)
-            | genex::views::map([](auto&& x) { return std::toupper(x); })
+            | genex::views::map([](auto &&x) { return std::toupper(x); })
             | genex::views::to<std::string>();
         const auto expected1 = std::string{"BCD"};
         assert(b == expected1);
@@ -597,6 +598,31 @@ int main() {
     }
 
     {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 0, 0};
+        const auto b = a
+            | genex::views::view
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 0, 0};
+        assert(b == expected1);
+    }
+
+    {
+        auto variadic_adder = [](auto &&... args) -> int {
+            return (args + ...);
+        };
+
+        const auto a1 = std::vector{0, 1, 2, 3};
+        const auto a2 = std::vector{1, 2, 3, 4};
+        const auto a3 = std::vector{2, 3, 4, 5};
+        const auto a4 = std::vector{3, 4, 5, 6};
+        const auto b = genex::views::zip(a1, a2, a3, a4)
+            | genex::views::map([variadic_adder](auto &&... t) { return std::apply(variadic_adder, std::forward<decltype(t)>(t)...); })
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{6, 10, 14, 18};
+        assert(b == expected1);
+    }
+
+    {
         const auto a = std::string("hello world");
         const auto b = a
             | genex::strings::upper_case
@@ -611,22 +637,6 @@ int main() {
             | genex::strings::lower_case
             | genex::views::to<std::string>();
         const auto expected1 = std::string("hello world");
-        assert(b == expected1);
-    }
-
-    {
-        auto variadic_adder = [](auto&&... args) -> int {
-            return (args + ...);
-        };
-
-        const auto a1 = std::vector{0, 1, 2, 3};
-        const auto a2 = std::vector{1, 2, 3, 4};
-        const auto a3 = std::vector{2, 3, 4, 5};
-        const auto a4 = std::vector{3, 4, 5, 6};
-        const auto b = genex::views::zip(a1, a2, a3, a4)
-            | genex::views::map([variadic_adder](auto&&... t) { return std::apply(variadic_adder, std::forward<decltype(t)>(t)...); })
-            | genex::views::to<std::vector>();
-        const auto expected1 = std::vector{6, 10, 14, 18};
         assert(b == expected1);
     }
 }
