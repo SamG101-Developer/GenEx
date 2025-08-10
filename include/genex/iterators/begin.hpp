@@ -52,6 +52,8 @@ namespace genex::iterators {
     template <typename Rng>
     using rbegin_t = decltype(std::declval<rbegin_fn>()(std::declval<Rng>()));
 
-    EXPORT_GENEX_STRUCT(begin);
-    EXPORT_GENEX_STRUCT(rbegin);
+    // EXPORT_GENEX_STRUCT(begin);
+    // EXPORT_GENEX_STRUCT(rbegin);
+    inline constexpr begin_fn begin;
+    inline constexpr rbegin_fn rbegin;
 }
