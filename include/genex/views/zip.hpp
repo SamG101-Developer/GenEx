@@ -3,6 +3,7 @@
 #include <genex/concepts.hpp>
 #include <genex/iterators/begin.hpp>
 #include <genex/iterators/end.hpp>
+#include <genex/views/_view_base.hpp>
 
 using namespace genex::concepts;
 using namespace genex::type_traits;
