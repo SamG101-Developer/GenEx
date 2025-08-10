@@ -1,6 +1,7 @@
 #pragma once
 #include <coroutine>
-#include <functional>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/concepts.hpp>
 #include <genex/views/map.hpp>
 
