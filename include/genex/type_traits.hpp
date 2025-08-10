@@ -73,7 +73,7 @@ struct genex::type_traits::iter_value<I const> {
 };
 
 
-template <typename T> requires requires(T const &t) { *std::declval<T>(); }
+template <typename T> requires requires(T &&t) { *std::declval<T>(); }
 struct genex::type_traits::deref_value<T> {
-    using type = std::remove_cvref_t<decltype(*std::declval<T>())>;
+    using type = decltype(*std::declval<T>());
 };
