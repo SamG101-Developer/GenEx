@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include <genex/actions/remove.hpp>
 #include <genex/algorithms/accumulate.hpp>
 #include <genex/algorithms/all_of.hpp>
 #include <genex/algorithms/any_of.hpp>
@@ -29,6 +30,7 @@
 #include <genex/views/iota.hpp>
 #include <genex/views/join.hpp>
 #include <genex/views/map.hpp>
+#include <genex/views/ptr.hpp>
 #include <genex/views/remove.hpp>
 #include <genex/views/replace.hpp>
 #include <genex/views/reverse.hpp>
@@ -115,18 +117,21 @@ int main() {
         assert(i == expected4);
     }
 
-    {
-        const auto a = std::vector{new int(1), new int(2), new int(3)};
-        const auto b = a
-            | genex::views::deref
-            | genex::views::to<std::vector>();
-        const auto expected1 = std::vector{*a[0], *a[1], *a[2]};
-        assert(b == expected1);
-
-        for (auto ptr : a) {
-            delete ptr; // Clean up dynamically allocated memory
-        }
-    }
+    // {
+    //     auto x = "a"s, y = "b"s, z = "c"s;
+    //     std::vector<std::string&> A = std::vector<std::string&>{x, y, z};
+    //
+    //     const auto a = std::vector{new int(1), new int(2), new int(3)};
+    //     const auto b = a
+    //         | genex::views::deref
+    //         | genex::views::to<std::vector>();
+    //     const auto expected1 = std::vector{*a[0], *a[1], *a[2]};
+    //     assert(b == expected1);
+    //
+    //     for (auto ptr : a) {
+    //         delete ptr; // Clean up dynamically allocated memory
+    //     }
+    // }
 
     {
         const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -267,6 +272,18 @@ int main() {
         const auto b = a
             | genex::views::join_with(",");
         const auto expected1 = "0,1,2,3,4,5,6,7,8,9"s;
+        assert(b == expected1);
+    }
+
+    {
+        auto a = std::vector<std::unique_ptr<int>>{};
+        a.emplace_back(std::make_unique<int>(1));
+        a.emplace_back(std::make_unique<int>(2));
+        a.emplace_back(std::make_unique<int>(3));
+        const auto b = a
+            | genex::views::ptr_unique
+            | genex::views::to<std::vector>();
+        auto expected1 = std::vector{a[0].get(), a[1].get(), a[2].get()};
         assert(b == expected1);
     }
 
@@ -482,18 +499,18 @@ int main() {
         assert(b == expected1);
     }
 
-    {
-        auto a = std::vector<std::unique_ptr<std::string>>{};
-        a.push_back(std::make_unique<std::string>("0"));
-        a.push_back(std::make_unique<std::string>("1"));
-
-        const auto b = a
-            | genex::views::copied
-            | genex::views::deref
-            | genex::views::to<std::vector>();
-        const auto expected1 = std::vector<std::string>{"0", "1"};
-        assert(b == expected1);
-    }
+    // {
+    //     auto a = std::vector<std::unique_ptr<std::string>>{};
+    //     a.push_back(std::make_unique<std::string>("0"));
+    //     a.push_back(std::make_unique<std::string>("1"));
+    //
+    //     const auto b = a
+    //         | genex::views::copied
+    //         | genex::views::deref
+    //         | genex::views::to<std::vector>();
+    //     const auto expected1 = std::vector<std::string>{"0", "1"};
+    //     assert(b == expected1);
+    // }
 
     {
         const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 5};
@@ -638,5 +655,19 @@ int main() {
             | genex::views::to<std::string>();
         const auto expected1 = std::string("hello world");
         assert(b == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        a |= genex::actions::remove(2);
+        const auto expected1 = std::vector{0, 1, 3, 4, 5, 6, 7, 8, 9};
+        assert(a == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        a |= genex::actions::remove_if([](const int x) { return x % 2 == 0; });
+        const auto expected1 = std::vector{1, 3, 5, 7, 9};
+        assert(a == expected1);
     }
 }

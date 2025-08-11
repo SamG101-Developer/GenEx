@@ -23,7 +23,7 @@ auto operator|(T &&lhs, F &&rhs) {
 
 
 // vector |= genex::actions::___
-template <typename T, std::invocable<T> F>
+template <typename T, std::invocable<T> F> requires (not std::is_const_v<T>)
 auto operator|=(T &&lhs, F &&rhs) {
     return std::forward<F>(rhs)(std::forward<T>(lhs));
 }
