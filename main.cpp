@@ -18,8 +18,8 @@
 #include <genex/views/concat.hpp>
 #include <genex/views/cycle.hpp>
 #include <genex/views/deref.hpp>
-#include <genex/views/deref.hpp>
 #include <genex/views/drop.hpp>
+#include <genex/views/duplicates.hpp>
 #include <genex/views/enumerate.hpp>
 #include <genex/views/filter.hpp>
 #include <genex/views/flat.hpp>
@@ -161,6 +161,24 @@ int main() {
             | genex::views::to<std::vector>();
         const auto expected4 = std::vector{7, 8, 9};
         assert(h == expected4);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::duplicates()
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{5, 5};
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::duplicates()
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector<int>{};
+        assert(b == expected1);
     }
 
     {
