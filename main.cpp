@@ -12,6 +12,7 @@
 #include <genex/algorithms/count.hpp>
 #include <genex/algorithms/binary_search.hpp>
 #include <genex/algorithms/find.hpp>
+#include <genex/algorithms/none_of.hpp>
 #include <genex/algorithms/position.hpp>
 #include <genex/views/cast.hpp>
 #include <genex/views/chunk.hpp>
@@ -376,6 +377,20 @@ int main() {
         const auto c = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         const auto d = c
             | genex::algorithms::binary_search(10);
+        auto expected2 = false;
+        assert(d == expected2);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::algorithms::none_of([](const int x) { return x == 10; });
+        auto expected1 = true;
+        assert(b == expected1);
+
+        const auto c = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto d = c
+            | genex::algorithms::none_of([](const int x) { return x == 5; });
         auto expected2 = false;
         assert(d == expected2);
     }
