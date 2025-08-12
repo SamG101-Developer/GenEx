@@ -510,6 +510,27 @@ int main() {
     }
 
     {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::cast.operator()<float>()
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f};
+        assert(b == expected1);
+    }
+
+    {
+        struct A {};
+        struct B : A {};
+
+        auto a = std::vector<std::unique_ptr<B>>{};
+        a.push_back(std::make_unique<B>());
+        a.push_back(std::make_unique<B>());
+        const auto b = a
+            | genex::views::cast.operator()<A>()
+            | genex::views::to<std::vector>();
+    }
+
+    {
         const auto a = std::vector<std::string>{"0"};
         const auto b = a
             | genex::views::copied
