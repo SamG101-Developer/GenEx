@@ -13,6 +13,7 @@
 #include <genex/algorithms/binary_search.hpp>
 #include <genex/algorithms/find.hpp>
 #include <genex/algorithms/position.hpp>
+#include <genex/views/cast.hpp>
 #include <genex/views/chunk.hpp>
 #include <genex/views/copied.hpp>
 #include <genex/views/concat.hpp>
