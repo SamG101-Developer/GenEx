@@ -4,6 +4,8 @@
 #include <genex/concepts.hpp>
 #include <genex/iterators/advance.hpp>
 
+using namespace genex::concepts;
+
 
 namespace genex::iterators {
     template <typename I>
