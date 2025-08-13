@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include <genex/actions/pop.hpp>
 #include <genex/actions/remove.hpp>
 #include <genex/algorithms/accumulate.hpp>
 #include <genex/algorithms/all_of.hpp>
@@ -723,6 +724,27 @@ int main() {
         auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         a |= genex::actions::remove_if([](const int x) { return x % 2 == 0; });
         const auto expected1 = std::vector{1, 3, 5, 7, 9};
+        assert(a == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        a |= genex::actions::pop(1);
+        const auto expected1 = std::vector{0, 2, 3, 4, 5, 6, 7, 8, 9};
+        assert(a == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        a |= genex::actions::pop_front;
+        const auto expected1 = std::vector{1, 2, 3, 4, 5, 6, 7, 8, 9};
+        assert(a == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        a |= genex::actions::pop_back;
+        const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8};
         assert(a == expected1);
     }
 }
