@@ -577,6 +577,14 @@ int main() {
     }
 
     {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::algorithms::count_if([](const int x) { return x < 5; });
+        const auto expected1 = 5;
+        assert(b == expected1);
+    }
+
+    {
         const auto a = std::vector<std::vector<int>>{{0, 1, 2, 3}, {4, 5}, {6, 7, 8}, {9}};
         const auto b = a
             | genex::views::flat

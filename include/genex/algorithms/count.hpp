@@ -30,6 +30,26 @@ auto do_count(Rng &&rng, E &&elem, Proj &&proj = {}) -> size_t {
 }
 
 
+template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = genex::meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+auto do_count_if(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> size_t {
+    auto count = static_cast<std::size_t>(0);
+    for (; first != last; ++first) {
+        if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { ++count; }
+    }
+    return count;
+}
+
+
+template <range Rng, std::invocable<range_value_t<Rng>> Proj = genex::meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
+auto do_count_if(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> size_t {
+    auto count = static_cast<std::size_t>(0);
+    for (auto &&x : rng) {
+        if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) { ++count; }
+    }
+    return count;
+}
+
+
 namespace genex::algorithms {
     struct count_fn final : detail::algorithm_base {
         template <iterator I, sentinel S, typename E, std::invocable<E> Proj = meta::identity>
@@ -48,5 +68,23 @@ namespace genex::algorithms {
         }
     };
 
+    struct count_if_fn final : detail::algorithm_base {
+        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> size_t {
+            MAP_TO_IMPL(do_count_if, first, last, pred, proj);
+        }
+
+        template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+            MAP_TO_IMPL(do_count_if, rng, pred, proj);
+        }
+
+        template <typename Proj = meta::identity>
+        constexpr auto operator()(Proj &&proj = {}) const -> decltype(auto) {
+            MAP_TO_BASE(proj);
+        }
+    };
+
     EXPORT_GENEX_STRUCT(count);
+    EXPORT_GENEX_STRUCT(count_if);
 }
