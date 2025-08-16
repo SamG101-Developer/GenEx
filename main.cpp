@@ -22,7 +22,7 @@
 #include <genex/views/copied.hpp>
 #include <genex/views/concat.hpp>
 #include <genex/views/cycle.hpp>
-#include <genex/views/deref.hpp>
+#include <genex/views/address.hpp>
 #include <genex/views/drop.hpp>
 #include <genex/views/duplicates.hpp>
 #include <genex/views/enumerate.hpp>
