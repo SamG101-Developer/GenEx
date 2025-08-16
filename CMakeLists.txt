@@ -27,6 +27,9 @@ write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/GenExConfigVersion
 configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/GenExConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/GenExConfig.cmake" INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GenEx)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GenExConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/GenExConfigVersion.cmake" DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GenEx)
 
+# Library uninstallation configuration.
+add_custom_target(uninstall COMMAND xargs rm -vf < "${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt")
+
 # Create the test executable.
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE GenExLib)
