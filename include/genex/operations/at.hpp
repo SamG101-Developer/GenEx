@@ -23,6 +23,14 @@ namespace genex::operations {
         constexpr auto operator()(Rng &&r, const std::size_t n) const noexcept -> range_value_t<Rng>& {
             return r.at(n);
         }
+
+        template <typename T>
+        constexpr auto operator()(std::generator<T> &&gen, const std::size_t n) const noexcept -> T& {
+            auto it = iterators::begin(gen);
+            for (size_t i = 0; i < n && it != iterators::end(gen); ++i, ++it) {
+            }
+            return *it;
+        }
     };
 
     struct front_fn final : detail::operations_base {
@@ -35,6 +43,11 @@ namespace genex::operations {
         constexpr auto operator()(Rng &&r) const noexcept -> range_value_t<Rng>& {
             return r.at(0);
         }
+
+        template <typename T>
+        constexpr auto operator()(std::generator<T> &&gen) const noexcept -> T& {
+            return *gen.begin();
+        }
     };
 
     struct back_fn final : detail::operations_base {
@@ -46,6 +59,16 @@ namespace genex::operations {
         template <typename Rng> requires has_member_at<Rng>
         constexpr auto operator()(Rng &&r) const noexcept -> range_value_t<Rng>& {
             return r.at(size(r) - 1);
+        }
+
+        template <typename T>
+        constexpr auto operator()(std::generator<T> &&gen) const noexcept -> T& {
+            auto it = iterators::begin(gen);
+            auto last = static_cast<T*>(nullptr);
+            for (; it != iterators::end(gen); ++it) {
+                last = std::addressof(*it);
+            }
+            return *last;
         }
     };
 
