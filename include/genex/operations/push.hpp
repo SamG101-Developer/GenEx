@@ -15,25 +15,35 @@ namespace genex::operations {
 
     struct push_back_fn final : detail::operations_base {
         template <typename Rng> requires (has_member_push_back<Rng>)
-        constexpr auto operator()(Rng &&r, range_value_t<Rng> const &elem) const noexcept -> void {
+        constexpr auto operator()(Rng &&r, range_value_t<Rng> &&elem) const noexcept -> void {
             r.push_back(std::forward<range_value_t<Rng>>(elem));
         }
 
         template <typename Rng> requires (not has_member_push_back<Rng> and has_member_insert<Rng>)
-        constexpr auto operator()(Rng &&r, range_value_t<Rng> const &elem) const noexcept -> void {
+        constexpr auto operator()(Rng &&r, range_value_t<Rng> &&elem) const noexcept -> void {
             r.insert(std::forward<range_value_t<Rng>>(elem), operations::size(r));
+        }
+
+        template <typename E>
+        constexpr auto operator()(E &&elem) const noexcept -> decltype(auto) {
+            MAP_TO_BASE(elem);
         }
     };
 
     struct push_front_fn final : detail::operations_base {
         template <typename Rng> requires (has_member_push_front<Rng>)
-        constexpr auto operator()(Rng &&r, range_value_t<Rng> const &elem) const noexcept -> void {
+        constexpr auto operator()(Rng &&r, range_value_t<Rng> &&elem) const noexcept -> void {
             r.push_front(std::forward<range_value_t<Rng>>(elem));
         }
 
         template <typename Rng> requires (not has_member_push_front<Rng> and has_member_insert<Rng>)
-        constexpr auto operator()(Rng &&r, range_value_t<Rng> const &elem) const noexcept -> void {
+        constexpr auto operator()(Rng &&r, range_value_t<Rng> &&elem) const noexcept -> void {
             r.insert(std::forward<range_value_t<Rng>>(elem), 0);
+        }
+
+        template <typename E>
+        constexpr auto operator()(E &&elem) const noexcept -> decltype(auto) {
+            MAP_TO_BASE(elem);
         }
     };
 

@@ -31,6 +31,10 @@ namespace genex::operations {
             }
             return *it;
         }
+
+        constexpr auto operator()(const std::size_t n) const noexcept -> decltype(auto) {
+            MAP_TO_BASE(n);
+        }
     };
 
     struct front_fn final : detail::operations_base {
@@ -47,6 +51,10 @@ namespace genex::operations {
         template <typename T>
         constexpr auto operator()(std::generator<T> &&gen) const noexcept -> T& {
             return *gen.begin();
+        }
+
+        constexpr auto operator()() const noexcept -> decltype(auto) {
+            MAP_TO_BASE();
         }
     };
 
@@ -69,6 +77,10 @@ namespace genex::operations {
                 last = std::addressof(*it);
             }
             return *last;
+        }
+
+        constexpr auto operator()() const noexcept -> decltype(auto) {
+            MAP_TO_BASE();
         }
     };
 

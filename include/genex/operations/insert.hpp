@@ -13,8 +13,13 @@ namespace genex::operations {
 
     struct insert_fn final : detail::operations_base {
         template <typename Rng> requires has_member_insert<Rng>
-        constexpr auto operator()(Rng &&r, range_value_t<Rng> const &elem) const noexcept -> void {
+        constexpr auto operator()(Rng &&r, range_value_t<Rng> &&elem) const noexcept -> void {
             r.insert(std::forward<range_value_t<Rng>>(elem));
+        }
+
+        template <typename E>
+        constexpr auto operator()(E &&elem) const noexcept -> decltype(auto) {
+            MAP_TO_BASE(elem);
         }
     };
 

@@ -31,6 +31,10 @@ namespace genex::operations {
             }
             return count;
         }
+
+        constexpr auto operator()() const noexcept -> decltype(auto) {
+            MAP_TO_BASE();
+        }
     };
 
     EXPORT_GENEX_STRUCT(size);
