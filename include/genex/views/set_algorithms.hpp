@@ -1,5 +1,6 @@
 #pragma once
 #include <coroutine>
+#include <genex/algorithms/contains.hpp>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
