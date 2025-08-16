@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include <genex/actions/concat.hpp>
 #include <genex/actions/pop.hpp>
 #include <genex/actions/remove.hpp>
 #include <genex/algorithms/accumulate.hpp>
@@ -753,6 +754,13 @@ int main() {
         auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         a |= genex::actions::pop_back;
         const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8};
+        assert(a == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        a |= genex::actions::concat(std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+        const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         assert(a == expected1);
     }
 }

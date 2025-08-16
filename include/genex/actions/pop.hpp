@@ -12,21 +12,23 @@ using namespace genex::concepts;
 using namespace genex::type_traits;
 
 
-template <typename Rng>
-auto do_pop(Rng *rng, const std::size_t n) -> void {
-    genex::iterators::erase(*rng, genex::iterators::next(genex::iterators::begin(*rng), n));
-}
+namespace genex::actions::detail {
+    template <typename Rng>
+    auto do_pop(Rng *rng, const std::size_t n) -> void {
+        iterators::erase(*rng, iterators::next(iterators::begin(*rng), n));
+    }
 
 
-template <typename Rng>
-auto do_pop_front(Rng *rng) -> void {
-    return do_pop(rng, 0);
-}
+    template <typename Rng>
+    auto do_pop_front(Rng *rng) -> void {
+        return do_pop(rng, 0);
+    }
 
 
-template <typename Rng>
-auto do_pop_back(Rng *rng) -> void {
-    return do_pop(rng, genex::operations::size(*rng) - 1);
+    template <typename Rng>
+    auto do_pop_back(Rng *rng) -> void {
+        return do_pop(rng, operations::size(*rng) - 1);
+    }
 }
 
 
@@ -34,7 +36,7 @@ namespace genex::actions {
     struct pop_fn final : detail::action_base {
         template <typename Rng>
         constexpr auto operator()(Rng &&rng, const std::size_t n) const -> void {
-            MAP_TO_IMPL(do_pop, &rng, n);
+            MAP_TO_IMPL(detail::do_pop, &rng, n);
         }
 
         constexpr auto operator()(const std::size_t n) const -> decltype(auto) {
@@ -45,7 +47,7 @@ namespace genex::actions {
     struct pop_front_fn final : detail::action_base {
         template <typename Rng>
         constexpr auto operator()(Rng &&rng) const -> void {
-            MAP_TO_IMPL(do_pop_front, &rng);
+            MAP_TO_IMPL(detail::do_pop_front, &rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {
@@ -56,7 +58,7 @@ namespace genex::actions {
     struct pop_back_fn final : detail::action_base {
         template <typename Rng>
         constexpr auto operator()(Rng &&rng) const -> void {
-            MAP_TO_IMPL(do_pop_back, &rng);
+            MAP_TO_IMPL(detail::do_pop_back, &rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {
