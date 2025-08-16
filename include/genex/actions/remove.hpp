@@ -15,7 +15,6 @@ namespace genex::actions::detail {
         rng->erase(std::remove(rng->begin(), rng->end(), std::forward<decltype(elem)>(elem)), rng->end());
     }
 
-
     template <range Rng, std::invocable<range_value_t<Rng>> Proj = genex::meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
     auto do_remove_if(Rng *rng, Pred &&pred, Proj &&proj = {}) -> void {
         auto it = std::remove_if(rng->begin(), rng->end(), [&]<typename E>(E &&elem) {

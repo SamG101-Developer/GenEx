@@ -52,8 +52,6 @@ namespace genex::iterators {
     template <typename Rng>
     using rend_t = decltype(std::declval<rend_fn>()(std::declval<Rng>()));
 
-    // EXPORT_GENEX_STRUCT(end);
-    // EXPORT_GENEX_STRUCT(rend);
-    inline constexpr end_fn end;
-    inline constexpr rend_fn rend;
+    EXPORT_GENEX_STRUCT(end);
+    EXPORT_GENEX_STRUCT(rend);
 }

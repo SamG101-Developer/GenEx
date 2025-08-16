@@ -18,12 +18,10 @@ namespace genex::actions::detail {
         iterators::erase(*rng, iterators::next(iterators::begin(*rng), n));
     }
 
-
     template <typename Rng>
     auto do_pop_front(Rng *rng) -> void {
         return do_pop(rng, 0);
     }
-
 
     template <typename Rng>
     auto do_pop_back(Rng *rng) -> void {
