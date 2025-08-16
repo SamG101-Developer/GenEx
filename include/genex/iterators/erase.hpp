@@ -12,7 +12,7 @@ namespace genex::iterators {
     template <typename Rng>
     concept has_erase = has_member_erase<Rng> || has_std_erase<Rng>;
 
-    struct erase_fn {
+    struct erase_fn final : detail::iterators_base {
         template <typename Rng> requires (has_member_erase<Rng>)
         constexpr auto operator()(Rng &&r, begin_t<Rng> &&it) const noexcept -> decltype(r.erase(std::forward<begin_t<Rng>>(it))) {
             return r.erase(std::forward<begin_t<Rng>>(it));

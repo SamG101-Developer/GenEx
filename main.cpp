@@ -16,6 +16,7 @@
 #include <genex/algorithms/find.hpp>
 #include <genex/algorithms/none_of.hpp>
 #include <genex/algorithms/position.hpp>
+#include <genex/operations/at.hpp>
 #include <genex/views/cast.hpp>
 #include <genex/views/chunk.hpp>
 #include <genex/views/copied.hpp>
@@ -762,5 +763,12 @@ int main() {
         a |= genex::actions::concat(std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
         const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         assert(a == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = genex::operations::at(a, 5);
+        const auto expected1 = 5;
+        assert(b == expected1);
     }
 }

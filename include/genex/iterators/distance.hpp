@@ -9,7 +9,7 @@ using namespace genex::concepts;
 
 
 namespace genex::iterators {
-    struct distance_fn {
+    struct distance_fn final : detail::iterators_base {
         template <iterator I, sentinel S>
         constexpr auto operator()(I &&first, S &&last) const noexcept -> std::size_t {
             return std::distance(std::forward<I>(first), std::forward<S>(last));

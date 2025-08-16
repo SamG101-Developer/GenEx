@@ -2,6 +2,10 @@
 #include <iterator>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/iterators/_iterators_base.hpp>
+
+using namespace genex::concepts;
+
 
 namespace genex::iterators {
     template <typename I>
@@ -13,14 +17,14 @@ namespace genex::iterators {
     template <typename I>
     concept has_advance = has_std_advance<I> || has_operator_plusplus<I>;
 
-    struct advance_fn {
-        template <concepts::iterator I> requires (has_std_advance<I>)
+    struct advance_fn final : detail::iterators_base {
+        template <iterator I> requires (has_std_advance<I>)
         constexpr auto operator()(I &&it, const std::size_t n = 1) const noexcept -> I {
             std::advance(it, n);
             return it;
         }
 
-        template <concepts::iterator I> requires (not has_std_advance<I> && has_operator_plusplus<I>)
+        template <iterator I> requires (not has_std_advance<I> && has_operator_plusplus<I>)
         constexpr auto operator()(I &&it, const std::size_t n = 1) const noexcept -> I {
             for (std::size_t i = 0; i < n; ++i) { ++it; }
             return it;

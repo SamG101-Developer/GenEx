@@ -14,7 +14,7 @@ namespace genex::iterators {
     template <typename I>
     concept has_next = has_std_next<I> || has_operator_plusplus<I>;
 
-    struct next_fn {
+    struct next_fn final : detail::iterators_base {
         template <iterator I> requires (has_std_next<I>)
         constexpr auto operator()(I &&it, const std::size_t n = 1) const noexcept -> decltype(auto) {
             return std::next(std::forward<I>(it), n);
