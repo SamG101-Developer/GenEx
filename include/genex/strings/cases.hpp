@@ -11,66 +11,68 @@ using namespace genex::concepts;
 using namespace genex::type_traits;
 
 
-template <iterator I, sentinel S> requires (genex::strings::strict_char_like<iter_value_t<I>>)
-auto do_upper_case(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
-    for (; first != last; ++first) {
-        co_yield std::toupper(*first);
+namespace genex::strings::detail {
+    template <iterator I, sentinel S> requires (genex::strings::strict_char_like<iter_value_t<I>>)
+    auto do_upper_case(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
+        for (; first != last; ++first) {
+            co_yield std::toupper(*first);
+        }
     }
-}
 
 
-template <iterator I, sentinel S> requires (genex::strings::wide_char_like<iter_value_t<I>>)
-auto do_upper_case(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
-    for (; first != last; ++first) {
-        co_yield std::towupper(*first);
+    template <iterator I, sentinel S> requires (genex::strings::wide_char_like<iter_value_t<I>>)
+    auto do_upper_case(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
+        for (; first != last; ++first) {
+            co_yield std::towupper(*first);
+        }
     }
-}
 
 
-template <range Rng> requires (genex::strings::strict_char_like<range_value_t<Rng>>)
-auto do_upper_case(Rng &&rng) -> genex::generator<range_value_t<Rng>> {
-    for (auto &&x : rng) {
-        co_yield std::toupper(std::forward<decltype(x)>(x));
+    template <range Rng> requires (genex::strings::strict_char_like<range_value_t<Rng>>)
+    auto do_upper_case(Rng &&rng) -> genex::generator<range_value_t<Rng>> {
+        for (auto &&x : rng) {
+            co_yield std::toupper(std::forward<decltype(x)>(x));
+        }
     }
-}
 
 
-template <range Rng> requires (genex::strings::wide_char_like<range_value_t<Rng>>)
-auto do_upper_case(Rng &&rng) -> genex::generator<range_value_t<Rng>> {
-    for (auto &&x : rng) {
-        co_yield std::towupper(std::forward<decltype(x)>(x));
+    template <range Rng> requires (genex::strings::wide_char_like<range_value_t<Rng>>)
+    auto do_upper_case(Rng &&rng) -> genex::generator<range_value_t<Rng>> {
+        for (auto &&x : rng) {
+            co_yield std::towupper(std::forward<decltype(x)>(x));
+        }
     }
-}
 
 
-template <iterator I, sentinel S> requires (genex::strings::strict_char_like<iter_value_t<I>>)
-auto do_lower_case(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
-    for (; first != last; ++first) {
-        co_yield std::tolower(*first);
+    template <iterator I, sentinel S> requires (genex::strings::strict_char_like<iter_value_t<I>>)
+    auto do_lower_case(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
+        for (; first != last; ++first) {
+            co_yield std::tolower(*first);
+        }
     }
-}
 
 
-template <iterator I, sentinel S> requires (genex::strings::wide_char_like<iter_value_t<I>>)
-auto do_lower_case(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
-    for (; first != last; ++first) {
-        co_yield std::towlower(*first);
+    template <iterator I, sentinel S> requires (genex::strings::wide_char_like<iter_value_t<I>>)
+    auto do_lower_case(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
+        for (; first != last; ++first) {
+            co_yield std::towlower(*first);
+        }
     }
-}
 
 
-template <range Rng> requires (genex::strings::strict_char_like<range_value_t<Rng>>)
-auto do_lower_case(Rng &&rng) -> genex::generator<range_value_t<Rng>> {
-    for (auto &&x : rng) {
-        co_yield std::tolower(std::forward<decltype(x)>(x));
+    template <range Rng> requires (genex::strings::strict_char_like<range_value_t<Rng>>)
+    auto do_lower_case(Rng &&rng) -> genex::generator<range_value_t<Rng>> {
+        for (auto &&x : rng) {
+            co_yield std::tolower(std::forward<decltype(x)>(x));
+        }
     }
-}
 
 
-template <range Rng> requires (genex::strings::wide_char_like<range_value_t<Rng>>)
-auto do_lower_case(Rng &&rng) -> genex::generator<range_value_t<Rng>> {
-    for (auto &&x : rng) {
-        co_yield std::towlower(std::forward<decltype(x)>(x));
+    template <range Rng> requires (genex::strings::wide_char_like<range_value_t<Rng>>)
+    auto do_lower_case(Rng &&rng) -> genex::generator<range_value_t<Rng>> {
+        for (auto &&x : rng) {
+            co_yield std::towlower(std::forward<decltype(x)>(x));
+        }
     }
 }
 
@@ -79,12 +81,12 @@ namespace genex::strings {
     struct upper_case_fn final : detail::string_base {
         template <iterator I, sentinel S> requires (char_like<iter_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(do_upper_case, first, last);
+            MAP_TO_IMPL(detail::do_upper_case, first, last);
         }
 
         template <range Rng> requires (char_like<range_value_t<Rng>>)
         constexpr auto operator()(Rng &&rng) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(do_upper_case, rng);
+            MAP_TO_IMPL(detail::do_upper_case, rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {
@@ -95,12 +97,12 @@ namespace genex::strings {
     struct lower_case_fn final : detail::string_base {
         template <iterator I, sentinel S> requires (char_like<iter_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(do_lower_case, first, last);
+            MAP_TO_IMPL(detail::do_lower_case, first, last);
         }
 
         template <range Rng> requires (char_like<range_value_t<Rng>>)
         constexpr auto operator()(Rng &&rng) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(do_lower_case, rng);
+            MAP_TO_IMPL(detail::do_lower_case, rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {

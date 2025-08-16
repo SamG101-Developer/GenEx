@@ -1,6 +1,5 @@
 #pragma once
 #include <coroutine>
-#include <functional>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
@@ -9,18 +8,19 @@ using namespace genex::concepts;
 using namespace genex::type_traits;
 
 
-template <iterator I, sentinel S>
-auto do_view(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
-    for (auto it = first; it != last; ++it) {
-        co_yield *it;
+namespace genex::views::detail {
+    template <iterator I, sentinel S>
+    auto do_view(I &&first, S &&last) -> generator<iter_value_t<I>> {
+        for (auto it = first; it != last; ++it) {
+            co_yield *it;
+        }
     }
-}
 
-
-template <range Rng>
-auto do_view(Rng &&rng) -> genex::generator<range_value_t<Rng>> {
-    for (auto &&x : rng) {
-        co_yield std::forward<decltype(x)>(x);
+    template <range Rng>
+    auto do_view(Rng &&rng) -> generator<range_value_t<Rng>> {
+        for (auto &&x : rng) {
+            co_yield std::forward<decltype(x)>(x);
+        }
     }
 }
 
@@ -29,12 +29,12 @@ namespace genex::views {
     struct view_fn final : detail::view_base {
         template <iterator I, sentinel S>
         constexpr auto operator()(I &&first, S &&last) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(do_view, first, last);
+            MAP_TO_IMPL(detail::do_view, first, last);
         }
 
         template <range Rng>
         constexpr auto operator()(Rng &&rng) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(do_view, rng);
+            MAP_TO_IMPL(detail::do_view, rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {

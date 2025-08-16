@@ -1,6 +1,6 @@
 #pragma once
 
-namespace genex::detail {
+namespace genex::views::detail {
     struct view_base {
         virtual ~view_base() = default;
     };

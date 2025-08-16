@@ -28,7 +28,7 @@ namespace genex::strings {
 }
 
 
-namespace genex::detail {
+namespace genex::strings::detail {
     struct string_base {
         virtual ~string_base() = default;
     };
