@@ -12,6 +12,9 @@ namespace genex::operations {
     template <typename Rng>
     concept has_std_size = requires(Rng &&r) { std::size(r); };
 
+    template <typename Rng>
+    concept has_member_empty = requires(Rng &&r) { r.empty(); };
+
     struct size_fn final : detail::operations_base {
         template <typename Rng> requires (has_member_size<Rng>)
         constexpr auto operator()(Rng &&r) const noexcept -> std::size_t {
@@ -37,5 +40,22 @@ namespace genex::operations {
         }
     };
 
+    struct empty_fn final : detail::operations_base {
+        template <typename Rng> requires (has_member_empty<Rng>)
+        constexpr auto operator()(Rng &&r) const noexcept -> bool {
+            return r.empty();
+        }
+
+        template <typename Rng> requires (!has_member_empty<Rng>)
+        constexpr auto operator()(Rng &&r) const noexcept -> bool {
+            return size(std::forward<Rng>(r)) == 0;
+        }
+
+        constexpr auto operator()() const noexcept -> decltype(auto) {
+            MAP_TO_BASE();
+        }
+    };
+
     EXPORT_GENEX_STRUCT(size);
+    EXPORT_GENEX_STRUCT(empty);
 }
