@@ -26,10 +26,10 @@ namespace genex::actions::detail {
 
 
 namespace genex::actions {
-    struct remove_fn final : detail::action_base {
+    DEFINE_ACTION(remove) {
         template <range Rng>
         auto operator()(Rng &&rng, range_value_t<Rng> &&elem) const -> void {
-            MAP_TO_IMPL(detail::do_remove, &rng, elem);
+            FWD_TO_IMPL(detail::do_remove, &rng, elem);
         }
 
         template <typename E>
@@ -38,10 +38,10 @@ namespace genex::actions {
         }
     };
 
-    struct remove_if_fn final : detail::action_base {
+    DEFINE_ACTION(remove_if) {
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> void {
-            MAP_TO_IMPL(detail::do_remove_if, &rng, pred, proj);
+            FWD_TO_IMPL(detail::do_remove_if, &rng, pred, proj);
         }
 
         template <typename E>
@@ -50,6 +50,6 @@ namespace genex::actions {
         }
     };
 
-    EXPORT_GENEX_STRUCT(remove);
-    EXPORT_GENEX_STRUCT(remove_if);
+    EXPORT_GENEX_ACTION(remove);
+    EXPORT_GENEX_ACTION(remove_if);
 };

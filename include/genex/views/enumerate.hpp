@@ -28,15 +28,17 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct enumerate_fn final : detail::view_base {
+    DEFINE_VIEW(enumerate) {
+        DEFINE_OUTPUT_TYPE(enumerate);
+
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last) const -> generator<std::pair<size_t, iter_value_t<I>>> {
-            MAP_TO_IMPL(detail::do_enumerate, first, last);
+        constexpr auto operator()(I &&first, S &&last) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_enumerate, first, last);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng) const -> generator<std::pair<size_t, range_value_t<Rng>>> {
-            MAP_TO_IMPL(detail::do_enumerate, rng);
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_enumerate, rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {
@@ -44,5 +46,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(enumerate);
+    EXPORT_GENEX_VIEW(enumerate);
 }

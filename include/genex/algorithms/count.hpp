@@ -49,40 +49,40 @@ namespace genex::algorithms::detail {
 
 
 namespace genex::algorithms {
-    struct count_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(count) {
         template <iterator I, sentinel S, typename E, std::invocable<E> Proj = meta::identity>
         constexpr auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> size_t {
-            MAP_TO_IMPL(detail::do_count, first, last, elem, proj);
+            FWD_TO_IMPL(detail::do_count, first, last, elem, proj);
         }
 
         template <range Rng, typename E, std::invocable<E> Proj = meta::identity>
-        constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> decltype(auto) {
-            MAP_TO_IMPL(detail::do_count, rng, elem, proj);
+        constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_count, rng, elem, proj);
         }
 
         template <typename E, std::invocable<E> Proj = meta::identity>
-        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(elem, proj);
         }
     };
 
-    struct count_if_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(count_if) {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> size_t {
-            MAP_TO_IMPL(detail::do_count_if, first, last, pred, proj);
+            FWD_TO_IMPL(detail::do_count_if, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
-            MAP_TO_IMPL(detail::do_count_if, rng, pred, proj);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_count_if, rng, pred, proj);
         }
 
         template <typename Proj = meta::identity>
-        constexpr auto operator()(Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(proj);
         }
     };
 
-    EXPORT_GENEX_STRUCT(count);
-    EXPORT_GENEX_STRUCT(count_if);
+    EXPORT_GENEX_ALGORITHM(count);
+    EXPORT_GENEX_ALGORITHM(count_if);
 }

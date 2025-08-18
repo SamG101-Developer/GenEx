@@ -30,15 +30,15 @@ namespace genex::algorithms::detail {
 
 
 namespace genex::algorithms {
-    struct all_of_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(all_of) {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> bool {
-            MAP_TO_IMPL(detail::do_all_of, first, last, pred, proj);
+            FWD_TO_IMPL(detail::do_all_of, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> bool {
-            MAP_TO_IMPL(detail::do_all_of, rng, pred, proj);
+            FWD_TO_IMPL(detail::do_all_of, rng, pred, proj);
         }
 
         template <typename Pred, typename Proj = meta::identity>
@@ -47,5 +47,5 @@ namespace genex::algorithms {
         }
     };
 
-    EXPORT_GENEX_STRUCT(all_of);
+    EXPORT_GENEX_ALGORITHM(all_of);
 }

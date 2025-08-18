@@ -30,22 +30,24 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct replace_fn final : detail::view_base {
+    DEFINE_VIEW(replace) {
+        DEFINE_OUTPUT_TYPE(replace);
+
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last, iter_value_t<I> &&old_val, iter_value_t<I> &&new_val) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_replace, first, last, old_val, new_val);
+        constexpr auto operator()(I &&first, S &&last, iter_value_t<I> &&old_val, iter_value_t<I> &&new_val) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_replace, first, last, old_val, new_val);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng, range_value_t<Rng> &&old_val, range_value_t<Rng> &&new_val) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_replace, rng, old_val, new_val);
+        constexpr auto operator()(Rng &&rng, range_value_t<Rng> &&old_val, range_value_t<Rng> &&new_val) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_replace, rng, old_val, new_val);
         }
 
         template <typename E>
-        constexpr auto operator()(E &&old_val, E &&new_val) const -> decltype(auto) {
+        constexpr auto operator()(E &&old_val, E &&new_val) const -> auto {
             MAP_TO_BASE(old_val, new_val);
         }
     };
 
-    EXPORT_GENEX_STRUCT(replace);
+    EXPORT_GENEX_VIEW(replace);
 }

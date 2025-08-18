@@ -1,8 +1,9 @@
 #pragma once
 #include <iterator>
-#include <genex/macros.hpp>
 #include <genex/concepts.hpp>
+#include <genex/iterators/_iterator_base.hpp>
 #include <genex/iterators/advance.hpp>
+#include <genex/macros.hpp>
 
 using namespace genex::concepts;
 
@@ -14,7 +15,7 @@ namespace genex::iterators {
     template <typename I>
     concept has_next = has_std_next<I> || has_operator_plusplus<I>;
 
-    struct next_fn final : detail::iterators_base {
+    DEFINE_ITERATOR(next) {
         template <iterator I> requires (has_std_next<I>)
         constexpr auto operator()(I &&it, const std::size_t n = 1) const noexcept -> decltype(auto) {
             return std::next(std::forward<I>(it), n);
@@ -28,5 +29,5 @@ namespace genex::iterators {
         }
     };
 
-    EXPORT_GENEX_STRUCT(next);
+    EXPORT_GENEX_ITERATOR(next);
 }

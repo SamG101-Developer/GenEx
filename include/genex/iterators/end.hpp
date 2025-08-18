@@ -1,7 +1,7 @@
 #pragma once
 #include <iterator>
 #include <genex/macros.hpp>
-#include <genex/iterators/_iterators_base.hpp>
+#include <genex/iterators/_iterator_base.hpp>
 
 
 namespace genex::iterators {
@@ -23,7 +23,7 @@ namespace genex::iterators {
     template <typename Rng>
     concept has_rend = has_member_rend<Rng> || has_std_rend<Rng>;
 
-    struct end_fn final : detail::iterators_base {
+    DEFINE_ITERATOR(end) {
         template <typename Rng> requires (has_member_end<Rng>)
         constexpr auto operator()(Rng &&r) const noexcept -> decltype(r.end()) {
             return r.end();
@@ -35,7 +35,7 @@ namespace genex::iterators {
         }
     };
 
-    struct rend_fn final : detail::iterators_base {
+    DEFINE_ITERATOR(rend) {
         template <typename Rng> requires (has_member_rend<Rng>)
         constexpr auto operator()(Rng &&r) const noexcept -> decltype(r.rend()) {
             return r.rend();
@@ -53,6 +53,6 @@ namespace genex::iterators {
     template <typename Rng>
     using rend_t = decltype(std::declval<rend_fn>()(std::declval<Rng>()));
 
-    EXPORT_GENEX_STRUCT(end);
-    EXPORT_GENEX_STRUCT(rend);
+    EXPORT_GENEX_ITERATOR(end);
+    EXPORT_GENEX_ITERATOR(rend);
 }

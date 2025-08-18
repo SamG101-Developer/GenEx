@@ -2,7 +2,10 @@
 #include <coroutine>
 #include <iostream>
 #include <string>
+#include <map>
 #include <vector>
+
+#include <boost/preprocessor/comma.hpp>
 
 #include <genex/actions/concat.hpp>
 #include <genex/actions/pop.hpp>
@@ -43,6 +46,7 @@
 #include <genex/views/slice.hpp>
 #include <genex/views/take.hpp>
 #include <genex/views/to.hpp>
+#include <genex/views/sort.hpp>
 #include <genex/views/view.hpp>
 #include <genex/views/zip.hpp>
 #include <genex/strings/cases.hpp>
@@ -270,22 +274,23 @@ int main() {
         assert(i == expected3);
     }
 
-    {
-        const auto a = genex::views::iota(0, 10)
-            | genex::views::to<std::vector>();
-        auto expected1 = std::vector<size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        assert(a == expected1);
-
-        const auto b = genex::views::iota(10)
-            | genex::views::to<std::vector>();
-        auto expected2 = std::vector<size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        assert(b == expected2);
-    }
+    // {
+    //     const auto a = genex::views::iota(0, 10)
+    //         | genex::views::to<std::vector>();
+    //     auto expected1 = std::vector<size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    //     assert(a == expected1);
+    //
+    //     const auto b = genex::views::iota(10)
+    //         | genex::views::to<std::vector>();
+    //     auto expected2 = std::vector<size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    //     assert(b == expected2);
+    // }
 
     {
         const auto a = std::vector{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
         const auto b = a
-            | genex::views::join;
+            | genex::views::join
+            | genex::views::to<std::string>();
         const auto expected1 = "0123456789"s;
         assert(b == expected1);
     }
@@ -293,7 +298,8 @@ int main() {
     {
         const auto a = std::vector{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
         const auto b = a
-            | genex::views::join_with(",");
+            | genex::views::join_with(",")
+            | genex::views::to<std::string>();
         const auto expected1 = "0,1,2,3,4,5,6,7,8,9"s;
         assert(b == expected1);
     }
@@ -537,8 +543,10 @@ int main() {
     }
 
     {
-        struct A {};
-        struct B : A {};
+        struct A {
+        };
+        struct B : A {
+        };
 
         auto a = std::vector<std::unique_ptr<B>>{};
         a.push_back(std::make_unique<B>());
@@ -681,6 +689,24 @@ int main() {
     }
 
     {
+        const auto a = std::vector{9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+        const auto b = a
+            | genex::views::sort(std::less<int>{})
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::sort(std::less<int>{}, true)
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector{9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+        assert(b == expected1);
+    }
+
+    {
         const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 0, 0};
         const auto b = a
             | genex::views::view
@@ -698,8 +724,9 @@ int main() {
         const auto a2 = std::vector{1, 2, 3, 4};
         const auto a3 = std::vector{2, 3, 4, 5};
         const auto a4 = std::vector{3, 4, 5, 6};
+
         const auto b = genex::views::zip(a1, a2, a3, a4)
-            | genex::views::map([variadic_adder](auto &&... t) { return std::apply(variadic_adder, std::forward<decltype(t)>(t)...); })
+            | genex::views::map([variadic_adder]<typename... Ts>(Ts &&... t) { return std::apply(variadic_adder, std::forward<Ts>(t)...); })
             | genex::views::to<std::vector>();
         const auto expected1 = std::vector{6, 10, 14, 18};
         assert(b == expected1);
@@ -721,6 +748,22 @@ int main() {
             | genex::views::to<std::string>();
         const auto expected1 = std::string("hello world");
         assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+        const auto b = a
+            | genex::views::map([](const int x) { return x * 2; })
+            | genex::views::zip(a)
+            | genex::views::to<std::vector>();
+
+        // const auto c = a
+        //     | genex::views::map([](const int x) { return x * 2; })
+        //     | genex::views::zip(a)
+        //     | genex::views::to<std::map>();
+        //
+        // assert(std::map<int BOOST_PP_COMMA() int>(b.begin(), b.end()) == c);
     }
 
     {

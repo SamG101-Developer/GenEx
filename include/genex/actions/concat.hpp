@@ -19,10 +19,10 @@ namespace genex::actions::detail {
 
 
 namespace genex::actions {
-    struct concat_fn final : detail::action_base {
+    DEFINE_ACTION(concat) {
         template <range Rng1, range Rng2> requires std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>
         constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> void {
-            MAP_TO_IMPL(detail::do_concat, rng1, rng2);
+            FWD_TO_IMPL(detail::do_concat, rng1, rng2);
         }
 
         template <range Rng2>
@@ -31,5 +31,5 @@ namespace genex::actions {
         }
     };
 
-    EXPORT_GENEX_STRUCT(concat);
+    EXPORT_GENEX_ACTION(concat);
 }

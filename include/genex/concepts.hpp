@@ -30,10 +30,34 @@ namespace genex::concepts {
     struct is_unique_ptr : std::false_type {
     };
 
-    template <typename U, typename Deleter>
-    struct is_unique_ptr<std::unique_ptr<U, Deleter>> : std::true_type {
+    template <typename T, typename Deleter>
+    struct is_unique_ptr<std::unique_ptr<T, Deleter>> : std::true_type {
     };
 
     template <typename T>
     concept unique_ptr = is_unique_ptr<std::remove_cvref_t<T>>::value;
+
+
+    template <typename T>
+    struct is_shared_ptr : std::false_type {
+    };
+
+    template <typename T>
+    struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {
+    };
+
+    template <typename T>
+    concept shared_ptr = is_shared_ptr<std::remove_cvref_t<T>>::value;
+
+
+    template <typename T>
+    struct is_weak_ptr : std::false_type {
+    };
+
+    template <typename T>
+    struct is_weak_ptr<std::weak_ptr<T>> : std::true_type {
+    };
+
+    template <typename T>
+    concept weak_ptr = is_weak_ptr<std::remove_cvref_t<T>>::value;
 }

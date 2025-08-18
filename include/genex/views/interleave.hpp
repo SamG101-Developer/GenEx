@@ -39,22 +39,24 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct interleave_fn final : detail::view_base {
+    DEFINE_VIEW(interleave) {
+        DEFINE_OUTPUT_TYPE(interleave);
+
         template <iterator I1, sentinel S1, iterator I2, sentinel S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
-        constexpr auto operator()(I1 &&first1, S1 &&last1, I2 first2, S2 last2) const -> generator<iter_value_t<I1>> {
-            MAP_TO_IMPL(detail::do_interleave, first1, last1, first2, last2);
+        constexpr auto operator()(I1 &&first1, S1 &&last1, I2 first2, S2 last2) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_interleave, first1, last1, first2, last2);
         }
 
         template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
-        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> generator<range_value_t<Rng1>> {
-            MAP_TO_IMPL(detail::do_interleave, rng1, rng2);
+        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_interleave, rng1, rng2);
         }
 
         template <range Rng2>
-        constexpr auto operator()(Rng2 &&rng2) const -> decltype(auto) {
+        constexpr auto operator()(Rng2 &&rng2) const -> auto {
             MAP_TO_BASE(rng2);
         }
     };
 
-    EXPORT_GENEX_STRUCT(interleave);
+    EXPORT_GENEX_VIEW(interleave);
 }

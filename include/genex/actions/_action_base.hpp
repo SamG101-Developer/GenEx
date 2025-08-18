@@ -1,7 +1,15 @@
 #pragma once
+#include <genex/macros.hpp>
+
+#define EXPORT_GENEX_ACTION(name) \
+    EXPORT_GENEX_STRUCT(name)
+
+#define DEFINE_ACTION(name) \
+    struct name ## _fn : detail::action_fn_base
+
 
 namespace genex::actions::detail {
-    struct action_base {
-        virtual ~action_base() = default;
+    struct action_fn_base {
+        virtual ~action_fn_base() = default;
     };
 }

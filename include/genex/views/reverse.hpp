@@ -25,21 +25,23 @@ namespace genex::views::detail {
 }
 
 namespace genex::views {
-    struct reverse_fn final : detail::view_base {
+    DEFINE_VIEW(reverse) {
+        DEFINE_OUTPUT_TYPE(reverse);
+
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_reverse, first, last);
+        constexpr auto operator()(I &&first, S &&last) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_reverse, first, last);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_reverse, rng);
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_reverse, rng);
         }
 
-        constexpr auto operator()() const -> decltype(auto) {
+        constexpr auto operator()() const -> auto {
             MAP_TO_BASE();
         }
     };
 
-    EXPORT_GENEX_STRUCT(reverse);
+    EXPORT_GENEX_VIEW(reverse);
 }

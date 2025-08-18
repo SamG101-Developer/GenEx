@@ -23,6 +23,20 @@ namespace genex::views::detail {
         }
     }
 
+    template <typename T, iterator I, sentinel S> requires (shared_ptr<iter_value_t<I>>)
+    auto do_cast(I &&first, S &&last) -> generator<std::shared_ptr<T>> {
+        for (; first != last; ++first) {
+            co_yield std::shared_ptr<T>(dynamic_cast<T*>(first->release()));
+        }
+    }
+
+    template <typename T, iterator I, sentinel S> requires (weak_ptr<iter_value_t<I>>)
+    auto do_cast(I &&first, S &&last) -> generator<std::weak_ptr<T>> {
+        for (; first != last; ++first) {
+            co_yield std::weak_ptr<T>(dynamic_cast<T*>(first->release()));
+        }
+    }
+
     template <typename T, range Rng>
     auto do_cast(Rng &&rng) -> generator<T> {
         for (auto &&x : rng) {
@@ -36,30 +50,45 @@ namespace genex::views::detail {
             co_yield std::unique_ptr<T>(dynamic_cast<T*>(x.release()));
         }
     }
+
+    template <typename T, range Rng> requires (shared_ptr<range_value_t<Rng>>)
+    auto do_cast(Rng &&rng) -> generator<std::shared_ptr<T>> {
+        for (auto &&x : rng) {
+            co_yield std::shared_ptr<T>(dynamic_cast<T*>(x.release()));
+        }
+    }
+
+    template <typename T, range Rng> requires (weak_ptr<range_value_t<Rng>>)
+    auto do_cast(Rng &&rng) -> generator<std::weak_ptr<T>> {
+        for (auto &&x : rng) {
+            co_yield std::weak_ptr<T>(dynamic_cast<T*>(x.release()));
+        }
+    }
 }
 
 
 namespace genex::views {
-    struct cast_fn final : detail::view_base {
+    DEFINE_VIEW(cast) {
+        DEFINE_OUTPUT_TYPE(cast);
+
         template <iterator I, sentinel S, typename T>
-        constexpr auto operator()(I &&first, S &&last) const -> generator<T> {
-            MAP_TO_IMPL(detail::do_cast<T>, first, last);
+        constexpr auto operator()(I &&first, S &&last) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_cast<T>, first, last);
         }
 
         template <iterator I, sentinel S, typename T> requires (unique_ptr<iter_value_t<I>>)
-        constexpr auto operator()(I &&first, S &&last) const -> generator<std::unique_ptr<T>> {
-            MAP_TO_IMPL(detail::do_cast<T>, first, last);
+        constexpr auto operator()(I &&first, S &&last) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_cast<T>, first, last);
         }
 
-
         template <range Rng, typename T>
-        constexpr auto operator()(Rng &&rng) const -> generator<T> {
-            MAP_TO_IMPL(detail::do_cast<T>, rng);
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_cast<T>, rng);
         }
 
         template <range Rng, typename T> requires (unique_ptr<range_value_t<Rng>>)
-        constexpr auto operator()(Rng &&rng) const -> generator<std::unique_ptr<T>> {
-            MAP_TO_IMPL(detail::do_cast<T>, rng);
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_cast<T>, rng);
         }
 
         template <typename T>
@@ -68,5 +97,5 @@ namespace genex::views {
         }
     };
 
-    inline constexpr cast_fn cast{};
+    EXPORT_GENEX_VIEW(cast);
 }

@@ -29,15 +29,15 @@ namespace genex::algorithms::detail {
 
 
 namespace genex::algorithms {
-    struct contains_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(contains) {
         template <iterator I, sentinel S, typename E, std::invocable<E> Proj = meta::identity>
         constexpr auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> bool {
-            MAP_TO_IMPL(detail::do_contains, first, last, elem, proj);
+            FWD_TO_IMPL(detail::do_contains, first, last, elem, proj);
         }
 
         template <range Rng, typename E, std::invocable<E> Proj = meta::identity>
         constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> bool {
-            MAP_TO_IMPL(detail::do_contains, rng, elem, proj);
+            FWD_TO_IMPL(detail::do_contains, rng, elem, proj);
         }
 
         template <typename E, std::invocable<E> Proj = meta::identity>
@@ -46,5 +46,5 @@ namespace genex::algorithms {
         }
     };
 
-    EXPORT_GENEX_STRUCT(contains);
+    EXPORT_GENEX_ALGORITHM(contains);
 }

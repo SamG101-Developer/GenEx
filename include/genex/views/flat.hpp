@@ -30,21 +30,23 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct flat_fn final : detail::view_base {
+    DEFINE_VIEW(flat) {
+        DEFINE_OUTPUT_TYPE(flat);
+
         template <iterator I, sentinel S> requires range<iter_value_t<I>>
-        constexpr auto operator()(I &&first, S &&last) const -> generator<range_value_t<iter_value_t<I>>> {
-            MAP_TO_IMPL(detail::do_flat, first, last);
+        constexpr auto operator()(I &&first, S &&last) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_flat, first, last);
         }
 
         template <range Rng> requires range<range_value_t<Rng>>
-        constexpr auto operator()(Rng &&rng) const -> generator<range_value_t<range_value_t<Rng>>> {
-            MAP_TO_IMPL(detail::do_flat, rng);
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_flat, rng);
         }
 
-        constexpr auto operator()() const -> decltype(auto) {
+        constexpr auto operator()() const -> auto {
             MAP_TO_BASE();
         }
     };
 
-    EXPORT_GENEX_STRUCT(flat);
+    EXPORT_GENEX_VIEW(flat);
 }

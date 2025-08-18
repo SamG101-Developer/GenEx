@@ -24,15 +24,15 @@ namespace genex::algorithms::detail {
 
 
 namespace genex::algorithms {
-    struct binary_search_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(binary_search) {
         template <iterator I, sentinel S, typename E, typename C = std::less<E>, std::invocable<iter_value_t<I>> Proj = meta::identity>
         constexpr auto operator()(I &&first, S &&last, E &&elem, C &&comp = {}, Proj &&proj = {}) const -> bool {
-            MAP_TO_IMPL(detail::do_binary_search, first, last, elem, comp, proj);
+            FWD_TO_IMPL(detail::do_binary_search, first, last, elem, comp, proj);
         }
 
         template <range Rng, std::same_as<range_value_t<Rng>> E, typename C = std::less<E>, std::invocable<range_value_t<Rng>> Proj = meta::identity>
         constexpr auto operator()(Rng &&rng, E &&elem, C &&comp = {}, Proj &&proj = {}) const -> bool {
-            MAP_TO_IMPL(detail::do_binary_search, rng, elem, comp, proj);
+            FWD_TO_IMPL(detail::do_binary_search, rng, elem, comp, proj);
         }
 
         template <typename E, typename C = std::less<E>, typename Proj = meta::identity>
@@ -41,5 +41,5 @@ namespace genex::algorithms {
         }
     };
 
-    EXPORT_GENEX_STRUCT(binary_search);
+    EXPORT_GENEX_ALGORITHM(binary_search);
 }

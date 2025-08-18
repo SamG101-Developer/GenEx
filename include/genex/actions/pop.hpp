@@ -31,10 +31,10 @@ namespace genex::actions::detail {
 
 
 namespace genex::actions {
-    struct pop_fn final : detail::action_base {
+    DEFINE_ACTION(pop) {
         template <typename Rng>
         constexpr auto operator()(Rng &&rng, const std::size_t n) const -> void {
-            MAP_TO_IMPL(detail::do_pop, &rng, n);
+            FWD_TO_IMPL(detail::do_pop, &rng, n);
         }
 
         constexpr auto operator()(const std::size_t n) const -> decltype(auto) {
@@ -42,10 +42,10 @@ namespace genex::actions {
         }
     };
 
-    struct pop_front_fn final : detail::action_base {
+    DEFINE_ACTION(pop_front) {
         template <typename Rng>
         constexpr auto operator()(Rng &&rng) const -> void {
-            MAP_TO_IMPL(detail::do_pop_front, &rng);
+            FWD_TO_IMPL(detail::do_pop_front, &rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {
@@ -53,10 +53,10 @@ namespace genex::actions {
         }
     };
 
-    struct pop_back_fn final : detail::action_base {
+    DEFINE_ACTION(pop_back) {
         template <typename Rng>
         constexpr auto operator()(Rng &&rng) const -> void {
-            MAP_TO_IMPL(detail::do_pop_back, &rng);
+            FWD_TO_IMPL(detail::do_pop_back, &rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {
@@ -64,7 +64,7 @@ namespace genex::actions {
         }
     };
 
-    EXPORT_GENEX_STRUCT(pop);
-    EXPORT_GENEX_STRUCT(pop_front);
-    EXPORT_GENEX_STRUCT(pop_back);
+    EXPORT_GENEX_ACTION(pop);
+    EXPORT_GENEX_ACTION(pop_front);
+    EXPORT_GENEX_ACTION(pop_back);
 }
