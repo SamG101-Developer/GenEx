@@ -22,6 +22,7 @@
 #include <genex/algorithms/fold.hpp>
 #include <genex/algorithms/none_of.hpp>
 #include <genex/algorithms/position.hpp>
+#include <genex/algorithms/sorted.hpp>
 #include <genex/operations/at.hpp>
 #include <genex/views/cast.hpp>
 #include <genex/views/chunk.hpp>
@@ -537,6 +538,13 @@ int main() {
     }
 
     {
+        const auto a = std::vector{4, 5, 6, 1, 2, 3, 5};
+        const auto b = a | genex::algorithms::sorted(std::less<int>{});
+        const auto expected1 = std::vector{1, 2, 3, 4, 5, 5, 6};
+        assert(b == expected1);
+    }
+
+    {
         const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         const auto b = a
             | genex::views::cast.operator()<float>()
@@ -563,6 +571,20 @@ int main() {
         const auto a = std::vector<std::string>{"0"};
         const auto b = a | genex::algorithms::copy;
         const auto expected1 = std::vector<std::string>{"0"};
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector<std::string>{"0", "1"};
+        const auto b = a | genex::algorithms::copy_n(1);
+        const auto expected1 = std::vector<std::string>{"0"};
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector<std::string>{"0", "1", "2", "3", "4"};
+        const auto b = a | genex::algorithms::copy_if([](auto &&x) { return std::stoi(x) % 2 == 0; });
+        const auto expected1 = std::vector<std::string>{"0", "2", "4"};
         assert(b == expected1);
     }
 
