@@ -19,7 +19,7 @@ target_include_directories(GenExLib INTERFACE
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 # Library installation configuration.
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING PATTERN "*.hpp")
 install(TARGETS GenExLib EXPORT GenExTargets)
 install(EXPORT GenExTargets FILE GenExTargets.cmake NAMESPACE GenEx:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GenEx)
 
