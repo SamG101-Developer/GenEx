@@ -1,6 +1,4 @@
-#ifndef MACROS_HPP
-#define MACROS_HPP
-
+#pragma once
 #include <boost/preprocessor.hpp>
 
 
@@ -57,6 +55,3 @@
 
 #define EXPORT_GENEX_STRUCT(name) \
     inline constexpr name ## _fn name
-
-
-#endif //MACROS_HPP
