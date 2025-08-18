@@ -1,7 +1,9 @@
 #pragma once
 #include <coroutine>
 #include <functional>
+#include <genex/categories.hpp>
 #include <genex/concepts.hpp>
+#include <genex/iterators/distance.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
 #include <genex/views/_view_base.hpp>
@@ -84,74 +86,82 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct take_fn final : detail::view_base {
+    DEFINE_VIEW(take) {
+        DEFINE_OUTPUT_TYPE(take);
+
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last, const size_t n) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_take, first, last, n);
+        constexpr auto operator()(I &&first, S &&last, const size_t n) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_take, first, last, n);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng, const size_t n) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_take, rng, n);
+        constexpr auto operator()(Rng &&rng, const size_t n) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_take, rng, n);
         }
 
-        constexpr auto operator()(size_t n) const -> decltype(auto) {
+        constexpr auto operator()(size_t n) const -> auto {
             MAP_TO_BASE(n);
         }
     };
 
-    struct take_last_fn final : detail::view_base {
+    DEFINE_VIEW(take_last) {
+        DEFINE_OUTPUT_TYPE(take_last);
+
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last, size_t n) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_take_last, first, last, n);
+        constexpr auto operator()(I &&first, S &&last, size_t n) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_take_last, first, last, n);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng, size_t n) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_take_last, rng, n);
+        constexpr auto operator()(Rng &&rng, size_t n) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_take_last, rng, n);
         }
 
-        constexpr auto operator()(size_t n) const -> decltype(auto) {
+        constexpr auto operator()(size_t n) const -> auto {
             MAP_TO_BASE(n);
         }
     };
 
-    struct take_while_fn final : detail::view_base {
+    DEFINE_VIEW(take_while) {
+        DEFINE_OUTPUT_TYPE(take_while);
+
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_take_while, first, last, pred, proj);
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_take_while, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_take_while, rng, pred, proj);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_take_while, rng, pred, proj);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(pred, proj);
         }
     };
 
-    struct take_until_fn final : detail::view_base {
+    DEFINE_VIEW(take_until) {
+        DEFINE_OUTPUT_TYPE(take_until);
+
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_take_until, first, last, pred, proj);
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_take_until, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_take_until, rng, pred, proj);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_take_until, rng, pred, proj);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(pred, proj);
         }
     };
 
-    EXPORT_GENEX_STRUCT(take);
-    EXPORT_GENEX_STRUCT(take_last);
-    EXPORT_GENEX_STRUCT(take_while);
-    EXPORT_GENEX_STRUCT(take_until);
+    EXPORT_GENEX_VIEW(take);
+    EXPORT_GENEX_VIEW(take_last);
+    EXPORT_GENEX_VIEW(take_while);
+    EXPORT_GENEX_VIEW(take_until);
 }

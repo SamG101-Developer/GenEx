@@ -26,15 +26,17 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct ptr_unique_fn final : detail::view_base {
+    DEFINE_VIEW(ptr_unique) {
+        DEFINE_OUTPUT_TYPE(ptr_unique);
+
         template <iterator I, sentinel S> requires (unique_ptr<deref_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last) const -> decltype(auto) {
-            MAP_TO_IMPL(detail::do_ptr_unique, first, last);
+            FWD_TO_IMPL_VIEW(detail::do_ptr_unique, first, last);
         }
 
         template <range Rng> requires (unique_ptr<range_value_t<Rng>>)
         constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
-            MAP_TO_IMPL(detail::do_ptr_unique, rng);
+            FWD_TO_IMPL_VIEW(detail::do_ptr_unique, rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {
@@ -42,5 +44,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(ptr_unique);
+    EXPORT_GENEX_VIEW(ptr_unique);
 }

@@ -1,8 +1,8 @@
 #pragma once
 #include <utility>
 #include <genex/macros.hpp>
-#include <genex/operations/insert.hpp>
 #include <genex/operations/_operations_base.hpp>
+#include <genex/operations/insert.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -13,7 +13,7 @@ namespace genex::operations {
     template <typename Rng>
     concept has_member_push_front = requires(Rng &&r) { r.push_front(std::declval<range_value_t<Rng>>()); };
 
-    struct push_back_fn final : detail::operations_base {
+    DEFINE_OPERATION(push_back) {
         template <typename Rng> requires (has_member_push_back<Rng>)
         constexpr auto operator()(Rng &&r, range_value_t<Rng> &&elem) const noexcept -> void {
             r.push_back(std::forward<range_value_t<Rng>>(elem));
@@ -30,7 +30,7 @@ namespace genex::operations {
         }
     };
 
-    struct push_front_fn final : detail::operations_base {
+    DEFINE_OPERATION(push_front) {
         template <typename Rng> requires (has_member_push_front<Rng>)
         constexpr auto operator()(Rng &&r, range_value_t<Rng> &&elem) const noexcept -> void {
             r.push_front(std::forward<range_value_t<Rng>>(elem));
@@ -47,6 +47,6 @@ namespace genex::operations {
         }
     };
 
-    EXPORT_GENEX_STRUCT(push_front);
-    EXPORT_GENEX_STRUCT(push_back);
+    EXPORT_GENEX_OPERATION(push_front);
+    EXPORT_GENEX_OPERATION(push_back);
 }

@@ -20,7 +20,6 @@ namespace genex::views::detail {
         }
     }
 
-
     template <range Rng>
     auto do_intersperse(Rng &&rng, range_value_t<Rng> const &separator) -> generator<range_value_t<Rng>> {
         if (iterators::distance(iterators::begin(rng), iterators::end(rng)) == 0) { co_return; }
@@ -31,7 +30,6 @@ namespace genex::views::detail {
         }
     }
 
-
     template <iterator I, sentinel S, std::invocable F> requires (std::same_as<std::invoke_result_t<F>, iter_value_t<I>>)
     auto do_intersperse_with(I &&first, S &&last, F &&separator) -> generator<iter_value_t<I>> {
         if (iterators::distance(first, last) == 0) { co_return; }
@@ -41,7 +39,6 @@ namespace genex::views::detail {
             co_yield *first;
         }
     }
-
 
     template <range Rng, std::invocable F> requires (std::same_as<std::invoke_result_t<F>, range_value_t<Rng>>)
     auto do_intersperse_with(Rng &&rng, F &&separator) -> generator<range_value_t<Rng>> {
@@ -56,15 +53,17 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct intersperse_fn final : detail::view_base {
+    DEFINE_VIEW(intersperse) {
+        DEFINE_OUTPUT_TYPE(intersperse);
+
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last, iter_value_t<I> const &sep) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_intersperse, first, last, sep);
+        constexpr auto operator()(I &&first, S &&last, iter_value_t<I> const &sep) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_intersperse, first, last, sep);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &sep) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_intersperse, rng, sep);
+        constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &sep) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_intersperse, rng, sep);
         }
 
         template <typename E>
@@ -73,15 +72,17 @@ namespace genex::views {
         }
     };
 
-    struct intersperse_with_fn final : detail::view_base {
+    DEFINE_VIEW(intersperse_with) {
+        DEFINE_OUTPUT_TYPE(intersperse_with);
+
         template <iterator I, sentinel S, std::invocable F> requires (std::same_as<std::invoke_result_t<F>, iter_value_t<I>>)
-        constexpr auto operator()(I &&first, S &&last, F &&sep) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_intersperse_with, first, last, sep);
+        constexpr auto operator()(I &&first, S &&last, F &&sep) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_intersperse_with, first, last, sep);
         }
 
         template <range Rng, std::invocable F> requires (std::same_as<std::invoke_result_t<F>, range_value_t<Rng>>)
-        constexpr auto operator()(Rng &&rng, F &&sep) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_intersperse_with, rng, sep);
+        constexpr auto operator()(Rng &&rng, F &&sep) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_intersperse_with, rng, sep);
         }
 
         template <std::invocable F>
@@ -90,6 +91,6 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(intersperse);
-    EXPORT_GENEX_STRUCT(intersperse_with);
+    EXPORT_GENEX_VIEW(intersperse);
+    EXPORT_GENEX_VIEW(intersperse_with);
 }

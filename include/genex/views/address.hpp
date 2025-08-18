@@ -40,15 +40,17 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct deref_fn final : detail::view_base {
+    DEFINE_VIEW(deref) {
+        DEFINE_OUTPUT_TYPE(deref);
+
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last) const -> generator<deref_value_t<iter_value_t<I>>> {
-            MAP_TO_IMPL(detail::do_deref, first, last);
+        constexpr auto operator()(I &&first, S &&last) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_deref, first, last);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng) const -> generator<deref_value_t<range_value_t<Rng>>> {
-            MAP_TO_IMPL(detail::do_deref, rng);
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_deref, rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {
@@ -56,15 +58,17 @@ namespace genex::views {
         }
     };
 
-    struct address_fn final : detail::view_base {
+    DEFINE_VIEW(address) {
+        DEFINE_OUTPUT_TYPE(deref);
+
         template <iterator I, sentinel S>
         constexpr auto operator()(I &&first, S &&last) const -> generator<iter_value_t<I>*> {
-            MAP_TO_IMPL(detail::do_address, first, last);
+            FWD_TO_IMPL_VIEW(detail::do_address, first, last);
         }
 
         template <range Rng>
         constexpr auto operator()(Rng &&rng) const -> generator<range_value_t<Rng>*> {
-            MAP_TO_IMPL(detail::do_address, rng);
+            FWD_TO_IMPL_VIEW(detail::do_address, rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {
@@ -72,6 +76,6 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(deref);
-    EXPORT_GENEX_STRUCT(address);
+    EXPORT_GENEX_VIEW(deref);
+    EXPORT_GENEX_VIEW(address);
 }

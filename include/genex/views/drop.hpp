@@ -93,74 +93,82 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct drop_fn final : detail::view_base {
+    DEFINE_VIEW(drop) {
+        DEFINE_OUTPUT_TYPE(drop);
+
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last, const size_t n) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_drop, first, last, n);
+        constexpr auto operator()(I &&first, S &&last, const size_t n) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_drop, first, last, n);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng, const size_t n) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_drop, rng, n);
+        constexpr auto operator()(Rng &&rng, const size_t n) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_drop, rng, n);
         }
 
-        constexpr auto operator()(size_t n) const -> decltype(auto) {
+        constexpr auto operator()(size_t n) const -> auto {
             MAP_TO_BASE(n);
         }
     };
 
-    struct drop_last_fn final : detail::view_base {
+    DEFINE_VIEW(drop_last) {
+        DEFINE_OUTPUT_TYPE(drop_last);
+
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last, size_t n) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_drop_last, first, last, n);
+        constexpr auto operator()(I &&first, S &&last, size_t n) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_drop_last, first, last, n);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng, size_t n) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_drop_last, rng, n);
+        constexpr auto operator()(Rng &&rng, size_t n) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_drop_last, rng, n);
         }
 
-        constexpr auto operator()(size_t n) const -> decltype(auto) {
+        constexpr auto operator()(size_t n) const -> auto {
             MAP_TO_BASE(n);
         }
     };
 
-    struct drop_while_fn final : detail::view_base {
+    DEFINE_VIEW(drop_while) {
+        DEFINE_OUTPUT_TYPE(drop_while);
+
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_drop_while, first, last, pred, proj);
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_drop_while, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_drop_while, rng, pred, proj);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_drop_while, rng, pred, proj);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(pred, proj);
         }
     };
 
-    struct drop_until_fn final : detail::view_base {
+    DEFINE_VIEW(drop_until) {
+        DEFINE_OUTPUT_TYPE(drop_until);
+
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_drop_until, first, last, pred, proj);
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_drop_until, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_drop_until, rng, pred, proj);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_drop_until, rng, pred, proj);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(pred, proj);
         }
     };
 
-    EXPORT_GENEX_STRUCT(drop);
-    EXPORT_GENEX_STRUCT(drop_last);
-    EXPORT_GENEX_STRUCT(drop_while);
-    EXPORT_GENEX_STRUCT(drop_until);
+    EXPORT_GENEX_VIEW(drop);
+    EXPORT_GENEX_VIEW(drop_last);
+    EXPORT_GENEX_VIEW(drop_while);
+    EXPORT_GENEX_VIEW(drop_until);
 }

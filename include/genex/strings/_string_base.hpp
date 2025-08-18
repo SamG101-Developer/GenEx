@@ -1,4 +1,12 @@
 #pragma once
+#include <genex/macros.hpp>
+
+#define EXPORT_GENEX_STRING(name) \
+    EXPORT_GENEX_STRUCT(name)
+
+#define DEFINE_STRING(name) \
+    struct name ## _fn : detail::string_fn_base
+
 
 
 namespace genex::strings {
@@ -29,7 +37,7 @@ namespace genex::strings {
 
 
 namespace genex::strings::detail {
-    struct string_base {
-        virtual ~string_base() = default;
+    struct string_fn_base {
+        virtual ~string_fn_base() = default;
     };
 }

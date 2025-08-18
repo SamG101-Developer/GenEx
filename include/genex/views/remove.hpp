@@ -46,41 +46,45 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct remove_fn final : detail::view_base {
+    DEFINE_VIEW(remove) {
+        DEFINE_OUTPUT_TYPE(remove);
+
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last, iter_value_t<I> const &elem) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_remove, first, last, elem);
+        constexpr auto operator()(I &&first, S &&last, iter_value_t<I> const &elem) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_remove, first, last, elem);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &elem) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_remove, rng, elem);
+        constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &elem) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_remove, rng, elem);
         }
 
         template <typename E>
-        constexpr auto operator()(E &&elem) const -> decltype(auto) {
+        constexpr auto operator()(E &&elem) const -> auto {
             MAP_TO_BASE(elem);
         }
     };
 
-    struct remove_if_fn final : detail::view_base {
+    DEFINE_VIEW(remove_if) {
+        DEFINE_OUTPUT_TYPE(remove_if);
+
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_remove_if, first, last, pred, proj);
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_remove_if, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_remove_if, rng, pred, proj);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_remove_if, rng, pred, proj);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(pred, proj);
         }
     };
 
 
-    EXPORT_GENEX_STRUCT(remove);
-    EXPORT_GENEX_STRUCT(remove_if);
+    EXPORT_GENEX_VIEW(remove);
+    EXPORT_GENEX_VIEW(remove_if);
 }

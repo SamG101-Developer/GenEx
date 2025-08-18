@@ -48,15 +48,17 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct duplicates_fn final : detail::view_base {
+    DEFINE_VIEW(duplicates) {
+        DEFINE_OUTPUT_TYPE(duplicates);
+
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity>
-        constexpr auto operator()(I &&first, S &&last, Proj && proj = {}) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_duplicates, first, last, proj);
+        constexpr auto operator()(I &&first, S &&last, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_duplicates, first, last, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity>
-        constexpr auto operator()(Rng &&rng, Proj &&proj = {}) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_duplicates, rng, proj);
+        constexpr auto operator()(Rng &&rng, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_duplicates, rng, proj);
         }
 
         template <typename Proj = meta::identity>
@@ -65,5 +67,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(duplicates);
+    EXPORT_GENEX_VIEW(duplicates);
 }

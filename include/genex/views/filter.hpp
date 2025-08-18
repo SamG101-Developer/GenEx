@@ -32,22 +32,24 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct filter_fn final : detail::view_base {
+    DEFINE_VIEW(filter) {
+        DEFINE_OUTPUT_TYPE(filter);
+
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_filter, first, last, pred, proj);
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_filter, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_filter, rng, pred, proj);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_filter, rng, pred, proj);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(pred, proj);
         }
     };
 
-    EXPORT_GENEX_STRUCT(filter);
+    EXPORT_GENEX_VIEW(filter);
 }

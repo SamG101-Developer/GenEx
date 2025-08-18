@@ -28,22 +28,24 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct for_each_fn final : detail::view_base {
+    DEFINE_VIEW(for_each) {
+        DEFINE_OUTPUT_TYPE(for_each);
+
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> F>
         constexpr auto operator()(I &&first, S &&last, F &&f) const -> void {
-            MAP_TO_IMPL(detail::do_for_each, first, last, f);
+            FWD_TO_IMPL_VIEW_VOID(detail::do_for_each, first, last, f);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> F>
         constexpr auto operator()(Rng &&rng, F &&f) const -> void {
-            MAP_TO_IMPL(detail::do_for_each, rng, f);
+            FWD_TO_IMPL_VIEW_VOID(detail::do_for_each, rng, f);
         }
 
         template <typename F>
-        constexpr auto operator()(F &&f) const -> decltype(auto) {
+        constexpr auto operator()(F &&f) const -> auto {
             MAP_TO_BASE(f);
         }
     };
 
-    EXPORT_GENEX_STRUCT(for_each);
+    EXPORT_GENEX_VIEW(for_each);
 }

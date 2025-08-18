@@ -1,6 +1,8 @@
 #pragma once
 #include <coroutine>
 #include <genex/concepts.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
 
@@ -26,15 +28,17 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct cycle_fn final : detail::view_base {
+    DEFINE_VIEW(cycle) {
+        DEFINE_OUTPUT_TYPE(cycle);
+
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_cycle, first, last);
+        constexpr auto operator()(I &&first, S &&last) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_cycle, first, last);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_cycle, rng);
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_cycle, rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {
@@ -42,5 +46,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(cycle);
+    EXPORT_GENEX_VIEW(cycle);
 }

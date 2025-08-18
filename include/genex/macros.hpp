@@ -21,9 +21,8 @@
 #define SPLIT_RANGE_TO_ITER(_1, _2, i, range) \
     BOOST_PP_COMMA_IF(i) iterators::begin(range), iterators::end(range)
 
-#define MAP_TO_IMPL(fn, ...) \
-    return fn(BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(FORWARD_OBJECT, BOOST_PP_EMPTY, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__))))
-
+#define FWD_TO_IMPL(fn, ...) \
+    return fn(BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(FORWARD_OBJECT, BOOST_PP_EMPTY, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__))));
 
 #define MAP_TO_BASE_SOLO_THIS_CAPTURE(...) \
     this

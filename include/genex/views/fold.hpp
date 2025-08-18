@@ -49,40 +49,44 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct fold_left_fn final : detail::view_base {
+    DEFINE_VIEW(fold_left) {
+        DEFINE_OUTPUT_TYPE(fold_left);
+
         template <iterator I, sentinel S, typename E, std::invocable<E, iter_value_t<I>> F>
-        constexpr auto operator()(I &&first, S &&last, E &&init, F &&f) const -> E {
-            MAP_TO_IMPL(detail::do_fold_left, first, last, init, f);
+        constexpr auto operator()(I &&first, S &&last, E &&init, F &&f) const -> auto {
+            FWD_TO_IMPL(detail::do_fold_left, first, last, init, f);
         }
 
         template <range Rng, typename E, std::invocable<E, range_value_t<Rng>> F>
-        constexpr auto operator()(Rng &&rng, E &&init, F &&f) const -> E {
-            MAP_TO_IMPL(detail::do_fold_left, rng, init, f);
+        constexpr auto operator()(Rng &&rng, E &&init, F &&f) const -> auto {
+            FWD_TO_IMPL(detail::do_fold_left, rng, init, f);
         }
 
         template <typename E, typename F>
-        constexpr auto operator()(E &&init, F &&f) const -> decltype(auto) {
+        constexpr auto operator()(E &&init, F &&f) const -> auto {
             MAP_TO_BASE(init, f);
         }
     };
 
-    struct fold_right_fn final : detail::view_base {
+    DEFINE_VIEW(fold_right) {
+        DEFINE_OUTPUT_TYPE(fold_right);
+
         template <iterator I, sentinel S, typename E, std::invocable<E, iter_value_t<I>> F>
-        constexpr auto operator()(I &&first, S &&last, E &&init, F &&f) const -> E {
-            MAP_TO_IMPL(detail::do_fold_right, first, last, init, f);
+        constexpr auto operator()(I &&first, S &&last, E &&init, F &&f) const -> auto {
+            FWD_TO_IMPL(detail::do_fold_right, first, last, init, f);
         }
 
         template <range Rng, typename E, std::invocable<E, range_value_t<Rng>> F>
-        constexpr auto operator()(Rng &&rng, E &&init, F &&f) const -> E {
-            MAP_TO_IMPL(detail::do_fold_right, rng, init, f);
+        constexpr auto operator()(Rng &&rng, E &&init, F &&f) const -> auto {
+            FWD_TO_IMPL(detail::do_fold_right, rng, init, f);
         }
 
         template <typename E, typename F>
-        constexpr auto operator()(E &&init, F &&f) const -> decltype(auto) {
+        constexpr auto operator()(E &&init, F &&f) const -> auto {
             MAP_TO_BASE(init, f);
         }
     };
 
-    EXPORT_GENEX_STRUCT(fold_left);
-    EXPORT_GENEX_STRUCT(fold_right);
+    EXPORT_GENEX_VIEW(fold_left);
+    EXPORT_GENEX_VIEW(fold_right);
 }

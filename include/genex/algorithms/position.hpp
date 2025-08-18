@@ -55,40 +55,40 @@ namespace genex::algorithms::detail {
 
 
 namespace genex::algorithms {
-    struct position_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(position) {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> std::size_t {
-            MAP_TO_IMPL(detail::do_position, first, last, pred, proj, def);
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> auto {
+            FWD_TO_IMPL(detail::do_position, first, last, pred, proj, def);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> std::size_t {
-            MAP_TO_IMPL(detail::do_position, rng, pred, proj, def);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> auto {
+            FWD_TO_IMPL(detail::do_position, rng, pred, proj, def);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> auto {
             MAP_TO_BASE(pred, proj, def);
         }
     };
 
-    struct position_last_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(position_last) {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> std::size_t {
-            MAP_TO_IMPL(detail::do_position_last, first, last, pred, proj, def);
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> auto {
+            FWD_TO_IMPL(detail::do_position_last, first, last, pred, proj, def);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> std::size_t {
-            MAP_TO_IMPL(detail::do_position_last, rng, pred, proj, def);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> auto {
+            FWD_TO_IMPL(detail::do_position_last, rng, pred, proj, def);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> auto {
             MAP_TO_BASE(pred, proj, def);
         }
     };
 
-    EXPORT_GENEX_STRUCT(position);
-    EXPORT_GENEX_STRUCT(position_last);
+    EXPORT_GENEX_ALGORITHM(position);
+    EXPORT_GENEX_ALGORITHM(position_last);
 }

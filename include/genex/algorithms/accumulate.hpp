@@ -32,15 +32,15 @@ namespace genex::algorithms::detail {
 
 
 namespace genex::algorithms {
-    struct accumulate_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(accumulate) {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::invocable<iter_value_t<I>, iter_value_t<I>> BinaryOp>
         constexpr auto operator()(I &&first, S &&last, iter_value_t<I> const &init, BinaryOp &&binary_op, Proj &&proj = {}) const -> iter_value_t<I> {
-            MAP_TO_IMPL(detail::do_accumulate, first, last, init, binary_op, proj);
+            FWD_TO_IMPL(detail::do_accumulate, first, last, init, binary_op, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::invocable<range_value_t<Rng>, range_value_t<Rng>> BinaryOp>
         constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &init, BinaryOp &&binary_op, Proj &&proj = {}) const -> range_value_t<Rng> {
-            MAP_TO_IMPL(detail::do_accumulate, rng, init, binary_op, proj);
+            FWD_TO_IMPL(detail::do_accumulate, rng, init, binary_op, proj);
         }
 
         template <typename T, typename BinaryOp, typename Proj = meta::identity>
@@ -49,5 +49,5 @@ namespace genex::algorithms {
         }
     };
 
-    EXPORT_GENEX_STRUCT(accumulate);
+    EXPORT_GENEX_ALGORITHM(accumulate);
 }

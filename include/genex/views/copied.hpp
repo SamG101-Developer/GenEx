@@ -34,20 +34,22 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct copied_fn final : detail::view_base {
+    DEFINE_VIEW(copied) {
+        DEFINE_OUTPUT_TYPE(copied);
+
         template <iterator I, sentinel S> requires (std::is_copy_constructible_v<iter_value_t<I>>)
-        constexpr auto operator()(I &&first, S &&last) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_copied, first, last);
+        constexpr auto operator()(I &&first, S &&last) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_copied, first, last);
         }
 
         template <range Rng> requires (std::is_copy_constructible_v<range_value_t<Rng>>)
-        constexpr auto operator()(Rng &&rng) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_copied, rng);
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_copied, rng);
         }
 
         template <range Rng> requires (unique_ptr<range_value_t<Rng>> && std::is_copy_constructible_v<typename range_value_t<Rng>::element_type>)
-        constexpr auto operator()(Rng &&rng) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_copied, rng);
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_copied, rng);
         }
 
         constexpr auto operator()() const -> decltype(auto) {
@@ -55,5 +57,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(copied);
+    EXPORT_GENEX_VIEW(copied);
 }

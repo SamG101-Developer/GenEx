@@ -18,7 +18,7 @@ namespace genex::operations {
     template <typename Rng>
     concept has_member_back = requires(Rng &&r) { r.back(); };
 
-    struct at_fn final : detail::operations_base {
+    DEFINE_OPERATION(at) {
         template <typename Rng> requires has_member_at<Rng>
         constexpr auto operator()(Rng &&r, const std::size_t n) const noexcept -> range_value_t<Rng>& {
             return r.at(n);
@@ -37,7 +37,7 @@ namespace genex::operations {
         }
     };
 
-    struct front_fn final : detail::operations_base {
+    DEFINE_OPERATION(front) {
         template <typename Rng> requires has_member_front<Rng>
         constexpr auto operator()(Rng &&r) const noexcept -> range_value_t<Rng>& {
             return r.front();
@@ -58,7 +58,7 @@ namespace genex::operations {
         }
     };
 
-    struct back_fn final : detail::operations_base {
+    DEFINE_OPERATION(back) {
         template <typename Rng> requires has_member_back<Rng>
         constexpr auto operator()(Rng &&r) const noexcept -> range_value_t<Rng>& {
             return r.back();
@@ -84,7 +84,7 @@ namespace genex::operations {
         }
     };
 
-    EXPORT_GENEX_STRUCT(at);
-    EXPORT_GENEX_STRUCT(front);
-    EXPORT_GENEX_STRUCT(back);
+    EXPORT_GENEX_OPERATION(at);
+    EXPORT_GENEX_OPERATION(front);
+    EXPORT_GENEX_OPERATION(back);
 }

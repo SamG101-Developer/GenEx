@@ -1,4 +1,5 @@
 #pragma once
+#include <genex/iterators/_iterator_base.hpp>
 #include <genex/iterators/begin.hpp>
 
 
@@ -12,7 +13,7 @@ namespace genex::iterators {
     template <typename Rng>
     concept has_erase = has_member_erase<Rng> || has_std_erase<Rng>;
 
-    struct erase_fn final : detail::iterators_base {
+    DEFINE_ITERATOR(erase) {
         template <typename Rng> requires (has_member_erase<Rng>)
         constexpr auto operator()(Rng &&r, begin_t<Rng> &&it) const noexcept -> decltype(r.erase(std::forward<begin_t<Rng>>(it))) {
             return r.erase(std::forward<begin_t<Rng>>(it));
@@ -24,5 +25,5 @@ namespace genex::iterators {
         }
     };
 
-    EXPORT_GENEX_STRUCT(erase);
+    EXPORT_GENEX_ITERATOR(erase);
 }

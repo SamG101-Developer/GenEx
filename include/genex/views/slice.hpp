@@ -28,15 +28,17 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct slice_fn final : detail::view_base {
+    DEFINE_VIEW(slice) {
+        DEFINE_OUTPUT_TYPE(slice);
+
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last, const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> generator<iter_value_t<I>> {
-            MAP_TO_IMPL(detail::do_slice, first, last, start_index, end_index, step);
+        constexpr auto operator()(I &&first, S &&last, const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_slice, first, last, start_index, end_index, step);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng, const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> generator<range_value_t<Rng>> {
-            MAP_TO_IMPL(detail::do_slice, rng, start_index, end_index, step);
+        constexpr auto operator()(Rng &&rng, const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_slice, rng, start_index, end_index, step);
         }
 
         constexpr auto operator()(const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> decltype(auto) {
@@ -44,5 +46,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(slice);
+    EXPORT_GENEX_VIEW(slice);
 }

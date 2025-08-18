@@ -94,113 +94,113 @@ namespace genex::algorithms::detail {
 
 
 namespace genex::algorithms {
-    struct find_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(find) {
         template <iterator I, sentinel S, typename E, std::invocable<E> Proj = meta::identity> requires std::equality_comparable_with<iter_value_t<I>, E>
-        constexpr auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> I {
-            MAP_TO_IMPL(detail::do_find, first, last, elem, proj);
+        constexpr auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_find, first, last, elem, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity>
-        constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &elem, Proj &&proj = {}) const -> decltype(auto) {
-            MAP_TO_IMPL(detail::do_find, rng, elem, proj);
+        constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &elem, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_find, rng, elem, proj);
         }
 
         template <typename E, std::invocable<E> Proj = meta::identity>
-        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(elem, proj);
         }
     };
 
-    struct find_last_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(find_last) {
         template <typename I, typename S, typename E, std::invocable<E> Proj = meta::identity> requires std::equality_comparable_with<iter_value_t<I>, E>
-        constexpr auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> I {
-            MAP_TO_IMPL(detail::do_find_last, first, last, elem, proj);
+        constexpr auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_find_last, first, last, elem, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity>
-        constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &elem, Proj &&proj = {}) const -> decltype(auto) {
-            MAP_TO_IMPL(detail::do_find_last, rng, elem, proj);
+        constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &elem, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_find_last, rng, elem, proj);
         }
 
         template <typename E, std::invocable<E> Proj = meta::identity>
-        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(elem, proj);
         }
     };
 
-    struct find_if_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(find_if) {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> I {
-            MAP_TO_IMPL(detail::do_find_if, first, last, pred, proj);
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_find_if, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
-            MAP_TO_IMPL(detail::do_find_if, rng, pred, proj);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_find_if, rng, pred, proj);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(pred, proj);
         }
     };
 
-    struct find_last_if_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(find_last_if) {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> I {
-            MAP_TO_IMPL(detail::do_find_last_if, first, last, pred, proj);
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_find_last_if, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
-            MAP_TO_IMPL(detail::do_find_last_if, rng, pred, proj);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_find_last_if, rng, pred, proj);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(pred, proj);
         }
     };
 
 
-    struct find_if_not_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(find_if_not) {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> I {
-            MAP_TO_IMPL(detail::do_find_if_not, first, last, pred, proj);
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_find_if_not, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
-            MAP_TO_IMPL(detail::do_find_if_not, rng, pred, proj);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_find_if_not, rng, pred, proj);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(pred, proj);
         }
     };
 
-    struct find_last_if_not_fn final : detail::algorithm_base {
+    DEFINE_ALGORITHM(find_last_if_not) {
         template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> I {
-            MAP_TO_IMPL(detail::do_find_last_if_not, first, last, pred, proj);
+        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_find_last_if_not, first, last, pred, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
-            MAP_TO_IMPL(detail::do_find_last_if_not, rng, pred, proj);
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL(detail::do_find_last_if_not, rng, pred, proj);
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             MAP_TO_BASE(pred, proj);
         }
     };
 
-    EXPORT_GENEX_STRUCT(find);
-    EXPORT_GENEX_STRUCT(find_last);
-    EXPORT_GENEX_STRUCT(find_if);
-    EXPORT_GENEX_STRUCT(find_last_if);
-    EXPORT_GENEX_STRUCT(find_if_not);
-    EXPORT_GENEX_STRUCT(find_last_if_not);
+    EXPORT_GENEX_ALGORITHM(find);
+    EXPORT_GENEX_ALGORITHM(find_last);
+    EXPORT_GENEX_ALGORITHM(find_if);
+    EXPORT_GENEX_ALGORITHM(find_last_if);
+    EXPORT_GENEX_ALGORITHM(find_if_not);
+    EXPORT_GENEX_ALGORITHM(find_last_if_not);
 }
