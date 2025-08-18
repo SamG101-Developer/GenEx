@@ -4,7 +4,8 @@
 #include <genex/iterators/begin.hpp>
 #include <genex/iterators/end.hpp>
 
-#include "genex/categories.hpp"
+using namespace genex::concepts;
+using namespace genex::type_traits;
 
 
 #define EXPORT_GENEX_VIEW(name) \
