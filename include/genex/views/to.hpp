@@ -26,8 +26,8 @@ namespace genex::views {
     template <template <typename> typename Out, range Rng> // requires (not range<range_value_t<Rng>>)
     auto to_base_fn(Rng &&rng) -> Out<range_value_t<Rng>> {
         Out<range_value_t<Rng>> out;
-        auto begin = iterators::begin(std::forward<Rng>(rng));
-        auto end = iterators::end(std::forward<Rng>(rng));
+        auto begin = iterators::begin(rng);
+        auto end = iterators::end(rng);
         for (; begin != end; ++begin) {
             out.push_back(*begin);
         }
@@ -48,8 +48,8 @@ namespace genex::views {
     template <typename Out, range Rng>
     auto to_base_fn(Rng &&rng) -> Out {
         Out out;
-        auto begin = iterators::begin(std::forward<Rng>(rng));
-        auto end = iterators::end(std::forward<Rng>(rng));
+        auto begin = iterators::begin(rng);
+        auto end = iterators::end(rng);
         for (; begin != end; ++begin) {
             out.push_back(*begin);
         }
