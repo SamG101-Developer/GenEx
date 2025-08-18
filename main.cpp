@@ -90,6 +90,9 @@ int main() {
     {
         const auto v = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
+        const auto fff = v
+            | genex::views::filter([](const int x) { return x % 2 == 0; });
+
         const auto f = v
             | genex::views::filter([](const int x) { return x % 2 == 0; })
             | genex::views::filter([](const int x) { return x % 3 == 0; })
