@@ -50,7 +50,9 @@ conform to regular standards.
 
 ## Future
 
-Add more concepts regarding the type of generator, such as `forward_generator`, `bidirectional_generator` etc. This
-will allow optimizations, for example for `find_last` with a `reversible_generator`, the generator can be reversed then
-the first match found, rather than iterating over the entire generator.
+- Add more concepts regarding the type of generator, such as `forward_generator`, `bidirectional_generator` etc. This
+  will allow optimizations, for example for `find_last` with a `reversible_generator`, the generator can be reversed
+  then the first match found, rather than iterating over the entire generator.
 
+- Add more views, algorithms, actions, etc. Will include everything from `ranges-v3`, `Rust STL`, and other rust
+  extensions.
