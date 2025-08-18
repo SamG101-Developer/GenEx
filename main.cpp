@@ -9,6 +9,7 @@
 
 #include <genex/actions/concat.hpp>
 #include <genex/actions/pop.hpp>
+#include <genex/actions/sort.hpp>
 #include <genex/actions/remove.hpp>
 #include <genex/algorithms/accumulate.hpp>
 #include <genex/algorithms/all_of.hpp>
@@ -797,5 +798,19 @@ int main() {
         const auto b = genex::operations::at(a, 5);
         const auto expected1 = 5;
         assert(b == expected1);
+    }
+
+    {
+        auto a = std::vector{9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+        a |= genex::actions::sort(std::less<int>{});
+        const auto expected1 = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        assert(a == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        a |= genex::actions::sort(std::greater<int>{});
+        const auto expected1 = std::vector{9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+        assert(a == expected1);
     }
 }

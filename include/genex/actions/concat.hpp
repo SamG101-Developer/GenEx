@@ -1,5 +1,4 @@
 #pragma once
-
 #include <functional>
 #include <genex/concepts.hpp>
 #include <genex/actions/_action_base.hpp>
