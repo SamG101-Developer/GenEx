@@ -1,7 +1,6 @@
 #pragma once
 #include <utility>
 #include <genex/macros.hpp>
-#include <genex/operations/_operation_base.hpp>
 #include <genex/actions/insert.hpp>
 #include <genex/operations/size.hpp>
 

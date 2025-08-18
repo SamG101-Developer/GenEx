@@ -1,8 +1,11 @@
 #pragma once
 #include <iterator>
-#include <genex/generator.hpp>
+#include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/operations/_operation_base.hpp>
+
+using namespace genex::concepts;
+using namespace genex::type_traits;
 
 
 namespace genex::operations {

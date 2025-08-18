@@ -1,11 +1,11 @@
 #pragma once
 #include <utility>
-#include <genex/macros.hpp>
 #include <genex/concepts.hpp>
-#include <genex/operations/_operation_base.hpp>
+#include <genex/macros.hpp>
 #include <genex/operations/size.hpp>
 
 using namespace genex::concepts;
+using namespace genex::type_traits;
 
 
 namespace genex::operations {
