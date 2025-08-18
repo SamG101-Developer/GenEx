@@ -15,15 +15,16 @@
 #include <genex/algorithms/all_of.hpp>
 #include <genex/algorithms/any_of.hpp>
 #include <genex/algorithms/contains.hpp>
+#include <genex/algorithms/copy.hpp>
 #include <genex/algorithms/count.hpp>
 #include <genex/algorithms/binary_search.hpp>
 #include <genex/algorithms/find.hpp>
+#include <genex/algorithms/fold.hpp>
 #include <genex/algorithms/none_of.hpp>
 #include <genex/algorithms/position.hpp>
 #include <genex/operations/at.hpp>
 #include <genex/views/cast.hpp>
 #include <genex/views/chunk.hpp>
-#include <genex/views/copied.hpp>
 #include <genex/views/concat.hpp>
 #include <genex/views/cycle.hpp>
 #include <genex/views/address.hpp>
@@ -32,7 +33,6 @@
 #include <genex/views/enumerate.hpp>
 #include <genex/views/filter.hpp>
 #include <genex/views/flat.hpp>
-#include <genex/views/fold.hpp>
 #include <genex/views/for_each.hpp>
 #include <genex/views/interleave.hpp>
 #include <genex/views/intersperse.hpp>
@@ -561,9 +561,7 @@ int main() {
 
     {
         const auto a = std::vector<std::string>{"0"};
-        const auto b = a
-            | genex::views::copied
-            | genex::views::to<std::vector>();
+        const auto b = a | genex::algorithms::copy;
         const auto expected1 = std::vector<std::string>{"0"};
         assert(b == expected1);
     }
@@ -615,7 +613,7 @@ int main() {
     {
         const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         const auto b = a
-            | genex::views::fold_left(0, std::minus<int>{});
+            | genex::algorithms::fold_left(0, std::minus<int>{});
         const auto expected1 = -45;
         assert(b == expected1);
     }
@@ -623,7 +621,7 @@ int main() {
     {
         const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         const auto b = a
-            | genex::views::fold_right(0, std::minus<int>{});
+            | genex::algorithms::fold_right(0, std::minus<int>{});
         const auto expected1 = -5;
         assert(b == expected1);
     }

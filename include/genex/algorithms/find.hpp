@@ -19,7 +19,7 @@ namespace genex::algorithms::detail {
     }
 
     template <range Rng, typename E, std::invocable<E> Proj = meta::identity> requires std::equality_comparable_with<range_value_t<Rng>, E>
-    auto do_find(Rng &&rng, E &&elem, Proj &&proj = {}) -> decltype(auto) {
+    auto do_find(Rng &&rng, E &&elem, Proj &&proj = {}) -> auto {
         return do_find(iterators::begin(rng), iterators::end(rng), std::forward<E>(elem), std::forward<Proj>(proj));
     }
 
@@ -33,7 +33,7 @@ namespace genex::algorithms::detail {
     }
 
     template <range Rng, typename E, std::invocable<E> Proj = meta::identity> requires std::equality_comparable_with<range_value_t<Rng>, E>
-    auto do_find_last(Rng &&rng, E &&elem, Proj &&proj = {}) -> decltype(auto) {
+    auto do_find_last(Rng &&rng, E &&elem, Proj &&proj = {}) -> auto {
         return do_find_last(iterators::begin(rng), iterators::end(rng), std::forward<E>(elem), std::forward<Proj>(proj));
     }
 
@@ -46,7 +46,7 @@ namespace genex::algorithms::detail {
     }
 
     template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-    auto do_find_if(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> decltype(auto) {
+    auto do_find_if(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> auto {
         return do_find_if(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
     }
 
@@ -60,7 +60,7 @@ namespace genex::algorithms::detail {
     }
 
     template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-    auto do_find_last_if(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> decltype(auto) {
+    auto do_find_last_if(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> auto {
         return do_find_last_if(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
     }
 
@@ -73,7 +73,7 @@ namespace genex::algorithms::detail {
     }
 
     template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-    auto do_find_if_not(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> decltype(auto) {
+    auto do_find_if_not(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> auto {
         return do_find_if_not(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
     }
 
@@ -87,7 +87,7 @@ namespace genex::algorithms::detail {
     }
 
     template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-    auto do_find_last_if_not(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> decltype(auto) {
+    auto do_find_last_if_not(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> auto {
         return do_find_last_if_not(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
     }
 }
@@ -107,7 +107,7 @@ namespace genex::algorithms {
 
         template <typename E, std::invocable<E> Proj = meta::identity>
         constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
-            MAP_TO_BASE(elem, proj);
+            MAKE_CLOSURE(elem, proj);
         }
     };
 
@@ -124,7 +124,7 @@ namespace genex::algorithms {
 
         template <typename E, std::invocable<E> Proj = meta::identity>
         constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
-            MAP_TO_BASE(elem, proj);
+            MAKE_CLOSURE(elem, proj);
         }
     };
 
@@ -141,7 +141,7 @@ namespace genex::algorithms {
 
         template <typename Pred, typename Proj = meta::identity>
         constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            MAP_TO_BASE(pred, proj);
+            MAKE_CLOSURE(pred, proj);
         }
     };
 
@@ -158,7 +158,7 @@ namespace genex::algorithms {
 
         template <typename Pred, typename Proj = meta::identity>
         constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            MAP_TO_BASE(pred, proj);
+            MAKE_CLOSURE(pred, proj);
         }
     };
 
@@ -176,7 +176,7 @@ namespace genex::algorithms {
 
         template <typename Pred, typename Proj = meta::identity>
         constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            MAP_TO_BASE(pred, proj);
+            MAKE_CLOSURE(pred, proj);
         }
     };
 
@@ -193,7 +193,7 @@ namespace genex::algorithms {
 
         template <typename Pred, typename Proj = meta::identity>
         constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            MAP_TO_BASE(pred, proj);
+            MAKE_CLOSURE(pred, proj);
         }
     };
 

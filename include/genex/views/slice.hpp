@@ -41,8 +41,8 @@ namespace genex::views {
             FWD_TO_IMPL_VIEW(detail::do_slice, rng, start_index, end_index, step);
         }
 
-        constexpr auto operator()(const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> decltype(auto) {
-            MAP_TO_BASE(start_index, end_index, step);
+        constexpr auto operator()(const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> auto {
+            MAKE_CLOSURE(start_index, end_index, step);
         }
     };
 

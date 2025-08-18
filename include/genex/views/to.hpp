@@ -57,12 +57,12 @@ namespace genex::views {
     }
 
     template <template <typename...> typename Out>
-    auto to() -> decltype(auto) {
+    auto to() -> auto {
         return []<range Rng>(Rng &&rng) { return to_base_fn<Out>(std::forward<Rng>(rng)); };
     }
 
     template <typename Out>
-    auto to() -> decltype(auto) {
+    auto to() -> auto {
         return []<range Rng>(Rng &&rng) { return to_base_fn<Out>(std::forward<Rng>(rng)); };
     }
 }

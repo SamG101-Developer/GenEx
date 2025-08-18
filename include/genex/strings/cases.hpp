@@ -82,8 +82,8 @@ namespace genex::strings {
             FWD_TO_IMPL(detail::do_upper_case, rng);
         }
 
-        constexpr auto operator()() const -> decltype(auto) {
-            MAP_TO_BASE();
+        constexpr auto operator()() const -> auto {
+            MAKE_CLOSURE();
         }
     };
 
@@ -98,8 +98,8 @@ namespace genex::strings {
             FWD_TO_IMPL(detail::do_lower_case, rng);
         }
 
-        constexpr auto operator()() const -> decltype(auto) {
-            MAP_TO_BASE();
+        constexpr auto operator()() const -> auto {
+            MAKE_CLOSURE();
         }
     };
 

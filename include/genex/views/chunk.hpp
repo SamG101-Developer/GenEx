@@ -47,8 +47,8 @@ namespace genex::views {
             FWD_TO_IMPL_VIEW(detail::do_chunk, rng, size);
         }
 
-        constexpr auto operator()(size_t n) const -> decltype(auto) {
-            MAP_TO_BASE(n);
+        constexpr auto operator()(size_t n) const -> auto {
+            MAKE_CLOSURE(n);
         }
     };
 

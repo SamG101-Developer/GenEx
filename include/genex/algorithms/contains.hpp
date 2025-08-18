@@ -41,8 +41,8 @@ namespace genex::algorithms {
         }
 
         template <typename E, std::invocable<E> Proj = meta::identity>
-        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> decltype(auto) {
-            MAP_TO_BASE(elem, proj);
+        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
+            MAKE_CLOSURE(elem, proj);
         }
     };
 

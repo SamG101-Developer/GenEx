@@ -92,7 +92,7 @@ namespace genex::views {
 
         template <range Rng2>
         constexpr auto operator()(Rng2 &&rng2) const -> auto {
-            MAP_TO_BASE(rng2);
+            MAKE_CLOSURE(rng2);
         }
     };
 
@@ -110,8 +110,8 @@ namespace genex::views {
         }
 
         template <range Rng2>
-        constexpr auto operator()(Rng2 &&rng2) const -> decltype(auto) {
-            MAP_TO_BASE(rng2);
+        constexpr auto operator()(Rng2 &&rng2) const -> auto {
+            MAKE_CLOSURE(rng2);
         }
     };
 
@@ -129,8 +129,8 @@ namespace genex::views {
         }
 
         template <range Rng2>
-        constexpr auto operator()(Rng2 &&rng2) const -> decltype(auto) {
-            MAP_TO_BASE(rng2);
+        constexpr auto operator()(Rng2 &&rng2) const -> auto {
+            MAKE_CLOSURE(rng2);
         }
     };
 
@@ -148,8 +148,8 @@ namespace genex::views {
         }
 
         template <range Rng2>
-        constexpr auto operator()(Rng2 &&rng2) const -> decltype(auto) {
-            MAP_TO_BASE(rng2);
+        constexpr auto operator()(Rng2 &&rng2) const -> auto {
+            MAKE_CLOSURE(rng2);
         }
     };
 

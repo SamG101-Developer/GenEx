@@ -46,7 +46,7 @@ namespace genex::algorithms {
 
         template <typename Pred, typename Proj = meta::identity>
         constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            MAP_TO_BASE(pred, proj);
+            MAKE_CLOSURE(pred, proj);
         }
     };
 

@@ -17,12 +17,12 @@ namespace genex::iterators {
 
     DEFINE_ITERATOR(next) {
         template <iterator I> requires (has_std_next<I>)
-        constexpr auto operator()(I &&it, const std::size_t n = 1) const noexcept -> decltype(auto) {
+        constexpr auto operator()(I &&it, const std::size_t n = 1) const noexcept -> auto {
             return std::next(std::forward<I>(it), n);
         }
 
         template <iterator I> requires (not has_std_next<I> && has_operator_plusplus<I>)
-        constexpr auto operator()(I &&it, const std::size_t n = 1) const noexcept -> decltype(auto) {
+        constexpr auto operator()(I &&it, const std::size_t n = 1) const noexcept -> auto {
             auto copy_it = std::forward<I>(it);
             for (std::size_t i = 0; i < n; ++i) { ++copy_it; }
             return copy_it;

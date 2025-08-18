@@ -42,7 +42,7 @@ namespace genex::views {
 
         template <typename F>
         constexpr auto operator()(F &&f) const -> auto {
-            MAP_TO_BASE(f);
+            MAKE_CLOSURE(f);
         }
     };
 

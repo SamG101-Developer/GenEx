@@ -37,8 +37,8 @@ namespace genex::actions {
             FWD_TO_IMPL(detail::do_pop, &rng, n);
         }
 
-        constexpr auto operator()(const std::size_t n) const -> decltype(auto) {
-            MAP_TO_BASE(n);
+        constexpr auto operator()(const std::size_t n) const -> auto {
+            MAKE_CLOSURE(n);
         }
     };
 
@@ -48,8 +48,8 @@ namespace genex::actions {
             FWD_TO_IMPL(detail::do_pop_front, &rng);
         }
 
-        constexpr auto operator()() const -> decltype(auto) {
-            MAP_TO_BASE();
+        constexpr auto operator()() const -> auto {
+            MAKE_CLOSURE();
         }
     };
 
@@ -59,8 +59,8 @@ namespace genex::actions {
             FWD_TO_IMPL(detail::do_pop_back, &rng);
         }
 
-        constexpr auto operator()() const -> decltype(auto) {
-            MAP_TO_BASE();
+        constexpr auto operator()() const -> auto {
+            MAKE_CLOSURE();
         }
     };
 

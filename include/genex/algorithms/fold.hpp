@@ -1,15 +1,16 @@
 #pragma once
 #include <coroutine>
+#include <functional>
 #include <genex/concepts.hpp>
 #include <genex/iterators/next.hpp>
 #include <genex/macros.hpp>
-#include <genex/views/_view_base.hpp>
+#include <genex/algorithms/_algorithm_base.hpp>
 
 using namespace genex::concepts;
 using namespace genex::type_traits;
 
 
-namespace genex::views::detail {
+namespace genex::algorithms::detail {
     template <iterator I, sentinel S, typename E, std::invocable<E, iter_value_t<I>> F>
     auto do_fold_left(I &&first, S &&last, E &&init, F &&f) -> E {
         auto &&acc = std::forward<E>(init);
@@ -48,10 +49,8 @@ namespace genex::views::detail {
 }
 
 
-namespace genex::views {
-    DEFINE_VIEW(fold_left) {
-        DEFINE_OUTPUT_TYPE(fold_left);
-
+namespace genex::algorithms {
+    DEFINE_ALGORITHM(fold_left) {
         template <iterator I, sentinel S, typename E, std::invocable<E, iter_value_t<I>> F>
         constexpr auto operator()(I &&first, S &&last, E &&init, F &&f) const -> auto {
             FWD_TO_IMPL(detail::do_fold_left, first, last, init, f);
@@ -64,13 +63,11 @@ namespace genex::views {
 
         template <typename E, typename F>
         constexpr auto operator()(E &&init, F &&f) const -> auto {
-            MAP_TO_BASE(init, f);
+            MAKE_CLOSURE(init, f);
         }
     };
 
-    DEFINE_VIEW(fold_right) {
-        DEFINE_OUTPUT_TYPE(fold_right);
-
+    DEFINE_ALGORITHM(fold_right) {
         template <iterator I, sentinel S, typename E, std::invocable<E, iter_value_t<I>> F>
         constexpr auto operator()(I &&first, S &&last, E &&init, F &&f) const -> auto {
             FWD_TO_IMPL(detail::do_fold_right, first, last, init, f);
@@ -83,10 +80,10 @@ namespace genex::views {
 
         template <typename E, typename F>
         constexpr auto operator()(E &&init, F &&f) const -> auto {
-            MAP_TO_BASE(init, f);
+            MAKE_CLOSURE(init, f);
         }
     };
 
-    EXPORT_GENEX_VIEW(fold_left);
-    EXPORT_GENEX_VIEW(fold_right);
+    EXPORT_GENEX_ALGORITHM(fold_left);
+    EXPORT_GENEX_ALGORITHM(fold_right);
 }

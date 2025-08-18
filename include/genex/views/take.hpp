@@ -100,7 +100,7 @@ namespace genex::views {
         }
 
         constexpr auto operator()(size_t n) const -> auto {
-            MAP_TO_BASE(n);
+            MAKE_CLOSURE(n);
         }
     };
 
@@ -118,7 +118,7 @@ namespace genex::views {
         }
 
         constexpr auto operator()(size_t n) const -> auto {
-            MAP_TO_BASE(n);
+            MAKE_CLOSURE(n);
         }
     };
 
@@ -137,7 +137,7 @@ namespace genex::views {
 
         template <typename Pred, typename Proj = meta::identity>
         constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            MAP_TO_BASE(pred, proj);
+            MAKE_CLOSURE(pred, proj);
         }
     };
 
@@ -156,7 +156,7 @@ namespace genex::views {
 
         template <typename Pred, typename Proj = meta::identity>
         constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            MAP_TO_BASE(pred, proj);
+            MAKE_CLOSURE(pred, proj);
         }
     };
 

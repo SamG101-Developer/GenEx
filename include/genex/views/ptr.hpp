@@ -30,17 +30,17 @@ namespace genex::views {
         DEFINE_OUTPUT_TYPE(ptr_unique);
 
         template <iterator I, sentinel S> requires (unique_ptr<deref_value_t<I>>)
-        constexpr auto operator()(I &&first, S &&last) const -> decltype(auto) {
+        constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_ptr_unique, first, last);
         }
 
         template <range Rng> requires (unique_ptr<range_value_t<Rng>>)
-        constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+        constexpr auto operator()(Rng &&rng) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_ptr_unique, rng);
         }
 
-        constexpr auto operator()() const -> decltype(auto) {
-            MAP_TO_BASE();
+        constexpr auto operator()() const -> auto {
+            MAKE_CLOSURE();
         }
     };
 

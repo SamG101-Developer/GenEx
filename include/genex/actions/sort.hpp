@@ -23,13 +23,13 @@ namespace genex::actions::detail {
 namespace genex::actions {
     DEFINE_ACTION(sort) {
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::invocable<std::invoke_result_t<Proj, range_value_t<Rng>>, std::invoke_result_t<Proj, range_value_t<Rng>>> F>
-        constexpr auto operator()(Rng &&rng, F &&f, Proj &&proj = {}) const -> decltype(auto) {
+        constexpr auto operator()(Rng &&rng, F &&f, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL(detail::do_sort, &rng, f, proj);
         }
 
         template <typename F, typename Proj = meta::identity>
-        constexpr auto operator()(F &&f, Proj &&proj = {}) const -> decltype(auto) {
-            MAP_TO_BASE(f, proj);
+        constexpr auto operator()(F &&f, Proj &&proj = {}) const -> auto {
+            MAKE_CLOSURE(f, proj);
         }
     };
 

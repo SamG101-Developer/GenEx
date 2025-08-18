@@ -36,8 +36,8 @@ namespace genex::algorithms {
         }
 
         template <typename E, typename C = std::less<E>, typename Proj = meta::identity>
-        constexpr auto operator()(E &&elem, C &&comp = {}, Proj &&proj = {}) const -> decltype(auto) {
-            MAP_TO_BASE(elem, comp, proj);
+        constexpr auto operator()(E &&elem, C &&comp = {}, Proj &&proj = {}) const -> auto {
+            MAKE_CLOSURE(elem, comp, proj);
         }
     };
 

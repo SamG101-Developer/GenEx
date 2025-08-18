@@ -33,8 +33,8 @@ namespace genex::actions {
         }
 
         template <typename E>
-        auto operator()(E &&elem) const -> decltype(auto) {
-            MAP_TO_BASE(elem);
+        auto operator()(E &&elem) const -> auto {
+            MAKE_CLOSURE(elem);
         }
     };
 
@@ -45,8 +45,8 @@ namespace genex::actions {
         }
 
         template <typename E>
-        auto operator()(E &&elem) const -> decltype(auto) {
-            MAP_TO_BASE(elem);
+        auto operator()(E &&elem) const -> auto {
+            MAKE_CLOSURE(elem);
         }
     };
 

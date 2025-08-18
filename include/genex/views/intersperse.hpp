@@ -67,8 +67,8 @@ namespace genex::views {
         }
 
         template <typename E>
-        constexpr auto operator()(E &&sep) const -> decltype(auto) {
-            MAP_TO_BASE(sep);
+        constexpr auto operator()(E &&sep) const -> auto {
+            MAKE_CLOSURE(sep);
         }
     };
 
@@ -86,8 +86,8 @@ namespace genex::views {
         }
 
         template <std::invocable F>
-        constexpr auto operator()(F &&sep) const -> decltype(auto) {
-            MAP_TO_BASE(sep);
+        constexpr auto operator()(F &&sep) const -> auto {
+            MAKE_CLOSURE(sep);
         }
     };
 

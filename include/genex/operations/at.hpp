@@ -2,7 +2,7 @@
 #include <utility>
 #include <genex/macros.hpp>
 #include <genex/concepts.hpp>
-#include <genex/operations/_operations_base.hpp>
+#include <genex/operations/_operation_base.hpp>
 #include <genex/operations/size.hpp>
 
 using namespace genex::concepts;
@@ -32,8 +32,8 @@ namespace genex::operations {
             return *it;
         }
 
-        constexpr auto operator()(const std::size_t n) const noexcept -> decltype(auto) {
-            MAP_TO_BASE(n);
+        constexpr auto operator()(const std::size_t n) const noexcept -> auto {
+            MAKE_CLOSURE(n);
         }
     };
 
@@ -53,8 +53,8 @@ namespace genex::operations {
             return *gen.begin();
         }
 
-        constexpr auto operator()() const noexcept -> decltype(auto) {
-            MAP_TO_BASE();
+        constexpr auto operator()() const noexcept -> auto {
+            MAKE_CLOSURE();
         }
     };
 
@@ -79,8 +79,8 @@ namespace genex::operations {
             return *last;
         }
 
-        constexpr auto operator()() const noexcept -> decltype(auto) {
-            MAP_TO_BASE();
+        constexpr auto operator()() const noexcept -> auto {
+            MAKE_CLOSURE();
         }
     };
 

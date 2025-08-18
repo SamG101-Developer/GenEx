@@ -50,8 +50,8 @@
         MAP_TO_BASE_SOLO_FORWARD_RANGE_ARGUMENT()\
     ))
 
-#define MAP_TO_BASE(...) \
-    return [MAP_TO_BASE_CAPTURES(__VA_ARGS__)]<range Rng>(Rng &&rng) mutable -> decltype(auto) { \
+#define MAKE_CLOSURE(...) \
+    return [MAP_TO_BASE_CAPTURES(__VA_ARGS__)]<range Rng>(Rng &&rng) mutable -> auto { \
         return (*this)(MAP_TO_BASE_ARGUMENTS(__VA_ARGS__)); \
     }
 

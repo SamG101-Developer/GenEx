@@ -53,8 +53,8 @@ namespace genex::views {
             FWD_TO_IMPL_VIEW(detail::do_deref, rng);
         }
 
-        constexpr auto operator()() const -> decltype(auto) {
-            MAP_TO_BASE();
+        constexpr auto operator()() const -> auto {
+            MAKE_CLOSURE();
         }
     };
 
@@ -71,8 +71,8 @@ namespace genex::views {
             FWD_TO_IMPL_VIEW(detail::do_address, rng);
         }
 
-        constexpr auto operator()() const -> decltype(auto) {
-            MAP_TO_BASE();
+        constexpr auto operator()() const -> auto {
+            MAKE_CLOSURE();
         }
     };
 

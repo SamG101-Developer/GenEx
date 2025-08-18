@@ -44,7 +44,7 @@ namespace genex::views {
         }
 
         constexpr auto operator()() const -> auto {
-            MAP_TO_BASE();
+            MAKE_CLOSURE();
         }
     };
 

@@ -11,8 +11,8 @@ using namespace genex::type_traits;
 namespace genex::views::detail {
     template <iterator I, sentinel S>
     auto do_reverse(I &&first, S &&last) -> generator<iter_value_t<I>> {
-        for (; first != last; ++first) {
-            co_yield *first;
+        for (; last != first; --last) {
+            co_yield *iterators::next(last, -1);
         }
     }
 
@@ -39,7 +39,7 @@ namespace genex::views {
         }
 
         constexpr auto operator()() const -> auto {
-            MAP_TO_BASE();
+            MAKE_CLOSURE();
         }
     };
 

@@ -92,8 +92,8 @@ namespace genex::views {
         }
 
         template <typename T>
-        constexpr auto operator()() const -> decltype(auto) {
-            return [this]<range Rng>(Rng &&rng) mutable -> decltype(auto) { return this->operator()<Rng, T>(std::forward<Rng>(rng)); };
+        constexpr auto operator()() const -> auto {
+            return [this]<range Rng>(Rng &&rng) mutable -> auto { return this->operator()<Rng, T>(std::forward<Rng>(rng)); };
         }
     };
 

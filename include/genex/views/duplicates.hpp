@@ -62,8 +62,8 @@ namespace genex::views {
         }
 
         template <typename Proj = meta::identity>
-        constexpr auto operator()(Proj &&proj = {}) const -> decltype(auto) {
-            MAP_TO_BASE(proj);
+        constexpr auto operator()(Proj &&proj = {}) const -> auto {
+            MAKE_CLOSURE(proj);
         }
     };
 

@@ -45,7 +45,7 @@ namespace genex::views {
 
         template <typename E>
         constexpr auto operator()(E &&old_val, E &&new_val) const -> auto {
-            MAP_TO_BASE(old_val, new_val);
+            MAKE_CLOSURE(old_val, new_val);
         }
     };
 

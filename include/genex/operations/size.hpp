@@ -2,7 +2,7 @@
 #include <iterator>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
-#include <genex/operations/_operations_base.hpp>
+#include <genex/operations/_operation_base.hpp>
 
 
 namespace genex::operations {
@@ -35,8 +35,8 @@ namespace genex::operations {
             return count;
         }
 
-        constexpr auto operator()() const noexcept -> decltype(auto) {
-            MAP_TO_BASE();
+        constexpr auto operator()() const noexcept -> auto {
+            MAKE_CLOSURE();
         }
     };
 
@@ -51,8 +51,8 @@ namespace genex::operations {
             return size(std::forward<Rng>(r)) == 0;
         }
 
-        constexpr auto operator()() const noexcept -> decltype(auto) {
-            MAP_TO_BASE();
+        constexpr auto operator()() const noexcept -> auto {
+            MAKE_CLOSURE();
         }
     };
 

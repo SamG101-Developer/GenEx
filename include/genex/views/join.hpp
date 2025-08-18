@@ -67,11 +67,11 @@ namespace genex::views {
 
         template <typename T, std::invocable<T> Proj>
         constexpr auto operator()(Proj &&proj) const -> auto {
-            MAP_TO_BASE(proj);
+            MAKE_CLOSURE(proj);
         }
 
         constexpr auto operator()() const -> auto {
-            MAP_TO_BASE();
+            MAKE_CLOSURE();
         }
     };
 
@@ -90,7 +90,7 @@ namespace genex::views {
 
         template <typename T, typename Proj = meta::identity>
         constexpr auto operator()(T &&sep, Proj &&proj = {}) const -> auto {
-            MAP_TO_BASE(sep, proj);
+            MAKE_CLOSURE(sep, proj);
         }
     };
 
