@@ -34,7 +34,7 @@ namespace genex::algorithms::detail {
 namespace genex::algorithms {
     DEFINE_ALGORITHM(sorted) {
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::invocable<std::invoke_result_t<Proj, range_value_t<Rng>>, std::invoke_result_t<Proj, range_value_t<Rng>>> F>
-        constexpr auto operator()(Rng &&rng, F &&f, Proj &&proj) const -> auto {
+        constexpr auto operator()(Rng &&rng, F &&f, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL(detail::do_sorted, rng, f, proj);
         }
 

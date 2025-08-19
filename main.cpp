@@ -20,6 +20,7 @@
 #include <genex/algorithms/binary_search.hpp>
 #include <genex/algorithms/find.hpp>
 #include <genex/algorithms/fold.hpp>
+#include <genex/algorithms/minmax.hpp>
 #include <genex/algorithms/none_of.hpp>
 #include <genex/algorithms/position.hpp>
 #include <genex/algorithms/sorted.hpp>
@@ -541,6 +542,20 @@ int main() {
         const auto a = std::vector{4, 5, 6, 1, 2, 3, 5};
         const auto b = a | genex::algorithms::sorted(std::less<int>{});
         const auto expected1 = std::vector{1, 2, 3, 4, 5, 5, 6};
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{4, 5, 6, 1, 2, 3, 5};
+        const auto b = a | genex::algorithms::min();
+        const auto expected1 = 1;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{4, 5, 6, 1, 2, 3, 5};
+        const auto b = a | genex::algorithms::max();
+        const auto expected1 = 6;
         assert(b == expected1);
     }
 
