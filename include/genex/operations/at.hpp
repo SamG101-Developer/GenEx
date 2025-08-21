@@ -49,7 +49,7 @@ namespace genex::operations {
         }
 
         template <typename T>
-        constexpr auto operator()(std::generator<T> &&gen) const noexcept -> T& {
+        constexpr auto operator()(std::generator<T> &&gen) const noexcept -> T {
             return *gen.begin();
         }
 
