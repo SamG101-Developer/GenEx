@@ -41,6 +41,7 @@
 #include <genex/views/iota.hpp>
 #include <genex/views/join.hpp>
 #include <genex/views/map.hpp>
+#include <genex/views/materialize.hpp>
 #include <genex/views/move.hpp>
 #include <genex/views/ptr.hpp>
 #include <genex/views/remove.hpp>
@@ -121,7 +122,6 @@ int main() {
             | genex::views::move
             | genex::views::filter([](auto &&s) { return s->starts_with("h"); })
             | genex::views::to<std::vector>();
-
     }
 
     {
@@ -201,6 +201,17 @@ int main() {
     {
         const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         const auto b = a
+            | genex::views::duplicates()
+            | genex::views::to<std::vector>();
+        const auto expected1 = std::vector<int>{};
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        const auto b = a
+            | genex::views::filter([](auto x) { return x > 3; })
+            | genex::views::materialize
             | genex::views::duplicates()
             | genex::views::to<std::vector>();
         const auto expected1 = std::vector<int>{};

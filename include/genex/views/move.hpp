@@ -40,9 +40,8 @@ namespace genex::views {
             FWD_TO_IMPL_VIEW(detail::do_move, rng);
         }
 
-        template <typename F>
-        constexpr auto operator()(F &&f) const -> auto {
-            MAKE_CLOSURE(f);
+        constexpr auto operator()() const -> auto {
+            MAKE_CLOSURE();
         }
     };
 
