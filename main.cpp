@@ -302,17 +302,17 @@ int main() {
         assert(i == expected3);
     }
 
-    // {
-    //     const auto a = genex::views::iota(0, 10)
-    //         | genex::views::to<std::vector>();
-    //     auto expected1 = std::vector<size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    //     assert(a == expected1);
-    //
-    //     const auto b = genex::views::iota(10)
-    //         | genex::views::to<std::vector>();
-    //     auto expected2 = std::vector<size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    //     assert(b == expected2);
-    // }
+    {
+        const auto a = genex::views::iota(0, 10)
+            | genex::views::to<std::vector>();
+        auto expected1 = std::vector<size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        assert(a == expected1);
+
+        const auto b = genex::views::iota(10)
+            | genex::views::to<std::vector>();
+        auto expected2 = std::vector<size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        assert(b == expected2);
+    }
 
     {
         const auto a = std::vector{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
