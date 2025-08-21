@@ -3,6 +3,8 @@
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/operations/size.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 
 using namespace genex::concepts;
 using namespace genex::type_traits;
@@ -19,13 +21,13 @@ namespace genex::operations {
     concept has_member_back = requires(Rng &&r) { r.back(); };
 
     DEFINE_OPERATION(at) {
-        template <typename Rng> requires has_member_at<Rng>
+        template <typename Rng> requires (has_member_at<Rng>)
         constexpr auto operator()(Rng &&r, const std::size_t n) const noexcept -> range_value_t<Rng>& {
             return r.at(n);
         }
 
         template <typename T>
-        constexpr auto operator()(std::generator<T> &&gen, const std::size_t n) const noexcept -> T& {
+        constexpr auto operator()(std::generator<T> &&gen, const std::size_t n) const noexcept -> T {
             auto it = iterators::begin(gen);
             for (size_t i = 0; i < n && it != iterators::end(gen); ++i, ++it) {
             }
@@ -38,18 +40,18 @@ namespace genex::operations {
     };
 
     DEFINE_OPERATION(front) {
-        template <typename Rng> requires has_member_front<Rng>
+        template <typename Rng> requires (has_member_front<Rng>)
         constexpr auto operator()(Rng &&r) const noexcept -> range_value_t<Rng>& {
             return r.front();
         }
 
-        template <typename Rng> requires has_member_at<Rng>
+        template <typename Rng> requires (has_member_at<Rng> and not has_member_front<Rng>)
         constexpr auto operator()(Rng &&r) const noexcept -> range_value_t<Rng>& {
             return r.at(0);
         }
 
-        template <typename T>
-        constexpr auto operator()(std::generator<T> &&gen) const noexcept -> T {
+        template <typename Rng>
+        constexpr auto operator()(Rng &&gen) const noexcept -> range_value_t<Rng> {
             return *gen.begin();
         }
 
@@ -59,24 +61,22 @@ namespace genex::operations {
     };
 
     DEFINE_OPERATION(back) {
-        template <typename Rng> requires has_member_back<Rng>
+        template <typename Rng> requires (has_member_back<Rng>)
         constexpr auto operator()(Rng &&r) const noexcept -> range_value_t<Rng>& {
             return r.back();
         }
 
-        template <typename Rng> requires has_member_at<Rng>
+        template <typename Rng> requires (has_member_at<Rng> and not has_member_back<Rng>)
         constexpr auto operator()(Rng &&r) const noexcept -> range_value_t<Rng>& {
             return r.at(size(r) - 1);
         }
 
-        template <typename T>
-        constexpr auto operator()(std::generator<T> &&gen) const noexcept -> T& {
+        template <typename Rng>
+        constexpr auto operator()(Rng &&gen) const noexcept -> range_value_t<Rng> {
             auto it = iterators::begin(gen);
-            auto last = static_cast<T*>(nullptr);
             for (; it != iterators::end(gen); ++it) {
-                last = std::addressof(*it);
             }
-            return *last;
+            return *it;
         }
 
         constexpr auto operator()() const noexcept -> auto {

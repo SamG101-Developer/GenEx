@@ -871,4 +871,50 @@ int main() {
         const auto expected1 = std::vector{9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
         assert(a == expected1);
     }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        auto b = a | genex::operations::front;
+        const auto expected1 = 0;
+        assert(b == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        auto b = a | genex::operations::front;
+        const auto expected1 = 0;
+        assert(b == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        auto b = a
+            | genex::views::filter([](auto &&x) { return x % 2 == 1; })
+            | genex::operations::front;
+        const auto expected1 = 1;
+        assert(b == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        auto b = a | genex::operations::back;
+        const auto expected1 = 9;
+        assert(b == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        auto b = a
+            | genex::views::filter([](auto &&x) { return x % 2 == 0; })
+            | genex::operations::back;
+        const auto expected1 = 8;
+        assert(b == expected1);
+    }
+
+    {
+        auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        auto b = a | genex::operations::at(5);
+        const auto expected1 = 5;
+        assert(b == expected1);
+    }
 }
