@@ -41,6 +41,7 @@
 #include <genex/views/iota.hpp>
 #include <genex/views/join.hpp>
 #include <genex/views/map.hpp>
+#include <genex/views/move.hpp>
 #include <genex/views/ptr.hpp>
 #include <genex/views/remove.hpp>
 #include <genex/views/replace.hpp>
@@ -110,6 +111,17 @@ int main() {
             | genex::views::to<std::vector>();
         const auto expected2 = std::vector{std::string("hello")};
         assert(g == expected2);
+    }
+
+    {
+        auto w = std::vector<std::unique_ptr<std::string>>{};
+        w.push_back(std::make_unique<std::string>("hello"));
+        w.push_back(std::make_unique<std::string>("world"));
+        const auto g = w
+            | genex::views::move
+            | genex::views::filter([](auto &&s) { return s->starts_with("h"); })
+            | genex::views::to<std::vector>();
+
     }
 
     {
