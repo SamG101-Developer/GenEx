@@ -16,6 +16,13 @@ namespace genex::views::detail {
         }
     }
 
+    template <typename T, iterator I, sentinel S> requires (std::is_pointer_v<iter_value_t<I>>)
+    auto do_cast(I &&first, S &&last) -> generator<T> {
+        for (; first != last; ++first) {
+            co_yield dynamic_cast<T>(std::forward<decltype(*first)>(*first));
+        }
+    }
+
     template <typename T, iterator I, sentinel S> requires (unique_ptr<iter_value_t<I>>)
     auto do_cast(I &&first, S &&last) -> generator<std::unique_ptr<T>> {
         for (; first != last; ++first) {
@@ -41,6 +48,13 @@ namespace genex::views::detail {
     auto do_cast(Rng &&rng) -> generator<T> {
         for (auto &&x : rng) {
             co_yield static_cast<T>(std::forward<decltype(x)>(x));
+        }
+    }
+
+    template <typename T, range Rng> requires (std::is_pointer_v<range_value_t<Rng>>)
+    auto do_cast(Rng &&rng) -> generator<T> {
+        for (auto &&x : rng) {
+            co_yield dynamic_cast<T>(std::forward<decltype(x)>(x));
         }
     }
 
