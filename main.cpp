@@ -445,9 +445,10 @@ int main() {
         const auto a = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         const auto b = std::vector{5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
         const auto c = a
+            | genex::views::filter([](auto &&x) { return x < 4; })
             | genex::views::set_difference(b)
             | genex::views::to<std::vector>();
-        const auto expected1 = std::vector{0, 1, 2, 3, 4};
+        const auto expected1 = std::vector{0, 1, 2, 3};
         assert(c == expected1);
     }
 

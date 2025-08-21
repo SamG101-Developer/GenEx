@@ -20,7 +20,7 @@ namespace genex::views::detail {
     template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
     auto do_set_difference(Rng1 &&rng1, Rng2 &&rng2) -> generator<range_value_t<Rng1>> {
         for (auto &&x : rng1) {
-            if (!algorithms::contains(rng2, x)) { co_yield std::forward<decltype(x)>(x); }
+            if (!algorithms::contains(std::forward<Rng2>(rng2), x)) { co_yield std::forward<decltype(x)>(x); }
         }
     }
 
@@ -34,7 +34,7 @@ namespace genex::views::detail {
     template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
     auto do_set_intersection(Rng1 &&rng1, Rng2 &&rng2) -> generator<range_value_t<Rng1>> {
         for (auto &&x : rng1) {
-            if (algorithms::contains(rng2, x)) { co_yield std::forward<decltype(x)>(x); }
+            if (algorithms::contains(std::forward<Rng2>(rng2), x)) { co_yield std::forward<decltype(x)>(x); }
         }
     }
 
@@ -51,10 +51,10 @@ namespace genex::views::detail {
     template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
     auto do_set_symmetric_difference(Rng1 &&rng1, Rng2 &&rng2) -> generator<range_value_t<Rng1>> {
         for (auto &&x : rng1) {
-            if (!algorithms::contains(rng2, x)) { co_yield std::forward<decltype(x)>(x); }
+            if (!algorithms::contains(std::forward<Rng2>(rng2), x)) { co_yield std::forward<decltype(x)>(x); }
         }
         for (auto &&x : rng2) {
-            if (!algorithms::contains(rng1, x)) { co_yield std::forward<decltype(x)>(x); }
+            if (!algorithms::contains(std::forward<Rng1>(rng1), x)) { co_yield std::forward<decltype(x)>(x); }
         }
     }
 
@@ -70,7 +70,7 @@ namespace genex::views::detail {
     auto do_set_union(Rng1 &&rng1, Rng2 &&rng2) -> generator<range_value_t<Rng1>> {
         for (auto &&x : rng1) { co_yield std::forward<decltype(x)>(x); }
         for (auto &&x : rng2) {
-            if (!algorithms::contains(rng1, x)) { co_yield std::forward<decltype(x)>(x); }
+            if (!algorithms::contains(std::forward<Rng1>(rng1), x)) { co_yield std::forward<decltype(x)>(x); }
         }
     }
 }
