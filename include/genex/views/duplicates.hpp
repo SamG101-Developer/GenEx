@@ -17,7 +17,7 @@ namespace genex::views::detail {
         for (; first != last; ++first) {
             auto elem = *first;
             auto count_orig = orig;
-            auto count = algorithms::count(std::move(count_orig), std::forward<I>(last), std::forward<decltype(elem)>(elem));
+            auto count = algorithms::count(std::move(count_orig), std::forward<I>(last), std::forward<decltype(elem)>(elem), std::forward<Proj>(proj));
 
             if (count > 1) {
                 for (; orig != last; ++orig) {
