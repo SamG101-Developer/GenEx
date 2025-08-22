@@ -34,6 +34,7 @@
 #include <genex/views/duplicates.hpp>
 #include <genex/views/enumerate.hpp>
 #include <genex/views/filter.hpp>
+#include <genex/views/forward.hpp>
 #include <genex/views/flat.hpp>
 #include <genex/views/for_each.hpp>
 #include <genex/views/interleave.hpp>
@@ -119,7 +120,7 @@ int main() {
         w.push_back(std::make_unique<std::string>("hello"));
         w.push_back(std::make_unique<std::string>("world"));
         const auto g = w
-            | genex::views::move
+            | genex::views::forward
             | genex::views::filter([](auto &&s) { return s->starts_with("h"); })
             | genex::views::to<std::vector>();
     }
@@ -542,6 +543,15 @@ int main() {
         const auto a = std::vector{4, 5, 6, 1, 2, 3, 5};
         const auto b = a
             | genex::algorithms::position([](auto x) { return x == 7; });
+        const auto expected1 = -1;
+        assert(b == expected1);
+    }
+
+    {
+        const auto a = std::vector{4, 5, 6, 1, 2, 3, 5};
+        const auto b = a
+            | genex::views::filter([](auto x) { return x > 3; })
+            | genex::algorithms::position([](auto x) { return x == 1; });
         const auto expected1 = -1;
         assert(b == expected1);
     }
