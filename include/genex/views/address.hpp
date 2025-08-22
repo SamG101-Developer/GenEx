@@ -62,12 +62,12 @@ namespace genex::views {
         DEFINE_OUTPUT_TYPE(deref);
 
         template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last) const -> generator<iter_value_t<I>*> {
+        constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_address, first, last);
         }
 
         template <range Rng>
-        constexpr auto operator()(Rng &&rng) const -> generator<range_value_t<Rng>*> {
+        constexpr auto operator()(Rng &&rng) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_address, rng);
         }
 
