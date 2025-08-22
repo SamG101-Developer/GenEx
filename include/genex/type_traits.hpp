@@ -3,6 +3,10 @@
 #include <genex/generator.hpp>
 #include <genex/iterators/begin.hpp>
 
+#define CONSTRAIN_RNG_TAG(Tag) static_assert(categories::Tag<iterators::begin_t<Rng>>, "Rng must be a " #Tag " range")
+
+#define CONSTRAIN_ITER_TAG(Tag) static_assert(categories::Tag<I>, "I must be a " #Tag " iterator")
+
 
 namespace genex::type_traits {
     template <typename Rng>

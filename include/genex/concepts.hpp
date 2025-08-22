@@ -60,4 +60,7 @@ namespace genex::concepts {
 
     template <typename T>
     concept weak_ptr = is_weak_ptr<std::remove_cvref_t<T>>::value;
+
+    template <typename S, typename I>
+    concept sentinel_for = iterator<I> and sentinel<S> and std::sentinel_for<S, I>;
 }

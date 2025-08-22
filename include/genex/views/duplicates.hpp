@@ -1,5 +1,6 @@
 #pragma once
 #include <coroutine>
+#include <genex/categories.hpp>
 #include <genex/concepts.hpp>
 #include <genex/algorithms/count.hpp>
 #include <genex/macros.hpp>
@@ -51,13 +52,15 @@ namespace genex::views {
     DEFINE_VIEW(duplicates) {
         DEFINE_OUTPUT_TYPE(duplicates);
 
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity>
+        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity> requires (sentinel_for<S, I>)
         constexpr auto operator()(I &&first, S &&last, Proj &&proj = {}) const -> auto {
+            CONSTRAIN_ITER_TAG(forward_iterator);
             FWD_TO_IMPL_VIEW(detail::do_duplicates, first, last, proj);
         }
 
         template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity>
         constexpr auto operator()(Rng &&rng, Proj &&proj = {}) const -> auto {
+            CONSTRAIN_RNG_TAG(forward_iterator);
             FWD_TO_IMPL_VIEW(detail::do_duplicates, rng, proj);
         }
 
