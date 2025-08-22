@@ -12,18 +12,18 @@ using namespace genex::type_traits;
 
 namespace genex::actions::detail {
     template <typename Rng>
-    auto do_pop(Rng *rng, const std::size_t n) -> void {
-        iterators::erase(*rng, iterators::next(iterators::begin(*rng), n));
+    auto do_pop(Rng &&rng, const std::size_t n) -> void {
+        iterators::erase(std::forward<Rng>(rng), iterators::next(iterators::begin(rng), n));
     }
 
     template <typename Rng>
-    auto do_pop_front(Rng *rng) -> void {
-        return do_pop(rng, 0);
+    auto do_pop_front(Rng &&rng) -> void {
+        return do_pop(std::forward<Rng>(rng), 0);
     }
 
     template <typename Rng>
-    auto do_pop_back(Rng *rng) -> void {
-        return do_pop(rng, operations::size(*rng) - 1);
+    auto do_pop_back(Rng &&rng) -> void {
+        return do_pop(std::forward<Rng>(rng), operations::size(rng) - 1);
     }
 }
 
@@ -32,7 +32,7 @@ namespace genex::actions {
     DEFINE_ACTION(pop) {
         template <typename Rng>
         constexpr auto operator()(Rng &&rng, const std::size_t n) const -> void {
-            FWD_TO_IMPL(detail::do_pop, &rng, n);
+            FWD_TO_IMPL(detail::do_pop, rng, n);
         }
 
         constexpr auto operator()(const std::size_t n) const -> auto {
@@ -43,7 +43,7 @@ namespace genex::actions {
     DEFINE_ACTION(pop_front) {
         template <typename Rng>
         constexpr auto operator()(Rng &&rng) const -> void {
-            FWD_TO_IMPL(detail::do_pop_front, &rng);
+            FWD_TO_IMPL(detail::do_pop_front, rng);
         }
 
         constexpr auto operator()() const -> auto {
@@ -54,7 +54,7 @@ namespace genex::actions {
     DEFINE_ACTION(pop_back) {
         template <typename Rng>
         constexpr auto operator()(Rng &&rng) const -> void {
-            FWD_TO_IMPL(detail::do_pop_back, &rng);
+            FWD_TO_IMPL(detail::do_pop_back, rng);
         }
 
         constexpr auto operator()() const -> auto {
