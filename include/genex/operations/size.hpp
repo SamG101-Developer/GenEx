@@ -29,8 +29,8 @@ namespace genex::operations {
             return std::size(r);
         }
 
-        template <typename T>
-        constexpr auto operator()(generator<T> &&gen) const noexcept -> std::size_t {
+        template <typename Rng>
+        constexpr auto operator()(Rng &&gen) const noexcept -> std::size_t {
             auto count = static_cast<std::size_t>(0);
             for (auto &&_ : std::move(gen)) {
                 ++count;
