@@ -13,7 +13,7 @@ using namespace genex::type_traits;
 namespace genex::actions::detail {
     template <typename Rng>
     auto do_pop(Rng &&rng, const std::size_t n) -> void {
-        iterators::erase(std::forward<Rng>(rng), iterators::next(iterators::begin(rng), n));
+        iterators::erase(std::forward<Rng>(rng), iterators::next(iterators::begin(std::forward<Rng>(rng)), n));
     }
 
     template <typename Rng>
