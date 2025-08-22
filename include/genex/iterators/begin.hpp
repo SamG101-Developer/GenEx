@@ -6,16 +6,16 @@
 
 namespace genex::iterators {
     template <typename Rng>
-    concept has_member_begin = requires(Rng &&r) { r.begin(); };
+    concept has_member_begin = requires(Rng &&r) { { r.begin() } -> std::input_or_output_iterator; };
 
     template <typename Rng>
-    concept has_member_rbegin = requires(Rng &&r) { r.rbegin(); };
+    concept has_member_rbegin = requires(Rng &&r) { { r.rbegin() } -> std::input_or_output_iterator; };
 
     template <typename Rng>
-    concept has_std_begin = requires(Rng &&r) { std::begin(std::forward<Rng>(r)); };
+    concept has_std_begin = requires(Rng &&r) { { std::begin(std::forward<Rng>(r)) } -> std::input_or_output_iterator; };
 
     template <typename Rng>
-    concept has_std_rbegin = requires(Rng &&r) { std::rbegin(std::forward<Rng>(r)); };
+    concept has_std_rbegin = requires(Rng &&r) { { std::rbegin(std::forward<Rng>(r)) } -> std::input_or_output_iterator; };
 
     template <typename Rng>
     concept has_begin = has_member_begin<Rng> || has_std_begin<Rng>;
