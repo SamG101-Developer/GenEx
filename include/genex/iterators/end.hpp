@@ -6,10 +6,14 @@
 
 namespace genex::iterators {
     template <typename Rng>
-    concept has_member_end = requires(Rng &r) { { r.end() } -> std::sentinel_for<decltype(r.begin())>; };
+    concept has_member_end =
+        requires(Rng &&r) { { r.end() } -> std::sentinel_for<decltype(r.begin())>; } ||
+        requires(Rng const &r) { { r.end() } -> std::sentinel_for<decltype(r.begin())>; };
 
     template <typename Rng>
-    concept has_member_rend = requires(Rng &r) { { r.rend() } -> std::sentinel_for<decltype(r.rbegin())>; };
+    concept has_member_rend =
+        requires(Rng &r) { { r.rend() } -> std::sentinel_for<decltype(r.rbegin())>; } ||
+        requires(Rng const &r) { { r.rend() } -> std::sentinel_for<decltype(r.rbegin())>; };
 
     template <typename Rng>
     concept has_std_end = requires(Rng &r) { { std::end(std::forward<Rng>(r)) } -> std::sentinel_for<decltype(r.begin())>; };
