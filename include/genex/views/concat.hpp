@@ -1,5 +1,6 @@
 #pragma once
 #include <coroutine>
+#include <genex/categories.hpp>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
@@ -26,13 +27,17 @@ namespace genex::views {
     DEFINE_VIEW(concat) {
         DEFINE_OUTPUT_TYPE(concat);
 
-        template <iterator I1, iterator I2, sentinel S1, sentinel S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
+        template <iterator I1, iterator I2, sentinel S1, sentinel S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>> && sentinel_for<S1, I1> && sentinel_for<S2, I2>)
         constexpr auto operator()(I1 &&i1, I2 &&i2, S1 &&s1, S2 &&s2) const -> auto {
+            CONSTRAIN_ITER_TAG(I1, input_iterator);
+            CONSTRAIN_ITER_TAG(I2, input_iterator);
             FWD_TO_IMPL_VIEW(detail::do_concat, i1, i2, s1, s2);
         }
 
         template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
         constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> auto {
+            CONSTRAIN_RNG_TAG(Rng1, input_iterator);
+            CONSTRAIN_RNG_TAG(Rng2, input_iterator);
             FWD_TO_IMPL_VIEW(detail::do_concat, rng1, rng2);
         }
 
