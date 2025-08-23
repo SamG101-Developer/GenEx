@@ -1,6 +1,7 @@
 #pragma once
 #include <coroutine>
-#include <functional>
+#include <utility>
+#include <genex/categories.hpp>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
@@ -11,9 +12,8 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>> requires (
-        categories::input_iterator<I> and
-        std::equality_comparable_with<iter_value_t<I>, Old>)
+    template <iterator I, sentinel_for<I> S> requires (
+        categories::input_iterator<I>)
     auto do_join(I &&first, S &&last) -> generator<char> {
         auto result = std::string();
         for (; first != last; ++first) {
@@ -22,9 +22,8 @@ namespace genex::views::detail {
         for (auto &&c : result) { co_yield c; }
     }
 
-    template <range Rng, typename Old = range_value_t<Rng>> requires (
-        categories::input_range<Rng> and
-        std::equality_comparable_with<range_value_t<Rng>, Old>)
+    template <range Rng> requires (
+        categories::input_range<Rng>)
     auto do_join(Rng &&rng) -> generator<char> {
         auto result = std::string();
         for (auto &&x : rng) {
@@ -33,9 +32,8 @@ namespace genex::views::detail {
         for (auto &&c : result) { co_yield c; }
     }
 
-    template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, typename New> requires (
+    template <iterator I, sentinel_for<I> S, typename New> requires (
         categories::input_iterator<I> and
-        std::equality_comparable_with<iter_value_t<I>, Old> and
         std::convertible_to<New, iter_value_t<I>>)
     auto do_join_with(I &&first, S &&last, New &&sep) -> generator<char> {
         auto result = std::string();
@@ -46,9 +44,8 @@ namespace genex::views::detail {
         for (auto &&c : result) { co_yield c; }
     }
 
-    template <range Rng, typename New, typename Old = range_value_t<Rng>> requires (
+    template <range Rng, typename New> requires (
         categories::input_range<Rng> and
-        std::equality_comparable_with<range_value_t<Rng>, Old> and
         std::convertible_to<New, range_value_t<Rng>>)
     auto do_join_with(Rng &&rng, New &&sep) -> generator<char> {
         auto result = std::string();
@@ -65,16 +62,14 @@ namespace genex::views {
     DEFINE_VIEW(join) {
         DEFINE_OUTPUT_TYPE(join);
 
-        template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>> requires (
-            categories::input_iterator<I> and
-            std::equality_comparable_with<iter_value_t<I>, Old>)
+        template <iterator I, sentinel_for<I> S> requires (
+            categories::input_iterator<I>)
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_join, first, last);
         }
 
-        template <range Rng, typename Old = range_value_t<Rng>> requires (
-            categories::input_range<Rng> and
-            std::equality_comparable_with<range_value_t<Rng>, Old>)
+        template <range Rng> requires (
+            categories::input_range<Rng>)
         constexpr auto operator()(Rng &&rng) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_join, rng);
         }
@@ -90,17 +85,15 @@ namespace genex::views {
     DEFINE_VIEW(join_with) {
         DEFINE_OUTPUT_TYPE(join_with);
 
-        template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, typename New> requires (
+        template <iterator I, sentinel_for<I> S, typename New> requires (
             categories::input_iterator<I> and
-            std::equality_comparable_with<iter_value_t<I>, Old> and
             std::convertible_to<New, iter_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last, New &&sep) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_join_with, first, last, sep);
         }
 
-        template <range Rng, typename New, typename Old = range_value_t<Rng>> requires (
+        template <range Rng, typename New> requires (
             categories::input_range<Rng> and
-            std::equality_comparable_with<range_value_t<Rng>, Old> and
             std::convertible_to<New, range_value_t<Rng>>)
         constexpr auto operator()(Rng &&rng, New &&sep) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_join_with, rng, sep);
