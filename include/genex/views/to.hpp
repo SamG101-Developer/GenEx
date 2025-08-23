@@ -17,13 +17,7 @@ namespace genex::views {
     template <typename Rng>
     using InnerRangeTypeT = typename InnerRangeType<std::remove_cvref_t<Rng>>::type;
 
-
-    // template <template <typename> typename Out, categories::non_generator_range Rng>
-    // auto to_base_fn(Rng &&rng) -> Out<range_value_t<Rng>> {
-    //     return Out<range_value_t<Rng>>(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
-    // }
-
-    template <template <typename> typename Out, range Rng> // requires (not range<range_value_t<Rng>>)
+    template <template <typename> typename Out, range Rng>
     auto to_base_fn(Rng &&rng) -> Out<range_value_t<Rng>> {
         Out<range_value_t<Rng>> out;
         auto begin = iterators::begin(rng);
@@ -33,17 +27,6 @@ namespace genex::views {
         }
         return out;
     }
-
-    // template <template <typename...> typename Out, range Rng> requires (range<range_value_t<Rng>>)
-    // auto to_base_fn(Rng &&rng) -> Out<InnerRangeTypeT<Rng>> {
-    //     auto inner = rng | views::map([]<typename Inner>(Inner &&x) { return to_base_fn<Out>(std::forward<Inner>(x)); });
-    //     return to_base_fn<Out>(std::move(inner));
-    // }
-
-    // template <typename Out, categories::non_generator_range Rng>
-    // auto to_base_fn(Rng &&rng) -> Out {
-    //     return Out(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
-    // }
 
     template <typename Out, range Rng>
     auto to_base_fn(Rng &&rng) -> Out {

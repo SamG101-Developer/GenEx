@@ -9,7 +9,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel S>
+    template <iterator I, sentinel_for<I> S>
     auto do_cycle(I &&first, S &&last) -> generator<iter_value_t<I>> {
         while (true) {
             for (auto it = first; it != last; ++it) { co_yield *it; }
@@ -29,7 +29,7 @@ namespace genex::views {
     DEFINE_VIEW(cycle) {
         DEFINE_OUTPUT_TYPE(cycle);
 
-        template <iterator I, sentinel S>
+        template <iterator I, sentinel_for<I> S>
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_cycle, first, last);
         }

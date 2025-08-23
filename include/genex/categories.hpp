@@ -6,19 +6,34 @@
 
 namespace genex::categories {
     template <typename T>
-    concept input_iterator = std::input_iterator<T>;
+    concept input_iterator = iterator<T> and std::input_iterator<T>;
 
     template <typename T>
-    concept forward_iterator = std::forward_iterator<T>;
+    concept forward_iterator = iterator<T> and std::forward_iterator<T>;
 
     template <typename T>
-    concept bidirectional_iterator = std::bidirectional_iterator<T>;
+    concept bidirectional_iterator = iterator<T> and std::bidirectional_iterator<T>;
 
     template <typename T>
-    concept random_access_iterator = std::random_access_iterator<T>;
+    concept random_access_iterator = iterator<T> and std::random_access_iterator<T>;
 
     template <typename T>
-    concept contiguous_iterator = std::contiguous_iterator<T>;
+    concept contiguous_iterator = iterator<T> and std::contiguous_iterator<T>;
+
+    template <typename Rng>
+    concept input_range = concepts::range<Rng> and input_iterator<iterators::begin_t<Rng>>;
+
+    template <typename Rng>
+    concept forward_range = concepts::range<Rng> and forward_iterator<iterators::begin_t<Rng>>;
+
+    template <typename Rng>
+    concept bidirectional_range = concepts::range<Rng> and bidirectional_iterator<iterators::begin_t<Rng>>;
+
+    template <typename Rng>
+    concept random_access_range = concepts::range<Rng> and random_access_iterator<iterators::begin_t<Rng>>;
+
+    template <typename Rng>
+    concept contiguous_range = concepts::range<Rng> and contiguous_iterator<iterators::begin_t<Rng>>;
 
     // template <typename Cat1, typename Cat2>
     // struct min_iterator_category;

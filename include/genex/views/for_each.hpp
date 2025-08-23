@@ -10,7 +10,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel S, std::invocable<iter_value_t<I>> F>
+    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> F>
     auto do_for_each(I &&first, S &&last, F &&f) -> void {
         for (; first != last; ++first) {
             std::invoke(std::forward<F>(f), std::forward<decltype(*first)>(*first));
@@ -31,7 +31,7 @@ namespace genex::views {
     DEFINE_VIEW(for_each) {
         DEFINE_OUTPUT_TYPE(for_each);
 
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> F>
+        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> F>
         constexpr auto operator()(I &&first, S &&last, F &&f) const -> void {
             FWD_TO_IMPL_VIEW_VOID(detail::do_for_each, first, last, f);
         }

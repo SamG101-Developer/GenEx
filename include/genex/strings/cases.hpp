@@ -12,14 +12,14 @@ using namespace genex::type_traits;
 
 
 namespace genex::strings::detail {
-    template <iterator I, sentinel S> requires (genex::strings::strict_char_like<iter_value_t<I>>)
+    template <iterator I, sentinel_for<I> S> requires (genex::strings::strict_char_like<iter_value_t<I>>)
     auto do_upper_case(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             co_yield std::toupper(*first);
         }
     }
 
-    template <iterator I, sentinel S> requires (genex::strings::wide_char_like<iter_value_t<I>>)
+    template <iterator I, sentinel_for<I> S> requires (genex::strings::wide_char_like<iter_value_t<I>>)
     auto do_upper_case(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             co_yield std::towupper(*first);
@@ -40,14 +40,14 @@ namespace genex::strings::detail {
         }
     }
 
-    template <iterator I, sentinel S> requires (genex::strings::strict_char_like<iter_value_t<I>>)
+    template <iterator I, sentinel_for<I> S> requires (genex::strings::strict_char_like<iter_value_t<I>>)
     auto do_lower_case(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             co_yield std::tolower(*first);
         }
     }
 
-    template <iterator I, sentinel S> requires (genex::strings::wide_char_like<iter_value_t<I>>)
+    template <iterator I, sentinel_for<I> S> requires (genex::strings::wide_char_like<iter_value_t<I>>)
     auto do_lower_case(I &&first, S &&last) -> genex::generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             co_yield std::towlower(*first);
@@ -72,7 +72,7 @@ namespace genex::strings::detail {
 
 namespace genex::strings {
     DEFINE_STRING(upper_case) {
-        template <iterator I, sentinel S> requires (char_like<iter_value_t<I>>)
+        template <iterator I, sentinel_for<I> S> requires (char_like<iter_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last) const -> generator<iter_value_t<I>> {
             FWD_TO_IMPL(detail::do_upper_case, first, last);
         }
@@ -88,7 +88,7 @@ namespace genex::strings {
     };
 
     DEFINE_STRING(lower_case) {
-        template <iterator I, sentinel S> requires (char_like<iter_value_t<I>>)
+        template <iterator I, sentinel_for<I> S> requires (char_like<iter_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last) const -> generator<iter_value_t<I>> {
             FWD_TO_IMPL(detail::do_lower_case, first, last);
         }

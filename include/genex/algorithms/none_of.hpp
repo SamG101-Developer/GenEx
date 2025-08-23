@@ -10,7 +10,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::algorithms::detail {
-    template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = genex::meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = genex::meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
     auto do_none_of(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> bool {
         for (; first != last; ++first) {
             if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
@@ -34,7 +34,7 @@ namespace genex::algorithms::detail {
 
 namespace genex::algorithms {
     DEFINE_ALGORITHM(none_of) {
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL(detail::do_none_of, first, last, pred, proj);
         }

@@ -12,7 +12,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity>
+    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity>
     auto do_duplicates(I &&first, S &&last, Proj &&proj = {}) -> generator<iter_value_t<I>> {
         auto orig = first;
         for (; first != last; ++first) {
@@ -52,7 +52,7 @@ namespace genex::views {
     DEFINE_VIEW(duplicates) {
         DEFINE_OUTPUT_TYPE(duplicates);
 
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity> requires (sentinel_for<S, I>)
+        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity> requires (sentinel_for<S, I>)
         constexpr auto operator()(I &&first, S &&last, Proj &&proj = {}) const -> auto {
             CONSTRAIN_ITER_TAG(I, forward_iterator);
             FWD_TO_IMPL_VIEW(detail::do_duplicates, first, last, proj);

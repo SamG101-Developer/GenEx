@@ -12,19 +12,7 @@ namespace genex::concepts {
     concept range = iterators::has_begin<Rng> and iterators::has_end<Rng>;
 
     template <typename I>
-    concept iterator = requires(I i)
-    {
-        { *i } -> std::convertible_to<iter_value_t<I>>;
-        { ++i } -> std::same_as<I&>;
-    };
-
-    template <typename S>
-    concept sentinel = requires(S s)
-    {
-        true;
-        // { s == s } -> std::convertible_to<bool>;
-        // { s != s } -> std::convertible_to<bool>;
-    };
+    concept iterator = std::input_or_output_iterator<I>;
 
     template <typename T>
     struct is_unique_ptr : std::false_type {
@@ -62,5 +50,5 @@ namespace genex::concepts {
     concept weak_ptr = is_weak_ptr<std::remove_cvref_t<T>>::value;
 
     template <typename S, typename I>
-    concept sentinel_for = iterator<I> and sentinel<S> and std::sentinel_for<S, I>;
+    concept sentinel_for = iterator<I> and std::sentinel_for<S, I>;
 }

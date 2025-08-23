@@ -339,7 +339,7 @@ int main() {
         a.emplace_back(std::make_unique<int>(2));
         a.emplace_back(std::make_unique<int>(3));
         const auto b = a
-            | genex::views::ptr_unique
+            | genex::views::ptr
             | genex::views::to<std::vector>();
         auto expected1 = std::vector{a[0].get(), a[1].get(), a[2].get()};
         assert(b == expected1);

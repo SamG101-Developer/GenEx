@@ -10,7 +10,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::algorithms::detail {
-    template <iterator I, sentinel S, typename E, typename C = std::less<E>, std::invocable<iter_value_t<I>> Proj = meta::identity>
+    template <iterator I, sentinel_for<I> S, typename E, typename C = std::less<E>, std::invocable<iter_value_t<I>> Proj = meta::identity>
     auto do_binary_search(I &&first, S &&last, E &&elem, C &&comp = {}, Proj &&proj = {}) -> bool {
         first = std::lower_bound(std::forward<I>(first), std::forward<S>(last), std::forward<E>(elem));
         return first != last && !std::invoke(std::forward<C>(comp), std::invoke(std::forward<Proj>(proj), *first), std::forward<E>(elem));
@@ -25,7 +25,7 @@ namespace genex::algorithms::detail {
 
 namespace genex::algorithms {
     DEFINE_ALGORITHM(binary_search) {
-        template <iterator I, sentinel S, typename E, typename C = std::less<E>, std::invocable<iter_value_t<I>> Proj = meta::identity>
+        template <iterator I, sentinel_for<I> S, typename E, typename C = std::less<E>, std::invocable<iter_value_t<I>> Proj = meta::identity>
         constexpr auto operator()(I &&first, S &&last, E &&elem, C &&comp = {}, Proj &&proj = {}) const -> bool {
             FWD_TO_IMPL(detail::do_binary_search, first, last, elem, comp, proj);
         }

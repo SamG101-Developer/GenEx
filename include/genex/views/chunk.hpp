@@ -9,7 +9,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel S>
+    template <iterator I, sentinel_for<I> S>
     auto do_chunk(I &&first, S &&last, size_t size) -> generator<generator<iter_value_t<I>>> {
         for (auto it = first; it != last;) {
             co_yield [it = std::move(it), last = std::forward<S>(last), size]() mutable -> generator<iter_value_t<I>> {
@@ -37,7 +37,7 @@ namespace genex::views {
     DEFINE_VIEW(chunk) {
         DEFINE_OUTPUT_TYPE(chunk);
 
-        template <iterator I, sentinel S>
+        template <iterator I, sentinel_for<I> S>
         constexpr auto operator()(I &&first, S &&last, size_t size) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_chunk, first, last, size);
         }

@@ -67,11 +67,9 @@ namespace genex::views::detail {
         auto begin() { return iterators::begin(m_rng); }
         auto end() { return iterators::end(m_rng); }
 
-        // auto begin() && { return iterators::begin(m_rng); }
-        // auto end() && { return iterators::end(m_rng); }
-
-        // auto begin() & = delete;
-        // auto end() & = delete;
+        auto get_generator() && {
+            return std::move(m_rng);
+        }
 
         virtual ~view_base() = default;
     };

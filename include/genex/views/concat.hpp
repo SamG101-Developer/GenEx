@@ -10,7 +10,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I1, iterator I2, sentinel S1, sentinel S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
+    template <iterator I1, iterator I2, sentinel_for<I1> S1, sentinel_for<I2> S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
     auto do_concat(I1 &&first1, I2 &&first2, S1 &&last1, S2 &&last2) -> generator<iter_value_t<I1>> {
         for (auto it = first1; it != last1; ++it) { co_yield *it; }
         for (auto it = first2; it != last2; ++it) { co_yield *it; }
@@ -27,7 +27,7 @@ namespace genex::views {
     DEFINE_VIEW(concat) {
         DEFINE_OUTPUT_TYPE(concat);
 
-        template <iterator I1, iterator I2, sentinel S1, sentinel S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>> && sentinel_for<S1, I1> && sentinel_for<S2, I2>)
+        template <iterator I1, iterator I2, sentinel_for<I1> S1, sentinel_for<I2> S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>> && sentinel_for<S1, I1> && sentinel_for<S2, I2>)
         constexpr auto operator()(I1 &&i1, I2 &&i2, S1 &&s1, S2 &&s2) const -> auto {
             CONSTRAIN_ITER_TAG(I1, input_iterator);
             CONSTRAIN_ITER_TAG(I2, input_iterator);

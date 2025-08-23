@@ -9,35 +9,35 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <typename T, iterator I, sentinel S>
+    template <typename T, iterator I, sentinel_for<I> S>
     auto do_cast(I &&first, S &&last) -> generator<T> {
         for (; first != last; ++first) {
             co_yield static_cast<T>(std::forward<decltype(*first)>(*first));
         }
     }
 
-    template <typename T, iterator I, sentinel S> requires (std::is_pointer_v<iter_value_t<I>>)
+    template <typename T, iterator I, sentinel_for<I> S> requires (std::is_pointer_v<iter_value_t<I>>)
     auto do_cast(I &&first, S &&last) -> generator<T> {
         for (; first != last; ++first) {
             co_yield dynamic_cast<T>(std::forward<decltype(*first)>(*first));
         }
     }
 
-    template <typename T, iterator I, sentinel S> requires (unique_ptr<iter_value_t<I>>)
+    template <typename T, iterator I, sentinel_for<I> S> requires (unique_ptr<iter_value_t<I>>)
     auto do_cast(I &&first, S &&last) -> generator<std::unique_ptr<T>> {
         for (; first != last; ++first) {
             co_yield std::unique_ptr<T>(dynamic_cast<T*>(first->release()));
         }
     }
 
-    template <typename T, iterator I, sentinel S> requires (shared_ptr<iter_value_t<I>>)
+    template <typename T, iterator I, sentinel_for<I> S> requires (shared_ptr<iter_value_t<I>>)
     auto do_cast(I &&first, S &&last) -> generator<std::shared_ptr<T>> {
         for (; first != last; ++first) {
             co_yield std::shared_ptr<T>(dynamic_cast<T*>(first->release()));
         }
     }
 
-    template <typename T, iterator I, sentinel S> requires (weak_ptr<iter_value_t<I>>)
+    template <typename T, iterator I, sentinel_for<I> S> requires (weak_ptr<iter_value_t<I>>)
     auto do_cast(I &&first, S &&last) -> generator<std::weak_ptr<T>> {
         for (; first != last; ++first) {
             co_yield std::weak_ptr<T>(dynamic_cast<T*>(first->release()));
@@ -85,12 +85,12 @@ namespace genex::views {
     DEFINE_VIEW(cast) {
         DEFINE_OUTPUT_TYPE(cast);
 
-        template <iterator I, sentinel S, typename T>
+        template <iterator I, sentinel_for<I> S, typename T>
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_cast<T>, first, last);
         }
 
-        template <iterator I, sentinel S, typename T> requires (unique_ptr<iter_value_t<I>>)
+        template <iterator I, sentinel_for<I> S, typename T> requires (unique_ptr<iter_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_cast<T>, first, last);
         }

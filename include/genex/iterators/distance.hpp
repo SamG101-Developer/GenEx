@@ -11,7 +11,7 @@ using namespace genex::concepts;
 
 namespace genex::iterators {
     DEFINE_ITERATOR(distance) {
-        template <iterator I, sentinel S>
+        template <iterator I, sentinel_for<I> S>
         constexpr auto operator()(I &&first, S &&last) const noexcept -> std::size_t {
             return std::distance(std::forward<I>(first), std::forward<S>(last));
         }

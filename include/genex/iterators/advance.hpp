@@ -15,6 +15,9 @@ namespace genex::iterators {
     concept has_operator_plusplus = requires(I &&it) { ++it; };
 
     template <typename I>
+    concept has_operator_minusminus = requires(I &&it) { --it; };
+
+    template <typename I>
     concept has_advance = has_std_advance<I> || has_operator_plusplus<I>;
 
     DEFINE_ITERATOR(advance) {

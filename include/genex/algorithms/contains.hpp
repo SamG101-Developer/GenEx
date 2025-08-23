@@ -10,7 +10,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::algorithms::detail {
-    template <iterator I, sentinel S, typename E, std::invocable<E> Proj>
+    template <iterator I, sentinel_for<I> S, typename E, std::invocable<E> Proj>
     auto do_contains(I &&first, S &&last, E &&elem, Proj &&proj = {}) -> bool {
         for (; first != last; ++first) {
             if (std::invoke(std::forward<Proj>(proj), *first) == elem) { return true; }
@@ -30,13 +30,15 @@ namespace genex::algorithms::detail {
 
 namespace genex::algorithms {
     DEFINE_ALGORITHM(contains) {
-        template <iterator I, sentinel S, typename E, std::invocable<E> Proj = meta::identity>
+        template <iterator I, sentinel_for<I> S, typename E, std::invocable<E> Proj = meta::identity>
         constexpr auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> bool {
+            CONSTRAIN_ITER_TAG(I, input_iterator);
             FWD_TO_IMPL(detail::do_contains, first, last, elem, proj);
         }
 
         template <range Rng, typename E, std::invocable<E> Proj = meta::identity>
         constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> bool {
+            CONSTRAIN_RNG_TAG(Rng, input_iterator);
             FWD_TO_IMPL(detail::do_contains, rng, elem, proj);
         }
 

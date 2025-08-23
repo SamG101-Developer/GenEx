@@ -10,7 +10,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel S>
+    template <iterator I, sentinel_for<I> S>
     auto do_forward(I &&first, S &&last) -> generator<iter_value_t<I>&&> {
         for (; first != last; ++first) {
             co_yield std::forward<iter_value_t<I>>(*first);
@@ -30,7 +30,7 @@ namespace genex::views {
     DEFINE_VIEW(forward) {
         DEFINE_OUTPUT_TYPE(forward);
 
-        template <iterator I, sentinel S>
+        template <iterator I, sentinel_for<I> S>
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_forward, first, last);
         }

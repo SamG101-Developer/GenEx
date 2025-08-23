@@ -10,7 +10,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::algorithms::detail {
-    template <iterator I, sentinel S, typename E, std::invocable<E> Proj = meta::identity> requires std::equality_comparable_with<iter_value_t<I>, E>
+    template <iterator I, sentinel_for<I> S, typename E, std::invocable<E> Proj = meta::identity> requires std::equality_comparable_with<iter_value_t<I>, E>
     auto do_find(I &&first, S &&last, E &&elem, Proj &&proj = {}) -> I {
         for (; first != last; ++first) {
             if (std::invoke(std::forward<Proj>(proj), *first) == elem) { return first; }
@@ -37,7 +37,7 @@ namespace genex::algorithms::detail {
         return do_find_last(iterators::begin(rng), iterators::end(rng), std::forward<E>(elem), std::forward<Proj>(proj));
     }
 
-    template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
     auto do_find_if(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> I {
         for (; first != last; ++first) {
             if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { return first; }
@@ -50,7 +50,7 @@ namespace genex::algorithms::detail {
         return do_find_if(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
     }
 
-    template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
     auto do_find_last_if(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> I {
         auto found_last = last;
         for (; first != last; ++first) {
@@ -64,7 +64,7 @@ namespace genex::algorithms::detail {
         return do_find_last_if(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
     }
 
-    template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
     auto do_find_if_not(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> I {
         for (; first != last; ++first) {
             if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { return first; }
@@ -77,7 +77,7 @@ namespace genex::algorithms::detail {
         return do_find_if_not(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
     }
 
-    template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
     auto do_find_last_if_not(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> I {
         auto found_last = last;
         for (; first != last; ++first) {
@@ -95,7 +95,7 @@ namespace genex::algorithms::detail {
 
 namespace genex::algorithms {
     DEFINE_ALGORITHM(find) {
-        template <iterator I, sentinel S, typename E, std::invocable<E> Proj = meta::identity> requires std::equality_comparable_with<iter_value_t<I>, E>
+        template <iterator I, sentinel_for<I> S, typename E, std::invocable<E> Proj = meta::identity> requires std::equality_comparable_with<iter_value_t<I>, E>
         constexpr auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL(detail::do_find, first, last, elem, proj);
         }
@@ -129,7 +129,7 @@ namespace genex::algorithms {
     };
 
     DEFINE_ALGORITHM(find_if) {
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL(detail::do_find_if, first, last, pred, proj);
         }
@@ -146,7 +146,7 @@ namespace genex::algorithms {
     };
 
     DEFINE_ALGORITHM(find_last_if) {
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL(detail::do_find_last_if, first, last, pred, proj);
         }
@@ -164,7 +164,7 @@ namespace genex::algorithms {
 
 
     DEFINE_ALGORITHM(find_if_not) {
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL(detail::do_find_if_not, first, last, pred, proj);
         }
@@ -181,7 +181,7 @@ namespace genex::algorithms {
     };
 
     DEFINE_ALGORITHM(find_last_if_not) {
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL(detail::do_find_last_if_not, first, last, pred, proj);
         }

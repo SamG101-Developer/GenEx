@@ -1,5 +1,6 @@
 #pragma once
 #include <coroutine>
+#include <genex/categories.hpp>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
@@ -9,14 +10,16 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel S>
+    template <iterator I, sentinel_for<I> S> requires (
+        categories::bidirectional_iterator<I>)
     auto do_reverse(I &&first, S &&last) -> generator<iter_value_t<I>> {
         for (; last != first; --last) {
-            co_yield *iterators::next(last, -1);
+            co_yield *iterators::prev(std::forward<decltype(last)>(last));
         }
     }
 
-    template <range Rng>
+    template <range Rng> requires (
+        categories::bidirectional_range<Rng>)
     auto do_reverse(Rng &&rng) -> generator<range_value_t<Rng>> {
         for (auto it = iterators::rbegin(rng); it != iterators::rend(rng); ++it) {
             co_yield *it;
@@ -28,12 +31,14 @@ namespace genex::views {
     DEFINE_VIEW(reverse) {
         DEFINE_OUTPUT_TYPE(reverse);
 
-        template <iterator I, sentinel S>
+        template <iterator I, sentinel_for<I> S> requires (
+            categories::bidirectional_iterator<I>)
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_reverse, first, last);
         }
 
-        template <range Rng>
+        template <range Rng> requires (
+            categories::bidirectional_range<Rng>)
         constexpr auto operator()(Rng &&rng) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_reverse, rng);
         }

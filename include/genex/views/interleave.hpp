@@ -1,6 +1,5 @@
 #pragma once
 #include <coroutine>
-#include <functional>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
@@ -10,7 +9,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I1, sentinel S1, iterator I2, iterator S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
+    template <iterator I1, sentinel_for<I1> S1, iterator I2, sentinel_for<I2> S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
     auto do_interleave(I1 &&first1, S1 &&last1, I2 first2, S2 last2) -> generator<iter_value_t<I1>> {
         while (first1 != last1 && first2 != last2) {
             co_yield *first1++;
@@ -42,7 +41,7 @@ namespace genex::views {
     DEFINE_VIEW(interleave) {
         DEFINE_OUTPUT_TYPE(interleave);
 
-        template <iterator I1, sentinel S1, iterator I2, sentinel S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
+        template <iterator I1, sentinel_for<I1> S1, iterator I2, sentinel_for<I2> S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
         constexpr auto operator()(I1 &&first1, S1 &&last1, I2 first2, S2 last2) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_interleave, first1, last1, first2, last2);
         }

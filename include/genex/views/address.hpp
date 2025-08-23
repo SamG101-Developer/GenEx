@@ -9,7 +9,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel S>
+    template <iterator I, sentinel_for<I> S>
     auto do_deref(I &&first, S &&last) -> generator<deref_value_t<iter_value_t<I>>> {
         for (auto it = first; it != last; ++it) {
             co_yield **it;
@@ -23,7 +23,7 @@ namespace genex::views::detail {
         }
     }
 
-    template <iterator I, sentinel S>
+    template <iterator I, sentinel_for<I> S>
     auto do_address(I &&first, S &&last) -> generator<iter_value_t<I>*> {
         for (auto it = first; it != last; ++it) {
             co_yield &*it;
@@ -43,7 +43,7 @@ namespace genex::views {
     DEFINE_VIEW(deref) {
         DEFINE_OUTPUT_TYPE(deref);
 
-        template <iterator I, sentinel S>
+        template <iterator I, sentinel_for<I> S>
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_deref, first, last);
         }
@@ -61,7 +61,7 @@ namespace genex::views {
     DEFINE_VIEW(address) {
         DEFINE_OUTPUT_TYPE(deref);
 
-        template <iterator I, sentinel S>
+        template <iterator I, sentinel_for<I> S>
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_address, first, last);
         }

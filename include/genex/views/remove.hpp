@@ -11,23 +11,34 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel S>
-    auto do_remove(I &&first, S &&last, iter_value_t<I> const &elem) -> generator<iter_value_t<I>> {
+    template <iterator I, sentinel_for<I> S, typename Old1, typename Old2 = iter_value_t<I>, std::invocable<Old2> Proj = meta::identity> requires (
+        categories::input_iterator<I> and
+        std::equality_comparable_with<iter_value_t<I>, Old1> and
+        std::equality_comparable_with<iter_value_t<I>, Old2> and
+        std::convertible_to<std::invoke_result_t<Proj, Old2>, iter_value_t<I>>)
+    auto do_remove(I &&first, S &&last, Old1 &&elem, Proj &&proj) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
-            if (*first == elem) { continue; }
+            if (std::invoke(std::forward<Proj>(proj), *first) == elem) { continue; }
             co_yield *first;
         }
     }
 
-    template <range Rng>
-    auto do_remove(Rng &&rng, range_value_t<Rng> const &elem) -> generator<range_value_t<Rng>> {
+    template <range Rng, typename Old1, typename Old2 = range_value_t<Rng>, std::invocable<Old2> Proj = meta::identity> requires (
+        categories::input_range<Rng> and
+        std::equality_comparable_with<range_value_t<Rng>, Old1> and
+        std::equality_comparable_with<range_value_t<Rng>, Old2> and
+        std::convertible_to<std::invoke_result_t<Proj, Old2>, range_value_t<Rng>>)
+    auto do_remove(Rng &&rng, Old1 &&elem, Proj &&proj) -> generator<range_value_t<Rng>> {
         for (auto &&x : rng) {
-            if (x == elem) { continue; }
+            if (std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)) == elem) { continue; }
             co_yield std::forward<decltype(x)>(x);
         }
     }
 
-    template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+    template <iterator I, sentinel_for<I> S, typename Old1 = iter_value_t<I>, std::invocable<Old1> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred> requires (
+        categories::input_iterator<I> and
+        std::equality_comparable_with<iter_value_t<I>, Old1> and
+        std::convertible_to<std::invoke_result_t<Proj, Old1>, iter_value_t<I>>)
     auto do_remove_if(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { continue; }
@@ -35,7 +46,10 @@ namespace genex::views::detail {
         }
     }
 
-    template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
+    template <range Rng, typename Old1 = range_value_t<Rng>, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred> requires (
+        categories::input_range<Rng> and
+        std::equality_comparable_with<range_value_t<Rng>, Old1> and
+        std::convertible_to<std::invoke_result_t<Proj, Old1>, range_value_t<Rng>>)
     auto do_remove_if(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> generator<range_value_t<Rng>> {
         for (auto &&x : rng) {
             if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) { continue; }
@@ -46,21 +60,30 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
+    // todo: projection?
     DEFINE_VIEW(remove) {
         DEFINE_OUTPUT_TYPE(remove);
 
-        template <iterator I, sentinel S>
-        constexpr auto operator()(I &&first, S &&last, iter_value_t<I> const &elem) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_remove, first, last, elem);
+        template <iterator I, sentinel_for<I> S, typename Old1, typename Old2 = iter_value_t<I>, std::invocable<Old2> Proj = meta::identity> requires (
+            categories::input_iterator<I> and
+            std::equality_comparable_with<iter_value_t<I>, Old1> and
+            std::equality_comparable_with<iter_value_t<I>, Old2> and
+            std::convertible_to<std::invoke_result_t<Proj, Old2>, iter_value_t<I>>)
+        constexpr auto operator()(I &&first, S &&last, Old1 &&elem, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_remove, first, last, elem, proj);
         }
 
-        template <range Rng>
-        constexpr auto operator()(Rng &&rng, range_value_t<Rng> const &elem) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_remove, rng, elem);
+        template <range Rng, typename Old1, typename Old2 = range_value_t<Rng>, std::invocable<Old2> Proj = meta::identity> requires (
+            categories::input_range<Rng> and
+            std::equality_comparable_with<range_value_t<Rng>, Old1> and
+            std::equality_comparable_with<range_value_t<Rng>, Old2> and
+            std::convertible_to<std::invoke_result_t<Proj, Old2>, range_value_t<Rng>>)
+        constexpr auto operator()(Rng &&rng, Old1 &&elem, Proj &&proj = {}) const -> auto {
+            FWD_TO_IMPL_VIEW(detail::do_remove, rng, elem, proj);
         }
 
-        template <typename E>
-        constexpr auto operator()(E &&elem) const -> auto {
+        template <typename Old>
+        constexpr auto operator()(Old &&elem) const -> auto {
             MAKE_CLOSURE(elem);
         }
     };
@@ -68,12 +91,18 @@ namespace genex::views {
     DEFINE_VIEW(remove_if) {
         DEFINE_OUTPUT_TYPE(remove_if);
 
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+        template <iterator I, sentinel_for<I> S, typename Old1 = iter_value_t<I>, std::invocable<Old1> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred> requires (
+            categories::input_iterator<I> and
+            std::equality_comparable_with<iter_value_t<I>, Old1> and
+            std::convertible_to<std::invoke_result_t<Proj, Old1>, iter_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_remove_if, first, last, pred, proj);
         }
 
-        template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
+        template <range Rng, typename Old1 = range_value_t<Rng>, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred> requires (
+            categories::input_range<Rng> and
+            std::equality_comparable_with<range_value_t<Rng>, Old1> and
+            std::convertible_to<std::invoke_result_t<Proj, Old1>, range_value_t<Rng>>)
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_remove_if, rng, pred, proj);
         }

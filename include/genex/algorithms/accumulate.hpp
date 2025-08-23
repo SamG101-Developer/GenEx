@@ -11,7 +11,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::algorithms::detail {
-    template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::invocable<iter_value_t<I>, iter_value_t<I>> BinaryOp>
+    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::invocable<iter_value_t<I>, iter_value_t<I>> BinaryOp>
     auto do_accumulate(I &&first, S &&last, iter_value_t<I> const &init, BinaryOp &&binary_op, Proj &&proj = {}) -> iter_value_t<I> {
         auto acc = init;
         for (; first != last; ++first) {
@@ -33,7 +33,7 @@ namespace genex::algorithms::detail {
 
 namespace genex::algorithms {
     DEFINE_ALGORITHM(accumulate) {
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::invocable<iter_value_t<I>, iter_value_t<I>> BinaryOp>
+        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::invocable<iter_value_t<I>, iter_value_t<I>> BinaryOp>
         constexpr auto operator()(I &&first, S &&last, iter_value_t<I> const &init, BinaryOp &&binary_op, Proj &&proj = {}) const -> iter_value_t<I> {
             FWD_TO_IMPL(detail::do_accumulate, first, last, init, binary_op, proj);
         }

@@ -8,6 +8,9 @@
 #include <genex/iterators/next.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
+#include <genex/views/reverse.hpp>
+
+#include "genex/views/to.hpp"
 
 using namespace genex::concepts;
 using namespace genex::type_traits;
@@ -19,7 +22,7 @@ namespace genex::algorithms {
 
 
 namespace genex::algorithms::detail {
-    template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
     auto do_position(I &&first, S &&last, Pred &&pred, Proj &&proj = {}, const pos_t def = -1) -> pos_t {
         pos_t index = 0;
         for (; first != last; ++first, ++index) {
@@ -35,16 +38,11 @@ namespace genex::algorithms::detail {
         return do_position(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj), def);
     }
 
-    template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
     auto do_position_last(I &&first, S &&last, Pred &&pred, Proj &&proj = {}, const pos_t def = -1) -> pos_t {
-        pos_t index = iterators::distance(first, last) - 1;
-        last = iterators::next(first, index);
-        for (; last != first; --last, --index) {
-            if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *last))) {
-                return index;
-            }
-        }
-        return def;
+        auto rng = views::reverse(std::forward<I>(first), std::forward<S>(last)) | views::to<std::vector>();
+        const auto rev_index = do_position(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj), def);
+        return rev_index == -1 ? -1 : operations::size(rng) - 1 - rev_index;
     }
 
     template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
@@ -56,7 +54,7 @@ namespace genex::algorithms::detail {
 
 namespace genex::algorithms {
     DEFINE_ALGORITHM(position) {
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> auto {
             FWD_TO_IMPL(detail::do_position, first, last, pred, proj, def);
         }
@@ -73,7 +71,7 @@ namespace genex::algorithms {
     };
 
     DEFINE_ALGORITHM(position_last) {
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}, pos_t def = -1) const -> auto {
             FWD_TO_IMPL(detail::do_position_last, first, last, pred, proj, def);
         }

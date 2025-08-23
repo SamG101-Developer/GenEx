@@ -10,7 +10,7 @@ using namespace genex::type_traits;
 
 
 namespace genex::algorithms::detail {
-    template <iterator I, sentinel S, typename E, std::invocable<E> Proj = genex::meta::identity>
+    template <iterator I, sentinel_for<I> S, typename E, std::invocable<E> Proj = genex::meta::identity>
     auto do_count(I &&first, S &&last, E &&elem, Proj &&proj = {}) -> size_t {
         auto count = static_cast<std::size_t>(0);
         for (; first != last; ++first) {
@@ -28,7 +28,7 @@ namespace genex::algorithms::detail {
         return count;
     }
 
-    template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = genex::meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = genex::meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
     auto do_count_if(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> size_t {
         auto count = static_cast<std::size_t>(0);
         for (; first != last; ++first) {
@@ -50,7 +50,7 @@ namespace genex::algorithms::detail {
 
 namespace genex::algorithms {
     DEFINE_ALGORITHM(count) {
-        template <iterator I, sentinel S, typename E, std::invocable<E> Proj = meta::identity>
+        template <iterator I, sentinel_for<I> S, typename E, std::invocable<E> Proj = meta::identity>
         constexpr auto operator()(I &&first, S &&last, E &&elem, Proj &&proj = {}) const -> size_t {
             FWD_TO_IMPL(detail::do_count, first, last, elem, proj);
         }
@@ -67,7 +67,7 @@ namespace genex::algorithms {
     };
 
     DEFINE_ALGORITHM(count_if) {
-        template <iterator I, sentinel S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> size_t {
             FWD_TO_IMPL(detail::do_count_if, first, last, pred, proj);
         }

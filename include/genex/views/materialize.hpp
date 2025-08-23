@@ -1,7 +1,7 @@
 #pragma once
 #include <coroutine>
-#include <functional>
 #include <vector>
+#include <genex/categories.hpp>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
@@ -11,7 +11,8 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel S>
+    template <iterator I, sentinel_for<I> S> requires (
+        categories::input_iterator<I>)
     auto do_materialize(I &&first, S &&last) -> std::vector<iter_value_t<I>> {
         auto vec = std::vector<iter_value_t<I>>();
         for (; first != last; ++first) {
@@ -20,7 +21,8 @@ namespace genex::views::detail {
         return vec;
     }
 
-    template <range Rng>
+    template <range Rng> requires (
+        categories::input_range<Rng>)
     auto do_materialize(Rng &&rng) -> std::vector<range_value_t<Rng>> {
         auto vec = std::vector<range_value_t<Rng>>();
         for (auto &&x : rng) {
@@ -35,12 +37,14 @@ namespace genex::views {
     DEFINE_VIEW(materialize) {
         DEFINE_OUTPUT_TYPE(materialize);
 
-        template <iterator I, sentinel S>
+        template <iterator I, sentinel_for<I> S> requires (
+            categories::input_iterator<I>)
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_materialize, first, last);
         }
 
-        template <range Rng>
+        template <range Rng> requires (
+            categories::input_range<Rng>)
         constexpr auto operator()(Rng &&rng) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_materialize, rng);
         }
