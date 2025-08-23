@@ -9,7 +9,8 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S>
+    template <iterator I, sentinel_for<I> S> requires (
+        categories::input_iterator<I>)
     auto do_enumerate(I &&first, S &&last) -> generator<std::pair<size_t, iter_value_t<I>>> {
         auto i = 0;
         for (; first != last; ++first) {
@@ -17,7 +18,8 @@ namespace genex::views::detail {
         }
     }
 
-    template <range Rng>
+    template <range Rng> requires (
+        categories::input_range<Rng>)
     auto do_enumerate(Rng &&rng) -> generator<std::pair<size_t, range_value_t<Rng>>> {
         auto i = 0;
         for (auto &&x : rng) {
@@ -31,12 +33,14 @@ namespace genex::views {
     DEFINE_VIEW(enumerate) {
         DEFINE_OUTPUT_TYPE(enumerate);
 
-        template <iterator I, sentinel_for<I> S>
+        template <iterator I, sentinel_for<I> S> requires (
+            categories::input_iterator<I>)
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_enumerate, first, last);
         }
 
-        template <range Rng>
+        template <range Rng> requires (
+            categories::input_range<Rng>)
         constexpr auto operator()(Rng &&rng) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_enumerate, rng);
         }

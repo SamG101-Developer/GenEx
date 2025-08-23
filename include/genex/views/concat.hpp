@@ -10,13 +10,19 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I1, iterator I2, sentinel_for<I1> S1, sentinel_for<I2> S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
+    template <iterator I1, sentinel_for<I1> S1, iterator I2, sentinel_for<I2> S2> requires (
+        categories::input_iterator<I1> and
+        categories::input_iterator<I2> and
+        std::convertible_to<iter_value_t<I1>, iter_value_t<I2>>)
     auto do_concat(I1 &&first1, I2 &&first2, S1 &&last1, S2 &&last2) -> generator<iter_value_t<I1>> {
         for (auto it = first1; it != last1; ++it) { co_yield *it; }
         for (auto it = first2; it != last2; ++it) { co_yield *it; }
     }
 
-    template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
+    template <range Rng1, range Rng2> requires (
+        categories::input_range<Rng1> and
+        categories::input_range<Rng2> and
+        std::convertible_to<range_value_t<Rng1>, range_value_t<Rng2>>)
     auto do_concat(Rng1 &&rng1, Rng2 &&rng2) -> generator<range_value_t<Rng1>> {
         for (auto &&x : rng1) { co_yield std::forward<decltype(x)>(x); }
         for (auto &&x : rng2) { co_yield std::forward<decltype(x)>(x); }
@@ -27,17 +33,19 @@ namespace genex::views {
     DEFINE_VIEW(concat) {
         DEFINE_OUTPUT_TYPE(concat);
 
-        template <iterator I1, iterator I2, sentinel_for<I1> S1, sentinel_for<I2> S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>> && sentinel_for<S1, I1> && sentinel_for<S2, I2>)
+        template <iterator I1, sentinel_for<I1> S1, iterator I2, sentinel_for<I2> S2> requires (
+            categories::input_iterator<I1> and
+            categories::input_iterator<I2> and
+            std::convertible_to<iter_value_t<I1>, iter_value_t<I2>>)
         constexpr auto operator()(I1 &&i1, I2 &&i2, S1 &&s1, S2 &&s2) const -> auto {
-            CONSTRAIN_ITER_TAG(I1, input_iterator);
-            CONSTRAIN_ITER_TAG(I2, input_iterator);
             FWD_TO_IMPL_VIEW(detail::do_concat, i1, i2, s1, s2);
         }
 
-        template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
+        template <range Rng1, range Rng2> requires (
+            categories::input_range<Rng1> and
+            categories::input_range<Rng2> and
+            std::convertible_to<range_value_t<Rng1>, range_value_t<Rng2>>)
         constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> auto {
-            CONSTRAIN_RNG_TAG(Rng1, input_iterator);
-            CONSTRAIN_RNG_TAG(Rng2, input_iterator);
             FWD_TO_IMPL_VIEW(detail::do_concat, rng1, rng2);
         }
 

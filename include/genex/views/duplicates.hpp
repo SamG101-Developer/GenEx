@@ -12,7 +12,10 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity>
+    template <iterator I, sentinel_for<I> S, typename Old2 = iter_value_t<I>, std::invocable<Old2> Proj = meta::identity> requires (
+        categories::forward_iterator<I> and
+        std::equality_comparable_with<iter_value_t<I>, Old2> and
+        std::convertible_to<std::invoke_result_t<Proj, Old2>, iter_value_t<I>>)
     auto do_duplicates(I &&first, S &&last, Proj &&proj = {}) -> generator<iter_value_t<I>> {
         auto orig = first;
         for (; first != last; ++first) {
@@ -30,7 +33,10 @@ namespace genex::views::detail {
     }
 
 
-    template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity>
+    template <range Rng, typename Old2 = range_value_t<Rng>, std::invocable<Old2> Proj = meta::identity> requires (
+        categories::forward_range<Rng> and
+        std::equality_comparable_with<range_value_t<Rng>, Old2> and
+        std::convertible_to<std::invoke_result_t<Proj, Old2>, range_value_t<Rng>>)
     auto do_duplicates(Rng &&rng, Proj &&proj = {}) -> generator<range_value_t<Rng>> {
         auto orig = iterators::begin(rng);
         for (auto &&x : rng) {
@@ -52,15 +58,19 @@ namespace genex::views {
     DEFINE_VIEW(duplicates) {
         DEFINE_OUTPUT_TYPE(duplicates);
 
-        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity> requires (sentinel_for<S, I>)
+        template <iterator I, sentinel_for<I> S, typename Old2 = iter_value_t<I>, std::invocable<Old2> Proj = meta::identity> requires (
+            categories::forward_iterator<I> and
+            std::equality_comparable_with<iter_value_t<I>, Old2> and
+            std::convertible_to<std::invoke_result_t<Proj, Old2>, iter_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last, Proj &&proj = {}) const -> auto {
-            CONSTRAIN_ITER_TAG(I, forward_iterator);
             FWD_TO_IMPL_VIEW(detail::do_duplicates, first, last, proj);
         }
 
-        template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity>
+        template <range Rng, typename Old2 = range_value_t<Rng>, std::invocable<Old2> Proj = meta::identity> requires (
+            categories::forward_range<Rng> and
+            std::equality_comparable_with<range_value_t<Rng>, Old2> and
+            std::convertible_to<std::invoke_result_t<Proj, Old2>, range_value_t<Rng>>)
         constexpr auto operator()(Rng &&rng, Proj &&proj = {}) const -> auto {
-            CONSTRAIN_RNG_TAG(Rng, forward_iterator);
             FWD_TO_IMPL_VIEW(detail::do_duplicates, rng, proj);
         }
 

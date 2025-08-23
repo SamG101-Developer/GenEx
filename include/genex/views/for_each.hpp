@@ -10,15 +10,18 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> F>
+    template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> F> requires (
+        categories::input_iterator<I> and
+        std::equality_comparable_with<iter_value_t<I>, Old>)
     auto do_for_each(I &&first, S &&last, F &&f) -> void {
         for (; first != last; ++first) {
             std::invoke(std::forward<F>(f), std::forward<decltype(*first)>(*first));
         }
     }
 
-
-    template <range Rng, std::invocable<range_value_t<Rng>> F>
+    template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> F> requires (
+        categories::input_range<Rng> and
+        std::equality_comparable_with<range_value_t<Rng>, Old>)
     auto do_for_each(Rng &&rng, F &&f) -> void {
         for (auto &&x : rng) {
             std::invoke(std::forward<F>(f), std::forward<decltype(x)>(x));
@@ -31,12 +34,16 @@ namespace genex::views {
     DEFINE_VIEW(for_each) {
         DEFINE_OUTPUT_TYPE(for_each);
 
-        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> F>
+        template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> F> requires (
+            categories::input_iterator<I> and
+            std::equality_comparable_with<iter_value_t<I>, Old>)
         constexpr auto operator()(I &&first, S &&last, F &&f) const -> void {
             FWD_TO_IMPL_VIEW_VOID(detail::do_for_each, first, last, f);
         }
 
-        template <range Rng, std::invocable<range_value_t<Rng>> F>
+        template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> F> requires (
+            categories::input_range<Rng> and
+            std::equality_comparable_with<range_value_t<Rng>, Old>)
         constexpr auto operator()(Rng &&rng, F &&f) const -> void {
             FWD_TO_IMPL_VIEW_VOID(detail::do_for_each, rng, f);
         }

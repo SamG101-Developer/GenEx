@@ -9,7 +9,9 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S> requires range<iter_value_t<I>>
+    template <iterator I, sentinel_for<I> S> requires (
+        categories::input_iterator<I> and
+        range<iter_value_t<I>>)
     auto do_flat(I &&first, S &&last) -> generator<range_value_t<iter_value_t<I>>> {
         for (; first != last; ++first) {
             for (auto &&x : *first) {
@@ -18,7 +20,9 @@ namespace genex::views::detail {
         }
     }
 
-    template <range Rng> requires range<range_value_t<Rng>>
+    template <range Rng> requires (
+        categories::input_range<Rng> and
+        range<range_value_t<Rng>>)
     auto do_flat(Rng &&rng) -> generator<range_value_t<range_value_t<Rng>>> {
         for (auto &&x : rng) {
             for (auto &&y : x) {
@@ -33,12 +37,16 @@ namespace genex::views {
     DEFINE_VIEW(flat) {
         DEFINE_OUTPUT_TYPE(flat);
 
-        template <iterator I, sentinel_for<I> S> requires range<iter_value_t<I>>
+        template <iterator I, sentinel_for<I> S> requires (
+            categories::input_iterator<I> and
+            range<iter_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_flat, first, last);
         }
 
-        template <range Rng> requires range<range_value_t<Rng>>
+        template <range Rng> requires (
+            categories::input_range<Rng> and
+            range<range_value_t<Rng>>)
         constexpr auto operator()(Rng &&rng) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_flat, rng);
         }

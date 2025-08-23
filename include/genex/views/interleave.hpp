@@ -9,7 +9,10 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I1, sentinel_for<I1> S1, iterator I2, sentinel_for<I2> S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
+    template <iterator I1, sentinel_for<I1> S1, iterator I2, sentinel_for<I2> S2> requires (
+        categories::input_iterator<I1> and
+        categories::input_iterator<I2> and
+        std::convertible_to<iter_value_t<I1>, iter_value_t<I2>>)
     auto do_interleave(I1 &&first1, S1 &&last1, I2 first2, S2 last2) -> generator<iter_value_t<I1>> {
         while (first1 != last1 && first2 != last2) {
             co_yield *first1++;
@@ -20,7 +23,10 @@ namespace genex::views::detail {
     }
 
 
-    template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
+    template <range Rng1, range Rng2> requires (
+        categories::input_range<Rng1> and
+        categories::input_range<Rng2> and
+        std::convertible_to<range_value_t<Rng1>, range_value_t<Rng2>>)
     auto do_interleave(Rng1 &&rng1, Rng2 &&rng2) -> generator<range_value_t<Rng1>> {
         auto it1 = iterators::begin(rng1);
         auto it2 = iterators::begin(rng2);
@@ -41,12 +47,18 @@ namespace genex::views {
     DEFINE_VIEW(interleave) {
         DEFINE_OUTPUT_TYPE(interleave);
 
-        template <iterator I1, sentinel_for<I1> S1, iterator I2, sentinel_for<I2> S2> requires (std::same_as<iter_value_t<I1>, iter_value_t<I2>>)
+        template <iterator I1, sentinel_for<I1> S1, iterator I2, sentinel_for<I2> S2> requires (
+            categories::input_iterator<I1> and
+            categories::input_iterator<I2> and
+            std::convertible_to<iter_value_t<I1>, iter_value_t<I2>>)
         constexpr auto operator()(I1 &&first1, S1 &&last1, I2 first2, S2 last2) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_interleave, first1, last1, first2, last2);
         }
 
-        template <range Rng1, range Rng2> requires (std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>)
+        template <range Rng1, range Rng2> requires (
+            categories::input_range<Rng1> and
+            categories::input_range<Rng2> and
+            std::convertible_to<range_value_t<Rng1>, range_value_t<Rng2>>)
         constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_interleave, rng1, rng2);
         }

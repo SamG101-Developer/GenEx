@@ -54,8 +54,10 @@ namespace genex::views::detail {
         }
     }
 
-    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred> requires (
-        categories::input_iterator<I>)
+    template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+        categories::input_iterator<I> and
+        std::equality_comparable_with<iter_value_t<I>, Old> and
+        std::convertible_to<std::invoke_result_t<Proj, Old>, iter_value_t<I>>)
     auto do_take_while(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { break; }
@@ -63,8 +65,10 @@ namespace genex::views::detail {
         }
     }
 
-    template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred> requires (
-        categories::input_range<Rng>)
+    template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+        categories::input_range<Rng> and
+        std::equality_comparable_with<range_value_t<Rng>, Old> and
+        std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
     auto do_take_while(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> generator<range_value_t<Rng>> {
         for (auto &&x : rng) {
             if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) { break; }
@@ -72,8 +76,10 @@ namespace genex::views::detail {
         }
     }
 
-    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred> requires (
-        categories::input_iterator<I>)
+    template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+        categories::input_iterator<I> and
+        std::equality_comparable_with<iter_value_t<I>, Old> and
+        std::convertible_to<std::invoke_result_t<Proj, Old>, iter_value_t<I>>)
     auto do_take_until(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { break; }
@@ -81,8 +87,10 @@ namespace genex::views::detail {
         }
     }
 
-    template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred> requires (
-        categories::input_range<Rng>)
+    template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+        categories::input_range<Rng> and
+        std::equality_comparable_with<range_value_t<Rng>, Old> and
+        std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
     auto do_take_until(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> generator<range_value_t<Rng>> {
         for (auto &&x : rng) {
             if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) { break; }
@@ -136,14 +144,18 @@ namespace genex::views {
     DEFINE_VIEW(take_while) {
         DEFINE_OUTPUT_TYPE(take_while);
 
-        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred> requires (
-            categories::input_iterator<I>)
+        template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+            categories::input_iterator<I> and
+            std::equality_comparable_with<iter_value_t<I>, Old> and
+            std::convertible_to<std::invoke_result_t<Proj, Old>, iter_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_take_while, first, last, pred, proj);
         }
 
-        template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred> requires (
-            categories::input_range<Rng>)
+        template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+            categories::input_range<Rng> and
+            std::equality_comparable_with<range_value_t<Rng>, Old> and
+            std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_take_while, rng, pred, proj);
         }
@@ -157,14 +169,18 @@ namespace genex::views {
     DEFINE_VIEW(take_until) {
         DEFINE_OUTPUT_TYPE(take_until);
 
-        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred> requires (
-            categories::input_iterator<I>)
+        template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+            categories::input_iterator<I> and
+            std::equality_comparable_with<iter_value_t<I>, Old> and
+            std::convertible_to<std::invoke_result_t<Proj, Old>, iter_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_take_until, first, last, pred, proj);
         }
 
-        template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred> requires (
-            categories::input_range<Rng>)
+        template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+            categories::input_range<Rng> and
+            std::equality_comparable_with<range_value_t<Rng>, Old> and
+            std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_take_until, rng, pred, proj);
         }

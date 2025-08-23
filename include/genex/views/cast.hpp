@@ -9,70 +9,88 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <typename T, iterator I, sentinel_for<I> S>
+    template <typename T, iterator I, sentinel_for<I> S> requires (
+        categories::input_iterator<I>)
     auto do_cast(I &&first, S &&last) -> generator<T> {
         for (; first != last; ++first) {
             co_yield static_cast<T>(std::forward<decltype(*first)>(*first));
         }
     }
 
-    template <typename T, iterator I, sentinel_for<I> S> requires (std::is_pointer_v<iter_value_t<I>>)
+    template <typename T, iterator I, sentinel_for<I> S> requires (
+        categories::input_iterator<I> and
+        std::is_pointer_v<iter_value_t<I>>)
     auto do_cast(I &&first, S &&last) -> generator<T> {
         for (; first != last; ++first) {
             co_yield dynamic_cast<T>(std::forward<decltype(*first)>(*first));
         }
     }
 
-    template <typename T, iterator I, sentinel_for<I> S> requires (unique_ptr<iter_value_t<I>>)
+    template <typename T, iterator I, sentinel_for<I> S> requires (
+        categories::input_iterator<I> and
+        unique_ptr<iter_value_t<I>>)
     auto do_cast(I &&first, S &&last) -> generator<std::unique_ptr<T>> {
         for (; first != last; ++first) {
             co_yield std::unique_ptr<T>(dynamic_cast<T*>(first->release()));
         }
     }
 
-    template <typename T, iterator I, sentinel_for<I> S> requires (shared_ptr<iter_value_t<I>>)
+    template <typename T, iterator I, sentinel_for<I> S> requires (
+        categories::input_iterator<I> and
+        shared_ptr<iter_value_t<I>>)
     auto do_cast(I &&first, S &&last) -> generator<std::shared_ptr<T>> {
         for (; first != last; ++first) {
             co_yield std::shared_ptr<T>(dynamic_cast<T*>(first->release()));
         }
     }
 
-    template <typename T, iterator I, sentinel_for<I> S> requires (weak_ptr<iter_value_t<I>>)
+    template <typename T, iterator I, sentinel_for<I> S> requires (
+        categories::input_iterator<I> and
+        weak_ptr<iter_value_t<I>>)
     auto do_cast(I &&first, S &&last) -> generator<std::weak_ptr<T>> {
         for (; first != last; ++first) {
             co_yield std::weak_ptr<T>(dynamic_cast<T*>(first->release()));
         }
     }
 
-    template <typename T, range Rng>
+    template <typename T, range Rng> requires (
+        categories::input_range<Rng>)
     auto do_cast(Rng &&rng) -> generator<T> {
         for (auto &&x : rng) {
             co_yield static_cast<T>(std::forward<decltype(x)>(x));
         }
     }
 
-    template <typename T, range Rng> requires (std::is_pointer_v<range_value_t<Rng>>)
+    template <typename T, range Rng> requires (
+        categories::input_range<Rng> and
+        std::is_pointer_v<range_value_t<Rng>>)
     auto do_cast(Rng &&rng) -> generator<T> {
         for (auto &&x : rng) {
             co_yield dynamic_cast<T>(std::forward<decltype(x)>(x));
         }
     }
 
-    template <typename T, range Rng> requires (unique_ptr<range_value_t<Rng>>)
+    template <typename T, range Rng> requires (
+        categories::input_range<Rng> and
+        unique_ptr<range_value_t<Rng>>)
     auto do_cast(Rng &&rng) -> generator<std::unique_ptr<T>> {
         for (auto &&x : rng) {
             co_yield std::unique_ptr<T>(dynamic_cast<T*>(x.release()));
         }
     }
 
-    template <typename T, range Rng> requires (shared_ptr<range_value_t<Rng>>)
+    template <typename T, range Rng> requires (
+        categories::input_range<Rng> and
+        shared_ptr<range_value_t<Rng>>)
     auto do_cast(Rng &&rng) -> generator<std::shared_ptr<T>> {
         for (auto &&x : rng) {
             co_yield std::shared_ptr<T>(dynamic_cast<T*>(x.release()));
         }
     }
 
-    template <typename T, range Rng> requires (weak_ptr<range_value_t<Rng>>)
+    template <typename T, range Rng> requires (
+        categories::input_range<Rng> and
+        weak_ptr<range_value_t<Rng>>)
     auto do_cast(Rng &&rng) -> generator<std::weak_ptr<T>> {
         for (auto &&x : rng) {
             co_yield std::weak_ptr<T>(dynamic_cast<T*>(x.release()));
@@ -85,22 +103,28 @@ namespace genex::views {
     DEFINE_VIEW(cast) {
         DEFINE_OUTPUT_TYPE(cast);
 
-        template <iterator I, sentinel_for<I> S, typename T>
+        template <iterator I, sentinel_for<I> S, typename T> requires (
+            categories::input_iterator<I>)
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_cast<T>, first, last);
         }
 
-        template <iterator I, sentinel_for<I> S, typename T> requires (unique_ptr<iter_value_t<I>>)
+        template <iterator I, sentinel_for<I> S, typename T> requires (
+            categories::input_iterator<I> and
+            unique_ptr<iter_value_t<I>>)
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_cast<T>, first, last);
         }
 
-        template <range Rng, typename T>
+        template <range Rng, typename T> requires (
+            categories::input_range<Rng>)
         constexpr auto operator()(Rng &&rng) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_cast<T>, rng);
         }
 
-        template <range Rng, typename T> requires (unique_ptr<range_value_t<Rng>>)
+        template <range Rng, typename T> requires (
+            categories::input_range<Rng> and
+            unique_ptr<range_value_t<Rng>>)
         constexpr auto operator()(Rng &&rng) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_cast<T>, rng);
         }

@@ -9,14 +9,16 @@ using namespace genex::type_traits;
 
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S>
+    template <iterator I, sentinel_for<I> S> requires (
+        categories::forward_iterator<I>)
     auto do_cycle(I &&first, S &&last) -> generator<iter_value_t<I>> {
         while (true) {
             for (auto it = first; it != last; ++it) { co_yield *it; }
         }
     }
 
-    template <range Rng>
+    template <range Rng> requires (
+        categories::forward_range<Rng>)
     auto do_cycle(Rng &&rng) -> generator<range_value_t<Rng>> {
         while (true) {
             for (auto &&x : rng) { co_yield std::forward<decltype(x)>(x); }
@@ -29,12 +31,14 @@ namespace genex::views {
     DEFINE_VIEW(cycle) {
         DEFINE_OUTPUT_TYPE(cycle);
 
-        template <iterator I, sentinel_for<I> S>
+        template <iterator I, sentinel_for<I> S> requires (
+            categories::forward_iterator<I>)
         constexpr auto operator()(I &&first, S &&last) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_cycle, first, last);
         }
 
-        template <range Rng>
+        template <range Rng> requires (
+            categories::forward_range<Rng>)
         constexpr auto operator()(Rng &&rng) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_cycle, rng);
         }
