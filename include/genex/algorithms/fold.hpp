@@ -2,7 +2,6 @@
 #include <coroutine>
 #include <functional>
 #include <genex/concepts.hpp>
-#include <genex/iterators/next.hpp>
 #include <genex/macros.hpp>
 #include <genex/algorithms/_algorithm_base.hpp>
 #include <genex/views/reverse.hpp>

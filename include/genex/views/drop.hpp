@@ -57,8 +57,7 @@ namespace genex::views::detail {
 
     template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
         categories::input_iterator<I> and
-        std::equality_comparable_with<iter_value_t<I>, Old> and
-        std::convertible_to<std::invoke_result_t<Proj, Old>, iter_value_t<I>>)
+        std::equality_comparable_with<iter_value_t<I>, Old>)
     auto do_drop_while(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
         auto dropping = true;
         for (; first != last; ++first) {
@@ -83,8 +82,7 @@ namespace genex::views::detail {
 
     template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
         categories::input_iterator<I> and
-        std::equality_comparable_with<iter_value_t<I>, Old> and
-        std::convertible_to<std::invoke_result_t<Proj, Old>, iter_value_t<I>>)
+        std::equality_comparable_with<iter_value_t<I>, Old>)
     auto do_drop_until(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
         auto dropping = true;
         for (; first != last; ++first) {
@@ -155,8 +153,7 @@ namespace genex::views {
 
         template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
             categories::input_iterator<I> and
-            std::equality_comparable_with<iter_value_t<I>, Old> and
-            std::convertible_to<std::invoke_result_t<Proj, Old>, iter_value_t<I>>)
+            std::equality_comparable_with<iter_value_t<I>, Old>)
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_drop_while, first, last, pred, proj);
         }
@@ -180,8 +177,7 @@ namespace genex::views {
 
         template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
             categories::input_iterator<I> and
-            std::equality_comparable_with<iter_value_t<I>, Old> and
-            std::convertible_to<std::invoke_result_t<Proj, Old>, iter_value_t<I>>)
+            std::equality_comparable_with<iter_value_t<I>, Old>)
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL_VIEW(detail::do_drop_until, first, last, pred, proj);
         }

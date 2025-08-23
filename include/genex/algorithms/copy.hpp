@@ -11,7 +11,8 @@ using namespace genex::type_traits;
 
 
 namespace genex::algorithms::detail {
-    template <range Rng>
+    template <range Rng> requires (
+        categories::input_range<Rng>)
     auto do_copy(Rng &&rng) -> std::remove_cvref_t<Rng> {
         auto copy = std::remove_cvref_t<Rng>();
         auto it = iterators::begin(rng);
@@ -21,7 +22,8 @@ namespace genex::algorithms::detail {
         return std::move(copy);
     }
 
-    template <range Rng>
+    template <range Rng> requires (
+        categories::input_range<Rng>)
     auto copy_n(Rng &&rng, const std::size_t n) -> std::remove_cvref_t<Rng> {
         auto copy = std::remove_cvref_t<Rng>();
         auto it = iterators::begin(rng);
@@ -31,7 +33,10 @@ namespace genex::algorithms::detail {
         return std::move(copy);
     }
 
-    template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
+    template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+        categories::input_range<Rng> and
+        std::equality_comparable_with<range_value_t<Rng>, Old> and
+        std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
     auto copy_if(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> std::remove_cvref_t<Rng> {
         auto copy = std::remove_cvref_t<Rng>();
         auto it = iterators::begin(rng);
@@ -47,7 +52,8 @@ namespace genex::algorithms::detail {
 
 namespace genex::algorithms {
     DEFINE_ALGORITHM(copy) {
-        template <range Rng>
+        template <range Rng> requires (
+            categories::input_range<Rng>)
         constexpr auto operator()(Rng &&rng) const -> auto {
             FWD_TO_IMPL(detail::do_copy, rng);
         }
@@ -58,7 +64,8 @@ namespace genex::algorithms {
     };
 
     DEFINE_ALGORITHM(copy_n) {
-        template <range Rng>
+        template <range Rng> requires (
+            categories::input_range<Rng>)
         constexpr auto operator()(Rng &&rng, const std::size_t n) const -> auto {
             FWD_TO_IMPL(detail::copy_n, rng, n);
         }
@@ -69,7 +76,10 @@ namespace genex::algorithms {
     };
 
     DEFINE_ALGORITHM(copy_if) {
-        template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
+        template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+            categories::input_range<Rng> and
+            std::equality_comparable_with<range_value_t<Rng>, Old> and
+            std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             FWD_TO_IMPL(detail::copy_if, rng, pred, proj);
         }

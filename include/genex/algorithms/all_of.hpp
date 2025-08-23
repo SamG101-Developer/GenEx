@@ -11,7 +11,9 @@ using namespace genex::type_traits;
 
 
 namespace genex::algorithms::detail {
-    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+    template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+        categories::input_iterator<I> and
+        std::equality_comparable_with<iter_value_t<I>, Old>)
     auto do_all_of(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> bool {
         for (; first != last; ++first) {
             if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { return false; }
@@ -19,7 +21,10 @@ namespace genex::algorithms::detail {
         return true;
     }
 
-    template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
+    template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+        categories::input_range<Rng> and
+        std::equality_comparable_with<range_value_t<Rng>, Old> and
+        std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
     auto do_all_of(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> bool {
         for (auto &&x : rng) {
             if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) { return false; }
@@ -31,12 +36,17 @@ namespace genex::algorithms::detail {
 
 namespace genex::algorithms {
     DEFINE_ALGORITHM(all_of) {
-        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
+        template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+            categories::input_iterator<I> and
+            std::equality_comparable_with<iter_value_t<I>, Old>)
         constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> bool {
             FWD_TO_IMPL(detail::do_all_of, first, last, pred, proj);
         }
 
-        template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
+        template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
+            categories::input_range<Rng> and
+            std::equality_comparable_with<range_value_t<Rng>, Old> and
+            std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> bool {
             FWD_TO_IMPL(detail::do_all_of, rng, pred, proj);
         }
