@@ -2,55 +2,52 @@
 #include <coroutine>
 #include <functional>
 #include <genex/concepts.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> F> requires (
-        categories::input_iterator<I> and
-        std::equality_comparable_with<iter_value_t<I>, Old>)
-    auto do_for_each(I &&first, S &&last, F &&f) -> void {
+    template <typename I, typename S, typename F>
+    auto do_for_each(I first, S last, F &&f) -> void {
         for (; first != last; ++first) {
             std::invoke(std::forward<F>(f), std::forward<decltype(*first)>(*first));
-        }
-    }
-
-    template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> F> requires (
-        categories::input_range<Rng> and
-        std::equality_comparable_with<range_value_t<Rng>, Old>)
-    auto do_for_each(Rng &&rng, F &&f) -> void {
-        for (auto &&x : rng) {
-            std::invoke(std::forward<F>(f), std::forward<decltype(x)>(x));
         }
     }
 }
 
 
 namespace genex::views {
+    template <typename I, typename S, typename F>
+    concept can_for_each_iters =
+        input_iterator<I> and
+        sentinel_for<S, I> and
+        std::invocable<F, iter_value_t<I>>;
+
+    template <typename Rng, typename F>
+    concept can_for_each_range =
+        input_range<Rng> and
+        std::invocable<F, range_value_t<Rng>>;
+
     DEFINE_VIEW(for_each) {
-        DEFINE_OUTPUT_TYPE(for_each);
-
-        template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> F> requires (
-            categories::input_iterator<I> and
-            std::equality_comparable_with<iter_value_t<I>, Old>)
-        constexpr auto operator()(I &&first, S &&last, F &&f) const -> void {
-            FWD_TO_IMPL_VIEW_VOID(detail::do_for_each, first, last, f);
+        template <typename I, typename S, typename F> requires can_for_each_iters<I, S, F>
+        constexpr auto operator()(I first, S last, F &&f) const -> void {
+            detail::do_for_each(std::move(first), std::move(last), std::forward<F>(f));
         }
 
-        template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> F> requires (
-            categories::input_range<Rng> and
-            std::equality_comparable_with<range_value_t<Rng>, Old>)
+        template <typename Rng, typename F> requires can_for_each_range<Rng, F>
         constexpr auto operator()(Rng &&rng, F &&f) const -> void {
-            FWD_TO_IMPL_VIEW_VOID(detail::do_for_each, rng, f);
+            (*this)(iterators::begin(rng), iterators::end(rng), std::forward<F>(f));
         }
 
-        template <typename F>
+        template <typename F> requires (not input_range<std::remove_cvref_t<F>>)
         constexpr auto operator()(F &&f) const -> auto {
-            MAKE_CLOSURE(f);
+            return
+                [FWD_CAPTURES(f)]<typename Rng> requires can_for_each_range<Rng, F>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), std::forward<F>(f));
+            };
         }
     };
 

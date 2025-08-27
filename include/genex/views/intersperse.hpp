@@ -2,104 +2,101 @@
 #include <coroutine>
 #include <functional>
 #include <genex/concepts.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S, typename New> requires (
-        categories::input_iterator<I> and
-        std::convertible_to<New, iter_value_t<I>>)
-    auto do_intersperse(I &&first, S &&last, New &&separator) -> generator<iter_value_t<I>> {
+    template <typename I, typename S, typename New>
+    auto do_intersperse(I first, S last, New &&sep) -> generator<iter_value_t<I>> {
         co_yield *first;
+        ++first;
         for (; first != last; ++first) {
-            co_yield separator;
+            co_yield sep;
             co_yield *first;
         }
     }
 
-    template <range Rng, typename New> requires (
-        categories::input_range<Rng> and
-        std::convertible_to<New, range_value_t<Rng>>)
-    auto do_intersperse(Rng &&rng, New &&separator) -> generator<range_value_t<Rng>> {
-        co_yield *iterators::begin(rng);
-        for (auto it = iterators::next(iterators::begin(rng)); it != iterators::end(rng); ++it) {
-            co_yield separator;
-            co_yield *it;
-        }
-    }
-
-    template <iterator I, sentinel_for<I> S, std::invocable F> requires (
-        categories::input_iterator<I> and
-        std::convertible_to<std::invoke_result_t<F>, iter_value_t<I>>)
-    auto do_intersperse_with(I &&first, S &&last, F &&separator) -> generator<iter_value_t<I>> {
+    template <typename I, typename S, std::invocable F>
+    auto do_intersperse_with(I first, S last, F &&sep) -> generator<iter_value_t<I>> {
         co_yield *first;
+        ++first;
         for (; first != last; ++first) {
-            co_yield std::invoke(std::forward<F>(separator));
+            co_yield std::invoke(std::forward<F>(sep));
             co_yield *first;
-        }
-    }
-
-    template <range Rng, std::invocable F> requires (
-        categories::input_range<Rng> and
-        std::convertible_to<std::invoke_result_t<F>, range_value_t<Rng>>)
-    auto do_intersperse_with(Rng &&rng, F &&separator) -> generator<range_value_t<Rng>> {
-        co_yield *iterators::begin(rng);
-        for (auto it = iterators::next(iterators::begin(rng)); it != iterators::end(rng); ++it) {
-            co_yield std::invoke(std::forward<F>(separator));
-            co_yield *it;
         }
     }
 }
 
 
 namespace genex::views {
+    template <typename I, typename S, typename New>
+    concept can_intersperse_iters =
+        input_iterator<I> and
+        sentinel_for<S, I> and
+        std::convertible_to<New, iter_value_t<I>>;
+
+    template <typename Rng, typename New>
+    concept can_intersperse_range =
+        input_range<Rng> and
+        std::convertible_to<New, range_value_t<Rng>>;
+
+    template <typename I, typename S, typename F>
+    concept can_intersperse_with_iters =
+        input_iterator<I> and
+        sentinel_for<S, I> and
+        std::invocable<F> and
+        std::convertible_to<std::invoke_result_t<F>, iter_value_t<I>>;
+
+    template <typename Rng, typename F>
+    concept can_intersperse_with_range =
+        input_range<Rng> and
+        std::invocable<F> and
+        std::convertible_to<std::invoke_result_t<F>, range_value_t<Rng>>;
+
     DEFINE_VIEW(intersperse) {
-        DEFINE_OUTPUT_TYPE(intersperse);
-
-        template <iterator I, sentinel_for<I> S, typename New> requires (
-            categories::input_iterator<I> and
-            std::convertible_to<New, iter_value_t<I>>)
-        constexpr auto operator()(I &&first, S &&last, New &&sep) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_intersperse, first, last, sep);
+        template <typename I, typename S, typename New> requires can_intersperse_iters<I, S, New>
+        constexpr auto operator()(I first, S last, New &&sep) const -> auto {
+            auto gen = detail::do_intersperse(std::move(first), std::move(last), std::forward<New>(sep));
+            return intersperse_view(std::move(gen));
         }
 
-        template <range Rng, typename New> requires (
-            categories::input_range<Rng> and
-            std::convertible_to<New, range_value_t<Rng>>)
+        template <typename Rng, typename New> requires can_intersperse_range<Rng, New>
         constexpr auto operator()(Rng &&rng, New &&sep) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_intersperse, rng, sep);
+            return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<New>(sep));
         }
 
-        template <typename New>
+        template <typename New> requires (not input_range<std::remove_cvref_t<New>>)
         constexpr auto operator()(New &&sep) const -> auto {
-            MAKE_CLOSURE(sep);
+            return
+                [FWD_CAPTURES(sep)]<typename Rng> requires can_intersperse_range<Rng, New>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), std::forward<New>(sep));
+            };
         }
     };
 
     DEFINE_VIEW(intersperse_with) {
-        DEFINE_OUTPUT_TYPE(intersperse_with);
-
-        template <iterator I, sentinel_for<I> S, std::invocable F> requires (
-            categories::input_iterator<I> and
-            std::convertible_to<std::invoke_result_t<F>, iter_value_t<I>>)
-        constexpr auto operator()(I &&first, S &&last, F &&sep) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_intersperse_with, first, last, sep);
+        template <typename I, typename S, typename F> requires can_intersperse_with_iters<I, S, F>
+        constexpr auto operator()(I first, S last, F &&sep) const -> auto {
+            auto gen = detail::do_intersperse_with(std::move(first), std::move(last), std::forward<F>(sep));
+            return intersperse_view(std::move(gen));
         }
 
-        template <range Rng, std::invocable F> requires (
-            categories::input_range<Rng> and
-            std::convertible_to<std::invoke_result_t<F>, range_value_t<Rng>>)
+        template <typename Rng, typename F> requires can_intersperse_with_range<Rng, F>
         constexpr auto operator()(Rng &&rng, F &&sep) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_intersperse_with, rng, sep);
+            return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<F>(sep));
         }
 
-        template <std::invocable F>
+        template <typename F> requires (not input_range<std::remove_cvref_t<F>>)
         constexpr auto operator()(F &&sep) const -> auto {
-            MAKE_CLOSURE(sep);
+            return
+                [FWD_CAPTURES(sep)]<typename Rng> requires can_intersperse_with_range<Rng, F>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), std::forward<F>(sep));
+            };
         }
     };
 

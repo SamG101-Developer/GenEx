@@ -1,4 +1,5 @@
 #pragma once
+#include <genex/generator.hpp>
 #include <genex/macros.hpp>
 
 #define EXPORT_GENEX_ACTION(name) \

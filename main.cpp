@@ -14,7 +14,7 @@
 #include <genex/algorithms/all_of.hpp>
 #include <genex/algorithms/any_of.hpp>
 #include <genex/algorithms/contains.hpp>
-#include <genex/algorithms/copy.hpp>
+#include <include/genex/views/copy.hpp>
 #include <genex/algorithms/count.hpp>
 #include <genex/algorithms/binary_search.hpp>
 #include <genex/algorithms/find.hpp>
@@ -39,7 +39,7 @@
 #include <genex/views/interleave.hpp>
 #include <genex/views/intersperse.hpp>
 #include <genex/views/iota.hpp>
-#include <genex/views/join.hpp>
+#include <genex/views/flatten.hpp>
 #include <genex/views/map.hpp>
 #include <genex/views/materialize.hpp>
 #include <genex/views/move.hpp>

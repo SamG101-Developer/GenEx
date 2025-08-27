@@ -1,33 +1,32 @@
 #pragma once
-#include <functional>
+#include <utility>
 #include <genex/concepts.hpp>
 #include <genex/actions/_action_base.hpp>
 #include <genex/iterators/begin.hpp>
 #include <genex/iterators/end.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
-
-namespace genex::actions::detail {
-    template <range Rng>
-    auto do_reverse(Rng *rng) -> void {
-        std::reverse(iterators::begin(*rng), iterators::end(*rng));
-    }
-}
-
 
 namespace genex::actions {
-    DEFINE_ACTION(sort) {
-        template <range Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
-            FWD_TO_IMPL(detail::do_reverse, &rng);
+    template <typename Rng>
+    concept can_reverse_range =
+        bidirectional_range<Rng> and
+        std::permutable<iterator_t<Rng>>;
+
+    DEFINE_ACTION(reverse) {
+        template <typename Rng> requires can_reverse_range<Rng>
+        constexpr auto operator()(Rng &&rng) const -> Rng& {
+            std::reverse(iterators::begin(rng), iterators::end(rng));
+            return rng;
         }
 
         constexpr auto operator()() const -> auto {
-            MAKE_CLOSURE();
+            return
+                [FWD_CAPTURES()]<typename Rng> requires can_reverse_range<Rng>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng));
+            };
         }
     };
 
-    EXPORT_GENEX_ACTION(sort);
+    EXPORT_GENEX_ACTION(reverse);
 }

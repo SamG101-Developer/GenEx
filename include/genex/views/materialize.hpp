@@ -1,32 +1,20 @@
 #pragma once
 #include <coroutine>
 #include <vector>
-#include <genex/categories.hpp>
 #include <genex/concepts.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S> requires (
-        categories::input_iterator<I>)
-    auto do_materialize(I &&first, S &&last) -> std::vector<iter_value_t<I>> {
-        auto vec = std::vector<iter_value_t<I>>();
+    template <template <typename> typename Cache, typename I, typename S>
+    auto do_materialize(I first, S last) -> Cache<std::reference_wrapper<iter_value_t<I>>> {
+        auto vec = Cache<std::reference_wrapper<iter_value_t<I>>>();
         for (; first != last; ++first) {
-            vec.push_back(std::forward<iter_value_t<I>>(*first));
-        }
-        return vec;
-    }
-
-    template <range Rng> requires (
-        categories::input_range<Rng>)
-    auto do_materialize(Rng &&rng) -> std::vector<range_value_t<Rng>> {
-        auto vec = std::vector<range_value_t<Rng>>();
-        for (auto &&x : rng) {
-            vec.push_back(std::forward<range_value_t<Rng>>(x));
+            auto &&temp = *first;
+            vec.push_back(std::ref(temp));
         }
         return vec;
     }
@@ -34,23 +22,38 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
+    template <template <typename> typename Cache, typename I, typename S>
+    concept can_materialize_iters =
+        input_iterator<I> and
+        sentinel_for<S, I> and
+        std::is_lvalue_reference_v<iter_reference_t<I>> and
+        requires { Cache<std::reference_wrapper<iter_value_t<I>>>::push_back(std::ref(*std::declval<I>())); };
+
+    template <template <typename> typename Cache, typename Rng>
+    concept can_materialize_range =
+        input_range<Rng> and
+        std::is_lvalue_reference_v<range_reference_t<Rng>> and
+        requires { Cache<std::reference_wrapper<range_value_t<Rng>>>::push_back(std::ref(*iterators::begin(std::declval<Rng>()))); };
+
     DEFINE_VIEW(materialize) {
-        DEFINE_OUTPUT_TYPE(materialize);
-
-        template <iterator I, sentinel_for<I> S> requires (
-            categories::input_iterator<I>)
-        constexpr auto operator()(I &&first, S &&last) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_materialize, first, last);
+        template <template <typename> typename Cache = std::vector, typename I, typename S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            auto gen = detail::do_materialize<Cache>(std::move(first), std::move(last));
+            return gen;
         }
 
-        template <range Rng> requires (
-            categories::input_range<Rng>)
+        template <template <typename> typename Cache = std::vector, typename Rng>
         constexpr auto operator()(Rng &&rng) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_materialize, rng);
+            return this->operator()<Cache>(iterators::begin(rng), iterators::end(rng));
         }
 
+        template <template <typename> typename Cache = std::vector>
         constexpr auto operator()() const -> auto {
-            MAKE_CLOSURE();
+            return
+                [FWD_CAPTURES()]<typename Rng> requires can_materialize_range<Cache, Rng>
+                (Rng &&rng) mutable -> auto {
+                return this->operator()<Cache>(std::forward<Rng>(rng));
+            };
         }
     };
 

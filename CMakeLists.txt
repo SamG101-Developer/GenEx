@@ -30,6 +30,6 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GenExConfig.cmake" "${CMAKE_CURRENT_B
 # Library uninstallation configuration.
 add_custom_target(uninstall COMMAND xargs rm -vf < "${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt")
 
-# Create the test executable.
-add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE GenExLib)
+# Create the tests.
+enable_testing()
+add_subdirectory(tests)

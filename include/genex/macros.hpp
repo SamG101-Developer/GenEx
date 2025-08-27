@@ -3,6 +3,8 @@
 
 
 #define CHECK_TUPLE_EMPTY_PROBE(...) BOOST_PP_TUPLE_ELEM(0, 0, (__VA_ARGS__, ~))
+
+
 #define IS_TUPLE_EMPTY(tuple) \
     BOOST_PP_IIF( \
         BOOST_PP_EQUAL(BOOST_PP_TUPLE_SIZE(tuple), 1), \
@@ -10,22 +12,16 @@
         0 \
     )
 
-#define FORWARD_OBJECT(_1, _2, obj) \
-    std::forward<decltype(obj)>(obj)
 
 #define FORWARD_OBJECT_FOR_CLOSURE(_1, _2, obj) \
     obj = std::forward<decltype(obj)>(obj)
 
-#define SPLIT_RANGE_TO_ITER(_1, _2, i, range) \
-    BOOST_PP_COMMA_IF(i) iterators::begin(range), iterators::end(range)
-
-#define FWD_TO_IMPL(fn, ...) \
-    return fn(BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(FORWARD_OBJECT, BOOST_PP_EMPTY, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__))));
 
 #define MAP_TO_BASE_SOLO_THIS_CAPTURE(...) \
-    this
+    *this
 
-#define MAP_TO_BASE_CAPTURES(...) \
+
+#define FWD_CAPTURES(...) \
     BOOST_PP_IF(\
         IS_TUPLE_EMPTY(BOOST_PP_VARIADIC_TO_TUPLE(__VA_ARGS__)),\
         MAP_TO_BASE_SOLO_THIS_CAPTURE,\
@@ -35,23 +31,6 @@
         MAP_TO_BASE_SOLO_THIS_CAPTURE()\
     ))
 
-#define MAP_TO_BASE_SOLO_FORWARD_RANGE_ARGUMENT(...) \
-    std::forward<Rng>(rng)
-
-#define MAP_TO_BASE_ARGUMENTS(...) \
-    BOOST_PP_IF(\
-        IS_TUPLE_EMPTY(BOOST_PP_VARIADIC_TO_TUPLE(__VA_ARGS__)),\
-        MAP_TO_BASE_SOLO_FORWARD_RANGE_ARGUMENT,\
-        BOOST_PP_SEQ_ENUM\
-    )(BOOST_PP_SEQ_PUSH_FRONT(\
-        BOOST_PP_SEQ_TRANSFORM(FORWARD_OBJECT, BOOST_PP_EMPTY, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__)),\
-        MAP_TO_BASE_SOLO_FORWARD_RANGE_ARGUMENT()\
-    ))
-
-#define MAKE_CLOSURE(...) \
-    return [MAP_TO_BASE_CAPTURES(__VA_ARGS__)]<range Rng>(Rng &&rng) mutable -> auto { \
-        return (*this)(MAP_TO_BASE_ARGUMENTS(__VA_ARGS__)); \
-    }
 
 #define EXPORT_GENEX_STRUCT(name) \
     inline constexpr name ## _fn name

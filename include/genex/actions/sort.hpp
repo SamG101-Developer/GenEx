@@ -4,32 +4,33 @@
 #include <genex/actions/_action_base.hpp>
 #include <genex/iterators/begin.hpp>
 #include <genex/iterators/end.hpp>
+#include <genex/operations/cmp.hpp>
 #include <genex/meta.hpp>
-
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
-
-namespace genex::actions::detail {
-    template <range Rng, std::invocable<range_value_t<Rng>> Proj, std::invocable<std::invoke_result_t<Proj, range_value_t<Rng>>, std::invoke_result_t<Proj, range_value_t<Rng>>> F>
-    auto do_sort(Rng *rng, F &&f, Proj &&proj) -> void {
-        std::sort(iterators::begin(*rng), iterators::end(*rng), [f, proj]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
-            return std::invoke(f, std::invoke(proj, std::forward<Lhs>(lhs)), std::invoke(proj, std::forward<Rhs>(rhs)));
-        });
-    }
-}
 
 
 namespace genex::actions {
+    template <typename Rng, typename Comp, typename Proj>
+    concept can_sorted_range =
+        random_access_range<Rng> and
+        std::permutable<iterator_t<Rng>> and
+        std::sortable<iterator_t<Rng>, Comp, Proj>;
+
     DEFINE_ACTION(sort) {
-        template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::invocable<std::invoke_result_t<Proj, range_value_t<Rng>>, std::invoke_result_t<Proj, range_value_t<Rng>>> F>
-        constexpr auto operator()(Rng &&rng, F &&f, Proj &&proj = {}) const -> auto {
-            FWD_TO_IMPL(detail::do_sort, &rng, f, proj);
+        template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity> requires can_sorted_range<Rng, Comp, Proj>
+        constexpr auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> Rng& {
+            std::sort(iterators::begin(rng), iterators::end(rng), [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
+                return std::invoke(comp, std::invoke(proj, std::forward<Lhs>(lhs)), std::invoke(proj, std::forward<Rhs>(rhs)));
+            });
+            return rng;
         }
 
-        template <typename F, typename Proj = meta::identity>
-        constexpr auto operator()(F &&f, Proj &&proj = {}) const -> auto {
-            MAKE_CLOSURE(f, proj);
+        template <typename Comp = operations::lt, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Comp>>)
+        constexpr auto operator()(Comp &&comp = {}, Proj &&proj = {}) const -> auto {
+            return
+                [FWD_CAPTURES(comp, proj)]<typename Rng> requires can_sorted_range<Rng, Comp, Proj>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), std::forward<Comp>(comp), std::forward<Proj>(proj));
+            };
         }
     };
 

@@ -5,48 +5,49 @@
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
-
-namespace genex::algorithms::detail {
-    template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = genex::meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-    auto do_none_of(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> bool {
-        for (; first != last; ++first) {
-            if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    template <range Rng, std::invocable<range_value_t<Rng>> Proj = genex::meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-    auto do_none_of(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> bool {
-        for (auto &&x : rng) {
-            if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) {
-                return false;
-            }
-        }
-        return true;
-    }
-}
-
 
 namespace genex::algorithms {
+    template <typename I, typename S, typename Pred, typename Proj>
+    concept can_none_of_iters =
+        input_iterator<I> and
+        sentinel_for<S, I> and
+        std::invocable<Proj, iter_value_t<I>> and
+        std::predicate<Pred, std::invoke_result_t<Proj, iter_value_t<I>>>;
+
+    template <typename Rng, typename Pred, typename Proj>
+    concept can_none_of_range =
+        input_range<Rng> and
+        std::invocable<Proj, range_value_t<Rng>> and
+        std::predicate<Pred, std::invoke_result_t<Proj, range_value_t<Rng>>>;
+
     DEFINE_ALGORITHM(none_of) {
-        template <iterator I, sentinel_for<I> S, std::invocable<iter_value_t<I>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, iter_value_t<I>>> Pred>
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
-            FWD_TO_IMPL(detail::do_none_of, first, last, pred, proj);
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires can_none_of_iters<I, S, Pred, Proj>
+        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            for (; first != last; ++first) {
+                if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
+                    return false;
+                }
+            }
+            return true;
         }
 
-        template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
+        template <typename Rng, typename Pred, typename Proj = meta::identity> requires can_none_of_range<Rng, Pred, Proj>
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
-            FWD_TO_IMPL(detail::do_none_of, rng, pred, proj);
+            for (auto &&x : rng) {
+                if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) {
+                    return false;
+                }
+            }
+            return true;
         }
 
-        template <typename Pred, typename Proj = meta::identity>
+        template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
         constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            MAKE_CLOSURE(pred, proj);
+            return
+                [FWD_CAPTURES(pred, proj)]<typename Rng> requires can_none_of_range<Rng, Pred, Proj>
+                (Rng &&rng) mutable -> bool {
+                return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            };
         }
     };
 

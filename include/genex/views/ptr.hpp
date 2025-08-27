@@ -1,90 +1,66 @@
 #pragma once
 #include <coroutine>
 #include <genex/concepts.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S> requires (
-        categories::input_iterator<I> and
-        unique_ptr<deref_value_t<I>>)
-    auto do_ptr(I &&first, S &&last) -> generator<typename deref_value_t<I>::pointer> {
+    template <typename I, typename S> requires unique_ptr<iter_value_t<I>>
+    auto do_ptr(I first, S last) -> generator<typename iter_value_t<I>::element_type*> {
         for (; first != last; ++first) {
             co_yield (*first).get();
         }
     }
 
-    template <range Rng> requires (
-        categories::input_range<Rng> and
-        unique_ptr<range_value_t<Rng>>)
-    auto do_ptr(Rng &&rng) -> generator<typename range_value_t<Rng>::pointer> {
-        for (auto &&x : rng) {
-            co_yield x.get();
-        }
-    }
-
-    template <iterator I, sentinel_for<I> S> requires (
-        categories::input_iterator<I> and
-        shared_ptr<deref_value_t<I>>)
-    auto do_ptr(I &&first, S &&last) -> generator<typename deref_value_t<I>::pointer> {
+    template <typename I, typename S> requires shared_ptr<iter_value_t<I>>
+    auto do_ptr(I first, S last) -> generator<typename iter_value_t<I>::element_type*> {
         for (; first != last; ++first) {
             co_yield (*first).get();
         }
     }
 
-    template <range Rng> requires (
-        categories::input_range<Rng> and
-        shared_ptr<range_value_t<Rng>>)
-    auto do_ptr(Rng &&rng) -> generator<typename range_value_t<Rng>::pointer> {
-        for (auto &&x : rng) {
-            co_yield x.get();
-        }
-    }
-
-    template <iterator I, sentinel_for<I> S> requires (
-        categories::input_iterator<I> and
-        weak_ptr<deref_value_t<I>>)
-    auto do_ptr(I &&first, S &&last) -> generator<typename deref_value_t<I>::pointer> {
+    template <typename I, typename S> requires weak_ptr<iter_value_t<I>>
+    auto do_ptr(I first, S last) -> generator<typename iter_value_t<I>::element_type*> {
         for (; first != last; ++first) {
-            co_yield (*first).get();
-        }
-    }
-
-    template <range Rng> requires (
-        categories::input_range<Rng> and
-        weak_ptr<range_value_t<Rng>>)
-    auto do_ptr(Rng &&rng) -> generator<typename range_value_t<Rng>::pointer> {
-        for (auto &&x : rng) {
-            co_yield x.get();
+            co_yield (*first).lock().get();
         }
     }
 }
 
 
 namespace genex::views {
-    DEFINE_VIEW(ptr) {
-        DEFINE_OUTPUT_TYPE(ptr);
+    template <typename I, typename S>
+    concept can_ptr_iters =
+        input_iterator<I> and
+        sentinel_for<S, I> and
+        (unique_ptr<iter_value_t<I>> or shared_ptr<iter_value_t<I>> or weak_ptr<iter_value_t<I>>);
 
-        template <iterator I, sentinel_for<I> S> requires (
-            categories::input_iterator<I> and
-            unique_ptr<deref_value_t<I>> or shared_ptr<deref_value_t<I>> or weak_ptr<deref_value_t<I>>)
-        constexpr auto operator()(I &&first, S &&last) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_ptr, first, last);
+    template <typename Rng>
+    concept can_ptr_range =
+        input_range<Rng> and
+        (unique_ptr<range_value_t<Rng>> or shared_ptr<range_value_t<Rng>> or weak_ptr<range_value_t<Rng>>);
+
+    DEFINE_VIEW(ptr) {
+        template <typename I, typename S> requires can_ptr_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            auto gen = detail::do_ptr(std::move(first), std::move(last));
+            return ptr_view(std::move(gen));
         }
 
-        template <range Rng> requires (
-            categories::input_range<Rng> and
-            unique_ptr<range_value_t<Rng>> or shared_ptr<range_value_t<Rng>> or weak_ptr<range_value_t<Rng>>)
+        template <typename Rng> requires can_ptr_range<Rng>
         constexpr auto operator()(Rng &&rng) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_ptr, rng);
+            return (*this)(iterators::begin(rng), iterators::end(rng));
         }
 
         constexpr auto operator()() const -> auto {
-            MAKE_CLOSURE();
+            return
+                [FWD_CAPTURES()]<typename Rng> requires can_ptr_range<Rng>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng));
+            };
         }
     };
 

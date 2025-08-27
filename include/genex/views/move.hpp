@@ -1,55 +1,56 @@
 #pragma once
 #include <coroutine>
-#include <functional>
+#include <utility>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S> requires (
-        categories::input_iterator<I> and
-        std::movable<iter_value_t<I>>)
-    auto do_move(I &&first, S &&last) -> generator<iter_value_t<I>&&> {
+    template <typename I, typename S>
+    auto do_move(I first, S last) -> generator<iter_value_t<I>&&> {
         for (; first != last; ++first) {
             co_yield std::move(*first);
-        }
-    }
-
-    template <range Rng> requires (
-        categories::input_range<Rng> and
-        std::movable<range_value_t<Rng>>)
-    auto do_move(Rng &&rng) -> generator<range_value_t<Rng>&&> {
-        for (auto &&x : rng) {
-            co_yield std::move(x);
         }
     }
 }
 
 
 namespace genex::views {
-    DEFINE_VIEW(move) {
-        DEFINE_OUTPUT_TYPE(move);
+    template <typename I, typename S>
+    concept can_move_iters =
+        input_iterator<I> and
+        sentinel_for<S, I> and
+        std::movable<iter_value_t<I>>;
 
-        template <iterator I, sentinel_for<I> S> requires (
-            categories::input_iterator<I> and
-            std::movable<iter_value_t<I>>)
-        constexpr auto operator()(I &&first, S &&last) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_move, first, last);
+    template <typename Rng>
+    concept can_move_range =
+        input_range<Rng> and
+        std::movable<range_value_t<Rng>>;
+
+    DEFINE_VIEW(move) {
+        template <typename I, typename S> requires can_move_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            // Call the move inner function.
+            auto gen = detail::do_move(std::move(first), std::move(last));
+            return move_view(std::move(gen));
         }
 
-        template <range Rng> requires (
-            categories::input_range<Rng> and
-            std::movable<range_value_t<Rng>>)
+        template <typename Rng> requires can_move_range<Rng>
         constexpr auto operator()(Rng &&rng) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_move, rng);
+            // Call the move inner function.
+            return (*this)(iterators::begin(rng), iterators::end(rng));
         }
 
         constexpr auto operator()() const -> auto {
-            MAKE_CLOSURE();
+            // Create a closure that takes a range and applies the move.
+            return
+                [FWD_CAPTURES()]<typename Rng> requires can_move_range<Rng>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng));
+            };
         }
     };
 

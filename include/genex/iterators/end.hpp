@@ -1,61 +1,42 @@
 #pragma once
 #include <iterator>
+#include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/iterators/_iterator_base.hpp>
 
 
 namespace genex::iterators {
     template <typename Rng>
-    concept has_member_end =
-        requires(Rng &&r) { { r.end() } -> std::sentinel_for<decltype(r.begin())>; } ||
-        requires(Rng const &r) { { r.end() } -> std::sentinel_for<decltype(r.begin())>; };
+    concept can_end_range =
+        input_range<Rng>;
 
     template <typename Rng>
-    concept has_member_rend =
-        requires(Rng &r) { { r.rend() } -> std::sentinel_for<decltype(r.rbegin())>; } ||
-        requires(Rng const &r) { { r.rend() } -> std::sentinel_for<decltype(r.rbegin())>; };
-
-    template <typename Rng>
-    concept has_std_end = requires(Rng &r) { { std::end(std::forward<Rng>(r)) } -> std::sentinel_for<decltype(r.begin())>; };
-
-    template <typename Rng>
-    concept has_std_rend = requires(Rng &r) { { std::rend(std::forward<Rng>(r)) } -> std::sentinel_for<decltype(r.rbegin())>; };
-
-    template <typename Rng>
-    concept has_end = has_member_end<Rng> || has_std_end<Rng>;
-
-    template <typename Rng>
-    concept has_rend = has_member_rend<Rng> || has_std_rend<Rng>;
+    concept can_rend_range =
+        bidirectional_range<Rng>;
 
     DEFINE_ITERATOR(end) {
-        template <typename Rng> requires (has_member_end<Rng>)
-        constexpr auto operator()(Rng &&r) const noexcept -> decltype(r.end()) {
-            return r.end();
+        template <typename Rng> requires (can_end_range<Rng> and has_std_end<Rng>)
+        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(std::end(std::forward<Rng>(rng)))) -> decltype(std::end(std::forward<Rng>(rng))) {
+            return std::end(std::forward<Rng>(rng));
         }
 
-        template <typename Rng> requires (not has_member_end<Rng> and has_std_end<Rng>)
-        constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::end(std::forward<Rng>(r))) {
-            return std::end(std::forward<Rng>(r));
+        template <typename Rng> requires (can_end_range<Rng> and not has_std_end<Rng> and has_member_end<Rng>)
+        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(rng.end())) -> decltype(rng.end()) {
+            return rng.end();
         }
     };
 
     DEFINE_ITERATOR(rend) {
-        template <typename Rng> requires (has_member_rend<Rng>)
-        constexpr auto operator()(Rng &&r) const noexcept -> decltype(r.rend()) {
-            return r.rend();
+        template <typename Rng> requires (can_rend_range<Rng> and has_std_rend<Rng>)
+        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(std::rend(std::forward<Rng>(rng)))) -> decltype(std::rend(std::forward<Rng>(rng))) {
+            return std::rend(std::forward<Rng>(rng));
         }
 
-        template <typename Rng> requires (not has_member_rend<Rng> and has_std_rend<Rng>)
-        constexpr auto operator()(Rng &&r) const noexcept -> decltype(std::rend(std::forward<Rng>(r))) {
-            return std::rend(std::forward<Rng>(r));
+        template <typename Rng> requires (can_rend_range<Rng> and not has_std_rend<Rng> and has_member_rend<Rng>)
+        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(rng.rend())) -> decltype(rng.rend()) {
+            return rng.rend();
         }
     };
-
-    template <typename Rng>
-    using end_t = decltype(std::declval<end_fn>()(std::declval<Rng>()));
-
-    template <typename Rng>
-    using rend_t = decltype(std::declval<rend_fn>()(std::declval<Rng>()));
 
     EXPORT_GENEX_ITERATOR(end);
     EXPORT_GENEX_ITERATOR(rend);

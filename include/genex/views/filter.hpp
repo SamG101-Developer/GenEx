@@ -2,34 +2,19 @@
 #include <coroutine>
 #include <functional>
 #include <genex/concepts.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
 #include <genex/views/_view_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-        categories::input_iterator<I> and
-        std::equality_comparable_with<iter_value_t<I>, Old>)
-    auto do_filter(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
+    template <typename I, typename S, typename Proj, typename Pred>
+    auto do_filter(I first, S last, Pred &&pred, Proj &&proj) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
                 co_yield *first;
-            }
-        }
-    }
-
-    template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-        categories::input_range<Rng> and
-        std::equality_comparable_with<range_value_t<Rng>, Old> and
-        std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
-    auto do_filter(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> generator<range_value_t<Rng>> {
-        for (auto &&x : rng) {
-            if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) {
-                co_yield std::forward<decltype(x)>(x);
             }
         }
     }
@@ -37,27 +22,39 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
+    template <typename I, typename S, typename Pred, typename Proj>
+    concept can_filter_iters =
+        input_iterator<I> and
+        sentinel_for<S, I> and
+        std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
+
+    template <typename Rng, typename Pred, typename Proj>
+    concept can_filter_range =
+        input_range<Rng> and
+        std::indirect_unary_predicate<Pred, std::projected<iterator_t<Rng>, Proj>>;
+
     DEFINE_VIEW(filter) {
-        DEFINE_OUTPUT_TYPE(filter);
-
-        template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-            categories::input_iterator<I> and
-            std::equality_comparable_with<iter_value_t<I>, Old>)
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_filter, first, last, pred, proj);
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires can_filter_iters<I, S, Pred, Proj>
+        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            // Call the filter inner function.
+            auto gen = detail::do_filter(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            return filter_view(std::move(gen));
         }
 
-        template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-            categories::input_range<Rng> and
-            std::equality_comparable_with<range_value_t<Rng>, Old> and
-            std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
+        template <typename Rng, typename Pred, typename Proj = meta::identity> requires can_filter_range<Rng, Pred, Proj>
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_filter, rng, pred, proj);
+            // Call the filter inner function.
+            return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
-        template <typename Pred, typename Proj = meta::identity>
+        template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
         constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            MAKE_CLOSURE(pred, proj);
+            // Create a closure that takes a range and applies the filter.
+            return
+                [FWD_CAPTURES(pred, proj)]<typename Rng> requires can_filter_range<Rng, Pred, Proj>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), std::move(pred), std::move(proj));
+            };
         }
     };
 

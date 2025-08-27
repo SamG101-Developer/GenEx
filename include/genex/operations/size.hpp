@@ -4,19 +4,9 @@
 #include <genex/macros.hpp>
 #include <genex/operations/_operation_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::operations {
-    template <typename Rng>
-    concept has_member_size = requires(Rng &&r) { r.size(); };
 
-    template <typename Rng>
-    concept has_std_size = requires(Rng &&r) { std::size(r); };
-
-    template <typename Rng>
-    concept has_member_empty = requires(Rng &&r) { r.empty(); };
 
     DEFINE_OPERATION(size) {
         template <typename Rng> requires (has_member_size<Rng>)
@@ -39,7 +29,11 @@ namespace genex::operations {
         }
 
         constexpr auto operator()() const noexcept -> auto {
-            MAKE_CLOSURE();
+            return
+                [FWD_CAPTURES()]<typename Rng>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng));
+            };
         }
     };
 
@@ -55,7 +49,11 @@ namespace genex::operations {
         }
 
         constexpr auto operator()() const noexcept -> auto {
-            MAKE_CLOSURE();
+            return
+                [FWD_CAPTURES()]<typename Rng>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng));
+            };
         }
     };
 

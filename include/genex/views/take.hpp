@@ -1,20 +1,16 @@
 #pragma once
 #include <coroutine>
 #include <functional>
-#include <genex/categories.hpp>
 #include <genex/concepts.hpp>
+#include <genex/iterators/distance.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
 #include <genex/views/_view_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S> requires (
-        categories::input_iterator<I>)
-    auto do_take(I &&first, S &&last, const size_t n) -> generator<iter_value_t<I>> {
+    template <typename I, typename S>
+    auto do_take(I first, S last, const size_t n) -> generator<iter_value_t<I>> {
         auto i = 0;
         for (; first != last; ++first) {
             if (i++ >= n) { break; }
@@ -22,20 +18,9 @@ namespace genex::views::detail {
         }
     }
 
-    template <range Rng> requires (
-        categories::input_range<Rng>)
-    auto do_take(Rng &&rng, const size_t n) -> generator<range_value_t<Rng>> {
-        auto i = 0;
-        for (auto &&x : rng) {
-            if (i++ >= n) { break; }
-            co_yield std::forward<decltype(x)>(x);
-        }
-    }
-
-    template <iterator I, sentinel_for<I> S> requires (
-        categories::bidirectional_iterator<I>)
-    auto do_take_last(I &&first, S &&last, size_t n) -> generator<iter_value_t<I>> {
-        auto size = iterators::distance(std::forward<I>(first), std::forward<S>(last));
+    template <typename I, typename S>
+    auto do_take_last(I first, S last, size_t n) -> generator<iter_value_t<I>> {
+        auto size = iterators::distance(first, last);
         auto i = 0;
         for (; first != last; ++first) {
             if (i++ < size - n) { continue; }
@@ -43,146 +28,151 @@ namespace genex::views::detail {
         }
     }
 
-    template <range Rng> requires (
-        categories::bidirectional_range<Rng>)
-    auto do_take_last(Rng &&rng, size_t n) -> generator<range_value_t<Rng>> {
-        auto size = iterators::distance(std::forward<Rng>(rng));
-        auto i = 0;
-        for (auto &&x : rng) {
-            if (i++ < size - n) { continue; }
-            co_yield std::forward<decltype(x)>(x);
-        }
-    }
-
-    template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-        categories::input_iterator<I> and
-        std::equality_comparable_with<iter_value_t<I>, Old>)
-    auto do_take_while(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
+    template <typename I, typename S, typename Pred, typename Proj>
+    auto do_take_while(I first, S last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { break; }
             co_yield *first;
         }
     }
 
-    template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-        categories::input_range<Rng> and
-        std::equality_comparable_with<range_value_t<Rng>, Old> and
-        std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
-    auto do_take_while(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> generator<range_value_t<Rng>> {
-        for (auto &&x : rng) {
-            if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) { break; }
-            co_yield std::forward<decltype(x)>(x);
-        }
-    }
-
-    template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-        categories::input_iterator<I> and
-        std::equality_comparable_with<iter_value_t<I>, Old>)
-    auto do_take_until(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
+    template <typename I, typename S, typename Pred, typename Proj>
+    auto do_take_until(I first, S last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { break; }
             co_yield *first;
-        }
-    }
-
-    template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-        categories::input_range<Rng> and
-        std::equality_comparable_with<range_value_t<Rng>, Old> and
-        std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
-    auto do_take_until(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> generator<range_value_t<Rng>> {
-        for (auto &&x : rng) {
-            if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) { break; }
-            co_yield std::forward<decltype(x)>(x);
         }
     }
 }
 
 
 namespace genex::views {
-    DEFINE_VIEW(take) {
-        DEFINE_OUTPUT_TYPE(take);
+    template <typename I, typename S>
+    concept can_take_iters =
+        input_iterator<I> and
+        sentinel_for<S, I>;
 
-        template <iterator I, sentinel_for<I> S> requires (
-            categories::input_iterator<I>)
-        constexpr auto operator()(I &&first, S &&last, const size_t n) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_take, first, last, n);
+    template <typename Rng>
+    concept can_take_range =
+        input_range<Rng>;
+
+    template <typename I, typename S>
+    concept can_take_last_iters =
+        bidirectional_iterator<I> and
+        sentinel_for<S, I>;
+
+    template <typename Rng>
+    concept can_take_last_range =
+        bidirectional_range<Rng>;
+
+    template <typename I, typename S, typename Pred, typename Proj>
+    concept can_take_while_iters =
+        input_iterator<I> and
+        sentinel_for<S, I> and
+        std::invocable<Proj, iter_value_t<I>> and
+        std::predicate<Pred, std::invoke_result_t<Proj, iter_value_t<I>>>;
+
+    template <typename Rng, typename Pred, typename Proj>
+    concept can_take_while_range =
+        input_range<Rng> and
+        std::invocable<Proj, range_value_t<Rng>> and
+        std::predicate<Pred, std::invoke_result_t<Proj, range_value_t<Rng>>>;
+
+    DEFINE_VIEW(take) {
+        template <typename I, typename S> requires can_take_iters<I, S>
+        constexpr auto operator()(I first, S last, const size_t n) const -> auto {
+            // Call the move inner function.
+            auto gen = detail::do_take(std::move(first), std::move(last), n);
+            return take_view(std::move(gen));
         }
 
-        template <range Rng> requires (
-            categories::input_range<Rng>)
+        template <typename Rng> requires can_take_range<Rng>
         constexpr auto operator()(Rng &&rng, const size_t n) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_take, rng, n);
+            // Call the move inner function.
+            return (*this)(iterators::begin(rng), iterators::end(rng), n);
         }
 
         constexpr auto operator()(std::size_t n) const -> auto {
-            MAKE_CLOSURE(n);
+            // Create a closure that takes a range and applies the take.
+            return
+                [FWD_CAPTURES(n)]<typename Rng> requires can_take_range<Rng>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), n);
+            };
         }
     };
 
     DEFINE_VIEW(take_last) {
-        DEFINE_OUTPUT_TYPE(take_last);
-
-        template <iterator I, sentinel_for<I> S> requires (
-            categories::bidirectional_iterator<I>)
-        constexpr auto operator()(I &&first, S &&last, size_t n) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_take_last, first, last, n);
+        template <typename I, typename S> requires can_take_last_iters<I, S>
+        constexpr auto operator()(I first, S last, size_t n) const -> auto {
+            // Call the move inner function.
+            auto gen = detail::do_take_last(std::move(first), std::move(last), n);
+            return take_last_view(std::move(gen));
         }
 
-        template <range Rng> requires (
-            categories::bidirectional_range<Rng>)
+        template <typename Rng> requires can_take_last_range<Rng>
         constexpr auto operator()(Rng &&rng, size_t n) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_take_last, rng, n);
+            // Call the move inner function.
+            return (*this)(iterators::begin(rng), iterators::end(rng), n);
         }
 
         constexpr auto operator()(size_t n) const -> auto {
-            MAKE_CLOSURE(n);
+            // Create a closure that takes a range and applies the take last.
+            return
+                [FWD_CAPTURES(n)]<typename Rng> requires can_take_last_range<Rng>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), n);
+            };
         }
     };
 
     DEFINE_VIEW(take_while) {
-        DEFINE_OUTPUT_TYPE(take_while);
-
-        template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-            categories::input_iterator<I> and
-            std::equality_comparable_with<iter_value_t<I>, Old>)
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_take_while, first, last, pred, proj);
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires can_take_while_iters<I, S, Pred, Proj>
+        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            // Call the move inner function.
+            auto gen = detail::do_take_while(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            return take_while_view(std::move(gen));
         }
 
-        template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-            categories::input_range<Rng> and
-            std::equality_comparable_with<range_value_t<Rng>, Old> and
-            std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
+        template <typename Rng, typename Pred, typename Proj = meta::identity> requires can_take_while_range<Rng, Pred, Proj>
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_take_while, rng, pred, proj);
+            // Call the move inner function.
+            return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
-        template <typename Pred, typename Proj = meta::identity>
+        template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
         constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            MAKE_CLOSURE(pred, proj);
+            // Create a closure that takes a range and applies the take last.
+            return
+                [FWD_CAPTURES(pred, proj)]<typename Rng> requires can_take_while_range<Rng, Pred, Proj>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), std::move(pred), std::move(proj));
+            };
         }
     };
 
     DEFINE_VIEW(take_until) {
-        DEFINE_OUTPUT_TYPE(take_until);
-
-        template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-            categories::input_iterator<I> and
-            std::equality_comparable_with<iter_value_t<I>, Old>)
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_take_until, first, last, pred, proj);
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires can_take_while_iters<I, S, Pred, Proj>
+        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            // Call the move inner function.
+            auto gen = detail::do_take_until(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            return take_until_view(std::move(gen));
         }
 
-        template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-            categories::input_range<Rng> and
-            std::equality_comparable_with<range_value_t<Rng>, Old>)
+        template <typename Rng, typename Pred, typename Proj = meta::identity> requires can_take_while_range<Rng, Pred, Proj>
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_take_until, rng, pred, proj);
+            // Call the move inner function.
+            return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
-        template <typename Pred, typename Proj = meta::identity>
+        template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
         constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            MAKE_CLOSURE(pred, proj);
+            // Create a closure that takes a range and applies the take last.
+            return
+                [FWD_CAPTURES(pred, proj)]<typename Rng> requires can_take_while_range<Rng, Pred, Proj>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), std::move(pred), std::move(proj));
+            };
         }
     };
 

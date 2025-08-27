@@ -1,50 +1,50 @@
 #pragma once
 #include <coroutine>
 #include <genex/concepts.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S> requires (
-        categories::forward_iterator<I>)
-    auto do_cycle(I &&first, S &&last) -> generator<iter_value_t<I>> {
+    template <typename I, typename S>
+    auto do_cycle(I first, S last) -> generator<iter_value_t<I>> {
         while (true) {
             for (auto it = first; it != last; ++it) { co_yield *it; }
-        }
-    }
-
-    template <range Rng> requires (
-        categories::forward_range<Rng>)
-    auto do_cycle(Rng &&rng) -> generator<range_value_t<Rng>> {
-        while (true) {
-            for (auto &&x : rng) { co_yield std::forward<decltype(x)>(x); }
         }
     }
 }
 
 
 namespace genex::views {
-    DEFINE_VIEW(cycle) {
-        DEFINE_OUTPUT_TYPE(cycle);
+    template <typename I, typename S>
+    concept can_cycle_iters =
+        forward_iterator<I> and
+        sentinel_for<S, I>;
 
-        template <iterator I, sentinel_for<I> S> requires (
-            categories::forward_iterator<I>)
-        constexpr auto operator()(I &&first, S &&last) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_cycle, first, last);
+    template <typename Rng>
+    concept can_cycle_range =
+        forward_range<Rng>;
+
+    DEFINE_VIEW(cycle) {
+        template <typename I, typename S> requires can_cycle_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            auto gen = detail::do_cycle(std::move(first), std::move(last));
+            return cycle_view(std::move(gen));
         }
 
-        template <range Rng> requires (
-            categories::forward_range<Rng>)
+        template <typename Rng> requires can_cycle_range<Rng>
         constexpr auto operator()(Rng &&rng) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_cycle, rng);
+            return (*this)(iterators::begin(rng), iterators::end(rng));
         }
 
         constexpr auto operator()() const -> auto {
-            MAKE_CLOSURE();
+            return
+                [FWD_CAPTURES()]<typename Rng> requires can_cycle_range<Rng>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng));
+            };
         }
     };
 

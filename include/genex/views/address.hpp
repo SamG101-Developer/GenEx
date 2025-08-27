@@ -1,92 +1,89 @@
 #pragma once
 #include <coroutine>
 #include <genex/concepts.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S> requires (
-        categories::input_iterator<I> and
-        requires { *std::declval<I>(); } and
-        requires { **std::declval<I>(); })
-    auto do_deref(I &&first, S &&last) -> generator<deref_value_t<iter_value_t<I>>> {
+    template <typename I, typename S>
+    auto do_deref(I first, S last) -> generator<deref_value_t<iter_value_t<I>>> {
         for (auto it = first; it != last; ++it) {
             co_yield **it;
         }
     }
 
-    template <range Rng> requires (
-        categories::input_range<Rng> and
-        requires { *std::declval<range_value_t<Rng>>(); })
-    auto do_deref(Rng &&rng) -> generator<deref_value_t<range_value_t<Rng>>> {
-        for (auto &&x : rng) {
-            co_yield *x;
-        }
-    }
-
-    template <iterator I, sentinel_for<I> S> requires (
-        categories::input_iterator<I>)
-    auto do_address(I &&first, S &&last) -> generator<iter_value_t<I>*> {
+    template <typename I, typename S>
+    auto do_address(I first, S last) -> generator<iter_value_t<I>*> {
         for (auto it = first; it != last; ++it) {
             co_yield &*it;
-        }
-    }
-
-    template <range Rng> requires (
-        categories::input_range<Rng>)
-    auto do_address(Rng &&rng) -> generator<range_value_t<Rng>*> {
-        for (auto &&x : rng) {
-            co_yield &x;
         }
     }
 }
 
 
 namespace genex::views {
-    DEFINE_VIEW(deref) {
-        DEFINE_OUTPUT_TYPE(deref);
+    template <typename I, typename S>
+    concept can_deref_iters =
+        input_iterator<I> and
+        sentinel_for<S, I>;
 
-        template <iterator I, sentinel_for<I> S> requires (
-            categories::input_iterator<I> and
-            requires { *std::declval<I>(); } and
-            requires { **std::declval<I>(); })
-        constexpr auto operator()(I &&first, S &&last) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_deref, first, last);
+    template <typename Rng>
+    concept can_deref_range =
+        input_range<Rng>;
+
+    template <typename I, typename S>
+    concept can_address_iters =
+        input_iterator<I> and
+        sentinel_for<S, I> and
+        std::is_lvalue_reference_v<iter_reference_t<I>>;
+
+    template <typename Rng>
+    concept can_address_range =
+        input_range<Rng> and
+        std::is_lvalue_reference_v<range_reference_t<Rng>>;
+
+    DEFINE_VIEW(deref) {
+        template <typename I, typename S> requires can_deref_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            auto gen = detail::do_deref(std::move(first), std::move(last));
+            return deref_view(std::move(gen));
         }
 
-        template <range Rng> requires (
-            categories::input_range<Rng> and
-            requires { *std::declval<range_value_t<Rng>>(); })
+        template <typename Rng> requires can_deref_range<Rng>
         constexpr auto operator()(Rng &&rng) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_deref, rng);
+            return (*this)(iterators::begin(rng), iterators::end(rng));
         }
 
         constexpr auto operator()() const -> auto {
-            MAKE_CLOSURE();
+            return
+                [FWD_CAPTURES()]<typename Rng> requires can_deref_range<Rng>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng));
+            };
         }
     };
 
     DEFINE_VIEW(address) {
-        DEFINE_OUTPUT_TYPE(deref);
-
-        template <iterator I, sentinel_for<I> S> requires (
-            categories::input_iterator<I>)
-        constexpr auto operator()(I &&first, S &&last) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_address, first, last);
+        template <typename I, typename S> requires can_address_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            auto gen = detail::do_address(std::move(first), std::move(last));
+            return address_view(std::move(gen));
         }
 
-        template <range Rng> requires (
-            categories::input_range<Rng>)
+        template <typename Rng> requires can_address_range<Rng>
         constexpr auto operator()(Rng &&rng) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_address, rng);
+            return (*this)(iterators::begin(rng), iterators::end(rng));
         }
 
         constexpr auto operator()() const -> auto {
-            MAKE_CLOSURE();
+            return
+                [FWD_CAPTURES()]<typename Rng> requires can_address_range<Rng>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng));
+            };
         }
     };
 

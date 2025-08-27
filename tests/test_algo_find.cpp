@@ -1,0 +1,94 @@
+#include <gtest/gtest.h>
+
+#include <genex/algorithms/find.hpp>
+#include <genex/iterators/distance.hpp>
+
+
+TEST(GenexAlgosFind, FindElementExists) {
+    auto vec = std::vector{1, 2, 3, 4, 5, 6};
+    const auto it = genex::algorithms::find(vec, 4);
+    EXPECT_EQ(*it, 4);
+    EXPECT_EQ(genex::iterators::distance(vec.begin(), it), 3);
+}
+
+
+TEST(GenexAlgosFind, FindElementNotExists) {
+    auto vec = std::vector{1, 2, 3, 4, 5, 6};
+    const auto it = genex::algorithms::find(vec, 10);
+    EXPECT_EQ(it, vec.end());
+}
+
+
+TEST(GenexAlgosFindLast, FindLastElementExists) {
+    auto vec = std::vector{1, 2, 3, 4, 5, 6, 4};
+    const auto it = genex::algorithms::find_last(vec, 4);
+    EXPECT_EQ(*it, 4);
+    EXPECT_EQ(genex::iterators::distance(vec.begin(), it), 6);
+}
+
+
+TEST(GenexAlgosFindLast, FindLastElementNotExists) {
+    auto vec = std::vector{1, 2, 3, 4, 5, 6};
+    const auto it = genex::algorithms::find_last(vec, 10);
+    EXPECT_EQ(it, vec.end());
+}
+
+
+TEST(GenexAlgosFindIf, FindIfElementExists) {
+    auto vec = std::vector{1, 2, 3, 4, 5, 6};
+    const auto it = genex::algorithms::find_if(vec, [](const int v) { return v % 2 == 0; });
+    EXPECT_EQ(*it, 2);
+    EXPECT_EQ(genex::iterators::distance(vec.begin(), it), 1);
+}
+
+
+TEST(GenexAlgosFindIf, FindIfElementNotExists) {
+    auto vec = std::vector{1, 3, 5, 7};
+    const auto it = genex::algorithms::find_if(vec, [](const int v) { return v % 2 == 0; });
+    EXPECT_EQ(it, vec.end());
+}
+
+
+TEST(GenexAlgosFindLastIf, FindLastIfElementExists) {
+    auto vec = std::vector{1, 2, 3, 4, 5, 6, 4};
+    const auto it = genex::algorithms::find_last_if(vec, [](const int v) { return v % 2 == 0; });
+    EXPECT_EQ(*it, 4);
+    EXPECT_EQ(genex::iterators::distance(vec.begin(), it), 6);
+}
+
+
+TEST(GenexAlgosFindLastIf, FindLastIfElementNotExists) {
+    auto vec = std::vector{1, 3, 5, 7};
+    const auto it = genex::algorithms::find_last_if(vec, [](const int v) { return v % 2 == 0; });
+    EXPECT_EQ(it, vec.end());
+}
+
+
+TEST(GenexAlgosFindIfNot, FindIfNotElementExists) {
+    auto vec = std::vector{1, 2, 3, 4, 5, 6};
+    const auto it = genex::algorithms::find_if_not(vec, [](const int v) { return v % 2 == 0; });
+    EXPECT_EQ(*it, 1);
+    EXPECT_EQ(genex::iterators::distance(vec.begin(), it), 0);
+}
+
+
+TEST(GenexAlgosFindIfNot, FindIfNotElementNotExists) {
+    auto vec = std::vector{2, 4, 6, 8};
+    const auto it = genex::algorithms::find_if_not(vec, [](const int v) { return v % 2 == 0; });
+    EXPECT_EQ(it, vec.end());
+}
+
+
+TEST(GenexAlgosFindLastIfNot, FindLastIfNotElementExists) {
+    auto vec = std::vector{1, 2, 3, 4, 5, 6, 3};
+    const auto it = genex::algorithms::find_last_if_not(vec, [](const int v) { return v % 2 == 0; });
+    EXPECT_EQ(*it, 3);
+    EXPECT_EQ(genex::iterators::distance(vec.begin(), it), 6);
+}
+
+
+TEST(GenexAlgosFindLastIfNot, FindLastIfNotElementNotExists) {
+    auto vec = std::vector{2, 4, 6, 8};
+    const auto it = genex::algorithms::find_last_if_not(vec, [](const int v) { return v % 2 == 0; });
+    EXPECT_EQ(it, vec.end());
+}

@@ -1,39 +1,39 @@
 #pragma once
 #include <genex/concepts.hpp>
-#include <genex/actions/_action_base.hpp>
+#include <genex/actions/push.hpp>
 #include <genex/iterators/begin.hpp>
 #include <genex/iterators/end.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
-
-namespace genex::actions::detail {
-    template <range Rng1, range Rng2> requires std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>
-    auto do_concat(Rng1 &&rng1, Rng2 &&rng2) -> void {
-        std::copy(
-            iterators::begin(std::forward<Rng2>(rng2)),
-            iterators::end(std::forward<Rng2>(rng2)),
-            std::back_inserter(std::forward<Rng1>(rng1)));
-    }
-}
-
 
 namespace genex::actions {
-    /**
-     * Modify a range in place, by concatenating another range to it. This places the second range at the end of the
-     * first range, and iteration will continue through the second range after the first. Both ranges must have the
-     * same value type.
-     */
+    template <typename... Rngs>
+    concept can_concat_range =
+        sizeof...(Rngs) > 0 and
+        (input_range<Rngs> and ...) and
+        requires { typename std::common_type_t<range_value_t<Rngs>...>; };
+
     DEFINE_ACTION(concat) {
-        template <range Rng1, range Rng2> requires std::same_as<range_value_t<Rng1>, range_value_t<Rng2>>
-        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> void {
-            FWD_TO_IMPL(detail::do_concat, rng1, rng2);
+        template <typename Rng1, typename Rng2> requires can_concat_range<Rng1, Rng2>
+        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> Rng1& {
+            for (auto &&x : rng2) {
+                rng1 |= push(iterators::end(rng1), std::forward<decltype(x)>(x));
+            }
+            return rng1;
         }
 
-        template <range Rng2>
+        template <typename Rng1, typename Rng2, typename... Rngs> requires can_concat_range<Rng1, Rng2, Rngs...>
+        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Rngs... rngs) const -> Rng1& {
+            (*this)(std::forward<Rng1>(rng1), std::forward<Rng2>(rng2));
+            return (*this)(std::forward<Rng1>(rng1), std::forward<Rngs>(rngs)...);
+        }
+
+        template <typename Rng2>
         constexpr auto operator()(Rng2 &&rng2) const -> auto {
-            MAKE_CLOSURE(rng2);
+            return
+                [FWD_CAPTURES(rng2)]<typename Rng1> requires can_concat_range<Rng1, Rng2>
+                (Rng1 &&rng1) mutable -> auto {
+                return (*this)(std::forward<Rng1>(rng1), std::forward<Rng2>(rng2));
+            };
         }
     };
 

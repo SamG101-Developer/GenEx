@@ -1,71 +1,72 @@
 #pragma once
-#include <coroutine>
 #include <genex/concepts.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::views::detail {
-    template <iterator I1, sentinel_for<I1> S1, iterator I2, sentinel_for<I2> S2> requires (
-        categories::input_iterator<I1> and
-        categories::input_iterator<I2> and
-        std::convertible_to<iter_value_t<I1>, iter_value_t<I2>>)
-    auto do_interleave(I1 &&first1, S1 &&last1, I2 first2, S2 last2) -> generator<iter_value_t<I1>> {
+    template <typename I1, typename S1, typename I2, typename S2>
+    auto do_interleave(I1 first1, S1 last1, I2 first2, S2 last2, const bool extend) -> generator<std::common_type_t<iter_value_t<I1>, iter_value_t<I2>>> {
         while (first1 != last1 && first2 != last2) {
-            co_yield *first1++;
-            co_yield *first2++;
+            co_yield *first1;
+            ++first1;
+            co_yield *first2;
+            ++first2;
         }
-        while (first1 != last1) { co_yield *first1++; }
-        while (first2 != last2) { co_yield *first2++; }
-    }
 
-
-    template <range Rng1, range Rng2> requires (
-        categories::input_range<Rng1> and
-        categories::input_range<Rng2> and
-        std::convertible_to<range_value_t<Rng1>, range_value_t<Rng2>>)
-    auto do_interleave(Rng1 &&rng1, Rng2 &&rng2) -> generator<range_value_t<Rng1>> {
-        auto it1 = iterators::begin(rng1);
-        auto it2 = iterators::begin(rng2);
-        auto end1 = iterators::end(rng1);
-        auto end2 = iterators::end(rng2);
-
-        while (it1 != end1 && it2 != end2) {
-            co_yield *it1++;
-            co_yield *it2++;
+        if (extend) {
+            while (first1 != last1) {
+                co_yield *first1;
+                ++first1;
+            }
+            while (first2 != last2) {
+                co_yield *first2;
+                ++first2;
+            }
         }
-        while (it1 != end1) { co_yield *it1++; }
-        while (it2 != end2) { co_yield *it2++; }
     }
 }
 
 
 namespace genex::views {
+    template <typename I1, typename S1, typename I2, typename S2>
+    concept can_interleave_iters =
+        input_iterator<I1> and
+        sentinel_for<S1, I1> and
+        input_iterator<I2> and
+        sentinel_for<S2, I2> and
+        requires { typename std::common_type_t<iter_value_t<I1>, iter_value_t<I2>>; };
+
+    template <typename Rng1, typename Rng2>
+    concept can_interleave_range =
+        input_range<Rng1> and
+        input_range<Rng2> and
+        requires { typename std::common_type_t<range_value_t<Rng1>, range_value_t<Rng2>>; };
+
     DEFINE_VIEW(interleave) {
-        DEFINE_OUTPUT_TYPE(interleave);
-
-        template <iterator I1, sentinel_for<I1> S1, iterator I2, sentinel_for<I2> S2> requires (
-            categories::input_iterator<I1> and
-            categories::input_iterator<I2> and
-            std::convertible_to<iter_value_t<I1>, iter_value_t<I2>>)
-        constexpr auto operator()(I1 &&first1, S1 &&last1, I2 first2, S2 last2) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_interleave, first1, last1, first2, last2);
+        template <typename I1, typename S1, typename I2, typename S2> requires can_interleave_iters<I1, S1, I2, S2>
+        constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, const bool extend = true) const -> auto {
+            // Call the interleave inner function.
+            auto gen = detail::do_interleave(std::move(first1), std::move(last1), std::move(first2), std::move(last2), extend);
+            return interleave_view(std::move(gen));
         }
 
-        template <range Rng1, range Rng2> requires (
-            categories::input_range<Rng1> and
-            categories::input_range<Rng2> and
-            std::convertible_to<range_value_t<Rng1>, range_value_t<Rng2>>)
-        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_interleave, rng1, rng2);
+        template <typename Rng1, typename Rng2> requires can_interleave_range<Rng1, Rng2>
+        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, const bool extend = true) const -> auto {
+            // Call the interleave inner function.
+            return (*this)(iterators::begin(rng1), iterators::end(rng1), iterators::begin(rng2), iterators::end(rng2), extend);
         }
 
-        template <range Rng2>
-        constexpr auto operator()(Rng2 &&rng2) const -> auto {
-            MAKE_CLOSURE(rng2);
+        template <typename Rng2>
+        constexpr auto operator()(Rng2 &&rng2, const bool extend = true) const -> auto {
+            // Create a closure that takes a range and applies the interleave.
+            return
+                [FWD_CAPTURES(rng2, extend)]<typename Rng1> requires can_interleave_range<Rng1, Rng2>
+                (Rng1 &&rng1) mutable -> auto {
+                return (*this)(std::forward<Rng1>(rng1), std::move(rng2), extend);
+            };
         }
     };
 

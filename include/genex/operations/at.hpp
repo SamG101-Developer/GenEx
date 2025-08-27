@@ -6,19 +6,8 @@
 #include <genex/iterators/begin.hpp>
 #include <genex/iterators/end.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::operations {
-    template <typename Rng>
-    concept has_member_at = requires(Rng &&r) { r.at(std::declval<std::size_t>()); };
-
-    template <typename Rng>
-    concept has_member_front = requires(Rng &&r) { r.front(); };
-
-    template <typename Rng>
-    concept has_member_back = requires(Rng &&r) { r.back(); };
 
     DEFINE_OPERATION(at) {
         template <typename Rng> requires (has_member_at<Rng>)
@@ -35,7 +24,11 @@ namespace genex::operations {
         }
 
         constexpr auto operator()(const std::size_t n) const noexcept -> auto {
-            MAKE_CLOSURE(n);
+            return
+                [FWD_CAPTURES(n)]<typename Rng>
+                (Rng &&r) mutable -> auto {
+                return (*this)(std::forward<Rng>(r), n);
+            };
         }
     };
 
@@ -56,7 +49,11 @@ namespace genex::operations {
         }
 
         constexpr auto operator()() const noexcept -> auto {
-            MAKE_CLOSURE();
+            return
+                [FWD_CAPTURES()]<typename Rng>
+                (Rng &&r) mutable -> auto {
+                return (*this)(std::forward<Rng>(r));
+            };
         }
     };
 
@@ -80,7 +77,11 @@ namespace genex::operations {
         }
 
         constexpr auto operator()() const noexcept -> auto {
-            MAKE_CLOSURE();
+            return
+                [FWD_CAPTURES()]<typename Rng>
+                (Rng &&r) mutable -> auto {
+                return (*this)(std::forward<Rng>(r));
+            };
         }
     };
 

@@ -1,51 +1,76 @@
 #pragma once
-#include <functional>
-#include <genex/concepts.hpp>
+#include <utility>
 #include <genex/actions/_action_base.hpp>
+#include <genex/algorithms/find.hpp>
+#include <genex/concepts.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/meta.hpp>
-
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
-
-namespace genex::actions::detail {
-    template <range Rng>
-    auto do_remove(Rng *rng, range_value_t<Rng> &&elem) -> void {
-        rng->erase(std::remove(rng->begin(), rng->end(), std::forward<decltype(elem)>(elem)), rng->end());
-    }
-
-    template <range Rng, std::invocable<range_value_t<Rng>> Proj = genex::meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-    auto do_remove_if(Rng *rng, Pred &&pred, Proj &&proj = {}) -> void {
-        auto it = std::remove_if(rng->begin(), rng->end(), [&]<typename E>(E &&elem) {
-            return std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<E>(elem)));
-        });
-        rng->erase(it, rng->end());
-    }
-}
 
 
 namespace genex::actions {
+    template <typename Rng, typename E, typename Proj>
+    concept can_action_remove_range =
+        forward_range<Rng> and
+        std::permutable<iterator_t<Rng>> and
+        std::invocable<Proj, range_reference_t<Rng>> and
+        std::equality_comparable_with<std::invoke_result_t<Proj, range_reference_t<Rng>>, E> and
+        has_member_erase<Rng>;
+
+    template <typename Rng, typename Pred, typename Proj>
+    concept can_action_remove_if_range =
+        forward_range<Rng> and
+        std::permutable<iterator_t<Rng>> and
+        std::indirect_unary_predicate<Pred, std::projected<iterator_t<Rng>, Proj>> and
+        has_member_erase<Rng>;
+
     DEFINE_ACTION(remove) {
-        template <range Rng>
-        auto operator()(Rng &&rng, range_value_t<Rng> &&elem) const -> void {
-            FWD_TO_IMPL(detail::do_remove, &rng, elem);
+        template <typename Rng, typename E, typename Proj = meta::identity> requires can_action_remove_range<Rng, E, Proj>
+        auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> Rng& {
+            auto first = iterators::begin(rng);
+            auto last = iterators::end(rng);
+
+            while (first != last) {
+                auto it = algorithms::find(first, last, std::forward<E>(elem), std::forward<Proj>(proj));
+                if (it == last) { break; }
+                first = rng.erase(std::move(it));
+            }
+
+            return rng;
         }
 
-        template <typename E>
+        template <typename E> requires (not input_range<std::remove_cvref_t<E>>)
         auto operator()(E &&elem) const -> auto {
-            MAKE_CLOSURE(elem);
+            return
+                [FWD_CAPTURES(elem)]<typename Rng> requires can_action_remove_range<Rng, E, meta::identity>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), std::move(elem));
+            };
         }
     };
 
     DEFINE_ACTION(remove_if) {
-        template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, range_value_t<Rng>>> Pred>
-        auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> void {
-            FWD_TO_IMPL(detail::do_remove_if, &rng, pred, proj);
+        template <typename Rng, typename Pred, typename Proj = meta::identity> requires can_action_remove_if_range<Rng, Pred, Proj>
+        auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> Rng& {
+            auto first = iterators::begin(rng);
+            auto last = iterators::end(rng);
+
+            while (first != last) {
+                auto it = algorithms::find_if(first, last, std::forward<Pred>(pred), std::forward<Proj>(proj));
+                if (it == last) { break; }
+                first = rng.erase(std::move(it));
+            }
+
+            return rng;
         }
 
-        template <typename E>
-        auto operator()(E &&elem) const -> auto {
-            MAKE_CLOSURE(elem);
+        template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
+        auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
+            return
+                [FWD_CAPTURES(pred, proj)]<typename Rng> requires can_action_remove_if_range<Rng, Pred, Proj>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), std::move(pred), std::move(proj));
+            };
         }
     };
 

@@ -6,54 +6,48 @@
 #include <genex/meta.hpp>
 
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
-
-namespace genex::algorithms::detail {
-    template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-        categories::input_iterator<I> and
-        std::equality_comparable_with<iter_value_t<I>, Old>)
-    auto do_all_of(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) -> bool {
-        for (; first != last; ++first) {
-            if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { return false; }
-        }
-        return true;
-    }
-
-    template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-        categories::input_range<Rng> and
-        std::equality_comparable_with<range_value_t<Rng>, Old> and
-        std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
-    auto do_all_of(Rng &&rng, Pred &&pred, Proj &&proj = {}) -> bool {
-        for (auto &&x : rng) {
-            if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) { return false; }
-        }
-        return true;
-    }
-}
-
-
 namespace genex::algorithms {
+    template <typename I, typename S, typename Pred, typename Proj>
+    concept can_all_of_iters =
+        input_iterator<I> and
+        sentinel_for<S, I> and
+        std::invocable<Proj, iter_value_t<I>> and
+        std::predicate<Pred, std::invoke_result_t<Proj, iter_value_t<I>>>;
+
+    template <typename Rng, typename Pred, typename Proj>
+    concept can_all_of_range =
+        input_range<Rng> and
+        std::invocable<Proj, range_value_t<Rng>> and
+        std::predicate<Pred, std::invoke_result_t<Proj, range_value_t<Rng>>>;
+
     DEFINE_ALGORITHM(all_of) {
-        template <iterator I, sentinel_for<I> S, typename Old = iter_value_t<I>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-            categories::input_iterator<I> and
-            std::equality_comparable_with<iter_value_t<I>, Old>)
-        constexpr auto operator()(I &&first, S &&last, Pred &&pred, Proj &&proj = {}) const -> bool {
-            FWD_TO_IMPL(detail::do_all_of, first, last, pred, proj);
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires can_all_of_iters<I, S, Pred, Proj>
+        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> bool {
+            for (; first != last; ++first) {
+                if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
+                    return false;
+                }
+            }
+            return true;
         }
 
-        template <range Rng, typename Old = range_value_t<Rng>, std::invocable<Old> Proj = meta::identity, std::predicate<std::invoke_result_t<Proj, Old>> Pred> requires (
-            categories::input_range<Rng> and
-            std::equality_comparable_with<range_value_t<Rng>, Old> and
-            std::convertible_to<std::invoke_result_t<Proj, Old>, range_value_t<Rng>>)
+        template <typename Rng, typename Pred, typename Proj = meta::identity> requires can_all_of_range<Rng, Pred, Proj>
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> bool {
-            FWD_TO_IMPL(detail::do_all_of, rng, pred, proj);
+            for (auto &&x : rng) {
+                if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) {
+                    return false;
+                }
+            }
+            return true;
         }
 
-        template <typename Pred, typename Proj = meta::identity>
+        template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
         constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            MAKE_CLOSURE(pred, proj);
+            return
+                [FWD_CAPTURES(pred, proj)]<typename Rng> requires can_all_of_range<Rng, Pred, Proj>
+                (Rng &&rng) mutable -> bool {
+                return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            };
         }
     };
 

@@ -1,51 +1,52 @@
 #pragma once
 #include <coroutine>
-#include <functional>
+#include <utility>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S> requires (
-        categories::input_iterator<I>)
-    auto do_forward(I &&first, S &&last) -> generator<iter_value_t<I>&&> {
+    template <typename I, typename S>
+    auto do_forward(I first, S last) -> generator<iter_value_t<I>&&> {
         for (; first != last; ++first) {
             co_yield std::forward<iter_value_t<I>>(*first);
-        }
-    }
-
-    template <range Rng> requires (
-        categories::input_range<Rng>)
-    auto do_forward(Rng &&rng) -> generator<range_value_t<Rng>&&> {
-        for (auto &&x : rng) {
-            co_yield std::forward<range_value_t<Rng>>(x);
         }
     }
 }
 
 
 namespace genex::views {
-    DEFINE_VIEW(forward) {
-        DEFINE_OUTPUT_TYPE(forward);
+    template <typename I, typename S>
+    concept can_forward_iters =
+        input_iterator<I> and
+        sentinel_for<S, I>;
 
-        template <iterator I, sentinel_for<I> S> requires (
-            categories::input_iterator<I>)
-        constexpr auto operator()(I &&first, S &&last) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_forward, first, last);
+    template <typename Rng>
+    concept can_forward_range =
+        input_range<Rng>;
+
+    DEFINE_VIEW(forward) {
+        template <typename I, typename S> requires can_forward_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            // Call the move inner function.
+            auto gen = detail::do_forward(std::move(first), std::move(last));
+            return forward_view(std::move(gen));
         }
 
-        template <range Rng> requires (
-            categories::input_range<Rng>)
+        template <typename Rng> requires can_forward_range<Rng>
         constexpr auto operator()(Rng &&rng) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_forward, rng);
+            // Call the move inner function.
+            return (*this)(iterators::begin(rng), iterators::end(rng));
         }
 
         constexpr auto operator()() const -> auto {
-            MAKE_CLOSURE();
+            // Create a closure that takes a range and applies the move.
+            return
+                [FWD_CAPTURES()]<typename Rng> requires can_forward_range<Rng>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng));
+            };
         }
     };
 

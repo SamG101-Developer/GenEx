@@ -2,29 +2,21 @@
 #include <functional>
 #include <genex/algorithms/_algorithm_base.hpp>
 #include <genex/concepts.hpp>
-#include <genex/iterators/distance.hpp>
 #include <genex/iterators/begin.hpp>
 #include <genex/iterators/end.hpp>
+#include <genex/operations/cmp.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::algorithms::detail {
-    template <range Rng, std::invocable<range_value_t<Rng>> Proj, std::invocable<std::invoke_result_t<Proj, range_value_t<Rng>>, std::invoke_result_t<Proj, range_value_t<Rng>>> F>
-    auto do_cmp(Rng &&rng, F &&f, Proj &&proj) -> range_value_t<Rng> {
-        auto it = iterators::begin(rng);
-        if (it == iterators::end(rng)) {
-            throw std::runtime_error("Cannot find minimum/maximum of an empty range");
-        }
-
-        auto best_value = *it;
+    template <typename I, typename S, typename F, typename Proj>
+    auto do_cmp(I first, S last, F &&f, Proj &&proj) -> iter_value_t<I> {
+        auto best_value = *first;
         auto best_proj_value = proj(best_value);
 
-        for (++it; it != iterators::end(rng); ++it) {
-            auto current_value = *it;
+        for (++first; first != last; ++first) {
+            auto current_value = *first;
             auto current_proj_value = proj(current_value);
             if (f(current_proj_value, best_proj_value)) {
                 best_value = current_value;
@@ -38,27 +30,58 @@ namespace genex::algorithms::detail {
 
 
 namespace genex::algorithms {
+    template <typename I, typename S, typename Comp, typename Proj>
+    concept can_minmax_iters =
+        input_iterator<I> and
+        sentinel_for<S, I> and
+        std::invocable<Proj, iter_value_t<I>> and
+        std::indirect_strict_weak_order<Comp, std::projected<I, Proj>>;
+
+    template <typename Rng, typename Comp, typename Proj>
+    concept can_minmax_range =
+        input_range<Rng> and
+        std::invocable<Proj, range_value_t<Rng>> and
+        std::indirect_strict_weak_order<Comp, std::projected<iterator_t<Rng>, Proj>>;
+
     DEFINE_ALGORITHM(min) {
-        template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity>
-        constexpr auto operator()(Rng &&rng, Proj &&proj = {}) const -> auto {
-            FWD_TO_IMPL(detail::do_cmp, rng, std::less<range_value_t<Rng>>{}, proj);
+        template <typename I, typename S, typename Comp = operations::lt, typename Proj = meta::identity> requires can_minmax_iters<I, S, Comp, Proj>
+        constexpr auto operator()(I first, S last, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
+            return detail::do_cmp(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
 
-        template <typename Proj = meta::identity>
-        constexpr auto operator()(Proj &&proj = {}) const -> auto {
-            MAKE_CLOSURE(proj);
+        template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity> requires can_minmax_range<Rng, Comp, Proj>
+        constexpr auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
+            return detail::do_cmp(iterators::begin(rng), iterators::end(rng), std::forward<Comp>(comp), std::forward<Proj>(proj));
+        }
+
+        template <typename Comp = operations::lt, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Comp>>)
+        constexpr auto operator()(Comp &&comp = {}, Proj &&proj = {}) const -> auto {
+            return
+                [FWD_CAPTURES(comp, proj)]<typename Rng> requires can_minmax_range<Rng, Comp, Proj>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), std::forward<Comp>(comp), std::forward<Proj>(proj));
+            };
         }
     };
 
     DEFINE_ALGORITHM(max) {
-        template <range Rng, std::invocable<range_value_t<Rng>> Proj = meta::identity>
-        constexpr auto operator()(Rng &&rng, Proj &&proj = {}) const -> auto {
-            FWD_TO_IMPL(detail::do_cmp, rng, std::greater<range_value_t<Rng>>{}, proj);
+        template <typename I, typename S, typename Comp = operations::gt, typename Proj = meta::identity> requires can_minmax_iters<I, S, Comp, Proj>
+        constexpr auto operator()(I first, S last, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
+            return detail::do_cmp(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
 
-        template <typename Proj = meta::identity>
-        constexpr auto operator()(Proj &&proj = {}) const -> auto {
-            MAKE_CLOSURE(proj);
+        template <typename Rng, typename Comp = operations::gt, typename Proj = meta::identity> requires can_minmax_range<Rng, Comp, Proj>
+        constexpr auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
+            return detail::do_cmp(iterators::begin(rng), iterators::end(rng), std::forward<Comp>(comp), std::forward<Proj>(proj));
+        }
+
+        template <typename Comp = operations::gt, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Comp>>)
+        constexpr auto operator()(Comp &&comp = {}, Proj &&proj = {}) const -> auto {
+            return
+                [FWD_CAPTURES(comp, proj)]<typename Rng> requires can_minmax_range<Rng, Comp, Proj>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng), std::forward<Comp>(comp), std::forward<Proj>(proj));
+            };
         }
     };
 

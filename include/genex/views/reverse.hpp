@@ -1,50 +1,56 @@
 #pragma once
 #include <coroutine>
-#include <genex/categories.hpp>
 #include <genex/concepts.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
+#include <genex/iterators/next.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
 
-using namespace genex::concepts;
-using namespace genex::type_traits;
-
 
 namespace genex::views::detail {
-    template <iterator I, sentinel_for<I> S> requires (
-        categories::bidirectional_iterator<I>)
-    auto do_reverse(I &&first, S &&last) -> generator<iter_value_t<I>> {
+    template <typename I, typename S>
+    auto do_reverse(I first, S last) -> generator<iter_value_t<I>> {
         for (; last != first; --last) {
             co_yield *iterators::prev(std::forward<decltype(last)>(last));
         }
     }
-
-    template <range Rng> requires (
-        categories::bidirectional_range<Rng>)
-    auto do_reverse(Rng &&rng) -> generator<range_value_t<Rng>> {
-        for (auto it = iterators::rbegin(rng); it != iterators::rend(rng); ++it) {
-            co_yield *it;
-        }
-    }
 }
 
-namespace genex::views {
-    DEFINE_VIEW(reverse) {
-        DEFINE_OUTPUT_TYPE(reverse);
 
-        template <iterator I, sentinel_for<I> S> requires (
-            categories::bidirectional_iterator<I>)
-        constexpr auto operator()(I &&first, S &&last) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_reverse, first, last);
+namespace genex::views {
+    template <typename I, typename S>
+    concept can_reverse_iters =
+        bidirectional_iterator<I> and
+        sentinel_for<S, I> and
+        std::same_as<I, S>;
+
+    template <typename Rng>
+    concept can_reverse_range =
+        bidirectional_range<Rng> and
+        common_range<Rng>;
+
+    DEFINE_VIEW(reverse) {
+        template <typename I, typename S> requires can_reverse_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            // Call the move inner function.
+            auto gen = detail::do_reverse(first, last);
+            return reverse_view(std::move(gen));
         }
 
-        template <range Rng> requires (
-            categories::bidirectional_range<Rng>)
+        template <typename Rng> requires can_reverse_range<Rng>
         constexpr auto operator()(Rng &&rng) const -> auto {
-            FWD_TO_IMPL_VIEW(detail::do_reverse, rng);
+            // Call the move inner function.
+            return (*this)(iterators::begin(rng), iterators::end(rng));
         }
 
         constexpr auto operator()() const -> auto {
-            MAKE_CLOSURE();
+            // Create a closure that takes a range and applies the reverse.
+            return
+                [FWD_CAPTURES()]<typename Rng> requires can_reverse_range<Rng>
+                (Rng &&rng) mutable -> auto {
+                return (*this)(std::forward<Rng>(rng));
+            };
         }
     };
 
