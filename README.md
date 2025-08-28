@@ -2,7 +2,7 @@
 
 GenEx (generator extensions) is a C++ library inspired by `ranges-v3` that provides a set of utilities for working with
 ranges and iterators. It is designed with a generator interface, which allows for lazy evaluation of operations on
-ranges. Concepts will be used to restrict the operations that can be performed on which types; for example, reversing a
+ranges. Concepts are used to restrict the operations that can be performed on which types; for example, reversing a
 range will require the range be bidirectional.
 
 ## Views
@@ -34,25 +34,23 @@ auto main() -> int {
 }
 ```
 
+## Actions
+
+Actions are similar to views, but they perform the operation on the inputted range, mutating it in place. Actions are
+eagerly evaluated, meaning they perform the operation immediately.
+
 ## Algorithms
 
 There are a number of algorithms designed to be used with ranges. Whilst the algorithms are designed to be used with the
-views, they can be used with almost any container.
+views, they can be used with almost any container. These are effectively functions over ranges that don't return a view,
+such as `any_of` or `fold_left`.
 
 ## Iterators
 
 The iterator abstraction layer provides a common interface to access key iteration members, such as `begin`, `end`,
-`data` etc. There are multiple specializations of `begin` for example, allowing for different ways to access teh data
+`data` etc. There are multiple specializations of `begin` for example, allowing for different ways to access the data
 depending on the design of the container.
 
-In the future, there will be a specialization API, allowing for iteration compatibility on custom containers that don't
-conform to regular standards.
+## Todo
 
-## Future
-
-- Add more concepts regarding the type of generator, such as `forward_generator`, `bidirectional_generator` etc. This
-  will allow optimizations, for example for `find_last` with a `reversible_generator`, the generator can be reversed
-  then the first match found, rather than iterating over the entire generator.
-
-- Add more views, algorithms, actions, etc. Will include everything from `ranges-v3`, `Rust STL`, and other rust
-  extensions.
+More algorithms, views and actions need to be implemented. The library is still in its early stages.
