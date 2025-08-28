@@ -81,8 +81,10 @@ namespace genex::algorithms {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires concepts::can_position_last_iters_optimized<I, S, Pred, Proj>
         auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
             auto pos = static_cast<std::make_signed_t<std::size_t>>(iterators::distance(first, last));
-            for (auto it = last; it != first; --it, --pos) {
-                if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *it))) {
+            while (first != last) {
+                --last;
+                --pos;
+                if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *last))) {
                     return pos;
                 }
             }

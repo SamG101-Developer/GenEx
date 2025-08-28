@@ -95,7 +95,8 @@ namespace genex::algorithms {
         template <typename I, typename S, typename E, typename Proj = meta::identity> requires concepts::can_find_last_iters_optimized<I, S, E, Proj>
         auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> auto {
             auto true_last = last;
-            for (; last != first; --last) {
+            while (last != first) {
+                --last;
                 if (std::invoke(std::forward<Proj>(proj), *last) == elem) { return last; }
             }
             return true_last;

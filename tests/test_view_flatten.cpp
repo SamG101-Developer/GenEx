@@ -30,7 +30,7 @@ TEST(GenexViewsFlatten, StrInput) {
 }
 
 
-TEST(GenexViewsFlattenWith, DISABLED_VecInput) {
+TEST(GenexViewsFlattenWith, VecInput) {
     auto vec = std::vector<std::vector<int>>{{1, 2, 3}, {4, 5}, {6}};
     const auto rng = vec
         | genex::views::flatten_with(0)
@@ -40,7 +40,7 @@ TEST(GenexViewsFlattenWith, DISABLED_VecInput) {
 }
 
 
-TEST(GenexViewsFlattenWith, DISABLED_StrInput) {
+TEST(GenexViewsFlattenWith, StrInput) {
     auto vec = std::vector<std::string>{"hello", "world", "!"};
     const auto rng = vec
         | genex::views::flatten_with(' ')
