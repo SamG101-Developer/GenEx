@@ -126,40 +126,118 @@ namespace genex {
 
 
 namespace genex {
-    template <typename T>
-    concept input_iterator = std::input_iterator<T>;
-
-    template <typename T>
-    concept forward_iterator = std::forward_iterator<T>;
-
-    template <typename T>
-    concept bidirectional_iterator = std::bidirectional_iterator<T>;
-
-    template <typename T>
-    concept random_access_iterator = std::random_access_iterator<T>;
-
-    template <typename T>
-    concept contiguous_iterator = std::contiguous_iterator<T>;
-
-    template <typename Rng>
-    concept input_range = input_iterator<iterator_t<Rng>>;
-
-    template <typename Rng>
-    concept forward_range = forward_iterator<iterator_t<Rng>>;
-
-    template <typename Rng>
-    concept bidirectional_range = bidirectional_iterator<iterator_t<Rng>>;
-
-    template <typename Rng>
-    concept random_access_range = random_access_iterator<iterator_t<Rng>>;
-
-    template <typename Rng>
-    concept contiguous_range = contiguous_iterator<iterator_t<Rng>>;
-
     template <typename Rng>
     concept range =
         (has_std_begin<Rng> or has_member_begin<Rng>) and
         (has_std_end<Rng> or has_member_end<Rng>);
+}
+
+
+namespace genex::views::detail {
+    template <typename Rng> requires range<Rng>
+    struct view_base;
+}
+
+
+namespace genex {
+    template <typename Rng>
+    concept input_range = range<Rng> and std::input_iterator<iterator_t<Rng>>;
+
+    template <typename Rng>
+    concept forward_range = input_range<Rng> and std::forward_iterator<iterator_t<Rng>>;
+
+    template <typename Rng>
+    concept bidirectional_range = forward_range<Rng> and std::bidirectional_iterator<iterator_t<Rng>>;
+
+    template <typename Rng>
+    concept random_access_range = bidirectional_range<Rng> and std::random_access_iterator<iterator_t<Rng>>;
+
+    template <typename Rng>
+    concept contiguous_range = random_access_range<Rng> and std::contiguous_iterator<iterator_t<Rng>>;
+}
+
+
+namespace genex {
+    template <std::size_t I = 0, typename... Ts, typename... Us> requires (I <= sizeof...(Ts) and sizeof...(Ts) == sizeof...(Us))
+    auto any_iterator_finished(std::tuple<Ts...> &starts, const std::tuple<Us...> &ends) -> bool {
+        if constexpr (I < sizeof...(Ts)) {
+            return std::get<I>(starts) == std::get<I>(ends) || any_iterator_finished<I + 1>(starts, ends);
+        }
+        else {
+            return false;
+        }
+    }
+
+    template <typename Tuple, std::size_t... Is>
+    auto deref_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> auto {
+        return std::tuple<iter_value_t<std::tuple_element_t<Is, Tuple>>...>{(*std::get<Is>(t))...};
+    }
+
+    template <typename Tuple>
+    auto deref_tuple(Tuple &t) -> auto {
+        return deref_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+    }
+
+    template <typename Tuple, std::size_t... Is>
+    auto advance_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> void {
+        ((++std::get<Is>(t)), ...);
+    }
+
+    template <typename Tuple>
+    auto advance_tuple(Tuple &t) -> void {
+        advance_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+    }
+
+    template <typename Tuple, std::size_t... Is>
+    auto tuple_tail_impl(Tuple &&t, std::index_sequence<Is...>) -> auto {
+        return std::make_tuple(std::get<Is + 1>(std::forward<Tuple>(t))...);
+    }
+
+    template <typename Tuple>
+    auto tuple_tail(Tuple &&t) -> auto {
+        return tuple_tail_impl(std::forward<Tuple>(t), std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<Tuple>> - 1>{});
+    }
+
+    template <typename Tuple>
+    auto tuple_head(Tuple &&t) -> auto {
+        return std::make_tuple(std::get<0>(std::forward<Tuple>(t)));
+    }
+}
+
+
+namespace genex {
+    template <typename T>
+    struct is_unique_ptr : std::false_type {
+    };
+
+    template <typename T, typename Deleter>
+    struct is_unique_ptr<std::unique_ptr<T, Deleter>> : std::true_type {
+    };
+
+    template <typename T>
+    concept unique_ptr = is_unique_ptr<std::remove_cvref_t<T>>::value;
+
+    template <typename T>
+    struct is_shared_ptr : std::false_type {
+    };
+
+    template <typename T>
+    struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {
+    };
+
+    template <typename T>
+    concept shared_ptr = is_shared_ptr<std::remove_cvref_t<T>>::value;
+
+    template <typename T>
+    struct is_weak_ptr : std::false_type {
+    };
+
+    template <typename T>
+    struct is_weak_ptr<std::weak_ptr<T>> : std::true_type {
+    };
+
+    template <typename T>
+    concept weak_ptr = is_weak_ptr<std::remove_cvref_t<T>>::value;
 }
 
 
@@ -204,57 +282,3 @@ struct genex::nth_type<N, First, Rest...> {
     static_assert(N < 1 + sizeof...(Rest), "Index out of bounds");
     using type = nth_type<N - 1, Rest...>::type;
 };
-
-
-template <typename T>
-struct is_unique_ptr : std::false_type {
-};
-
-
-template <typename T, typename Deleter>
-struct is_unique_ptr<std::unique_ptr<T, Deleter>> : std::true_type {
-};
-
-
-template <typename T>
-concept unique_ptr = is_unique_ptr<std::remove_cvref_t<T>>::value;
-
-
-template <typename T>
-struct is_shared_ptr : std::false_type {
-};
-
-
-template <typename T>
-struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {
-};
-
-
-template <typename T>
-concept shared_ptr = is_shared_ptr<std::remove_cvref_t<T>>::value;
-
-
-template <typename T>
-struct is_weak_ptr : std::false_type {
-};
-
-
-template <typename T>
-struct is_weak_ptr<std::weak_ptr<T>> : std::true_type {
-};
-
-
-template <typename T>
-concept weak_ptr = is_weak_ptr<std::remove_cvref_t<T>>::value;
-
-
-template <typename S, typename I>
-concept sentinel_for = genex::input_iterator<I> and std::sentinel_for<S, I>;
-
-
-template <typename T>
-concept borrowed_range = genex::input_range<T> and std::is_lvalue_reference_v<T>;
-
-
-template <typename T>
-concept common_range = genex::input_range<T> and std::same_as<genex::iterator_t<T>, genex::sentinel_t<T>>;

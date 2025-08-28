@@ -6,44 +6,29 @@
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
+#include <genex/operations/cmp.hpp>
 
 
-namespace genex::algorithms {
+namespace genex::algorithms::concepts {
     template <typename I, typename S, typename E, typename Proj>
     concept can_find_iters =
-        input_iterator<I> and
-        sentinel_for<S, I> and
-        std::invocable<Proj, iter_value_t<I>> and
-        std::equality_comparable_with<std::invoke_result_t<Proj, iter_value_t<I>>, E>;
-
-    template <typename Rng, typename E, typename Proj>
-    concept can_find_range =
-        input_range<Rng> and
-        std::invocable<Proj, range_value_t<Rng>> and
-        std::equality_comparable_with<std::invoke_result_t<Proj, range_value_t<Rng>>, E>;
+        std::input_iterator<I> and
+        std::sentinel_for<S, I> and
+        std::movable<I> and
+        std::indirectly_unary_invocable<Proj, I> and
+        std::indirectly_comparable<I, const std::remove_cvref_t<E>*, operations::eq, Proj, meta::identity>;
 
     template <typename I, typename S, typename E, typename Proj>
     concept can_find_last_iters_optimized =
-        bidirectional_iterator<I> and
+        std::bidirectional_iterator<I> and
         can_find_iters<I, S, E, Proj>;
-
-    template <typename Rng, typename E, typename Proj>
-    concept can_find_last_range_optimized =
-        bidirectional_range<Rng> and
-        can_find_range<Rng, E, Proj>;
 
     template <typename I, typename S, typename Pred, typename Proj>
     concept can_find_if_iters =
-        input_iterator<I> and
-        sentinel_for<S, I> and
-        std::invocable<Proj, iter_value_t<I>> and
-        std::predicate<Pred, std::invoke_result_t<Proj, iter_value_t<I>>>;
-
-    template <typename Rng, typename Pred, typename Proj>
-    concept can_find_if_range =
-        input_range<Rng> and
-        std::invocable<Proj, range_value_t<Rng>> and
-        std::predicate<Pred, std::invoke_result_t<Proj, range_value_t<Rng>>>;
+        std::input_iterator<I> and
+        std::sentinel_for<S, I> and
+        std::movable<I> and
+        std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
 
     template <typename I, typename S, typename E, typename Proj>
     concept can_find_if_last_iters_optimized =
@@ -51,29 +36,46 @@ namespace genex::algorithms {
         can_find_if_iters<I, S, E, Proj>;
 
     template <typename Rng, typename E, typename Proj>
+    concept can_find_range =
+        input_range<Rng> and
+        can_find_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
+
+    template <typename Rng, typename E, typename Proj>
+    concept can_find_last_range_optimized =
+        bidirectional_range<Rng> and
+        can_find_range<Rng, E, Proj>;
+
+    template <typename Rng, typename E, typename Proj>
+    concept can_find_if_range =
+        input_range<Rng> and
+        can_find_if_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
+
+    template <typename Rng, typename E, typename Proj>
     concept can_find_if_last_range_optimized =
         can_find_last_range_optimized<Rng, E, Proj> and
         can_find_if_range<Rng, E, Proj>;
+}
 
 
+namespace genex::algorithms {
     DEFINE_ALGORITHM(find) {
-        template <typename I, typename S, typename E, typename Proj = meta::identity> requires can_find_iters<I, S, E, Proj>
-        constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> auto {
+        template <typename I, typename S, typename E, typename Proj = meta::identity> requires concepts::can_find_iters<I, S, E, Proj>
+        auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> auto {
             for (; first != last; ++first) {
                 if (std::invoke(std::forward<Proj>(proj), *first) == elem) { return first; }
             }
             return last;
         }
 
-        template <typename Rng, typename E, typename Proj = meta::identity> requires can_find_range<Rng, E, Proj>
-        constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> auto {
+        template <typename Rng, typename E, typename Proj = meta::identity> requires concepts::can_find_range<Rng, E, Proj>
+        auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<E>(elem), std::forward<Proj>(proj));
         }
 
         template <typename E, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<E>>)
-        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
+        auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
             return
-                [FWD_CAPTURES(elem, proj)]<typename Rng> requires can_find_range<Rng, E, Proj>
+                [FWD_CAPTURES(elem, proj)]<typename Rng> requires concepts::can_find_range<Rng, E, Proj>
                 (Rng &&rng) mutable -> auto {
                 return (*this)(std::forward<Rng>(rng), std::forward<E>(elem), std::forward<Proj>(proj));
             };
@@ -81,8 +83,8 @@ namespace genex::algorithms {
     };
 
     DEFINE_ALGORITHM(find_last) {
-        template <typename I, typename S, typename E, typename Proj = meta::identity> requires (can_find_iters<I, S, E, Proj> and not can_find_last_iters_optimized<I, S, E, Proj>)
-        constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> auto {
+        template <typename I, typename S, typename E, typename Proj = meta::identity> requires (concepts::can_find_iters<I, S, E, Proj> and not concepts::can_find_last_iters_optimized<I, S, E, Proj>)
+        auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> auto {
             auto found_last = last;
             for (; first != last; ++first) {
                 if (std::invoke(std::forward<Proj>(proj), *first) == elem) { found_last = first; }
@@ -90,8 +92,8 @@ namespace genex::algorithms {
             return found_last;
         }
 
-        template <typename I, typename S, typename E, typename Proj = meta::identity> requires can_find_last_iters_optimized<I, S, E, Proj>
-        constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> auto {
+        template <typename I, typename S, typename E, typename Proj = meta::identity> requires concepts::can_find_last_iters_optimized<I, S, E, Proj>
+        auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> auto {
             auto true_last = last;
             for (; last != first; --last) {
                 if (std::invoke(std::forward<Proj>(proj), *last) == elem) { return last; }
@@ -99,15 +101,15 @@ namespace genex::algorithms {
             return true_last;
         }
 
-        template <typename Rng, typename E, typename Proj = meta::identity> requires can_find_range<Rng, E, Proj>
-        constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> auto {
+        template <typename Rng, typename E, typename Proj = meta::identity> requires concepts::can_find_range<Rng, E, Proj>
+        auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<E>(elem), std::forward<Proj>(proj));
         }
 
         template <typename E, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<E>>)
-        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
+        auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
             return
-                [FWD_CAPTURES(elem, proj)]<typename Rng> requires can_find_range<Rng, E, Proj>
+                [FWD_CAPTURES(elem, proj)]<typename Rng> requires concepts::can_find_range<Rng, E, Proj>
                 (Rng &&rng) mutable -> auto {
                 return (*this)(std::forward<Rng>(rng), std::forward<E>(elem), std::forward<Proj>(proj));
             };
@@ -115,23 +117,23 @@ namespace genex::algorithms {
     };
 
     DEFINE_ALGORITHM(find_if) {
-        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires can_find_if_iters<I, S, Pred, Proj>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires concepts::can_find_if_iters<I, S, Pred, Proj>
+        auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
             for (; first != last; ++first) {
                 if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { return first; }
             }
             return last;
         }
 
-        template <typename Rng, typename Pred, typename Proj = meta::identity> requires can_find_if_range<Rng, Pred, Proj>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+        template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_find_if_range<Rng, Pred, Proj>
+        auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
         template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
+        auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             return
-                [FWD_CAPTURES(pred, proj)]<typename Rng> requires can_find_if_range<Rng, Pred, Proj>
+                [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_find_if_range<Rng, Pred, Proj>
                 (Rng &&rng) mutable -> auto {
                 return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
             };
@@ -139,8 +141,8 @@ namespace genex::algorithms {
     };
 
     DEFINE_ALGORITHM(find_last_if) {
-        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires (can_find_if_iters<I, S, Pred, Proj> and not can_find_if_last_iters_optimized<I, S, Pred, Proj>)
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires (concepts::can_find_if_iters<I, S, Pred, Proj> and not concepts::can_find_if_last_iters_optimized<I, S, Pred, Proj>)
+        auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
             auto found_last = last;
             for (; first != last; ++first) {
                 if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { found_last = first; }
@@ -148,8 +150,8 @@ namespace genex::algorithms {
             return found_last;
         }
 
-        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires can_find_if_last_iters_optimized<I, S, Pred, Proj>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires concepts::can_find_if_last_iters_optimized<I, S, Pred, Proj>
+        auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
             auto true_last = last;
             for (; last != first; --last) {
                 if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *last))) { return last; }
@@ -157,15 +159,15 @@ namespace genex::algorithms {
             return true_last;
         }
 
-        template <typename Rng, typename Pred, typename Proj = meta::identity> requires can_find_if_range<Rng, Pred, Proj>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+        template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_find_if_range<Rng, Pred, Proj>
+        auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
         template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
+        auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             return
-                [FWD_CAPTURES(pred, proj)]<typename Rng> requires can_find_if_range<Rng, Pred, Proj>
+                [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_find_if_range<Rng, Pred, Proj>
                 (Rng &&rng) mutable -> auto {
                 return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
             };
@@ -175,22 +177,22 @@ namespace genex::algorithms {
 
     DEFINE_ALGORITHM(find_if_not) {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+        auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
             for (; first != last; ++first) {
                 if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { return first; }
             }
             return last;
         }
 
-        template <typename Rng, typename Pred, typename Proj = meta::identity> requires can_find_if_range<Rng, Pred, Proj>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+        template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_find_if_range<Rng, Pred, Proj>
+        auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
         template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
+        auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             return
-                [FWD_CAPTURES(pred, proj)]<typename Rng> requires can_find_if_range<Rng, Pred, Proj>
+                [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_find_if_range<Rng, Pred, Proj>
                 (Rng &&rng) mutable -> auto {
                 return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
             };
@@ -198,8 +200,8 @@ namespace genex::algorithms {
     };
 
     DEFINE_ALGORITHM(find_last_if_not) {
-        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires (can_find_if_iters<I, S, Pred, Proj> and not can_find_if_last_iters_optimized<I, S, Pred, Proj>)
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires (concepts::can_find_if_iters<I, S, Pred, Proj> and not concepts::can_find_if_last_iters_optimized<I, S, Pred, Proj>)
+        auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
             auto found_last = last;
             for (; first != last; ++first) {
                 if (not std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { found_last = first; }
@@ -207,8 +209,8 @@ namespace genex::algorithms {
             return found_last;
         }
 
-        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires can_find_if_last_iters_optimized<I, S, Pred, Proj>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires concepts::can_find_if_last_iters_optimized<I, S, Pred, Proj>
+        auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
             auto true_last = last;
             for (; last != first; --last) {
                 if (not std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *last))) { return last; }
@@ -216,15 +218,15 @@ namespace genex::algorithms {
             return true_last;
         }
 
-        template <typename Rng, typename Pred, typename Proj = meta::identity> requires can_find_if_range<Rng, Pred, Proj>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+        template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_find_if_range<Rng, Pred, Proj>
+        auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
         template <typename Pred, typename Proj = meta::identity> requires (not input_range<Pred>)
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
+        auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             return
-                [FWD_CAPTURES(pred, proj)]<typename Rng> requires can_find_if_range<Rng, Pred, Proj>
+                [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_find_if_range<Rng, Pred, Proj>
                 (Rng &&rng) mutable -> auto {
                 return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
             };

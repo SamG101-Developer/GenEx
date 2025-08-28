@@ -8,7 +8,6 @@
 
 
 namespace genex::operations {
-
     DEFINE_OPERATION(at) {
         template <typename Rng> requires (has_member_at<Rng>)
         constexpr auto operator()(Rng &&r, const std::size_t n) const noexcept -> range_value_t<Rng>& {

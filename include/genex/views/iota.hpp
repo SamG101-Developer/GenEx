@@ -5,9 +5,15 @@
 #include <genex/views/_view_base.hpp>
 
 
+namespace genex::views::concepts {
+    template <typename Size>
+    concept can_iota_size = std::integral<Size>;
+}
+
+
 namespace genex::views::detail {
-    template <typename T>
-    auto do_iota(const std::size_t lo, const std::size_t hi, const std::size_t step) -> generator<std::size_t> {
+    template <typename Size> requires concepts::can_iota_size<Size>
+    auto do_iota(const Size lo, const Size hi, const Size step) -> generator<Size> {
         for (auto i = lo; i < hi; i += step) {
             co_yield i;
         }
@@ -17,15 +23,15 @@ namespace genex::views::detail {
 
 namespace genex::views {
     DEFINE_VIEW(iota) {
-        template <typename T = void>
-        constexpr auto operator()(const std::size_t lo, const std::size_t hi, const std::size_t step = 1uz) const -> auto {
-            auto gen = detail::do_iota<T>(lo, hi, step);
+        template <typename Size = std::size_t> requires concepts::can_iota_size<Size>
+        constexpr auto operator()(const Size lo, const Size hi, const Size step = static_cast<Size>(1)) const -> auto {
+            auto gen = detail::do_iota<Size>(lo, hi, step);
             return iota_view(std::move(gen));
         }
 
-        template <typename T = void>
-        constexpr auto operator()(const std::size_t hi) const -> auto {
-            auto gen = detail::do_iota<T>(0uz, hi, 1uz);
+        template <typename Size = std::size_t>
+        constexpr auto operator()(const Size hi) const -> auto {
+            auto gen = detail::do_iota<Size>(static_cast<Size>(0), hi, static_cast<Size>(1));
             return iota_view(std::move(gen));
         }
     };

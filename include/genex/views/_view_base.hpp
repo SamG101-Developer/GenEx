@@ -15,6 +15,7 @@
     }; \
     EXPORT_GENEX_STRUCT(name)
 
+
 #define DEFINE_VIEW(name) \
     template <typename Rng> requires input_range<Rng> \
     struct name ## _view; \
@@ -26,21 +27,21 @@ namespace genex::views::detail {
         virtual ~view_fn_base() = default;
     };
 
-    template <typename Rng> requires input_range<Rng>
+    template <typename Rng> requires range<Rng>
     struct view_base {
     public:
         using value_type = range_value_t<Rng>;
         using iterator = iterator_t<Rng>;
         using sentinel = sentinel_t<Rng>;
-        using iterator_category = std::input_iterator_tag;
-        using reference = value_type&;
-        using const_reference = const value_type&;
+        using difference_type = std::ptrdiff_t;
+        using reference = range_reference_t<Rng>;
+        using const_reference = const reference;
         using pointer = value_type*;
         using const_pointer = const value_type*;
         using size_type = std::size_t;
-        using difference_type = std::ptrdiff_t;
 
     protected:
+        [[no_unique_address]]
         Rng m_rng;
 
         explicit view_base(Rng &&rng) :
@@ -50,6 +51,13 @@ namespace genex::views::detail {
     public:
         auto begin() { return iterators::begin(m_rng); }
         auto end() { return iterators::end(m_rng); }
+
+        auto begin() const requires range<const Rng> { return iterators::begin(m_rng); }
+        auto end() const requires range<const Rng> { return iterators::end(m_rng); }
+
+        auto operator[](size_type n) -> reference requires random_access_range<Rng> {
+            return m_rng[n];
+        }
 
         virtual ~view_base() = default;
     };

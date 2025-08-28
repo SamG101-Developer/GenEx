@@ -8,8 +8,6 @@ TEST(GenexViewsConcat, VecInput) {
     auto vec1 = std::vector{1, 2, 3, 4, 5, 6};
     auto vec2 = std::vector{7, 8, 9};
 
-    genex::views::concat(vec1, vec2);
-
     const auto rng = vec1
         | genex::views::concat(vec2)
         | genex::views::to<std::vector>();

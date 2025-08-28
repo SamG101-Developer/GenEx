@@ -32,5 +32,8 @@
     ))
 
 
+#define RANGE_TO_ITERS(rng) iterators::begin(std::forward<decltype(rng)>(rng)), iterators::end(std::forward<decltype(rng)>(rng))
+
+
 #define EXPORT_GENEX_STRUCT(name) \
     inline constexpr name ## _fn name

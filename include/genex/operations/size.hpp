@@ -6,8 +6,6 @@
 
 
 namespace genex::operations {
-
-
     DEFINE_OPERATION(size) {
         template <typename Rng> requires (has_member_size<Rng>)
         constexpr auto operator()(Rng &&r) const noexcept -> std::size_t {

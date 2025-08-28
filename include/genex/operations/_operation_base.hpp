@@ -1,5 +1,7 @@
 #pragma once
+#include <genex/generator.hpp>
 #include <genex/macros.hpp>
+
 
 #define EXPORT_GENEX_OPERATION(name) \
     EXPORT_GENEX_STRUCT(name)

@@ -6,22 +6,25 @@
 #include <genex/iterators/end.hpp>
 
 
-namespace genex::actions {
+namespace genex::actions::concepts {
     template <typename Rng>
     concept can_reverse_range =
         bidirectional_range<Rng> and
         std::permutable<iterator_t<Rng>>;
+}
 
+
+namespace genex::actions {
     DEFINE_ACTION(reverse) {
-        template <typename Rng> requires can_reverse_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> Rng& {
-            std::reverse(iterators::begin(rng), iterators::end(rng));
+        template <typename Rng> requires concepts::can_reverse_range<Rng>
+        auto operator()(Rng &&rng) const -> Rng& {
+            std::reverse(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
             return rng;
         }
 
-        constexpr auto operator()() const -> auto {
+        auto operator()() const -> auto {
             return
-                [FWD_CAPTURES()]<typename Rng> requires can_reverse_range<Rng>
+                [FWD_CAPTURES()]<typename Rng> requires concepts::can_reverse_range<Rng>
                 (Rng &&rng) mutable -> auto {
                 return (*this)(std::forward<Rng>(rng));
             };

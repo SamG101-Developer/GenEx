@@ -6,51 +6,7 @@
 #include <genex/views/_view_base.hpp>
 
 
-namespace genex::views::detail {
-    template <std::size_t I = 0, typename... Ts, typename... Us> requires (I <= sizeof...(Ts) and sizeof...(Ts) == sizeof...(Us))
-    auto any_iterator_finished(std::tuple<Ts...> &starts, const std::tuple<Us...> &ends) -> bool {
-        if constexpr (I < sizeof...(Ts)) {
-            return std::get<I>(starts) == std::get<I>(ends) || any_iterator_finished<I + 1>(starts, ends);
-        }
-        else {
-            return false;
-        }
-    }
-
-    template <typename Tuple, std::size_t... Is>
-    auto deref_tuple_impl(Tuple &t, std::index_sequence<Is...>) {
-        return std::tuple<iter_value_t<std::tuple_element_t<Is, Tuple>>...>{(*std::get<Is>(t))...};
-    }
-
-    template <typename Tuple>
-    auto deref_tuple(Tuple &t) {
-        return deref_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-    }
-
-    template <typename Tuple, std::size_t... Is>
-    void advance_tuple_impl(Tuple &t, std::index_sequence<Is...>) {
-        ((++std::get<Is>(t)), ...);
-    }
-
-    template <typename Tuple>
-    void advance_tuple(Tuple &t) {
-        advance_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-    }
-
-    template <typename... Is, typename... Ss>
-    auto do_zip(std::tuple<Is...> first, std::tuple<Ss...> last) -> generator<std::tuple<iter_value_t<Is>...>> {
-        auto begins = std::move(first);
-        auto ends = std::move(last);
-
-        while (!any_iterator_finished(begins, ends)) {
-            co_yield deref_tuple(begins);
-            advance_tuple(begins);
-        }
-    }
-}
-
-
-namespace genex::views {
+namespace genex::views::concepts {
     template <typename T1, typename T2>
     struct can_zip_iters_helper : std::false_type {
     };
@@ -60,8 +16,9 @@ namespace genex::views {
         static constexpr bool value =
             sizeof...(Is) > 0 and
             sizeof...(Is) == sizeof...(Ss) and
-            (input_iterator<Is> and ...) and
-            (sentinel_for<Ss, Is> and ...);
+            (std::input_iterator<Is> and ...) and
+            (std::sentinel_for<Ss, Is> and ...) and
+            (std::movable<Is> and ...);
     };
 
     template <typename T1, typename T2>
@@ -70,25 +27,42 @@ namespace genex::views {
     template <typename... Rngs>
     concept can_zip_range =
         sizeof...(Rngs) > 0 and
-        (input_range<Rngs> and ...);
+        (input_range<Rngs> and ...) and
+        can_zip_iters<std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>>;
+}
 
 
+namespace genex::views::detail {
+    template <typename... Is, typename... Ss> requires concepts::can_zip_iters<std::tuple<Is...>, std::tuple<Ss...>>
+    auto do_zip(std::tuple<Is...> first, std::tuple<Ss...> last) -> generator<std::tuple<iter_value_t<Is>...>> {
+        auto starts = std::move(first);
+        auto ends = std::move(last);
+
+        while (!any_iterator_finished(starts, ends)) {
+            co_yield deref_tuple(starts);
+            advance_tuple(starts);
+        }
+    }
+}
+
+
+namespace genex::views {
     DEFINE_VIEW(zip) {
-        template <typename... Is, typename... Ss> requires can_zip_iters<std::tuple<Is...>, std::tuple<Ss...>>
-        constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const -> auto {
+        template <typename... Is, typename... Ss> requires concepts::can_zip_iters<std::tuple<Is...>, std::tuple<Ss...>>
+        auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const -> auto {
             auto gen = detail::do_zip(std::move(first), std::move(last));
             return zip_view(std::move(gen));
         }
 
-        template <typename... Rngs> requires (can_zip_range<Rngs...> and sizeof...(Rngs) > 1)
-        constexpr auto operator()(Rngs &&... ranges) const -> auto {
+        template <typename... Rngs> requires (concepts::can_zip_range<Rngs...> and sizeof...(Rngs) > 1)
+        auto operator()(Rngs &&... ranges) const -> auto {
             return (*this)(std::make_tuple(iterators::begin(ranges)...), std::make_tuple(iterators::end(ranges)...));
         }
 
-        template <typename Rng2> requires can_zip_range<Rng2>
-        constexpr auto operator()(Rng2 &&rng2) const -> auto {
+        template <typename Rng2> requires concepts::can_zip_range<Rng2>
+        auto operator()(Rng2 &&rng2) const -> auto {
             return
-                [FWD_CAPTURES(rng2)]<typename Rng1> requires can_zip_range<Rng1, Rng2>
+                [FWD_CAPTURES(rng2)]<typename Rng1> requires concepts::can_zip_range<Rng1, Rng2>
                 (Rng1 &&rng1) mutable -> auto {
                 return (*this)(std::forward<Rng1>(rng1), std::forward<Rng2>(rng2));
             };

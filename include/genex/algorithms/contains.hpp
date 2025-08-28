@@ -4,33 +4,36 @@
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
+#include <genex/operations/cmp.hpp>
 
 
-namespace genex::algorithms {
+namespace genex::algorithms::concepts {
     template <typename I, typename S, typename E, typename Proj>
     concept can_contain_iters =
-        input_iterator<I> and
-        sentinel_for<S, I> and
-        std::invocable<Proj, iter_value_t<I>> and
-        std::equality_comparable_with<std::invoke_result_t<Proj, iter_value_t<I>>, E>;
+        std::input_iterator<I> and
+        std::sentinel_for<S, I> and
+        std::movable<I> and
+        std::indirectly_comparable<I, const std::remove_cvref_t<E>*, operations::eq, Proj, meta::identity>;
 
     template <typename Rng, typename E, typename Proj>
     concept can_contain_range =
         input_range<Rng> and
-        std::invocable<Proj, range_value_t<Rng>> and
-        std::equality_comparable_with<std::invoke_result_t<Proj, range_value_t<Rng>>, E>;
+        can_contain_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
+}
 
+
+namespace genex::algorithms {
     DEFINE_ALGORITHM(contains) {
-        template <typename I, typename S, typename E, typename Proj = meta::identity> requires can_contain_iters<I, S, E, Proj>
-        constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> bool {
+        template <typename I, typename S, typename E, typename Proj = meta::identity> requires concepts::can_contain_iters<I, S, E, Proj>
+        auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> bool {
             for (; first != last; ++first) {
                 if (std::invoke(std::forward<Proj>(proj), *first) == std::forward<E>(elem)) { return true; }
             }
             return false;
         }
 
-        template <typename Rng, typename E, typename Proj = meta::identity> requires can_contain_range<Rng, E, Proj>
-        constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> bool {
+        template <typename Rng, typename E, typename Proj = meta::identity> requires concepts::can_contain_range<Rng, E, Proj>
+        auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> bool {
             for (auto &&x : rng) {
                 if (std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)) == std::forward<E>(elem)) { return true; }
             }
@@ -38,9 +41,9 @@ namespace genex::algorithms {
         }
 
         template <typename E, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<E>>)
-        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
+        auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
             return
-                [FWD_CAPTURES(elem, proj)]<typename Rng> requires can_contain_range<Rng, E, Proj>
+                [FWD_CAPTURES(elem, proj)]<typename Rng> requires concepts::can_contain_range<Rng, E, Proj>
                 (Rng &&rng) mutable -> auto {
                 return (*this)(std::forward<Rng>(rng), std::forward<E>(elem), std::forward<Proj>(proj));
             };

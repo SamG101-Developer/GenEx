@@ -10,20 +10,24 @@
 #include <genex/meta.hpp>
 
 
-namespace genex::algorithms {
+namespace genex::algorithms::concepts {
     template <typename I, typename S, typename Comp, typename Proj>
     concept can_sorted_iters =
-        random_access_iterator<I> and
-        sentinel_for<S, I> and
+        std::random_access_iterator<I> and
+        std::sentinel_for<S, I> and
+        std::movable<I> and
         std::sortable<I, Comp, Proj>;
 
     template <typename Rng, typename Comp, typename Proj>
     concept can_sorted_range =
         random_access_range<Rng> and
-        std::sortable<iterator_t<Rng>, Comp, Proj>;
+        can_sorted_iters<iterator_t<Rng>, sentinel_t<Rng>, Comp, Proj>;
+}
 
+
+namespace genex::algorithms {
     DEFINE_ALGORITHM(sorted) {
-        template <typename I, typename S, typename Comp = operations::lt, typename Proj = meta::identity> requires can_sorted_iters<I, S, Comp, Proj>
+        template <typename I, typename S, typename Comp = operations::lt, typename Proj = meta::identity> requires concepts::can_sorted_iters<I, S, Comp, Proj>
         constexpr auto operator()(I first, S last, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
             auto copy = std::vector<iter_value_t<I>>();
             copy.reserve(iterators::distance(first, last));
@@ -39,15 +43,15 @@ namespace genex::algorithms {
             return std::move(copy);
         }
 
-        template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity> requires can_sorted_range<Rng, Comp, Proj>
+        template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity> requires concepts::can_sorted_range<Rng, Comp, Proj>
         constexpr auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
-            return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Comp>(comp), std::forward<Proj>(proj));
+            return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
 
         template <typename Comp = operations::lt, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Comp>>)
         constexpr auto operator()(Comp &&comp = {}, Proj &&proj = {}) const -> auto {
             return
-                [FWD_CAPTURES(comp, proj)]<typename Rng> requires can_sorted_range<Rng, Comp, Proj>
+                [FWD_CAPTURES(comp, proj)]<typename Rng> requires concepts::can_sorted_range<Rng, Comp, Proj>
                 (Rng &&rng) mutable -> auto {
                 return (*this)(std::forward<Rng>(rng), std::forward<Comp>(comp), std::forward<Proj>(proj));
             };

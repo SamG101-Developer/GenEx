@@ -1,7 +1,8 @@
 #pragma once
-#include <genex/macros.hpp>
 #include <genex/generator.hpp>
+#include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
+
 
 #define EXPORT_GENEX_STRING(name) \
     EXPORT_GENEX_STRUCT(name)

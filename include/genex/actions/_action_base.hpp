@@ -1,6 +1,9 @@
 #pragma once
 #include <genex/generator.hpp>
+#include <genex/iterators/begin.hpp>
+#include <genex/iterators/end.hpp>
 #include <genex/macros.hpp>
+
 
 #define EXPORT_GENEX_ACTION(name) \
     EXPORT_GENEX_STRUCT(name)

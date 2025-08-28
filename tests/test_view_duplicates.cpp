@@ -6,7 +6,6 @@
 
 TEST(GenexViewsDuplicates, Duplicates) {
     auto vec = std::vector{1, 2, 3, 4, 1, 2};
-    auto b = genex::views::duplicates(vec);
 
     const auto rng = vec
         | genex::views::duplicates
@@ -18,7 +17,6 @@ TEST(GenexViewsDuplicates, Duplicates) {
 
 TEST(GenexViewsDuplicates, NoDuplicates) {
     auto vec = std::vector{1, 2, 3, 4};
-    auto b = genex::views::duplicates(vec);
 
     const auto rng = vec
         | genex::views::duplicates

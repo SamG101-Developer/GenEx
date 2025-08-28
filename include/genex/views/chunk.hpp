@@ -27,8 +27,8 @@ namespace genex::views::detail {
 namespace genex::views {
     template <typename I, typename S>
     concept can_chunk_iters =
-        forward_iterator<I> and
-        sentinel_for<S, I>;
+        std::forward_iterator<I> and
+        std::sentinel_for<S, I>;
 
     template <typename Rng>
     concept can_chunk_range =

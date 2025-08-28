@@ -16,6 +16,7 @@ TEST(GenexViewsIntersperse, VecInput) {
 
 TEST(GenexViewsIntersperseWith, VecInput) {
     auto vec = std::vector<int>{{1, 2, 3, 4, 5, 6}};
+
     const auto rng = vec
         | genex::views::intersperse_with([] { return 0; })
         | genex::views::to<std::vector>();
