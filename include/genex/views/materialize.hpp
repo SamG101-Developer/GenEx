@@ -42,18 +42,18 @@ namespace genex::views::detail {
 namespace genex::views {
     DEFINE_VIEW(materialize) {
         template <template <typename> typename Cache = std::vector, typename I, typename S> requires concepts::can_materialize_iters<Cache, I, S>
-        constexpr auto operator()(I first, S last) const -> auto {
+        auto operator()(I first, S last) const -> auto {
             auto gen = detail::do_materialize<Cache>(std::move(first), std::move(last));
             return materialize_view(std::move(gen));
         }
 
         template <template <typename> typename Cache = std::vector, typename Rng> requires concepts::can_materialize_range<Cache, Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        auto operator()(Rng &&rng) const -> auto {
             return this->operator()<Cache>(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
         }
 
         template <template <typename> typename Cache = std::vector>
-        constexpr auto operator()() const -> auto {
+        auto operator()() const -> auto {
             return
                 [FWD_CAPTURES()]<typename Rng> requires concepts::can_materialize_range<Cache, Rng>
                 (Rng &&rng) mutable -> auto {

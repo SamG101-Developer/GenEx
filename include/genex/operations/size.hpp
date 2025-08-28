@@ -8,17 +8,17 @@
 namespace genex::operations {
     DEFINE_OPERATION(size) {
         template <typename Rng> requires (has_member_size<Rng>)
-        constexpr auto operator()(Rng &&r) const noexcept -> std::size_t {
+        auto operator()(Rng &&r) const noexcept -> std::size_t {
             return r.size();
         }
 
         template <typename Rng> requires (not has_member_size<Rng> and has_std_size<Rng>)
-        constexpr auto operator()(Rng &&r) const noexcept -> std::size_t {
+        auto operator()(Rng &&r) const noexcept -> std::size_t {
             return std::size(r);
         }
 
         template <typename Rng>
-        constexpr auto operator()(Rng &&gen) const noexcept -> std::size_t {
+        auto operator()(Rng &&gen) const noexcept -> std::size_t {
             auto count = static_cast<std::size_t>(0);
             for (auto &&_ : std::move(gen)) {
                 ++count;
@@ -26,7 +26,7 @@ namespace genex::operations {
             return count;
         }
 
-        constexpr auto operator()() const noexcept -> auto {
+        auto operator()() const noexcept -> auto {
             return
                 [FWD_CAPTURES()]<typename Rng>
                 (Rng &&rng) mutable -> auto {
@@ -37,16 +37,16 @@ namespace genex::operations {
 
     DEFINE_OPERATION(empty) {
         template <typename Rng> requires (has_member_empty<Rng>)
-        constexpr auto operator()(Rng &&r) const noexcept -> bool {
+        auto operator()(Rng &&r) const noexcept -> bool {
             return r.empty();
         }
 
         template <typename Rng> requires (!has_member_empty<Rng>)
-        constexpr auto operator()(Rng &&r) const noexcept -> bool {
+        auto operator()(Rng &&r) const noexcept -> bool {
             return size(std::forward<Rng>(r)) == 0;
         }
 
-        constexpr auto operator()() const noexcept -> auto {
+        auto operator()() const noexcept -> auto {
             return
                 [FWD_CAPTURES()]<typename Rng>
                 (Rng &&rng) mutable -> auto {

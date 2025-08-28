@@ -19,24 +19,24 @@ namespace genex::iterators::concepts {
 namespace genex::iterators {
     DEFINE_ITERATOR(begin) {
         template <typename Rng> requires (concepts::can_begin_range<Rng> and has_std_begin<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(std::begin(std::forward<Rng>(rng)))) -> decltype(std::begin(std::forward<Rng>(rng))) {
+        auto operator()(Rng &&rng) const noexcept(noexcept(std::begin(std::forward<Rng>(rng)))) -> decltype(std::begin(std::forward<Rng>(rng))) {
             return std::begin(std::forward<Rng>(rng));
         }
 
         template <typename Rng> requires (concepts::can_begin_range<Rng> and not has_std_begin<Rng> and has_member_begin<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(rng.begin())) -> decltype(rng.begin()) {
+        auto operator()(Rng &&rng) const noexcept(noexcept(rng.begin())) -> decltype(rng.begin()) {
             return rng.begin();
         }
     };
 
     DEFINE_ITERATOR(rbegin) {
         template <typename Rng> requires (concepts::can_rbegin_range<Rng> and has_std_rbegin<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(std::rbegin(std::forward<Rng>(rng)))) -> decltype(std::rbegin(std::forward<Rng>(rng))) {
+        auto operator()(Rng &&rng) const noexcept(noexcept(std::rbegin(std::forward<Rng>(rng)))) -> decltype(std::rbegin(std::forward<Rng>(rng))) {
             return std::rbegin(std::forward<Rng>(rng));
         }
 
         template <typename Rng> requires (concepts::can_rbegin_range<Rng> and not has_std_rbegin<Rng> and has_member_rbegin<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(rng.end())) -> decltype(rng.rbegin()) {
+        auto operator()(Rng &&rng) const noexcept(noexcept(rng.end())) -> decltype(rng.rbegin()) {
             return rng.rbegin();
         }
     };

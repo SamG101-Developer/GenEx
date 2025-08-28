@@ -24,13 +24,13 @@ namespace genex::views::detail {
 namespace genex::views {
     DEFINE_VIEW(iota) {
         template <typename Size = std::size_t> requires concepts::can_iota_size<Size>
-        constexpr auto operator()(const Size lo, const Size hi, const Size step = static_cast<Size>(1)) const -> auto {
+        auto operator()(const Size lo, const Size hi, const Size step = static_cast<Size>(1)) const -> auto {
             auto gen = detail::do_iota<Size>(lo, hi, step);
             return iota_view(std::move(gen));
         }
 
         template <typename Size = std::size_t>
-        constexpr auto operator()(const Size hi) const -> auto {
+        auto operator()(const Size hi) const -> auto {
             auto gen = detail::do_iota<Size>(static_cast<Size>(0), hi, static_cast<Size>(1));
             return iota_view(std::move(gen));
         }

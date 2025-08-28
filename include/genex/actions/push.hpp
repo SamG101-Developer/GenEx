@@ -30,22 +30,22 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     DEFINE_ACTION(push_back) {
         template <typename Rng, typename E> requires (concepts::can_push_back_range<Rng, E> and has_member_emplace_back<Rng>)
-        constexpr auto operator()(Rng &&rng, E &&elem) const noexcept(noexcept(rng.emplace_back(std::forward<E>(elem)))) -> void {
+        auto operator()(Rng &&rng, E &&elem) const noexcept(noexcept(rng.emplace_back(std::forward<E>(elem)))) -> void {
             rng.emplace_back(std::forward<E>(elem));
         }
 
         template <typename Rng, typename E> requires (concepts::can_push_back_range<Rng, E> and has_member_push_back<Rng> and not has_member_emplace_back<Rng>)
-        constexpr auto operator()(Rng &&rng, E &&elem) const noexcept(noexcept(rng.push_back(std::forward<E>(elem)))) -> void {
+        auto operator()(Rng &&rng, E &&elem) const noexcept(noexcept(rng.push_back(std::forward<E>(elem)))) -> void {
             rng.push_back(std::forward<E>(elem));
         }
 
         template <typename Rng, typename E> requires (concepts::can_push_back_range<Rng, E> and has_member_insert<Rng> and not has_member_push_back<Rng> and not has_member_emplace_back<Rng>)
-        constexpr auto operator()(Rng &&rng, E &&elem) const noexcept(noexcept(rng.insert(end(rng), std::forward<E>(elem)))) -> void {
+        auto operator()(Rng &&rng, E &&elem) const noexcept(noexcept(rng.insert(end(rng), std::forward<E>(elem)))) -> void {
             rng.insert(end(rng), std::forward<E>(elem));
         }
 
         template <typename E> requires (not input_range<std::remove_cvref_t<E>>)
-        constexpr auto operator()(E &&elem) const noexcept -> auto {
+        auto operator()(E &&elem) const noexcept -> auto {
             return
                 [FWD_CAPTURES(elem)]<typename Rng> requires concepts::can_push_back_range<Rng, E>
                 (Rng &&rng) mutable -> void {
@@ -56,22 +56,22 @@ namespace genex::actions {
 
     DEFINE_ACTION(push_front) {
         template <typename Rng, typename E> requires (concepts::can_push_front_range<Rng, E> and has_member_emplace_front<Rng>)
-        constexpr auto operator()(Rng &&rng, E &&elem) const noexcept(noexcept(rng.emplace_front(std::forward<E>(elem)))) -> void {
+        auto operator()(Rng &&rng, E &&elem) const noexcept(noexcept(rng.emplace_front(std::forward<E>(elem)))) -> void {
             rng.emplace_front(std::forward<E>(elem));
         }
 
         template <typename Rng, typename E> requires (concepts::can_push_front_range<Rng, E> and has_member_push_front<Rng> and not has_member_emplace_front<Rng>)
-        constexpr auto operator()(Rng &&rng, E &&elem) const noexcept(noexcept(rng.push_front(std::forward<E>(elem)))) -> void {
+        auto operator()(Rng &&rng, E &&elem) const noexcept(noexcept(rng.push_front(std::forward<E>(elem)))) -> void {
             rng.push_front(std::forward<E>(elem));
         }
 
         template <typename Rng, typename E> requires (concepts::can_push_front_range<Rng, E> and has_member_insert<Rng> and not has_member_push_front<Rng> and not has_member_emplace_front<Rng>)
-        constexpr auto operator()(Rng &&rng, E &&elem) const noexcept(noexcept(rng.insert(begin(rng), std::forward<E>(elem)))) -> void {
+        auto operator()(Rng &&rng, E &&elem) const noexcept(noexcept(rng.insert(begin(rng), std::forward<E>(elem)))) -> void {
             rng.insert(begin(rng), std::forward<E>(elem));
         }
 
         template <typename E> requires (not input_range<std::remove_cvref_t<E>>)
-        constexpr auto operator()(E &&elem) const noexcept -> auto {
+        auto operator()(E &&elem) const noexcept -> auto {
             return
                 [FWD_CAPTURES(elem)]<typename Rng> requires concepts::can_push_front_range<Rng, E>
                 (Rng &&rng) mutable -> void {
@@ -82,22 +82,22 @@ namespace genex::actions {
 
     DEFINE_ACTION(push) {
         template <typename Rng, typename I, typename E> requires (concepts::can_push_range<Rng, I, E> and has_member_emplace<Rng>)
-        constexpr auto operator()(Rng &&rng, I it, E &&elem) const noexcept(noexcept(rng.emplace(std::move(it), std::forward<E>(elem)))) -> void {
+        auto operator()(Rng &&rng, I it, E &&elem) const noexcept(noexcept(rng.emplace(std::move(it), std::forward<E>(elem)))) -> void {
             rng.emplace(std::move(it), std::forward<E>(elem));
         }
 
         template <typename Rng, typename I, typename E> requires (concepts::can_push_range<Rng, I, E> and has_member_push<Rng> and not has_member_emplace<Rng>)
-        constexpr auto operator()(Rng &&rng, I it, E &&elem) const noexcept(noexcept(rng.push(std::move(it), std::forward<E>(elem)))) -> void {
+        auto operator()(Rng &&rng, I it, E &&elem) const noexcept(noexcept(rng.push(std::move(it), std::forward<E>(elem)))) -> void {
             rng.push(std::move(it), std::forward<E>(elem));
         }
 
         template <typename Rng, typename I, typename E> requires (concepts::can_push_range<Rng, I, E> and has_member_insert<Rng> and not has_member_push<Rng> and not has_member_emplace<Rng>)
-        constexpr auto operator()(Rng &&rng, I it, E &&elem) const noexcept(noexcept(rng.insert(std::move(it), std::forward<E>(elem)))) -> void {
+        auto operator()(Rng &&rng, I it, E &&elem) const noexcept(noexcept(rng.insert(std::move(it), std::forward<E>(elem)))) -> void {
             rng.insert(std::move(it), std::forward<E>(elem));
         }
 
         template <typename I, typename E> requires (not input_range<std::remove_cvref_t<I>>)
-        constexpr auto operator()(I it, E &&elem) const noexcept -> auto {
+        auto operator()(I it, E &&elem) const noexcept -> auto {
             return
                 [FWD_CAPTURES(it, elem)]<typename Rng> requires concepts::can_push_range<Rng, I, E>
                 (Rng &&rng) mutable -> void {

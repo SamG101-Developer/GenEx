@@ -22,14 +22,14 @@ namespace genex::iterators::concepts {
 namespace genex::iterators {
     DEFINE_ITERATOR(next) {
         template <typename I> requires concepts::can_next_iters<I>
-        constexpr auto operator()(I it, const std::ptrdiff_t n = 1) const noexcept -> auto {
+        auto operator()(I it, const std::ptrdiff_t n = 1) const noexcept -> auto {
             return std::next(std::move(it), n);
         }
     };
 
     DEFINE_ITERATOR(prev) {
         template <typename I> requires concepts::can_prev_iters<I>
-        constexpr auto operator()(I it, const std::ptrdiff_t n = 1) const noexcept -> auto {
+        auto operator()(I it, const std::ptrdiff_t n = 1) const noexcept -> auto {
             return std::prev(std::move(it), n);
         }
     };

@@ -38,19 +38,19 @@ namespace genex::views {
 
     DEFINE_VIEW(move) {
         template <typename I, typename S> requires concepts::can_move_iters<I, S>
-        constexpr auto operator()(I first, S last) const -> auto {
+        auto operator()(I first, S last) const -> auto {
             // Call the move inner function.
             auto gen = detail::do_move(std::move(first), std::move(last));
             return move_view(std::move(gen));
         }
 
         template <typename Rng> requires concepts::can_move_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        auto operator()(Rng &&rng) const -> auto {
             // Call the move inner function.
             return (*this)(iterators::begin(rng), iterators::end(rng));
         }
 
-        constexpr auto operator()() const -> auto {
+        auto operator()() const -> auto {
             // Create a closure that takes a range and applies the move.
             return
                 [FWD_CAPTURES()]<typename Rng> requires concepts::can_move_range<Rng>

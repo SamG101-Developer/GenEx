@@ -19,24 +19,24 @@ namespace genex::iterators::concepts {
 namespace genex::iterators {
     DEFINE_ITERATOR(end) {
         template <typename Rng> requires (concepts::can_end_range<Rng> and has_std_end<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(std::end(std::forward<Rng>(rng)))) -> decltype(std::end(std::forward<Rng>(rng))) {
+        auto operator()(Rng &&rng) const noexcept(noexcept(std::end(std::forward<Rng>(rng)))) -> decltype(std::end(std::forward<Rng>(rng))) {
             return std::end(std::forward<Rng>(rng));
         }
 
         template <typename Rng> requires (concepts::can_end_range<Rng> and not has_std_end<Rng> and has_member_end<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(rng.end())) -> decltype(rng.end()) {
+        auto operator()(Rng &&rng) const noexcept(noexcept(rng.end())) -> decltype(rng.end()) {
             return rng.end();
         }
     };
 
     DEFINE_ITERATOR(rend) {
         template <typename Rng> requires (concepts::can_rend_range<Rng> and has_std_rend<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(std::rend(std::forward<Rng>(rng)))) -> decltype(std::rend(std::forward<Rng>(rng))) {
+        auto operator()(Rng &&rng) const noexcept(noexcept(std::rend(std::forward<Rng>(rng)))) -> decltype(std::rend(std::forward<Rng>(rng))) {
             return std::rend(std::forward<Rng>(rng));
         }
 
         template <typename Rng> requires (concepts::can_rend_range<Rng> and not has_std_rend<Rng> and has_member_rend<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(rng.rend())) -> decltype(rng.rend()) {
+        auto operator()(Rng &&rng) const noexcept(noexcept(rng.rend())) -> decltype(rng.rend()) {
             return rng.rend();
         }
     };

@@ -40,20 +40,20 @@ namespace genex::views::detail {
 namespace genex::views {
     DEFINE_VIEW(filter) {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires concepts::can_filter_iters<I, S, Pred, Proj>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+        auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
             // Call the filter inner function.
             auto gen = detail::do_filter(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
             return filter_view(std::move(gen));
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_filter_range<Rng, Pred, Proj>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+        auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             // Call the filter inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
         template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
+        auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
             // Create a closure that takes a range and applies the filter.
             return
                 [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_filter_range<Rng, Pred, Proj>

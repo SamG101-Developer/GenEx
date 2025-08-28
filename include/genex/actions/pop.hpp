@@ -28,21 +28,21 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     DEFINE_ACTION(pop_back) {
         template <typename Rng> requires (concepts::can_pop_back_range<Rng> and has_member_pop_back<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(rng.pop_back())) -> auto {
+        auto operator()(Rng &&rng) const noexcept(noexcept(rng.pop_back())) -> auto {
             return rng.pop_back();
         }
 
         template <typename Rng> requires (concepts::can_pop_back_range<Rng> and not has_member_pop_back<Rng> and has_member_pop<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(rng.pop(operations::size(rng) - 1))) -> auto {
+        auto operator()(Rng &&rng) const noexcept(noexcept(rng.pop(operations::size(rng) - 1))) -> auto {
             return rng.pop(operations::size(rng) - 1);
         }
 
         template <typename Rng> requires (concepts::can_pop_back_range<Rng> and not has_member_pop_back<Rng> and not has_member_pop<Rng> and has_member_erase<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(rng.erase(iterators::prev(iterators::end(rng))))) -> auto {
+        auto operator()(Rng &&rng) const noexcept(noexcept(rng.erase(iterators::prev(iterators::end(rng))))) -> auto {
             return rng.erase(iterators::prev(iterators::end(rng)));
         }
 
-        constexpr auto operator()() const -> auto {
+        auto operator()() const -> auto {
             return
                 [FWD_CAPTURES()]<typename Rng> requires concepts::can_pop_back_range<Rng>
                 (Rng &&rng) mutable -> auto {
@@ -53,21 +53,21 @@ namespace genex::actions {
 
     DEFINE_ACTION(pop_front) {
         template <typename Rng> requires (concepts::can_pop_front_range<Rng> and has_member_pop_front<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(rng.pop_front())) -> auto {
+        auto operator()(Rng &&rng) const noexcept(noexcept(rng.pop_front())) -> auto {
             return rng.pop_front();
         }
 
         template <typename Rng> requires (concepts::can_pop_front_range<Rng> and has_member_pop<Rng> and not has_member_pop_front<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(rng.pop(0))) -> auto {
+        auto operator()(Rng &&rng) const noexcept(noexcept(rng.pop(0))) -> auto {
             return rng.pop(0);
         }
 
         template <typename Rng> requires (concepts::can_pop_front_range<Rng> and has_member_erase<Rng> and not has_member_pop_front<Rng> and not has_member_pop<Rng>)
-        constexpr auto operator()(Rng &&rng) const noexcept(noexcept(rng.erase(iterators::begin(rng)))) -> auto {
+        auto operator()(Rng &&rng) const noexcept(noexcept(rng.erase(iterators::begin(rng)))) -> auto {
             return rng.erase(iterators::begin(rng));
         }
 
-        constexpr auto operator()() const -> auto {
+        auto operator()() const -> auto {
             return
                 [FWD_CAPTURES()]<typename Rng> requires concepts::can_pop_front_range<Rng>
                 (Rng &&rng) mutable -> auto {
@@ -79,17 +79,17 @@ namespace genex::actions {
 
     DEFINE_ACTION(pop) {
         template <typename Rng, typename I> requires (concepts::can_pop_range<Rng, I> and has_member_pop<Rng>)
-        constexpr auto operator()(Rng &&rng, I it) const noexcept(noexcept(rng.pop(iterators::distance(iterators::begin(rng), std::move(it))))) -> auto {
+        auto operator()(Rng &&rng, I it) const noexcept(noexcept(rng.pop(iterators::distance(iterators::begin(rng), std::move(it))))) -> auto {
             return rng.pop(iterators::distance(iterators::begin(rng), std::move(it)));
         }
 
         template <typename Rng, typename I> requires (concepts::can_pop_range<Rng, I> and has_member_erase<Rng> and not has_member_pop<Rng>)
-        constexpr auto operator()(Rng &&rng, I it) const noexcept(noexcept(rng.erase(std::move(it)))) -> auto {
+        auto operator()(Rng &&rng, I it) const noexcept(noexcept(rng.erase(std::move(it)))) -> auto {
             return rng.erase(std::move(it));
         }
 
         template <typename I> requires (not input_range<std::remove_cvref_t<I>>)
-        constexpr auto operator()(I it) const -> auto {
+        auto operator()(I it) const -> auto {
             return
                 [FWD_CAPTURES(it)]<typename Rng> requires concepts::can_pop_range<Rng, I>
                 (Rng &&rng) mutable -> auto {

@@ -28,7 +28,7 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     DEFINE_ALGORITHM(sorted) {
         template <typename I, typename S, typename Comp = operations::lt, typename Proj = meta::identity> requires concepts::can_sorted_iters<I, S, Comp, Proj>
-        constexpr auto operator()(I first, S last, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
+        auto operator()(I first, S last, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
             auto copy = std::vector<iter_value_t<I>>();
             copy.reserve(iterators::distance(first, last));
 
@@ -44,12 +44,12 @@ namespace genex::algorithms {
         }
 
         template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity> requires concepts::can_sorted_range<Rng, Comp, Proj>
-        constexpr auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
+        auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
 
         template <typename Comp = operations::lt, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Comp>>)
-        constexpr auto operator()(Comp &&comp = {}, Proj &&proj = {}) const -> auto {
+        auto operator()(Comp &&comp = {}, Proj &&proj = {}) const -> auto {
             return
                 [FWD_CAPTURES(comp, proj)]<typename Rng> requires concepts::can_sorted_range<Rng, Comp, Proj>
                 (Rng &&rng) mutable -> auto {

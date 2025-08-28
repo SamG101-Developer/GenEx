@@ -16,7 +16,7 @@ namespace genex::iterators::concepts {
 namespace genex::iterators {
     DEFINE_ITERATOR(advance) {
         template <typename I> requires concepts::can_advance_iters<I>
-        constexpr auto operator()(I &it, const iter_difference_t<I> n = 1) const noexcept(noexcept(std::advance(it, n))) -> I {
+        auto operator()(I &it, const iter_difference_t<I> n = 1) const noexcept(noexcept(std::advance(it, n))) -> I {
             std::advance(it, n);
             return it;
         }

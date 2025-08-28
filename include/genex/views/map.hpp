@@ -39,20 +39,20 @@ namespace genex::views::detail {
 namespace genex::views {
     DEFINE_VIEW(map) {
         template <typename I, typename S, typename F, typename Proj = meta::identity> requires concepts::can_map_iters<I, S, F, Proj>
-        constexpr auto operator()(I first, S last, F &&f, Proj &&proj = {}) const -> auto {
+        auto operator()(I first, S last, F &&f, Proj &&proj = {}) const -> auto {
             // Call the map inner function.
             auto gen = detail::do_map(std::move(first), std::move(last), std::forward<F>(f), std::forward<Proj>(proj));
             return map_view(std::move(gen));
         }
 
         template <typename Rng, typename F, typename Proj> requires concepts::can_map_range<Rng, F, Proj>
-        constexpr auto operator()(Rng &&rng, F &&f, Proj &&proj = {}) const -> auto {
+        auto operator()(Rng &&rng, F &&f, Proj &&proj = {}) const -> auto {
             // Call the map inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<F>(f), std::forward<Proj>(proj));
         }
 
         template <typename F, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<F>>)
-        constexpr auto operator()(F &&f, Proj &&proj = {}) const -> auto {
+        auto operator()(F &&f, Proj &&proj = {}) const -> auto {
             // Create a closure that takes a range and applies the map.
             return
                 [FWD_CAPTURES(f, proj)]<typename Rng> requires concepts::can_map_range<Rng, F, Proj>

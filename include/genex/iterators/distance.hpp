@@ -24,12 +24,12 @@ namespace genex::iterators::concepts {
 namespace genex::iterators {
     DEFINE_ITERATOR(distance) {
         template <typename I, typename S> requires concepts::can_distance_iters<I, S>
-        constexpr auto operator()(I first, S last) const noexcept -> std::size_t {
+        auto operator()(I first, S last) const noexcept -> std::size_t {
             return std::distance(std::move(first), std::move(last));
         }
 
         template <typename Rng> requires concepts::can_distance_range<Rng>
-        constexpr auto operator()(Rng &&rng) const noexcept -> std::size_t {
+        auto operator()(Rng &&rng) const noexcept -> std::size_t {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
         }
     };
