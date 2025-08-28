@@ -6,6 +6,7 @@
 #include <genex/iterators/next.hpp>
 #include <genex/macros.hpp>
 #include <genex/views/_view_base.hpp>
+BROKEN("Chunk view is broken")
 
 
 namespace genex::views::concepts {

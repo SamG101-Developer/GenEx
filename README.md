@@ -53,4 +53,5 @@ depending on the design of the container.
 
 ## Todo
 
-More algorithms, views and actions need to be implemented. The library is still in its early stages.
+More algorithms, views and actions need to be implemented. The library is still in its early stages. `views::chunk` is
+also broken.

@@ -37,3 +37,7 @@
 
 #define EXPORT_GENEX_STRUCT(name) \
     inline constexpr name ## _fn name
+
+
+#define GENEX_PRAGMA(x) _Pragma(#x)
+#define BROKEN(message) GENEX_PRAGMA(GCC warning message)
