@@ -40,7 +40,7 @@ namespace genex::algorithms {
             return false;
         }
 
-        template <typename E, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<E>>)
+        template <typename E, typename Proj = meta::identity>
         auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
             return
                 [FWD_CAPTURES(elem, proj)]<typename Rng> requires concepts::can_contain_range<Rng, E, Proj>
