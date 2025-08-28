@@ -62,14 +62,14 @@ namespace genex::views {
     DEFINE_VIEW(remove) {
         template <typename I, typename S, typename E, typename Proj = meta::identity> requires concepts::can_remove_iters<I, S, E, Proj>
         auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> auto {
-            // Call the move inner function.
+            // Call the remove inner function.
             auto gen = detail::do_remove(std::move(first), std::move(last), std::forward<E>(elem), std::forward<Proj>(proj));
             return remove_view(std::move(gen));
         }
 
         template <typename Rng, typename E, typename Proj = meta::identity> requires concepts::can_remove_range<Rng, E, Proj>
         auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> auto {
-            // Call the move inner function.
+            // Call the remove inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<E>(elem), std::forward<Proj>(proj));
         }
 
@@ -87,20 +87,20 @@ namespace genex::views {
     DEFINE_VIEW(remove_if) {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires concepts::can_remove_if_iters<I, S, Pred, Proj>
         auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Call the move inner function.
+            // Call the remove_if inner function.
             auto gen = detail::do_remove_if(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
             return remove_if_view(std::move(gen));
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_remove_if_range<Rng, Pred, Proj>
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Call the move inner function.
+            // Call the remove_if inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
         template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
         auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Create a closure that takes a range and applies the remove.
+            // Create a closure that takes a range and applies the remove_if.
             return
                 [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_remove_if_range<Rng, Pred, Proj>
                 (Rng &&rng) mutable -> auto {

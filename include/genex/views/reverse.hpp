@@ -37,14 +37,14 @@ namespace genex::views {
     DEFINE_VIEW(reverse) {
         template <typename I, typename S> requires concepts::can_reverse_iters<I, S>
         auto operator()(I first, S last) const -> auto {
-            // Call the move inner function.
+            // Call the reverse inner function.
             auto gen = detail::do_reverse(std::move(first), std::move(last));
             return reverse_view(std::move(gen));
         }
 
         template <typename Rng> requires concepts::can_reverse_range<Rng>
         auto operator()(Rng &&rng) const -> auto {
-            // Call the move inner function.
+            // Call the reverse inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
         }
 

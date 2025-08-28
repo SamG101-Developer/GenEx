@@ -31,13 +31,11 @@ namespace genex::views {
 
     template <template <typename...> typename Out>
     auto to() -> auto {
-        // for piping
         return []<typename Rng> requires input_range<Rng>(Rng &&rng) { return to_base_fn<Out>(std::forward<Rng>(rng)); };
     }
 
     template <typename Out>
     auto to() -> auto {
-        // for piping
         return []<typename Rng> requires input_range<Rng>(Rng &&rng) { return to_base_fn<Out>(std::forward<Rng>(rng)); };
     }
 }

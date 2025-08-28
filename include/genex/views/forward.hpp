@@ -39,19 +39,19 @@ namespace genex::views {
     DEFINE_VIEW(forward) {
         template <typename I, typename S> requires concepts::can_forward_iters<I, S>
         auto operator()(I first, S last) const -> auto {
-            // Call the move inner function.
+            // Call the forward inner function.
             auto gen = detail::do_forward(std::move(first), std::move(last));
             return forward_view(std::move(gen));
         }
 
         template <typename Rng> requires concepts::can_forward_range<Rng>
         auto operator()(Rng &&rng) const -> auto {
-            // Call the move inner function.
+            // Call the forward inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
         }
 
         auto operator()() const -> auto {
-            // Create a closure that takes a range and applies the move.
+            // Create a closure that takes a range and applies the forward.
             return
                 [FWD_CAPTURES()]<typename Rng> requires concepts::can_forward_range<Rng>
                 (Rng &&rng) mutable -> auto {

@@ -100,19 +100,19 @@ namespace genex::views {
     DEFINE_VIEW(drop) {
         template <typename I, typename S> requires concepts::can_drop_iters<I, S>
         auto operator()(I first, S last, const size_t n) const -> auto {
-            // Call the move inner function.
+            // Call the drop inner function.
             auto gen = detail::do_drop(std::move(first), std::move(last), n);
             return drop_view(std::move(gen));
         }
 
         template <typename Rng> requires concepts::can_drop_range<Rng>
         auto operator()(Rng &&rng, const size_t n) const -> auto {
-            // Call the move inner function.
+            // Call the drop inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), n);
         }
 
         auto operator()(size_t n) const -> auto {
-            // Create a closure that takes a range and applies the take.
+            // Create a closure that takes a range and applies the drop.
             return
                 [FWD_CAPTURES(n)]<typename Rng> requires concepts::can_drop_range<Rng>
                 (Rng &&rng) mutable -> auto {
@@ -124,19 +124,19 @@ namespace genex::views {
     DEFINE_VIEW(drop_last) {
         template <typename I, typename S> requires concepts::can_drop_last_iters<I, S>
         auto operator()(I first, S last, size_t n) const -> auto {
-            // Call the move inner function.
+            // Call the drop inner function.
             auto gen = detail::do_drop_last(std::move(first), std::move(last), n);
             return drop_last_view(std::move(gen));
         }
 
         template <typename Rng> requires concepts::can_drop_last_range<Rng>
         auto operator()(Rng &&rng, size_t n) const -> auto {
-            // Call the move inner function.
+            // Call the drop inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), n);
         }
 
         auto operator()(size_t n) const -> auto {
-            // Create a closure that takes a range and applies the take.
+            // Create a closure that takes a range and applies the drop.
             return
                 [FWD_CAPTURES(n)]<typename Rng> requires concepts::can_drop_last_range<Rng>
                 (Rng &&rng) mutable -> auto {
@@ -148,20 +148,20 @@ namespace genex::views {
     DEFINE_VIEW(drop_while) {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires concepts::can_drop_while_iters<I, S, Pred, Proj>
         auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Call the move inner function.
+            // Call the drop inner function.
             auto gen = detail::do_drop_while(std::forward<I>(first), std::forward<S>(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
             return drop_while_view(std::move(gen));
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_drop_while_range<Rng, Pred, Proj>
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Call the move inner function.
+            // Call the drop inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
         template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
         auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Create a closure that takes a range and applies the take.
+            // Create a closure that takes a range and applies the drop.
             return
                 [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_drop_while_range<Rng, Pred, Proj>
                 (Rng &&rng) mutable -> auto {
@@ -173,20 +173,20 @@ namespace genex::views {
     DEFINE_VIEW(drop_until) {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires concepts::can_drop_while_iters<I, S, Pred, Proj>
         auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Call the move inner function.
+            // Call the drop inner function.
             auto gen = detail::do_drop_until(std::forward<I>(first), std::forward<S>(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
             return drop_until_view(std::move(gen));
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_drop_while_range<Rng, Pred, Proj>
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Call the move inner function.
+            // Call the drop inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
         template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
         auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Create a closure that takes a range and applies the take.
+            // Create a closure that takes a range and applies the drop.
             return
                 [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_drop_while_range<Rng, Pred, Proj>
                 (Rng &&rng) mutable -> auto {

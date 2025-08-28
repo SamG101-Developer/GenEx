@@ -96,14 +96,14 @@ namespace genex::views {
     DEFINE_VIEW(take) {
         template <typename I, typename S> requires concepts::can_take_iters<I, S>
         auto operator()(I first, S last, const size_t n) const -> auto {
-            // Call the move inner function.
+            // Call the take inner function.
             auto gen = detail::do_take(std::move(first), std::move(last), n);
             return take_view(std::move(gen));
         }
 
         template <typename Rng> requires concepts::can_take_range<Rng>
         auto operator()(Rng &&rng, const size_t n) const -> auto {
-            // Call the move inner function.
+            // Call the take inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), n);
         }
 
@@ -120,14 +120,14 @@ namespace genex::views {
     DEFINE_VIEW(take_last) {
         template <typename I, typename S> requires concepts::can_take_last_iters<I, S>
         auto operator()(I first, S last, size_t n) const -> auto {
-            // Call the move inner function.
+            // Call the take inner function.
             auto gen = detail::do_take_last(std::move(first), std::move(last), n);
             return take_last_view(std::move(gen));
         }
 
         template <typename Rng> requires concepts::can_take_last_range<Rng>
         auto operator()(Rng &&rng, size_t n) const -> auto {
-            // Call the move inner function.
+            // Call the take inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), n);
         }
 
@@ -144,14 +144,14 @@ namespace genex::views {
     DEFINE_VIEW(take_while) {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires concepts::can_take_while_iters<I, S, Pred, Proj>
         auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Call the move inner function.
+            // Call the take inner function.
             auto gen = detail::do_take_while(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
             return take_while_view(std::move(gen));
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_take_while_range<Rng, Pred, Proj>
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Call the move inner function.
+            // Call the take inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
@@ -169,14 +169,14 @@ namespace genex::views {
     DEFINE_VIEW(take_until) {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires concepts::can_take_while_iters<I, S, Pred, Proj>
         auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Call the move inner function.
+            // Call the take inner function.
             auto gen = detail::do_take_until(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
             return take_until_view(std::move(gen));
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_take_while_range<Rng, Pred, Proj>
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Call the move inner function.
+            // Call the take inner function.
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 

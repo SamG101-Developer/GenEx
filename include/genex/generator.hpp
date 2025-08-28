@@ -8,14 +8,14 @@ namespace genex {
 }
 
 
-// auto range = vector | genex::views::___
+// Usage: auto range = vector | genex::views::___
 template <typename T, typename F> requires (std::is_invocable_v<F, T>)
 auto operator|(T &&lhs, F &&rhs) -> decltype(auto) {
     return std::invoke(std::forward<F>(rhs), std::forward<T>(lhs));
 }
 
 
-// vector |= genex::actions::___
+// Usage: vector |= genex::actions::___
 template <typename T, typename F> requires (std::is_invocable_v<F, T>)
 auto operator|=(T &&lhs, F &&rhs) -> decltype(auto) {
     return std::invoke(std::forward<F>(rhs), std::forward<T>(lhs));
