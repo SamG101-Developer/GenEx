@@ -14,9 +14,12 @@ operations on ranges.
 ### Examples
 
 ```cpp
-#include <genex/views/transform.hpp>
 #include <genex/views/filter.hpp>
+#include <genex/views/materialize.hpp>
 #include <genex/views/reverse.hpp>
+#include <genex/views/transform.hpp>
+#include <genex/views/to.hpp>
+
 
 auto main() -> int {
     auto vec = std::vector<int>{1, 2, 3, 4, 5};
