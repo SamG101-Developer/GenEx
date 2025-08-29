@@ -19,6 +19,14 @@ TEST(GenexAlgosPosition, ElementNotExists) {
 }
 
 
+TEST(GenexAlgosPosition, ElementNotExistsDiffDefault) {
+    auto vec = std::vector{5, 3, 8, 1, 4, 7, 2, 6};
+
+    const auto res = genex::algorithms::position(vec, [](const int v) { return v == 10; }, {}, 100);
+    EXPECT_EQ(res, 100);
+}
+
+
 TEST(GenexAlgosPositionLast, ElementExists) {
     auto vec = std::vector{5, 3, 8, 1, 4, 7, 2, 6, 1};
 
@@ -32,4 +40,12 @@ TEST(GenexAlgosPositionLast, ElementNotExists) {
 
     const auto res = genex::algorithms::position_last(vec, [](const int v) { return v == 10; });
     EXPECT_EQ(res, -1);
+}
+
+
+TEST(GenexAlgosPositionLast, ElementNotExistsDiffDefault) {
+    auto vec = std::vector{5, 3, 8, 1, 4, 7, 2, 6};
+
+    const auto res = genex::algorithms::position_last(vec, [](const int v) { return v == 10; }, {}, 100);
+    EXPECT_EQ(res, 100);
 }
