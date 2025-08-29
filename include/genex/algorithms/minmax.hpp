@@ -55,15 +55,6 @@ namespace genex::algorithms {
         auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
-
-        template <typename Comp = operations::lt, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Comp>>)
-        auto operator()(Comp &&comp = {}, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(comp, proj)]<typename Rng> requires concepts::can_minmax_range<Rng, Comp, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<Comp>(comp), std::forward<Proj>(proj));
-            };
-        }
     };
 
     DEFINE_ALGORITHM(max) {
@@ -75,15 +66,6 @@ namespace genex::algorithms {
         template <typename Rng, typename Comp = operations::gt, typename Proj = meta::identity> requires concepts::can_minmax_range<Rng, Comp, Proj>
         auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Comp>(comp), std::forward<Proj>(proj));
-        }
-
-        template <typename Comp = operations::gt, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Comp>>)
-        auto operator()(Comp &&comp = {}, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(comp, proj)]<typename Rng> requires concepts::can_minmax_range<Rng, Comp, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<Comp>(comp), std::forward<Proj>(proj));
-            };
         }
     };
 

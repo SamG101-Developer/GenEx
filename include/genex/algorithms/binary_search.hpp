@@ -36,15 +36,6 @@ namespace genex::algorithms {
         auto operator()(Rng &&rng, E &&elem, Comp &&comp = {}, Proj &&proj = {}) const -> bool {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<E>(elem), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
-
-        template <typename E, typename Comp = operations::lt, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<E>>)
-        auto operator()(E &&elem, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(elem, comp, proj)]<typename Rng> requires concepts::can_binary_search_range<Rng, E, Comp, Proj>
-                (Rng &&rng) mutable -> bool {
-                return (*this)(std::forward<Rng>(rng), std::forward<E>(elem), std::forward<Comp>(comp), std::forward<Proj>(proj));
-            };
-        }
     };
 
     EXPORT_GENEX_ALGORITHM(binary_search);

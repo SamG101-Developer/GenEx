@@ -55,15 +55,6 @@ namespace genex::algorithms {
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}, const std::make_signed_t<std::size_t> def = -1z) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj), def);
         }
-
-        template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
-        auto operator()(Pred &&pred, Proj &&proj = {}, const std::make_signed_t<std::size_t> def = -1z) const -> auto {
-            return
-                [FWD_CAPTURES(pred, proj, def)]<typename Rng> requires concepts::can_position_range<Rng, Pred, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj), def);
-            };
-        }
     };
 
     DEFINE_ALGORITHM(position_last) {
@@ -94,15 +85,6 @@ namespace genex::algorithms {
         template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_position_last_range<Rng, Pred, Proj>
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}, const std::make_signed_t<std::size_t> def = -1) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj), def);
-        }
-
-        template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
-        auto operator()(Pred &&pred, Proj &&proj = {}, const std::make_signed_t<std::size_t> def = -1) const -> auto {
-            return
-                [FWD_CAPTURES(pred, proj, def)]<typename Rng> requires concepts::can_position_last_range<Rng, Pred, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj), def);
-            };
         }
     };
 

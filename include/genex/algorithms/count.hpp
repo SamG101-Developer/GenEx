@@ -54,15 +54,6 @@ namespace genex::algorithms {
             }
             return count;
         }
-
-        template <typename E, std::invocable<E> Proj = meta::identity> requires (not input_range<std::remove_cvref_t<E>>)
-        auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(elem, proj)]<typename Rng> requires concepts::can_count_range<Rng, E, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<E>(elem), std::forward<Proj>(proj));
-            };
-        }
     };
 
     DEFINE_ALGORITHM(count_if) {
@@ -82,15 +73,6 @@ namespace genex::algorithms {
                 if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)))) { ++count; }
             }
             return count;
-        }
-
-        template <typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Proj>>)
-        auto operator()(Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(proj)]<typename Rng, typename Pred> requires concepts::can_count_if_range<Rng, Pred, Proj>
-                (Rng &&rng, Pred &&pred) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
-            };
         }
     };
 

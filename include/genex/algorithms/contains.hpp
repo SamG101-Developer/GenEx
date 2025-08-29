@@ -39,15 +39,6 @@ namespace genex::algorithms {
             }
             return false;
         }
-
-        template <typename E, typename Proj = meta::identity>
-        auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(elem, proj)]<typename Rng> requires concepts::can_contain_range<Rng, E, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<E>(elem), std::forward<Proj>(proj));
-            };
-        }
     };
 
     EXPORT_GENEX_ALGORITHM(contains);

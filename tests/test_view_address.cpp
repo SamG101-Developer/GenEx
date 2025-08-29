@@ -58,9 +58,9 @@ TEST(GenexViewsDeref, VecInput) {
     auto ptrs_iter = ptrs.begin();
 
     const auto vec = std::vector{p1, p2, p3};
-    const auto res = vec
-        | genex::views::deref
-        | genex::algorithms::all_of([ptrs_iter](const auto &x) mutable { return &x == *ptrs_iter++; });
+    const auto res = genex::algorithms::all_of(
+        vec | genex::views::deref,
+        [ptrs_iter](const auto &x) mutable { return &x == *ptrs_iter++; });
 
     EXPECT_TRUE(res);
 }

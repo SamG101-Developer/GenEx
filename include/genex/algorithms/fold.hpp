@@ -82,15 +82,6 @@ namespace genex::algorithms {
         auto operator()(Rng &&rng, E &&init, F &&f) const -> auto {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<E>(init), std::forward<F>(f));
         }
-
-        template <typename E, typename F>
-        auto operator()(E &&init, F &&f) const -> auto {
-            return
-                [FWD_CAPTURES(init, f)]<typename Rng> requires concepts::can_fold_left_range<Rng, E, F>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<E>(init), std::forward<F>(f));
-            };
-        }
     };
 
     DEFINE_ALGORITHM(fold_left_first) {
@@ -106,15 +97,6 @@ namespace genex::algorithms {
         template <typename Rng, typename F> requires concepts::can_fold_left_first_range<Rng, F>
         auto operator()(Rng &&rng, F &&f) const -> auto {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<F>(f));
-        }
-
-        template <typename F>
-        auto operator()(F &&f) const -> auto {
-            return
-                [FWD_CAPTURES(f)]<typename Rng> requires concepts::can_fold_left_first_range<Rng, F>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<F>(f));
-            };
         }
     };
 
@@ -133,15 +115,6 @@ namespace genex::algorithms {
         auto operator()(Rng &&rng, E &&init, F &&f) const -> auto {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<E>(init), std::forward<F>(f));
         }
-
-        template <typename E, typename F>
-        auto operator()(E &&init, F &&f) const -> auto {
-            return
-                [FWD_CAPTURES(init, f)]<typename Rng> requires concepts::can_fold_right_range<Rng, E, F>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<E>(init), std::forward<F>(f));
-            };
-        }
     };
 
     DEFINE_ALGORITHM(fold_right_first) {
@@ -158,15 +131,6 @@ namespace genex::algorithms {
         template <typename Rng, typename F> requires concepts::can_fold_right_first_range<Rng, F>
         auto operator()(Rng &&rng, F &&f) const -> auto {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<F>(f));
-        }
-
-        template <typename F>
-        auto operator()(F &&f) const -> auto {
-            return
-                [FWD_CAPTURES(f)]<typename Rng> requires concepts::can_fold_right_first_range<Rng, F>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<F>(f));
-            };
         }
     };
 

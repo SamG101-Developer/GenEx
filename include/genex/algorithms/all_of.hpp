@@ -37,15 +37,6 @@ namespace genex::algorithms {
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> bool {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
-
-        template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
-        auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_all_of_range<Rng, Pred, Proj>
-                (Rng &&rng) mutable -> bool {
-                return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
-            };
-        }
     };
 
     EXPORT_GENEX_ALGORITHM(all_of);

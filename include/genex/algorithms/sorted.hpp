@@ -47,15 +47,6 @@ namespace genex::algorithms {
         auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
-
-        template <typename Comp = operations::lt, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Comp>>)
-        auto operator()(Comp &&comp = {}, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(comp, proj)]<typename Rng> requires concepts::can_sorted_range<Rng, Comp, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<Comp>(comp), std::forward<Proj>(proj));
-            };
-        }
     };
 
     EXPORT_GENEX_ALGORITHM(sorted);

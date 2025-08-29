@@ -71,15 +71,6 @@ namespace genex::algorithms {
         auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<E>(elem), std::forward<Proj>(proj));
         }
-
-        template <typename E, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<E>>)
-        auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(elem, proj)]<typename Rng> requires concepts::can_find_range<Rng, E, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<E>(elem), std::forward<Proj>(proj));
-            };
-        }
     };
 
     DEFINE_ALGORITHM(find_last) {
@@ -106,15 +97,6 @@ namespace genex::algorithms {
         auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<E>(elem), std::forward<Proj>(proj));
         }
-
-        template <typename E, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<E>>)
-        auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(elem, proj)]<typename Rng> requires concepts::can_find_range<Rng, E, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<E>(elem), std::forward<Proj>(proj));
-            };
-        }
     };
 
     DEFINE_ALGORITHM(find_if) {
@@ -129,15 +111,6 @@ namespace genex::algorithms {
         template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_find_if_range<Rng, Pred, Proj>
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
-        }
-
-        template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
-        auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_find_if_range<Rng, Pred, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
-            };
         }
     };
 
@@ -164,15 +137,6 @@ namespace genex::algorithms {
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
-
-        template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
-        auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_find_if_range<Rng, Pred, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
-            };
-        }
     };
 
 
@@ -188,15 +152,6 @@ namespace genex::algorithms {
         template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_find_if_range<Rng, Pred, Proj>
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
-        }
-
-        template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)
-        auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_find_if_range<Rng, Pred, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
-            };
         }
     };
 
@@ -222,15 +177,6 @@ namespace genex::algorithms {
         template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_find_if_range<Rng, Pred, Proj>
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
-        }
-
-        template <typename Pred, typename Proj = meta::identity> requires (not input_range<Pred>)
-        auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            return
-                [FWD_CAPTURES(pred, proj)]<typename Rng> requires concepts::can_find_if_range<Rng, Pred, Proj>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
-            };
         }
     };
 
