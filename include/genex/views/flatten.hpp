@@ -90,7 +90,7 @@ namespace genex::views {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<New>(sep));
         }
 
-        template <typename New> requires (not input_range<std::remove_cvref_t<New>>)
+        template <typename New>
         auto operator()(New &&sep) const -> auto {
             return
                 [FWD_CAPTURES(sep)]<typename Rng> requires concepts::can_flatten_with_range<Rng, New>
