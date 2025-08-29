@@ -286,7 +286,7 @@ namespace genex::views {
             // Call the set algorithm inner function.
             auto gen = detail::do_set_difference_unsorted(
                 std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::forward<Proj>(proj));
-            return set_difference_view(std::move(gen));
+            return set_difference_unsorted_view(std::move(gen));
         }
 
         template <
@@ -319,7 +319,7 @@ namespace genex::views {
             // Call the set algorithm inner function.
             auto gen = detail::do_set_intersection_unsorted(
                 std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::forward<Proj>(proj));
-            return set_intersection_view(std::move(gen));
+            return set_intersection_unsorted_view(std::move(gen));
         }
 
         template <
@@ -353,7 +353,7 @@ namespace genex::views {
             auto gen = detail::do_set_symmetric_difference_unsorted(
                 std::move(first1), std::move(last1), std::move(first2), std::move(last2),
                 std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
-            return set_symmetric_difference_view(std::move(gen));
+            return set_symmetric_difference_unsorted_view(std::move(gen));
         }
 
         template <
@@ -386,7 +386,7 @@ namespace genex::views {
             // Call the set algorithm inner function.
             auto gen = detail::do_set_union_unsorted(
                 std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::forward<Proj>(proj));
-            return set_union_view(std::move(gen));
+            return set_union_unsorted_view(std::move(gen));
         }
 
         template <
