@@ -17,9 +17,8 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     DEFINE_ACTION(reverse) {
         template <typename Rng> requires concepts::can_reverse_range<Rng>
-        auto operator()(Rng &&rng) const -> Rng& {
+        auto operator()(Rng &&rng) const -> void {
             std::reverse(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
-            return rng;
         }
 
         auto operator()() const -> auto {

@@ -28,7 +28,7 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     DEFINE_ACTION(remove) {
         template <typename Rng, typename E, typename Proj = meta::identity> requires concepts::can_action_remove_range<Rng, E, Proj>
-        auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> Rng& {
+        auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> void {
             auto first = iterators::begin(std::forward<Rng>(rng));
             auto last = iterators::end(std::forward<Rng>(rng));
 
@@ -37,8 +37,6 @@ namespace genex::actions {
                 if (it == last) { break; }
                 first = rng.erase(std::move(it));
             }
-
-            return rng;
         }
 
         template <typename E> requires (not input_range<std::remove_cvref_t<E>>)
@@ -53,7 +51,7 @@ namespace genex::actions {
 
     DEFINE_ACTION(remove_if) {
         template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_action_remove_if_range<Rng, Pred, Proj>
-        auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> Rng& {
+        auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> void {
             auto first = iterators::begin(std::forward<Rng>(rng));
             auto last = iterators::end(std::forward<Rng>(rng));
 
@@ -62,8 +60,6 @@ namespace genex::actions {
                 if (it == last) { break; }
                 first = rng.erase(std::move(it));
             }
-
-            return rng;
         }
 
         template <typename Pred, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Pred>>)

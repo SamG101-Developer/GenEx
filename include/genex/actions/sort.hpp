@@ -20,11 +20,10 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     DEFINE_ACTION(sort) {
         template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity> requires concepts::can_sorted_range<Rng, Comp, Proj>
-        auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> Rng& {
+        auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> void {
             std::sort(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
                 return std::invoke(comp, std::invoke(proj, std::forward<Lhs>(lhs)), std::invoke(proj, std::forward<Rhs>(rhs)));
             });
-            return rng;
         }
 
         template <typename Comp = operations::lt, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<Comp>>)
