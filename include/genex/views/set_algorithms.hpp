@@ -281,7 +281,7 @@ namespace genex::views {
     DEFINE_VIEW(set_difference_unsorted) {
         template <
             typename I1, typename S1, typename I2, typename S2, typename Proj = meta::identity>
-            requires concepts::can_set_algorithm_iters<I1, S1, I2, S2, operations::eq, meta::identity, Proj>
+            requires concepts::can_set_algorithm_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
         auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj = {}) const -> auto {
             // Call the set algorithm inner function.
             auto gen = detail::do_set_difference_unsorted(
@@ -291,7 +291,7 @@ namespace genex::views {
 
         template <
             typename Rng1, typename Rng2, typename Proj = meta::identity>
-            requires concepts::can_set_algorithm_range<Rng1, Rng2, operations::eq, meta::identity, Proj>
+            requires concepts::can_set_algorithm_range<Rng1, Rng2, operations::eq, Proj, meta::identity>
         auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj &&proj = {}) const -> auto {
             // Call the set algorithm inner function.
             return (*this)(
@@ -304,7 +304,7 @@ namespace genex::views {
         auto operator()(Rng2 &&rng2, Proj &&proj = {}) const -> auto {
             // Create a closure that takes a range and applies the set algorithm.
             return
-                [FWD_CAPTURES(rng2, proj)]<typename Rng1> requires concepts::can_set_algorithm_range<Rng1, Rng2, operations::eq, meta::identity, Proj>
+                [FWD_CAPTURES(rng2, proj)]<typename Rng1> requires concepts::can_set_algorithm_range<Rng1, Rng2, operations::eq, Proj, meta::identity>
                 (Rng1 &&rng1) mutable -> auto {
                 return (*this)(std::forward<Rng1>(rng1), std::forward<Rng2>(rng2), std::forward<Proj>(proj));
             };
@@ -314,7 +314,7 @@ namespace genex::views {
     DEFINE_VIEW(set_intersection_unsorted) {
         template <
             typename I1, typename S1, typename I2, typename S2, typename Proj = meta::identity>
-            requires concepts::can_set_algorithm_iters<I1, S1, I2, S2, operations::eq, meta::identity, Proj>
+            requires concepts::can_set_algorithm_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
         auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj = {}) const -> auto {
             // Call the set algorithm inner function.
             auto gen = detail::do_set_intersection_unsorted(
@@ -324,7 +324,7 @@ namespace genex::views {
 
         template <
             typename Rng1, typename Rng2, typename Proj = meta::identity>
-            requires concepts::can_set_algorithm_range<Rng1, Rng2, operations::eq, meta::identity, Proj>
+            requires concepts::can_set_algorithm_range<Rng1, Rng2, operations::eq, Proj, meta::identity>
         auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj &&proj = {}) const -> auto {
             // Call the set algorithm inner function.
             return (*this)(
@@ -337,7 +337,7 @@ namespace genex::views {
         auto operator()(Rng2 &&rng2, Proj &&proj = {}) const -> auto {
             // Create a closure that takes a range and applies the set algorithm.
             return
-                [FWD_CAPTURES(rng2, proj)]<typename Rng1> requires concepts::can_set_algorithm_range<Rng1, Rng2, operations::eq, meta::identity, Proj>
+                [FWD_CAPTURES(rng2, proj)]<typename Rng1> requires concepts::can_set_algorithm_range<Rng1, Rng2, operations::eq, Proj, meta::identity>
                 (Rng1 &&rng1) mutable -> auto {
                 return (*this)(std::forward<Rng1>(rng1), std::forward<Rng2>(rng2), std::forward<Proj>(proj));
             };
@@ -381,7 +381,7 @@ namespace genex::views {
     DEFINE_VIEW(set_union_unsorted) {
         template <
             typename I1, typename S1, typename I2, typename S2, typename Proj = meta::identity>
-            requires concepts::can_set_algorithm_iters<I1, S1, I2, S2, operations::eq, meta::identity, Proj>
+            requires concepts::can_set_algorithm_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
         auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj = {}) const -> auto {
             // Call the set algorithm inner function.
             auto gen = detail::do_set_union_unsorted(
@@ -391,7 +391,7 @@ namespace genex::views {
 
         template <
             typename Rng1, typename Rng2, typename Proj = meta::identity>
-            requires concepts::can_set_algorithm_range<Rng1, Rng2, operations::eq, meta::identity, Proj>
+            requires concepts::can_set_algorithm_range<Rng1, Rng2, operations::eq, Proj, meta::identity>
         auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj &&proj = {}) const -> auto {
             // Call the set algorithm inner function.
             return (*this)(
@@ -404,7 +404,7 @@ namespace genex::views {
         auto operator()(Rng2 &&rng2, Proj &&proj = {}) const -> auto {
             // Create a closure that takes a range and applies the set algorithm.
             return
-                [FWD_CAPTURES(rng2, proj)]<typename Rng1> requires concepts::can_set_algorithm_range<Rng1, Rng2, operations::eq, meta::identity, Proj>
+                [FWD_CAPTURES(rng2, proj)]<typename Rng1> requires concepts::can_set_algorithm_range<Rng1, Rng2, operations::eq, Proj, meta::identity>
                 (Rng1 &&rng1) mutable -> auto {
                 return (*this)(std::forward<Rng1>(rng1), std::forward<Rng2>(rng2), std::forward<Proj>(proj));
             };
