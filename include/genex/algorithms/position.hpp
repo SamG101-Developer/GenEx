@@ -41,7 +41,7 @@ namespace genex::algorithms::concepts {
 
 namespace genex::algorithms {
     DEFINE_ALGORITHM(position) {
-        template <typename I, typename S, typename Pred, typename Proj = meta::identity>
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires concepts::can_position_iters<I, S, Pred, Proj>
         auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
             for (auto pos = 0z; first != last; ++first, ++pos) {
                 if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
@@ -51,7 +51,7 @@ namespace genex::algorithms {
             return static_cast<std::make_signed_t<std::size_t>>(-1);
         }
 
-        template <typename Rng, typename Pred, typename Proj = meta::identity>
+        template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_position_range<Rng, Pred, Proj>
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             return (*this)(iterators::begin(rng), iterators::end(rng), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
