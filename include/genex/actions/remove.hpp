@@ -11,7 +11,7 @@ namespace genex::actions::concepts {
     template <typename Rng, typename E, typename Proj>
     concept can_action_remove_range =
         forward_range<Rng> and
-        std::permutable<iterator_t<Rng>> and
+        // std::permutable<iterator_t<Rng>> and
         std::invocable<Proj, range_reference_t<Rng>> and
         std::indirectly_comparable<iterator_t<Rng>, const std::remove_cvref_t<E>*, operations::eq, Proj, meta::identity> and
         has_member_erase<Rng>;
@@ -19,7 +19,7 @@ namespace genex::actions::concepts {
     template <typename Rng, typename Pred, typename Proj>
     concept can_action_remove_if_range =
         forward_range<Rng> and
-        std::permutable<iterator_t<Rng>> and
+        // std::permutable<iterator_t<Rng>> and
         std::indirect_unary_predicate<Pred, std::projected<iterator_t<Rng>, Proj>> and
         has_member_erase<Rng>;
 }
