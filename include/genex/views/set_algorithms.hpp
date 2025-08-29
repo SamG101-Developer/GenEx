@@ -87,14 +87,14 @@ namespace genex::views::detail {
         }
     }
 
-    template <typename I1, typename S1, typename I2, typename S2, typename Proj> requires concepts::can_set_algorithm_iters<I1, S1, I2, S2, operations::eq, meta::identity, Proj>
+    template <typename I1, typename S1, typename I2, typename S2, typename Proj> requires concepts::can_set_algorithm_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
     auto do_set_difference_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj) -> generator<iter_value_t<I1>> {
         for (; first1 != last1; ++first1) {
             if (!algorithms::contains(first2, last2, *first1, std::forward<Proj>(proj))) { co_yield *first1; }
         }
     }
 
-    template <typename I1, typename S1, typename I2, typename S2, typename Proj> requires concepts::can_set_algorithm_iters<I1, S1, I2, S2, operations::eq, meta::identity, Proj>
+    template <typename I1, typename S1, typename I2, typename S2, typename Proj> requires concepts::can_set_algorithm_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
     auto do_set_intersection_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj) -> generator<iter_value_t<I1>> {
         for (; first1 != last1; ++first1) {
             if (algorithms::contains(first2, last2, *first1, std::forward<Proj>(proj))) { co_yield *first1; }
@@ -114,7 +114,7 @@ namespace genex::views::detail {
         }
     }
 
-    template <typename I1, typename S1, typename I2, typename S2, typename Proj> requires concepts::can_set_algorithm_iters<I1, S1, I2, S2, operations::eq, meta::identity, Proj>
+    template <typename I1, typename S1, typename I2, typename S2, typename Proj> requires concepts::can_set_algorithm_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
     auto do_set_union_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj) -> generator<iter_value_t<I1>> {
         auto f1 = first1;
         for (; first1 != last1; ++first1) { co_yield *first1; }
