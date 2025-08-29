@@ -13,7 +13,7 @@ namespace genex::actions::concepts {
         forward_range<Rng> and
         std::permutable<iterator_t<Rng>> and
         std::invocable<Proj, range_reference_t<Rng>> and
-        std::indirectly_comparable<iterator_t<Rng>, E*, operations::eq, Proj, meta::identity> and
+        std::indirectly_comparable<iterator_t<Rng>, const std::remove_cvref_t<E>*, operations::eq, Proj, meta::identity> and
         has_member_erase<Rng>;
 
     template <typename Rng, typename Pred, typename Proj>

@@ -14,7 +14,7 @@ namespace genex::algorithms::concepts {
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
         std::movable<I> and
-        std::indirect_binary_predicate<F, I, E*>;
+        std::indirect_binary_predicate<F, I, const std::remove_cvref_t<E>*>;
 
     template <typename I, typename S, typename F>
     concept can_fold_left_first_iters =
@@ -28,7 +28,7 @@ namespace genex::algorithms::concepts {
         std::bidirectional_iterator<I> and
         std::sentinel_for<S, I> and
         std::movable<I> and
-        std::indirect_binary_predicate<F, I, E*>;
+        std::indirect_binary_predicate<F, I, const std::remove_cvref_t<E>*>;
 
     template <typename I, typename S, typename F>
     concept can_fold_right_first_iters =

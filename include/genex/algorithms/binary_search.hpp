@@ -15,7 +15,7 @@ namespace genex::algorithms::concepts {
         std::forward_iterator<I> and
         std::sentinel_for<S, I> and
         std::movable<I> and
-        std::indirect_strict_weak_order<Comp, std::projected<I, Proj>, const E*>;
+        std::indirect_strict_weak_order<Comp, std::projected<I, Proj>, const std::remove_cvref_t<E>*>;
 
     template <typename Rng, typename E, typename Comp, typename Proj>
     concept can_binary_search_range =
