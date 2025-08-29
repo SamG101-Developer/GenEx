@@ -71,8 +71,8 @@ namespace genex::views::detail {
     auto do_unique_ptr_cast_iter(I first, S last) -> generator<std::unique_ptr<To>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
-            if (auto ptr = dynamic_cast<To*>(first->get())) {
-                first->release();
+            if (auto ptr = dynamic_cast<To*>((*first).get())) {
+                (*first).release();
                 co_yield std::unique_ptr<To>(ptr);
             }
         }
