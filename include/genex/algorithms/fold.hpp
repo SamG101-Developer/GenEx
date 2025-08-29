@@ -14,28 +14,36 @@ namespace genex::algorithms::concepts {
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
         std::movable<I> and
-        std::indirect_binary_predicate<F, I, const std::remove_cvref_t<E>*>;
+        std::movable<E> and
+        std::invocable<F, E, iter_reference_t<I>> and
+        std::convertible_to<std::invoke_result_t<F, E, iter_reference_t<I>>, E>;
 
     template <typename I, typename S, typename F>
     concept can_fold_left_first_iters =
         std::forward_iterator<I> and
         std::sentinel_for<S, I> and
         std::movable<I> and
-        std::indirect_binary_predicate<F, I, I>;
+        std::movable<iter_value_t<I>> and
+        std::invocable<F, iter_value_t<I>, iter_reference_t<I>> and
+        std::convertible_to<std::invoke_result_t<F, iter_value_t<I>, iter_reference_t<I>>, iter_value_t<I>>;
 
     template <typename I, typename S, typename E, typename F>
     concept can_fold_right_iters =
         std::bidirectional_iterator<I> and
         std::sentinel_for<S, I> and
         std::movable<I> and
-        std::indirect_binary_predicate<F, I, const std::remove_cvref_t<E>*>;
+        std::movable<E> and
+        std::invocable<F, iter_reference_t<I>, E> and
+        std::convertible_to<std::invoke_result_t<F, iter_reference_t<I>, E>, E>;
 
     template <typename I, typename S, typename F>
     concept can_fold_right_first_iters =
         std::bidirectional_iterator<I> and
         std::sentinel_for<S, I> and
         std::movable<I> and
-        std::indirect_binary_predicate<F, I, I>;
+        std::movable<iter_value_t<I>> and
+        std::invocable<F, iter_value_t<I>, iter_reference_t<I>> and
+        std::convertible_to<std::invoke_result_t<F, iter_value_t<I>, iter_reference_t<I>>, iter_value_t<I>>;
 
     template <typename Rng, typename E, typename F>
     concept can_fold_left_range =
@@ -75,7 +83,7 @@ namespace genex::algorithms {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<E>(init), std::forward<F>(f));
         }
 
-        template <typename E, typename F> requires (not input_range<std::remove_cvref_t<E>>)
+        template <typename E, typename F>
         auto operator()(E &&init, F &&f) const -> auto {
             return
                 [FWD_CAPTURES(init, f)]<typename Rng> requires concepts::can_fold_left_range<Rng, E, F>
@@ -100,7 +108,7 @@ namespace genex::algorithms {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<F>(f));
         }
 
-        template <typename F> requires (not input_range<std::remove_cvref_t<F>>)
+        template <typename F>
         auto operator()(F &&f) const -> auto {
             return
                 [FWD_CAPTURES(f)]<typename Rng> requires concepts::can_fold_left_first_range<Rng, F>
@@ -126,7 +134,7 @@ namespace genex::algorithms {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<E>(init), std::forward<F>(f));
         }
 
-        template <typename E, typename F> requires (not input_range<std::remove_cvref_t<E>>)
+        template <typename E, typename F>
         auto operator()(E &&init, F &&f) const -> auto {
             return
                 [FWD_CAPTURES(init, f)]<typename Rng> requires concepts::can_fold_right_range<Rng, E, F>
@@ -152,7 +160,7 @@ namespace genex::algorithms {
             return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<F>(f));
         }
 
-        template <typename F> requires (not input_range<std::remove_cvref_t<F>>)
+        template <typename F>
         auto operator()(F &&f) const -> auto {
             return
                 [FWD_CAPTURES(f)]<typename Rng> requires concepts::can_fold_right_first_range<Rng, F>
