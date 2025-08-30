@@ -15,8 +15,8 @@ namespace genex::algorithms::concepts {
     concept can_sorted_iters =
         std::random_access_iterator<I> and
         std::sentinel_for<S, I> and
-        std::movable<I> and
-        std::sortable<I, Comp, Proj>;
+        std::movable<I>;  // and
+        // std::sortable<I, Comp, Proj>;
 
     template <typename Rng, typename Comp, typename Proj>
     concept can_sorted_range =
