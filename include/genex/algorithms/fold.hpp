@@ -87,7 +87,8 @@ namespace genex::algorithms {
     DEFINE_ALGORITHM(fold_left_first) {
         template <typename I, typename S, typename F> requires concepts::can_fold_left_first_iters<I, S, F>
         auto operator()(I first, S last, F &&f) const -> auto {
-            auto acc = *first++;
+            auto acc = *first;
+            ++first;
             for (; first != last; ++first) {
                 acc = std::invoke(std::forward<F>(f), std::move(acc), *first);
             }
