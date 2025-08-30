@@ -73,6 +73,7 @@ TEST(GenexSetUnionUnsortedView, VecInputAllDuplicates) {
         | genex::views::to<std::vector>();
     const auto exp = std::vector{5, 5, 5, 5, 5};
     EXPECT_EQ(rng, exp);
+    EXPECT_EQ(rng, exp);
 }
 
 

@@ -34,10 +34,7 @@ namespace genex::algorithms {
 
         template <typename Rng, typename E, typename Proj = meta::identity> requires concepts::can_contain_range<Rng, E, Proj>
         auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> bool {
-            for (auto &&x : rng) {
-                if (std::invoke(std::forward<Proj>(proj), std::forward<decltype(x)>(x)) == std::forward<E>(elem)) { return true; }
-            }
-            return false;
+            return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<E>(elem), std::forward<Proj>(proj));
         }
     };
 

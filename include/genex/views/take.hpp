@@ -76,7 +76,7 @@ namespace genex::views::detail {
     auto do_take_while(I first, S last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
-            if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { break; }
+            if (not std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { break; }
             co_yield static_cast<iter_value_t<I>>(*first);
         }
     }

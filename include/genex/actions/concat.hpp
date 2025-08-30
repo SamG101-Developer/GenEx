@@ -15,17 +15,16 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     DEFINE_ACTION(concat) {
         template <typename Rng1, typename Rng2> requires concepts::can_concat_range<Rng1, Rng2>
-        auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> Rng1& {
+        auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> void {
             for (auto &&x : rng2) {
                 rng1 |= push(iterators::end(std::forward<Rng1>(rng1)), std::forward<decltype(x)>(x));
             }
-            return rng1;
         }
 
         template <typename Rng1, typename Rng2, typename... Rngs> requires concepts::can_concat_range<Rng1, Rng2, Rngs...>
-        auto operator()(Rng1 &&rng1, Rng2 &&rng2, Rngs... rngs) const -> Rng1& {
+        auto operator()(Rng1 &&rng1, Rng2 &&rng2, Rngs... rngs) const -> void {
             (*this)(std::forward<Rng1>(rng1), std::forward<Rng2>(rng2));
-            return (*this)(std::forward<Rng1>(rng1), std::forward<Rngs>(rngs)...);
+            (*this)(std::forward<Rngs>(rngs)...);
         }
 
         template <typename Rng2>

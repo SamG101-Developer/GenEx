@@ -41,7 +41,7 @@ namespace genex::operations {
             return r.empty();
         }
 
-        template <typename Rng> requires (!has_member_empty<Rng>)
+        template <typename Rng> requires (not has_member_empty<Rng>)
         auto operator()(Rng &&r) const noexcept -> bool {
             return size(std::forward<Rng>(r)) == 0;
         }

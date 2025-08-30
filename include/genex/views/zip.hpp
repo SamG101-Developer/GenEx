@@ -38,7 +38,7 @@ namespace genex::views::detail {
         auto starts = std::move(first);
         auto ends = std::move(last);
 
-        while (!any_iterator_finished(starts, ends)) {
+        while (not any_iterator_finished(starts, ends)) {
             co_yield deref_tuple(starts);
             advance_tuple(starts);
         }

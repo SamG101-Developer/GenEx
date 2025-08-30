@@ -144,7 +144,7 @@ namespace genex::algorithms {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
         auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
             for (; first != last; ++first) {
-                if (!std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { return first; }
+                if (not std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) { return first; }
             }
             return last;
         }
