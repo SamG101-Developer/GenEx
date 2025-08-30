@@ -21,14 +21,6 @@ namespace genex::operations {
             }
             return *it;
         }
-
-        auto operator()(const std::size_t n) const noexcept -> auto {
-            return
-                [FWD_CAPTURES(n)]<typename Rng>
-                (Rng &&r) mutable -> auto {
-                return (*this)(std::forward<Rng>(r), n);
-            };
-        }
     };
 
     DEFINE_OPERATION(front) {
@@ -45,14 +37,6 @@ namespace genex::operations {
         template <typename Rng>
         auto operator()(Rng &&gen) const noexcept -> range_value_t<Rng> {
             return *gen.begin();
-        }
-
-        auto operator()() const noexcept -> auto {
-            return
-                [FWD_CAPTURES()]<typename Rng>
-                (Rng &&r) mutable -> auto {
-                return (*this)(std::forward<Rng>(r));
-            };
         }
     };
 
@@ -73,14 +57,6 @@ namespace genex::operations {
             for (; it != iterators::end(gen); ++it) {
             }
             return *it;
-        }
-
-        auto operator()() const noexcept -> auto {
-            return
-                [FWD_CAPTURES()]<typename Rng>
-                (Rng &&r) mutable -> auto {
-                return (*this)(std::forward<Rng>(r));
-            };
         }
     };
 
