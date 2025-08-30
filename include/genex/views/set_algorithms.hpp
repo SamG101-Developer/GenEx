@@ -40,7 +40,10 @@ namespace genex::views::detail {
                 co_yield *first1;
                 ++first1;
             }
-            else if (std::invoke(comp, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) { co_yield *first1++; }
+            else if (std::invoke(comp, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) {
+                co_yield *first1;
+                ++first1;
+            }
             else if (std::invoke(comp, std::invoke(proj2, *first2), std::invoke(proj1, *first1))) { ++first2; }
             else {
                 ++first1;
