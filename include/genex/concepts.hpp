@@ -238,6 +238,17 @@ namespace genex {
 
     template <typename T>
     concept weak_ptr = is_weak_ptr<std::remove_cvref_t<T>>::value;
+
+    template <typename T>
+    struct is_tuple_like : std::false_type {
+    };
+
+    template <typename ...Ts>
+    struct is_tuple_like<std::tuple<Ts...>> : std::true_type {
+    };
+
+    template <typename T>
+    concept tuple_like = is_tuple_like<std::remove_cvref_t<T>>::value;
 }
 
 

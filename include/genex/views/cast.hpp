@@ -30,7 +30,6 @@ namespace genex::views::concepts {
         std::movable<I> and
         (unique_ptr<iter_value_t<I>> or shared_ptr<iter_value_t<I>> or weak_ptr<iter_value_t<I>>);
 
-
     template <typename To, typename Rng>
     concept can_static_cast_range =
         input_range<Rng> and
