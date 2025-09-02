@@ -185,7 +185,7 @@ namespace genex::views {
 
         template <
             typename Rng2, typename Comp = operations::eq,
-            typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+            typename Proj1 = meta::identity, typename Proj2 = meta::identity> requires (not range<Comp>)
         auto operator()(Rng2 &&rng2, Comp &&comp = {}, Proj1 &&proj1 = {}, Proj2 &&proj2 = {}) const -> auto {
             // Create a closure that takes a range and applies the set algorithm.
             return
@@ -223,7 +223,7 @@ namespace genex::views {
 
         template <
             typename Rng2, typename Comp = operations::eq,
-            typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+            typename Proj1 = meta::identity, typename Proj2 = meta::identity> requires (not range<Comp>)
         auto operator()(Rng2 &&rng2, Comp &&comp = {}, Proj1 &&proj1 = {}, Proj2 &&proj2 = {}) const -> auto {
             // Create a closure that takes a range and applies the set algorithm.
             return
@@ -261,7 +261,7 @@ namespace genex::views {
 
         template <
             typename Rng2, typename Comp = operations::eq,
-            typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+            typename Proj1 = meta::identity, typename Proj2 = meta::identity> requires (not range<Comp>)
         auto operator()(Rng2 &&rng2, Comp &&comp = {}, Proj1 &&proj1 = {}, Proj2 &&proj2 = {}) const -> auto {
             // Create a closure that takes a range and applies the set algorithm.
             return
@@ -299,7 +299,7 @@ namespace genex::views {
 
         template <
             typename Rng2, typename Comp = operations::eq,
-            typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+            typename Proj1 = meta::identity, typename Proj2 = meta::identity> requires (not range<Comp>)
         auto operator()(Rng2 &&rng2, Comp &&comp = {}, Proj1 &&proj1 = {}, Proj2 &&proj2 = {}) const -> auto {
             // Create a closure that takes a range and applies the set algorithm.
             return
@@ -332,7 +332,7 @@ namespace genex::views {
                 std::forward<Proj>(proj));
         }
 
-        template <typename Rng2, typename Proj = meta::identity>
+        template <typename Rng2, typename Proj = meta::identity> requires (not range<Proj>)
         auto operator()(Rng2 &&rng2, Proj &&proj = {}) const -> auto {
             // Create a closure that takes a range and applies the set algorithm.
             return
@@ -365,7 +365,7 @@ namespace genex::views {
                 std::forward<Proj>(proj));
         }
 
-        template <typename Rng2, typename Proj = meta::identity>
+        template <typename Rng2, typename Proj = meta::identity> requires (not range<Proj>)
         auto operator()(Rng2 &&rng2, Proj &&proj = {}) const -> auto {
             // Create a closure that takes a range and applies the set algorithm.
             return
@@ -399,7 +399,7 @@ namespace genex::views {
                 std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
         }
 
-        template <typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+        template <typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity> requires (not range<Proj1>)
         auto operator()(Rng2 &&rng2, Proj1 &&proj1 = {}, Proj2 &&proj2 = {}) const -> auto {
             // Create a closure that takes a range and applies the set algorithm.
             return
@@ -432,7 +432,7 @@ namespace genex::views {
                 std::forward<Proj>(proj));
         }
 
-        template <typename Rng2, typename Proj = meta::identity>
+        template <typename Rng2, typename Proj = meta::identity> requires (not range<Proj>)
         auto operator()(Rng2 &&rng2, Proj &&proj = {}) const -> auto {
             // Create a closure that takes a range and applies the set algorithm.
             return
