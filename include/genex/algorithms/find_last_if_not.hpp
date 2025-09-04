@@ -61,5 +61,5 @@ namespace genex::algorithms {
         }
     };
 
-    EXPORT_GENEX_STRUCT(find_last_if_not);
+    GENEX_EXPORT_STRUCT(find_last_if_not);
 }

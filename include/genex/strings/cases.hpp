@@ -98,6 +98,6 @@ namespace genex::strings {
         }
     };
 
-    EXPORT_GENEX_STRUCT(upper_case);
-    EXPORT_GENEX_STRUCT(lower_case);
+    GENEX_EXPORT_STRUCT(upper_case);
+    GENEX_EXPORT_STRUCT(lower_case);
 }

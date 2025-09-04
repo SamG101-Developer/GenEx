@@ -35,5 +35,5 @@ namespace genex::iterators {
         }
     };
 
-    EXPORT_GENEX_STRUCT(distance);
+    GENEX_EXPORT_STRUCT(distance);
 }

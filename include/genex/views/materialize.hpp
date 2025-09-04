@@ -63,7 +63,7 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(materialize_impl);
+    GENEX_EXPORT_STRUCT(materialize_impl);
 }
 
 

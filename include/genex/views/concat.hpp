@@ -81,5 +81,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(concat);
+    GENEX_EXPORT_STRUCT(concat);
 }

@@ -21,5 +21,5 @@ namespace genex::iterators {
         }
     };
 
-    EXPORT_GENEX_STRUCT(advance);
+    GENEX_EXPORT_STRUCT(advance);
 }

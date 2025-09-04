@@ -53,5 +53,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(enumerate);
+    GENEX_EXPORT_STRUCT(enumerate);
 }

@@ -50,5 +50,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(view);
+    GENEX_EXPORT_STRUCT(view);
 }

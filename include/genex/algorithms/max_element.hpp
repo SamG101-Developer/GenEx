@@ -43,5 +43,5 @@ namespace genex::algorithms {
         }
     };
 
-    EXPORT_GENEX_STRUCT(max_element);
+    GENEX_EXPORT_STRUCT(max_element);
 }

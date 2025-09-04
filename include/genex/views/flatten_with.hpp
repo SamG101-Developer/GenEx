@@ -60,5 +60,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(flatten_with);
+    GENEX_EXPORT_STRUCT(flatten_with);
 }

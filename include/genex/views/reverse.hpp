@@ -75,5 +75,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(reverse);
+    GENEX_EXPORT_STRUCT(reverse);
 }

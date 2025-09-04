@@ -56,7 +56,7 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(tuple_element_impl);
+    GENEX_EXPORT_STRUCT(tuple_element_impl);
 }
 
 

@@ -41,5 +41,5 @@ namespace genex::algorithms {
         }
     };
 
-    EXPORT_GENEX_STRUCT(binary_search);
+    GENEX_EXPORT_STRUCT(binary_search);
 }

@@ -191,9 +191,9 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(cast_static_impl);
-    EXPORT_GENEX_STRUCT(cast_dynamic_impl);
-    EXPORT_GENEX_STRUCT(cast_smart_ptr_impl);
+    GENEX_EXPORT_STRUCT(cast_static_impl);
+    GENEX_EXPORT_STRUCT(cast_dynamic_impl);
+    GENEX_EXPORT_STRUCT(cast_smart_ptr_impl);
 }
 
 

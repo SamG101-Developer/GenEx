@@ -44,5 +44,5 @@ namespace genex::algorithms {
     };
 
 
-    EXPORT_GENEX_STRUCT(find);
+    GENEX_EXPORT_STRUCT(find);
 }

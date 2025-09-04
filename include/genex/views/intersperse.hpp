@@ -61,5 +61,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(intersperse);
+    GENEX_EXPORT_STRUCT(intersperse);
 }

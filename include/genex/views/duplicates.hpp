@@ -83,5 +83,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(duplicates);
+    GENEX_EXPORT_STRUCT(duplicates);
 }

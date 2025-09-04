@@ -80,5 +80,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(interleave);
+    GENEX_EXPORT_STRUCT(interleave);
 }

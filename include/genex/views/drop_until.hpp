@@ -61,5 +61,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(drop_until);
+    GENEX_EXPORT_STRUCT(drop_until);
 }

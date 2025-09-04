@@ -31,5 +31,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(iota);
+    GENEX_EXPORT_STRUCT(iota);
 }

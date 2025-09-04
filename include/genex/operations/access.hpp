@@ -48,7 +48,7 @@ namespace genex::operations {
         }
     };
 
-    EXPORT_GENEX_STRUCT(at);
-    EXPORT_GENEX_STRUCT(front);
-    EXPORT_GENEX_STRUCT(back);
+    GENEX_EXPORT_STRUCT(at);
+    GENEX_EXPORT_STRUCT(front);
+    GENEX_EXPORT_STRUCT(back);
 }

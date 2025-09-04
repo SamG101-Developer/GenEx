@@ -42,5 +42,5 @@ namespace genex::actions {
         }
     };
 
-    EXPORT_GENEX_STRUCT(shuffle);
+    GENEX_EXPORT_STRUCT(shuffle);
 }

@@ -19,5 +19,5 @@ namespace genex::iterators {
         }
     };
 
-    EXPORT_GENEX_STRUCT(iter_pair);
+    GENEX_EXPORT_STRUCT(iter_pair);
 }

@@ -45,5 +45,5 @@ namespace genex::actions {
         }
     };
 
-    EXPORT_GENEX_STRUCT(pop_back);
+    GENEX_EXPORT_STRUCT(pop_back);
 }

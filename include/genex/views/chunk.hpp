@@ -7,7 +7,7 @@
 #include <genex/iterators/next.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
-BROKEN("Chunk view is broken")
+GENEX_MARK_AS_BROKEN("Chunk view is broken")
 
 
 namespace genex::views::concepts {
@@ -65,5 +65,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(chunk);
+    GENEX_EXPORT_STRUCT(chunk);
 }

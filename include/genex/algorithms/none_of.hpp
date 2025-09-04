@@ -27,5 +27,5 @@ namespace genex::algorithms {
         }
     };
 
-    EXPORT_GENEX_STRUCT(none_of);
+    GENEX_EXPORT_STRUCT(none_of);
 }

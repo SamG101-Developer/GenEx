@@ -61,5 +61,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(filter);
+    GENEX_EXPORT_STRUCT(filter);
 }

@@ -36,5 +36,5 @@ namespace genex::actions {
         }
     };
 
-    EXPORT_GENEX_STRUCT(sort);
+    GENEX_EXPORT_STRUCT(sort);
 }

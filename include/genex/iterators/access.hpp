@@ -125,8 +125,8 @@ namespace genex::iterators {
     };
 
 
-    EXPORT_GENEX_STRUCT(begin);
-    EXPORT_GENEX_STRUCT(end);
-    EXPORT_GENEX_STRUCT(rbegin);
-    EXPORT_GENEX_STRUCT(rend);
+    GENEX_EXPORT_STRUCT(begin);
+    GENEX_EXPORT_STRUCT(end);
+    GENEX_EXPORT_STRUCT(rbegin);
+    GENEX_EXPORT_STRUCT(rend);
 }

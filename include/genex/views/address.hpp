@@ -57,5 +57,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(address);
+    GENEX_EXPORT_STRUCT(address);
 }

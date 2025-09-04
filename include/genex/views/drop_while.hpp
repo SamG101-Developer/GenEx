@@ -61,5 +61,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(drop_while);
+    GENEX_EXPORT_STRUCT(drop_while);
 }

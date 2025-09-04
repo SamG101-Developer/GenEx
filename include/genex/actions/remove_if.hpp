@@ -38,5 +38,5 @@ namespace genex::actions {
         }
     };
 
-    EXPORT_GENEX_STRUCT(remove_if);
+    GENEX_EXPORT_STRUCT(remove_if);
 }

@@ -71,7 +71,7 @@ namespace genex::operations {
         }
     };
 
-    EXPORT_GENEX_STRUCT(size);
+    GENEX_EXPORT_STRUCT(size);
 
 
     struct empty_fn {
@@ -88,5 +88,5 @@ namespace genex::operations {
         }
     };
 
-    EXPORT_GENEX_STRUCT(empty);
+    GENEX_EXPORT_STRUCT(empty);
 }

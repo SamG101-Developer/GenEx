@@ -95,5 +95,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(take);
+    GENEX_EXPORT_STRUCT(take);
 }

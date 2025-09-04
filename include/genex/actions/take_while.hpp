@@ -30,5 +30,5 @@ namespace genex::actions {
         }
     };
 
-    EXPORT_GENEX_STRUCT(take_while);
+    GENEX_EXPORT_STRUCT(take_while);
 }

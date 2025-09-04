@@ -54,5 +54,5 @@ namespace genex::views {
         }
     };
 
-    EXPORT_GENEX_STRUCT(cycle);
+    GENEX_EXPORT_STRUCT(cycle);
 }

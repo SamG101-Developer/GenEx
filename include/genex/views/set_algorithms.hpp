@@ -299,12 +299,12 @@ namespace genex::views {
             }> {
     };
 
-    EXPORT_GENEX_STRUCT(set_difference);
-    EXPORT_GENEX_STRUCT(set_intersection);
-    EXPORT_GENEX_STRUCT(set_symmetric_difference);
-    EXPORT_GENEX_STRUCT(set_union);
-    EXPORT_GENEX_STRUCT(set_difference_unsorted);
-    EXPORT_GENEX_STRUCT(set_intersection_unsorted);
-    EXPORT_GENEX_STRUCT(set_symmetric_difference_unsorted);
-    EXPORT_GENEX_STRUCT(set_union_unsorted);
+    GENEX_EXPORT_STRUCT(set_difference);
+    GENEX_EXPORT_STRUCT(set_intersection);
+    GENEX_EXPORT_STRUCT(set_symmetric_difference);
+    GENEX_EXPORT_STRUCT(set_union);
+    GENEX_EXPORT_STRUCT(set_difference_unsorted);
+    GENEX_EXPORT_STRUCT(set_intersection_unsorted);
+    GENEX_EXPORT_STRUCT(set_symmetric_difference_unsorted);
+    GENEX_EXPORT_STRUCT(set_union_unsorted);
 }

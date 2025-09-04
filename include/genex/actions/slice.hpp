@@ -52,5 +52,5 @@ namespace genex::actions {
         }
     };
 
-    EXPORT_GENEX_STRUCT(slice);
+    GENEX_EXPORT_STRUCT(slice);
 }

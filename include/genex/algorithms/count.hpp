@@ -42,5 +42,5 @@ namespace genex::algorithms {
         }
     };
 
-    EXPORT_GENEX_STRUCT(count);
+    GENEX_EXPORT_STRUCT(count);
 }
