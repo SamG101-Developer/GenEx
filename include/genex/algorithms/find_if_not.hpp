@@ -24,7 +24,7 @@ namespace genex::algorithms {
     struct find_if_not_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
             requires concepts::findable_if_not_iters<I, S, Pred, Proj>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
             for (; first != last; ++first) {
                 if (not std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
                     break;

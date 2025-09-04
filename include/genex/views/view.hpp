@@ -1,6 +1,7 @@
 #pragma once
 #include <coroutine>
 #include <genex/concepts.hpp>
+#include <genex/generator.hpp>
 #include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>

@@ -1,5 +1,10 @@
 #pragma once
-#include <genex/algorithms/find_if.hpp>
+#include <functional>
+#include <genex/iterators/iter_pair.hpp>
+#include <genex/iterators/prev.hpp>
+#include <genex/concepts.hpp>
+#include <genex/macros.hpp>
+#include <genex/meta.hpp>
 
 
 namespace genex::algorithms::concepts {
@@ -7,6 +12,7 @@ namespace genex::algorithms::concepts {
     concept findable_last_if_not_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
+        std::convertible_to<S, I> and
         std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
 
     template <typename I, typename S, typename Pred, typename Proj>
@@ -30,7 +36,7 @@ namespace genex::algorithms {
     struct find_last_if_not_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
             requires concepts::findable_last_if_not_iters_unoptimized<I, S, Pred, Proj>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
             auto found_last = last;
             for (; first != last; ++first) {
                 if (not std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
@@ -42,11 +48,11 @@ namespace genex::algorithms {
 
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
             requires concepts::findable_last_if_not_iters_optimized<I, S, Pred, Proj>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
             auto true_last = last;
             for (; last != first; --last) {
-                if (not std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *last))) {
-                    return last;
+                if (not std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *iterators::prev(last)))) {
+                    return iterators::prev(last);
                 }
             }
             return true_last;

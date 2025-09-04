@@ -12,6 +12,7 @@ namespace genex::algorithms::concepts {
     concept findable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
+        std::convertible_to<S, I> and
         std::indirect_equivalence_relation<operations::eq, std::projected<I, Proj>, std::remove_cvref_t<E> const*>;
 
     template <typename Rng, typename E, typename Proj>
@@ -25,13 +26,13 @@ namespace genex::algorithms {
     struct find_fn {
         template <typename I, typename S, typename E, typename Proj = meta::identity>
             requires concepts::findable_iters<I, S, E, Proj>
-        constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> auto {
+        constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> I {
             for (; first != last; ++first) {
                 if (std::invoke(std::forward<Proj>(proj), *first) == elem) {
-                    return first;
+                    break;
                 }
             }
-            return last;
+            return first;
         }
 
         template <typename Rng, typename E, typename Proj = meta::identity>

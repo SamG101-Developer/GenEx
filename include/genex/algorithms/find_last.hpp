@@ -1,6 +1,10 @@
 #pragma once
 #include <functional>
-#include <genex/algorithms/find.hpp>
+#include <genex/iterators/iter_pair.hpp>
+#include <genex/iterators/prev.hpp>
+#include <genex/concepts.hpp>
+#include <genex/macros.hpp>
+#include <genex/meta.hpp>
 
 
 namespace genex::algorithms::concepts {
@@ -8,6 +12,7 @@ namespace genex::algorithms::concepts {
     concept findable_last_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
+        std::convertible_to<S, I> and
         std::indirect_equivalence_relation<operations::eq, std::projected<I, Proj>, std::remove_cvref_t<E> const*>;
 
     template <typename I, typename S, typename E, typename Proj>
@@ -17,7 +22,8 @@ namespace genex::algorithms::concepts {
 
     template <typename I, typename S, typename E, typename Proj>
     concept findable_last_iters_unoptimized =
-        not findable_last_iters_optimized<I, S, E, Proj> and
+        std::input_iterator<I> and
+        not std::bidirectional_iterator<I> and
         findable_last_iters<I, S, E, Proj>;
 
     template <typename Rng, typename E, typename Proj>
@@ -31,11 +37,11 @@ namespace genex::algorithms {
     struct find_last_fn {
         template <typename I, typename S, typename E, typename Proj = meta::identity>
             requires concepts::findable_last_iters_optimized<I, S, E, Proj>
-        constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> auto {
+        constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> I {
             auto result = last;
             for (; last != first; --last) {
-                if (std::invoke(std::forward<Proj>(proj), *std::prev(last)) == elem) {
-                    return std::prev(last);
+                if (std::invoke(std::forward<Proj>(proj), *iterators::prev(last)) == elem) {
+                    return iterators::prev(last);
                 }
             }
             return result;
@@ -43,7 +49,7 @@ namespace genex::algorithms {
 
         template <typename I, typename S, typename E, typename Proj = meta::identity>
             requires concepts::findable_last_iters_unoptimized<I, S, E, Proj>
-        constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> auto {
+        constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> I {
             auto result = last;
             for (; first != last; ++first) {
                 if (std::invoke(std::forward<Proj>(proj), *first) == elem) {
