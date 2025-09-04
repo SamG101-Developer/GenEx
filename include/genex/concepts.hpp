@@ -82,15 +82,6 @@ namespace genex {
     concept has_member_empty = requires(Rng &rng) { rng.empty(); };
 
     template <typename Rng>
-    concept has_member_at = requires(Rng &rng) { rng.at(std::declval<std::size_t>()); };
-
-    template <typename Rng>
-    concept has_member_front = requires(Rng &rng) { rng.front(); };
-
-    template <typename Rng>
-    concept has_member_back = requires(Rng &rng) { rng.back(); };
-
-    template <typename Rng>
     concept has_member_push_back = requires(Rng &rng) { rng.push_back(std::declval<range_value_t<Rng>>()); };
 
     template <typename Rng>
@@ -122,6 +113,9 @@ namespace genex {
 
     template <typename Rng>
     concept has_member_erase = requires(Rng &rng) { rng.erase(std::declval<iterator_t<Rng>>()); };
+
+    template <typename Rng>
+    concept has_member_clear = requires(Rng &rng) { rng.clear(); };
 }
 
 
