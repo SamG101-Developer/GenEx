@@ -8,6 +8,20 @@
 #include <genex/views/map.hpp>
 #include <genex/views/materialize.hpp>
 #include <genex/views/to.hpp>
+#include <genex/views/zip.hpp>
+
+
+TEST(GenexViewsMaterialize, ZipAsVec) {
+    auto vec1 = std::vector{0, 1, 2, 3, 4};
+    auto vec2 = std::vector{5, 6, 7, 8, 9};
+
+    const auto rng = genex::views::zip(vec1, vec2)
+        | genex::views::materialize()
+        | genex::views::to<std::vector>();
+    const auto exp = std::vector<std::tuple<int, int>>{{0, 5}, {1, 6}, {2, 7}, {3, 8}, {4, 9}};
+
+    EXPECT_EQ(rng, exp);
+}
 
 
 TEST(GenexViewsMaterialize, AsVec) {
