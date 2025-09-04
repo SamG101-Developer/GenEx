@@ -2,7 +2,7 @@
 
 #include <genex/algorithms/all_of.hpp>
 #include <genex/views/address.hpp>
-#include <genex/views/map.hpp>
+#include <genex/views/indirect.hpp>
 #include <genex/views/to.hpp>
 
 
@@ -38,7 +38,7 @@ TEST(GenexViewsAddress, VecInputTemp) {
 
     const auto rng = std::vector{t1, t2, t3}
         | genex::views::address
-        | genex::views::deref
+        | genex::views::indirect
         | genex::views::to<std::vector>();
     const auto exp = std::vector{t1, t2, t3};
     EXPECT_EQ(rng, exp);
@@ -59,7 +59,7 @@ TEST(GenexViewsDeref, VecInput) {
 
     const auto vec = std::vector{p1, p2, p3};
     const auto res = genex::algorithms::all_of(
-        vec | genex::views::deref,
+        vec | genex::views::indirect,
         [ptrs_iter](const auto &x) mutable { return &x == *ptrs_iter++; });
 
     EXPECT_TRUE(res);

@@ -12,12 +12,3 @@ TEST(GenexAlgoShuffle, VecInput) {
     const auto non_exp = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     EXPECT_NE(vec, non_exp);
 }
-
-
-TEST(GenexAlgoShuffleRandom, VecInput) {
-    auto vec = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    vec |= genex::actions::shuffle_random;
-
-    const auto non_exp = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    EXPECT_NE(vec, non_exp);
-}

@@ -1,29 +1,28 @@
 #pragma once
 #include <coroutine>
-#include <utility>
 #include <genex/concepts.hpp>
-#include <genex/iterators/begin.hpp>
-#include <genex/iterators/end.hpp>
+#include <genex/generator.hpp>
+#include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
-#include <genex/views/_view_base.hpp>
+#include <genex/pipe.hpp>
 
 
 namespace genex::views::concepts {
     template <typename I, typename S>
-    concept can_borrow_iters =
+    concept borrowable_iters =
         std::input_iterator<I> and
-        std::sentinel_for<S, I> and
-        std::movable<I>;
+        std::sentinel_for<S, I>;;
 
     template <typename Rng>
-    concept can_borrow_range =
+    concept borrowable_range =
         input_range<Rng> and
-        can_borrow_iters<iterator_t<Rng>, sentinel_t<Rng>>;
+        borrowable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
 
 namespace genex::views::detail {
-    template <typename I, typename S> requires concepts::can_borrow_iters<I, S>
+    template <typename I, typename S>
+        requires concepts::borrowable_iters<I, S>
     auto do_borrow(I first, S last) -> generator<iter_value_t<I>&> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -34,29 +33,25 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    DEFINE_VIEW(borrow) {
-        template <typename I, typename S> requires concepts::can_borrow_iters<I, S>
-        auto operator()(I first, S last) const -> auto {
-            // Call the borrow inner function.
-            auto gen = detail::do_borrow(std::move(first), std::move(last));
-            return borrow_view(std::move(gen));
+    struct borrow_fn {
+        template <typename I, typename S>
+            requires concepts::borrowable_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            return detail::do_borrow(std::move(first), std::move(last));
         }
 
-        template <typename Rng> requires concepts::can_borrow_range<Rng>
-        auto operator()(Rng &&rng) const -> auto {
-            // Call the borrow inner function.
-            return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
+        template <typename Rng>
+            requires concepts::borrowable_range<Rng>
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            auto [first, last] = iterators::iter_pair(rng);
+            return (*this)(
+                std::move(first), std::move(last));
         }
 
-        auto operator()() const -> auto {
-            // Create a closure that takes a range and applies the borrow.
-            return
-                [FWD_CAPTURES()]<typename Rng> requires concepts::can_borrow_range<Rng>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng));
-            };
+        constexpr auto operator()() const -> auto {
+            return std::bind_back(borrow_fn{});
         }
     };
 
-    EXPORT_GENEX_VIEW(borrow);
+    EXPORT_GENEX_STRUCT(borrow);
 }

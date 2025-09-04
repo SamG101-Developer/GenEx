@@ -1,43 +1,31 @@
 #pragma once
-#include <functional>
-#include <genex/algorithms/_algorithm_base.hpp>
-#include <genex/concepts.hpp>
+#include <genex/algorithms/_concepts.hpp>
+#include <genex/algorithms/find_if_not.hpp>
+#include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
 
 
-namespace genex::algorithms::concepts {
-    template <typename I, typename S, typename Pred, typename Proj>
-    concept can_all_of_iters =
-        std::input_iterator<I> and
-        std::sentinel_for<S, I> and
-        std::movable<I> and
-        std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
-
-    template <typename Rng, typename Pred, typename Proj>
-    concept can_all_of_range =
-        input_range<Rng> and
-        can_all_of_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj>;
-}
-
-
 namespace genex::algorithms {
-    DEFINE_ALGORITHM(all_of) {
-        template <typename I, typename S, typename Pred, typename Proj = meta::identity> requires concepts::can_all_of_iters<I, S, Pred, Proj>
-        auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> bool {
-            for (; first != last; ++first) {
-                if (not std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
-                    return false;
-                }
-            }
-            return true;
+    struct all_of_fn {
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity>
+            requires concepts::quantifiable_iters<I, S, Pred, Proj>
+        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
+            // Check for an iterator that does NOT satisfy the predicate; if none exist, all elements satisfy it.
+            auto it = algorithms::find_if_not(
+                std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            return it == last;
         }
 
-        template <typename Rng, typename Pred, typename Proj = meta::identity> requires concepts::can_all_of_range<Rng, Pred, Proj>
-        auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> bool {
-            return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Pred>(pred), std::forward<Proj>(proj));
+        template <typename Rng, typename Pred, typename Proj = meta::identity>
+            requires concepts::quantifiable_range<Rng, Pred, Proj>
+        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+            // Convert the range into iterators and call the iterator overload.
+            auto [first, last] = iterators::iter_pair(rng);
+            return (*this)(
+                std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
     };
 
-    EXPORT_GENEX_ALGORITHM(all_of);
+    EXPORT_GENEX_STRUCT(all_of);
 }

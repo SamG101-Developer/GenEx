@@ -2,7 +2,10 @@
 #include <iterator>
 #include <utility>
 #include <genex/concepts.hpp>
-#include <genex/views/_view_base.hpp>
+#include <genex/generator.hpp>
+#include <genex/iterators/iter_pair.hpp>
+#include <genex/macros.hpp>
+#include <genex/pipe.hpp>
 
 
 namespace genex::views::concepts {
@@ -10,7 +13,6 @@ namespace genex::views::concepts {
     concept can_tuple_element_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
-        std::movable<I> and
         tuple_like<iter_value_t<I>> and
         N <= std::tuple_size_v<iter_value_t<I>>;
 
@@ -23,7 +25,8 @@ namespace genex::views::concepts {
 
 namespace genex::views::detail {
     template <std::size_t N, typename I, typename S>
-    auto do_tuple_n(I first, S last) -> generator<std::tuple_element_t<N, iter_value_t<I>>> requires concepts::can_tuple_element_iters<N, I, S> {
+        requires concepts::can_tuple_element_iters<N, I, S>
+    auto do_tuple_n(I first, S last) -> generator<std::tuple_element_t<N, iter_value_t<I>>> {
         for (; first != last; ++first) {
             co_yield std::get<N>(*first);
         }
@@ -32,33 +35,29 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    DEFINE_VIEW(tuple_element_) {
-        template <std::size_t N, typename I, typename S> requires concepts::can_tuple_element_iters<N, I, S>
-        auto operator()(I first, S last) const -> auto {
-            // Call the tuple_n inner function.
-            auto gen = detail::do_tuple_n<N>(std::move(first), std::move(last));
-            return tuple_element__view(std::move(gen));
+    struct tuple_element_impl_fn {
+        template <std::size_t N, typename I, typename S>
+            requires concepts::can_tuple_element_iters<N, I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            return detail::do_tuple_n<N>(std::move(first), std::move(last));
         }
 
         template <std::size_t N, typename Rng> requires concepts::can_tuple_element_range<N, Rng>
         auto operator()(Rng &&rng) const -> auto {
-            // Call the take inner function.
-            return this->operator()<N>(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
+            auto [first, last] = iterators::iter_pair(rng);
+            return this->operator()<N>(std::move(first), std::move(last));
         }
 
         template <std::size_t N>
         auto operator()() const -> auto {
-            // Create a closure that takes a range and applies the take.
-            return
-                [FWD_CAPTURES()]<typename Rng> requires concepts::can_tuple_element_range<N, Rng>
-                (Rng &&rng) mutable -> auto {
+            return [*this]<typename Rng> requires concepts::can_tuple_element_range<N, Rng>(Rng &&rng) {
                 return this->operator()<N>(std::forward<Rng>(rng));
             };
         }
     };
 
-    EXPORT_GENEX_VIEW(tuple_element_);
+    EXPORT_GENEX_STRUCT(tuple_element_impl);
 }
 
 
-#define tuple_element tuple_element_.operator()
+#define tuple_element tuple_element_impl.operator()

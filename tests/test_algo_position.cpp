@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/algorithms/position.hpp>
+#include <genex/algorithms/position_last.hpp>
 
 
 TEST(GenexAlgosPosition, ElementExists) {

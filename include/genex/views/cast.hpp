@@ -1,54 +1,52 @@
 #pragma once
 #include <coroutine>
 #include <genex/concepts.hpp>
-#include <genex/iterators/begin.hpp>
-#include <genex/iterators/end.hpp>
+#include <genex/generator.hpp>
+#include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
-#include <genex/views/_view_base.hpp>
+#include <genex/pipe.hpp>
 
 
 namespace genex::views::concepts {
     template <typename To, typename I, typename S>
-    concept can_static_cast_iters =
+    concept static_castable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
-        std::movable<I> and
         requires(iter_value_t<I> &&from) { static_cast<To>(from); };
 
     template <typename To, typename I, typename S>
-    concept can_dynamic_cast_iters =
+    concept dynamic_castable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
-        std::movable<I> and
         std::is_pointer_v<To> and
         requires(iter_value_t<I> &&from) { dynamic_cast<To>(from); };
 
     template <typename To, typename I, typename S>
-    concept can_smart_ptr_cast_iters =
+    concept smart_ptr_castable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
-        std::movable<I> and
         (unique_ptr<iter_value_t<I>> or shared_ptr<iter_value_t<I>> or weak_ptr<iter_value_t<I>>);
 
     template <typename To, typename Rng>
-    concept can_static_cast_range =
+    concept static_castable_range =
         input_range<Rng> and
-        can_static_cast_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
+        static_castable_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
 
     template <typename To, typename Rng>
-    concept can_dynamic_cast_range =
+    concept dynamic_castable_range =
         input_range<Rng> and
-        can_dynamic_cast_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
+        dynamic_castable_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
 
     template <typename To, typename Rng>
-    concept can_smart_ptr_cast_range =
+    concept smart_ptr_castable_range =
         input_range<Rng> and
-        can_smart_ptr_cast_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
+        smart_ptr_castable_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
 
 namespace genex::views::detail {
-    template <typename To, typename I, typename S> requires concepts::can_static_cast_iters<To, I, S>
+    template <typename To, typename I, typename S>
+        requires concepts::static_castable_iters<To, I, S>
     auto do_static_cast_iter(I first, S last) -> generator<To> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -56,7 +54,8 @@ namespace genex::views::detail {
         }
     }
 
-    template <typename To, typename I, typename S> requires concepts::can_dynamic_cast_iters<To, I, S>
+    template <typename To, typename I, typename S>
+        requires concepts::dynamic_castable_iters<To, I, S>
     auto do_dynamic_cast_iter(I first, S last) -> generator<To> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -66,7 +65,8 @@ namespace genex::views::detail {
         }
     }
 
-    template <typename To, typename I, typename S> requires (concepts::can_smart_ptr_cast_iters<To, I, S> and unique_ptr<iter_value_t<I>>)
+    template <typename To, typename I, typename S>
+        requires (concepts::smart_ptr_castable_iters<To, I, S> and unique_ptr<iter_value_t<I>>)
     auto do_unique_ptr_cast_iter(I first, S last) -> generator<std::unique_ptr<To>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -77,7 +77,8 @@ namespace genex::views::detail {
         }
     }
 
-    template <typename To, typename I, typename S> requires (concepts::can_smart_ptr_cast_iters<To, I, S> and shared_ptr<iter_value_t<I>>)
+    template <typename To, typename I, typename S>
+        requires (concepts::smart_ptr_castable_iters<To, I, S> and shared_ptr<iter_value_t<I>>)
     auto do_shared_ptr_cast_iter(I first, S last) -> generator<std::shared_ptr<To>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -87,7 +88,8 @@ namespace genex::views::detail {
         }
     }
 
-    template <typename To, typename I, typename S> requires (concepts::can_smart_ptr_cast_iters<To, I, S> and weak_ptr<iter_value_t<I>>)
+    template <typename To, typename I, typename S>
+        requires (concepts::smart_ptr_castable_iters<To, I, S> and weak_ptr<iter_value_t<I>>)
     auto do_weak_ptr_cast_iter(I first, S last) -> generator<std::weak_ptr<To>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -100,100 +102,101 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    DEFINE_VIEW(cast_static_) {
-        template <typename To, typename I, typename S> requires concepts::can_static_cast_iters<To, I, S>
-        auto operator()(I first, S last) const -> auto {
-            auto gen = detail::do_static_cast_iter<To, I, S>(std::move(first), std::move(last));
-            return cast_static__view(std::move(gen));
+    struct cast_static_impl_fn {
+        template <typename To, typename I, typename S>
+            requires concepts::static_castable_iters<To, I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            return detail::do_static_cast_iter<To, I, S>(std::move(first), std::move(last));
         }
 
-        template <typename To, typename Rng> requires concepts::can_static_cast_range<To, Rng>
-        auto operator()(Rng &&rng) const -> auto {
-            return this->operator()<To>(iterators::begin(rng), iterators::end(rng));
+        template <typename To, typename Rng>
+            requires concepts::static_castable_range<To, Rng>
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            auto [first, last] = iterators::iter_pair(rng);
+            return this->operator()<To>(std::move(first), std::move(last));
         }
 
         template <typename To>
-        auto operator()() const -> auto {
-            return
-                [FWD_CAPTURES()]<typename Rng> requires concepts::can_static_cast_range<To, Rng>
-                (Rng &&rng) mutable -> auto {
+        constexpr auto operator()() const -> auto {
+            return [*this]<typename Rng>(Rng &&rng) requires concepts::static_castable_range<To, Rng> {
                 return this->operator()<To>(std::forward<Rng>(rng));
             };
         }
     };
 
-    DEFINE_VIEW(cast_dynamic_) {
-        template <typename To, typename I, typename S> requires concepts::can_dynamic_cast_iters<To, I, S>
-        auto operator()(I first, S last) const -> auto {
-            auto gen = detail::do_dynamic_cast_iter<To>(std::move(first), std::move(last));
-            return cast_dynamic__view(std::move(gen));
+    struct cast_dynamic_impl_fn {
+        template <typename To, typename I, typename S>
+            requires concepts::dynamic_castable_iters<To, I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            return detail::do_dynamic_cast_iter<To>(std::move(first), std::move(last));
         }
 
-        template <typename To, typename Rng> requires concepts::can_dynamic_cast_range<To, Rng>
-        auto operator()(Rng &&rng) const -> auto {
-            return this->operator()<To>(iterators::begin(rng), iterators::end(rng));
+        template <typename To, typename Rng>
+            requires concepts::dynamic_castable_range<To, Rng>
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            auto [first, last] = iterators::iter_pair(rng);
+            return this->operator()<To>(std::move(first), std::move(last));
         }
 
         template <typename To>
-        auto operator()() const -> auto {
-            return
-                [FWD_CAPTURES()]<typename Rng> requires concepts::can_dynamic_cast_range<To, Rng>
-                (Rng &&rng) mutable -> auto {
+        constexpr auto operator()() const -> auto {
+            return [*this]<typename Rng>(Rng &&rng) requires concepts::dynamic_castable_range<To, Rng> {
                 return this->operator()<To>(std::forward<Rng>(rng));
             };
         }
     };
 
-    DEFINE_VIEW(cast_smart_ptr_) {
-        template <typename To, typename I, typename S> requires concepts::can_smart_ptr_cast_iters<To, I, S> and unique_ptr<iter_value_t<I>> and std::movable<iter_value_t<I>>
-        auto operator()(I first, S last) const -> auto {
-            auto gen = detail::do_unique_ptr_cast_iter<To>(std::move(first), std::move(last));
-            return cast_smart_ptr__view(std::move(gen));
+    struct cast_smart_ptr_impl_fn {
+        template <typename To, typename I, typename S>
+            requires concepts::smart_ptr_castable_iters<To, I, S> and unique_ptr<iter_value_t<I>> and std::movable<iter_value_t<I>>
+        constexpr auto operator()(I first, S last) const -> auto {
+            return detail::do_unique_ptr_cast_iter<To>(std::move(first), std::move(last));
         }
 
-        template <typename To, typename I, typename S> requires concepts::can_smart_ptr_cast_iters<To, I, S> and shared_ptr<iter_value_t<I>>
-        auto operator()(I first, S last) const -> auto {
-            auto gen = detail::do_shared_ptr_cast_iter<To>(std::move(first), std::move(last));
-            return cast_smart_ptr__view(std::move(gen));
+        template <typename To, typename I, typename S>
+            requires concepts::smart_ptr_castable_iters<To, I, S> and shared_ptr<iter_value_t<I>>
+        constexpr auto operator()(I first, S last) const -> auto {
+            return detail::do_shared_ptr_cast_iter<To>(std::move(first), std::move(last));
         }
 
-        template <typename To, typename I, typename S> requires concepts::can_smart_ptr_cast_iters<To, I, S> and weak_ptr<iter_value_t<I>>
-        auto operator()(I first, S last) const -> auto {
-            auto gen = detail::do_weak_ptr_cast_iter<To>(std::move(first), std::move(last));
-            return cast_smart_ptr__view(std::move(gen));
+        template <typename To, typename I, typename S>
+            requires concepts::smart_ptr_castable_iters<To, I, S> and weak_ptr<iter_value_t<I>>
+        constexpr auto operator()(I first, S last) const -> auto {
+            return detail::do_weak_ptr_cast_iter<To>(std::move(first), std::move(last));
         }
 
-        template <typename To, typename Rng> requires concepts::can_smart_ptr_cast_range<To, Rng> and unique_ptr<range_value_t<Rng>> and std::movable<range_value_t<Rng>>
-        auto operator()(Rng &&rng) const -> auto {
+        template <typename To, typename Rng>
+            requires concepts::smart_ptr_castable_range<To, Rng> and unique_ptr<range_value_t<Rng>> and std::movable<range_value_t<Rng>>
+        constexpr auto operator()(Rng &&rng) const -> auto {
             return this->operator()<To>(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
         }
 
-        template <typename To, typename Rng> requires concepts::can_smart_ptr_cast_range<To, Rng> and shared_ptr<range_value_t<Rng>>
-        auto operator()(Rng &&rng) const -> auto {
+        template <typename To, typename Rng>
+            requires concepts::smart_ptr_castable_range<To, Rng> and shared_ptr<range_value_t<Rng>>
+        constexpr auto operator()(Rng &&rng) const -> auto {
             return this->operator()<To>(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
         }
 
-        template <typename To, typename Rng> requires concepts::can_smart_ptr_cast_range<To, Rng> and weak_ptr<range_value_t<Rng>>
-        auto operator()(Rng &&rng) const -> auto {
+        template <typename To, typename Rng>
+            requires concepts::smart_ptr_castable_range<To, Rng> and weak_ptr<range_value_t<Rng>>
+        constexpr auto operator()(Rng &&rng) const -> auto {
             return this->operator()<To>(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
         }
 
         template <typename To>
-        auto operator()() const -> auto {
-            return
-                [FWD_CAPTURES()]<typename Rng> requires concepts::can_smart_ptr_cast_range<To, Rng>
-                (Rng &&rng) mutable -> auto {
+        constexpr auto operator()() const -> auto {
+            return [*this]<typename Rng>(Rng &&rng) requires concepts::smart_ptr_castable_range<To, Rng> {
                 return this->operator()<To>(std::forward<Rng>(rng));
             };
         }
     };
 
-    EXPORT_GENEX_VIEW(cast_static_);
-    EXPORT_GENEX_VIEW(cast_dynamic_);
-    EXPORT_GENEX_VIEW(cast_smart_ptr_);
+    EXPORT_GENEX_STRUCT(cast_static_impl);
+    EXPORT_GENEX_STRUCT(cast_dynamic_impl);
+    EXPORT_GENEX_STRUCT(cast_smart_ptr_impl);
 }
 
 
-#define cast_static cast_static_.operator()
-#define cast_dynamic cast_dynamic_.operator()
-#define cast_smart_ptr cast_smart_ptr_.operator()
+#define cast_static cast_static_impl.operator()
+#define cast_dynamic cast_dynamic_impl.operator()
+#define cast_smart_ptr cast_smart_ptr_impl.operator()

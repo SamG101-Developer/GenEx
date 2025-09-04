@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/remove.hpp>
+#include <genex/views/remove_if.hpp>
 #include <genex/views/to.hpp>
 
 

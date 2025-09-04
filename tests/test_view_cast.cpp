@@ -31,7 +31,7 @@ TEST(GenexViewsStaticCast, VecSimple) {
     const auto rng = vec
         | genex::views::cast_static<double>()
         | genex::views::to<std::vector>();
-    const auto exp = std::vector<double>{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
+    const auto exp = std::vector{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
     EXPECT_EQ(rng, exp);
 }
 
@@ -43,7 +43,7 @@ TEST(GenexViewsStaticCast, VecSimpleAndBack) {
         | genex::views::cast_static<double>()
         | genex::views::cast_static<int>()
         | genex::views::to<std::vector>();
-    const auto exp = std::vector<int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    const auto exp = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     EXPECT_EQ(rng, exp);
 }
 
@@ -73,7 +73,7 @@ TEST(GenexViewsSharedCast, VecPolymorphicSmartPtr) {
     const auto rng = vec
         | genex::views::cast_smart_ptr<DerivedA>()
         | genex::views::to<std::vector>();
-    const auto exp = std::vector<std::shared_ptr<DerivedA>>{a1, a2};
+    const auto exp = std::vector{a1, a2};
     EXPECT_EQ(rng, exp);
 }
 

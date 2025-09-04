@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/replace.hpp>
+#include <genex/views/replace_if.hpp>
 #include <genex/views/to.hpp>
 
 

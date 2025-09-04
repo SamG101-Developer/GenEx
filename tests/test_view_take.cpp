@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/take.hpp>
+#include <genex/views/take_last.hpp>
+#include <genex/views/take_until.hpp>
+#include <genex/views/take_while.hpp>
 #include <genex/views/to.hpp>
 
 

@@ -1,18 +1,16 @@
 #pragma once
 #include <coroutine>
 #include <genex/concepts.hpp>
-#include <genex/iterators/begin.hpp>
-#include <genex/iterators/end.hpp>
+#include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
-#include <genex/views/_view_base.hpp>
+#include <genex/pipe.hpp>
 
 
 namespace genex::views::concepts {
     template <typename I, typename S>
     concept can_view_iters =
         std::input_iterator<I> and
-        std::sentinel_for<S, I> and
-        std::movable<I>;
+        std::sentinel_for<S, I>;
 
     template <typename Rng>
     concept can_view_range =
@@ -22,7 +20,8 @@ namespace genex::views::concepts {
 
 
 namespace genex::views::detail {
-    template <typename I, typename S> requires concepts::can_view_iters<I, S>
+    template <typename I, typename S>
+        requires concepts::can_view_iters<I, S>
     auto do_view(I first, S last) -> generator<iter_value_t<I>> {
         for (auto it = first; it != last; ++it) {
             co_yield static_cast<iter_value_t<I>>(*it);
@@ -32,26 +31,24 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    DEFINE_VIEW(view) {
-        template <typename I, typename S> requires concepts::can_view_iters<I, S>
-        auto operator()(I first, S last) const -> auto {
-            auto gen = detail::do_view(std::move(first), std::move(last));
-            return view_view(std::move(gen));
+    struct view_fn {
+        template <typename I, typename S>
+            requires concepts::can_view_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            return detail::do_view(std::move(first), std::move(last));
         }
 
-        template <typename Rng> requires concepts::can_view_range<Rng>
-        auto operator()(Rng &&rng) const -> auto {
-            return (*this)(iterators::begin(rng), iterators::end(rng));
+        template <typename Rng>
+            requires concepts::can_view_range<Rng>
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            auto [first, last] = iterators::iter_pair(rng);
+            return (*this)(std::move(first), std::move(last));
         }
 
-        auto operator()() const -> auto {
-            return
-                [FWD_CAPTURES()]<typename Rng> requires concepts::can_view_range<Rng>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng));
-            };
+        constexpr auto operator()() const -> auto {
+            return std::bind_back(view_fn{});
         }
     };
 
-    EXPORT_GENEX_VIEW(view);
+    EXPORT_GENEX_STRUCT(view);
 }

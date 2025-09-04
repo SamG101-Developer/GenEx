@@ -15,7 +15,7 @@ TEST(GenexViewsMaterialize, AsVec) {
 
     const auto rng = vec
         | genex::views::filter([](const int x) { return x % 2 == 0; })
-        | genex::views::materialize
+        | genex::views::materialize()
         | genex::views::to<std::vector>();
     const auto exp = std::vector{0, 2, 4, 6, 8};
 
@@ -28,7 +28,7 @@ TEST(GenexViewsMaterialize, AsList) {
 
     const auto rng = vec
         | genex::views::filter([](const int x) { return x % 2 == 0; })
-        | genex::views::materialize.operator()<std::list>()
+        | genex::views::materialize<std::list>()
         | genex::views::to<std::vector>();
     const auto exp = std::vector{0, 2, 4, 6, 8};
 
@@ -43,7 +43,7 @@ TEST(GenexViewsMaterialize, AsDeque) {
 
     const auto rng = vec
         | genex::views::filter([](const int x) { return x % 2 == 0; })
-        | genex::views::materialize.operator()<std::list>()
+        | genex::views::materialize<std::list>()
         | genex::views::to<std::vector>();
     const auto exp = std::vector{0, 2, 4, 6, 8};
 

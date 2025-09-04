@@ -1,11 +1,12 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/intersperse.hpp>
+#include <genex/views/intersperse_with.hpp>
 #include <genex/views/to.hpp>
 
 
 TEST(GenexViewsIntersperse, VecInput) {
-    auto vec = std::vector<int>{{1, 2, 3, 4, 5, 6}};
+    auto vec = std::vector{1, 2, 3, 4, 5, 6};
     const auto rng = vec
         | genex::views::intersperse(0)
         | genex::views::to<std::vector>();
@@ -15,7 +16,7 @@ TEST(GenexViewsIntersperse, VecInput) {
 
 
 TEST(GenexViewsIntersperseWith, VecInput) {
-    auto vec = std::vector<int>{{1, 2, 3, 4, 5, 6}};
+    auto vec = std::vector{1, 2, 3, 4, 5, 6};
 
     const auto rng = vec
         | genex::views::intersperse_with([] { return 0; })

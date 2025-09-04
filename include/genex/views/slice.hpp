@@ -1,90 +1,103 @@
 #pragma once
 #include <coroutine>
 #include <genex/concepts.hpp>
-#include <genex/iterators/begin.hpp>
-#include <genex/iterators/end.hpp>
+#include <genex/generator.hpp>
+#include <genex/iterators/iter_pair.hpp>
+#include <genex/iterators/next.hpp>
 #include <genex/macros.hpp>
-#include <genex/views/_view_base.hpp>
+#include <genex/pipe.hpp>
 
 
 namespace genex::views::concepts {
-    template <typename I, typename S>
-    concept can_slice_iters_optimized =
-        std::random_access_iterator<I> and
-        std::sentinel_for<S, I> and
-        std::movable<I>;
-
-    template <typename I, typename S>
-    concept can_slice_iters_unoptimized =
-        not can_slice_iters_optimized<I, S> and
-        std::input_iterator<I> and
-        std::sentinel_for<S, I> and
-        std::movable<I>;
-
-    template <typename I, typename S>
+    template <typename I, typename S, typename Int>
     concept can_slice_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
-        std::movable<I>;
+        integer_like<Int>;
 
-    template <typename Rng>
+    template <typename I, typename S, typename Int>
+    concept can_slice_iters_optimized_2 =
+        std::random_access_iterator<I> and
+        can_slice_iters<I, S, Int>;
+
+    template <typename I, typename S, typename Int>
+    concept can_slice_iters_optimized_1 =
+        std::forward_iterator<I> and
+        not std::random_access_iterator<I> and
+        can_slice_iters<I, S, Int>;
+
+    template <typename I, typename S, typename Int>
+    concept can_slice_iters_unoptimized =
+        std::input_iterator<I> and
+        not std::forward_iterator<I> and
+        can_slice_iters<I, S, Int>;
+
+    template <typename Rng, typename Int>
     concept can_slice_range =
         input_range<Rng> and
-        can_slice_iters<iterator_t<Rng>, sentinel_t<Rng>>;
+        can_slice_iters<iterator_t<Rng>, sentinel_t<Rng>, Int>;
 }
 
 
 namespace genex::views::detail {
-    template <typename I, typename S> requires concepts::can_slice_iters_unoptimized<I, S>
-    auto do_slice(I first, S last, const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) -> generator<iter_value_t<I>> {
+    template <typename I, typename S, typename Int>
+        requires concepts::can_slice_iters_optimized_2<I, S, Int>
+    auto do_slice(I first, S last, const Int start_index, const Int end_index, const Int step = 1) -> generator<iter_value_t<I>> {
         if (step <= 0) { throw std::invalid_argument("Step cannot be <= 0."); }
         if (first == last) { co_return; }
-        auto index = 0uz;
-        for (; first != last; first += step, ++index) {
-            if (index < start_index) { continue; }
-            if (index >= end_index) { break; }
-            if ((index - start_index) % step == 0) { co_yield static_cast<iter_value_t<I>>(*first); }
+        for (auto i = start_index; i < end_index and (first + i) != last; i += step) {
+            co_yield *(first + i);
         }
     }
 
-    template <typename I, typename S> requires concepts::can_slice_iters_optimized<I, S>
-    auto do_slice(I first, S last, const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) -> generator<iter_value_t<I>> {
+    template <typename I, typename S, typename Int>
+        requires concepts::can_slice_iters_optimized_1<I, S, Int>
+    auto do_slice(I first, S last, const Int start_index, const Int end_index, const Int step = 1) -> generator<iter_value_t<I>> {
         if (step <= 0) { throw std::invalid_argument("Step cannot be <= 0."); }
         if (first == last) { co_return; }
-        const auto distance = static_cast<std::size_t>(last - first);
-        const auto real_start = std::min(start_index, distance);
-        const auto real_end = std::min(end_index, distance);
-        for (auto index = real_start; index < real_end; index += step) {
-            co_yield static_cast<iter_value_t<I>>(*(first + index));
+        auto it = iterators::next(first, start_index, last);
+        for (auto i = start_index; i < end_index and (first + i) != last; i += step) {
+            co_yield *it;
+            it = iterators::next(it, step, last);
+        }
+    }
+
+    template <typename I, typename S, typename Int>
+        requires concepts::can_slice_iters_unoptimized<I, S, Int>
+    auto do_slice(I first, S last, const Int start_index, const Int end_index, const Int step = 1) -> generator<iter_value_t<I>> {
+        if (step <= 0) { throw std::invalid_argument("Step cannot be <= 0."); }
+        if (first == last) { co_return; }
+        for (auto i = 0u; i < start_index and first != last; ++i, ++first) {
+        }
+        for (auto i = start_index; i < end_index and first != last; i += step) {
+            co_yield *first;
+            for (auto j = 0u; j < step and first != last; ++j, ++first);
         }
     }
 }
 
 
 namespace genex::views {
-    DEFINE_VIEW(slice) {
-        template <typename I, typename S> requires concepts::can_slice_iters<I, S>
-        auto operator()(I first, S last, const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> auto {
-            // Call the slice inner function.
-            auto gen = detail::do_slice(std::move(first), std::move(last), start_index, end_index, step);
-            return slice_view(std::move(gen));
+    struct slice_fn {
+        template <typename I, typename S, typename Int>
+            requires concepts::can_slice_iters<I, S, Int>
+        constexpr auto operator()(I first, S last, const Int start_index, const Int end_index, const Int step = 1) const -> auto {
+            return detail::do_slice(std::move(first), std::move(last), start_index, end_index, step);
         }
 
-        template <typename Rng> requires concepts::can_slice_range<Rng>
-        auto operator()(Rng &&rng, const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> auto {
-            // Call the slice inner function.
-            return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), start_index, end_index, step);
+        template <typename Rng, typename Int>
+            requires concepts::can_slice_range<Rng, Int>
+        constexpr auto operator()(Rng &&rng, const Int start_index, const Int end_index, const Int step = 1) const -> auto {
+            auto [first, last] = iterators::iter_pair(rng);
+            return (*this)(std::move(first), std::move(last), start_index, end_index, step);
         }
 
-        auto operator()(const std::size_t start_index, const std::size_t end_index, const std::size_t step = 1) const -> auto {
-            // Create a closure that takes a range and applies the slice.
-            return
-                [FWD_CAPTURES(start_index, end_index, step)]<typename Rng> requires concepts::can_slice_range<Rng>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), start_index, end_index, step);
-            };
+        template <typename Int>
+            requires integer_like<Int>
+        constexpr auto operator()(const Int start_index, const Int end_index, const Int step = 1) const -> auto {
+            return std::bind_back(slice_fn{}, start_index, end_index, step);
         }
     };
 
-    EXPORT_GENEX_VIEW(slice);
+    EXPORT_GENEX_STRUCT(slice);
 }

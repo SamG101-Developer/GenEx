@@ -1,34 +1,55 @@
 #pragma once
 #include <utility>
 #include <genex/concepts.hpp>
-#include <genex/actions/_action_base.hpp>
-#include <genex/iterators/begin.hpp>
-#include <genex/iterators/end.hpp>
+#include <genex/iterators/iter_pair.hpp>
+#include <genex/pipe.hpp>
 
 
 namespace genex::actions::concepts {
     template <typename Rng>
-    concept can_reverse_range =
+    concept reversible_range =
         bidirectional_range<Rng> and
         std::permutable<iterator_t<Rng>>;
+
+    template <typename Rng>
+    concept reversible_range_optimized =
+        random_access_range<Rng> and
+        reversible_range<Rng>;
+
+    template <typename Rng>
+    concept reversible_range_unoptimized =
+        input_range<Rng> and
+        not random_access_range<Rng> and
+        reversible_range<Rng>;
 }
 
 
 namespace genex::actions {
-    DEFINE_ACTION(reverse) {
-        template <typename Rng> requires concepts::can_reverse_range<Rng>
-        auto operator()(Rng &&rng) const -> void {
-            std::reverse(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
+    struct reverse_fn {
+        template <typename Rng>
+            requires concepts::reversible_range_optimized<Rng>
+        constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+            auto [first, last] = iterators::iter_pair(rng);
+            while (first < --last) {
+                std::iter_swap(first++, last);
+            }
+            return std::forward<Rng>(rng);
         }
 
-        auto operator()() const -> auto {
-            return
-                [FWD_CAPTURES()]<typename Rng> requires concepts::can_reverse_range<Rng>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng));
-            };
+        template <typename Rng>
+            requires concepts::reversible_range_unoptimized<Rng>
+        constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+            auto [first, last] = iterators::iter_pair(rng);
+            while (first != last and first != --last) {
+                std::iter_swap(first++, last);
+            }
+            return std::forward<Rng>(rng);
+        }
+
+        constexpr auto operator()() const -> auto {
+            return std::bind_back(reverse_fn{});
         }
     };
 
-    EXPORT_GENEX_ACTION(reverse);
+    EXPORT_GENEX_STRUCT(reverse);
 }

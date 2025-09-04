@@ -1,14 +1,4 @@
 #pragma once
-#include <genex/generator.hpp>
-#include <genex/macros.hpp>
-#include <genex/views/_view_base.hpp>
-
-
-#define EXPORT_GENEX_STRING(name) \
-    EXPORT_GENEX_STRUCT(name)
-
-#define DEFINE_STRING(name) \
-    struct name ## _fn : detail::string_fn_base
 
 
 namespace genex::strings {
@@ -35,9 +25,4 @@ namespace genex::strings {
         strict_char_like<C> or
         wide_char_like<C> or
         utf_char_like<C>;
-}
-
-
-namespace genex::strings::detail {
-    using string_fn_base = views::detail::view_fn_base;
 }

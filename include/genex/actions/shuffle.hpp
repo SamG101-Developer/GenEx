@@ -1,59 +1,46 @@
 #pragma once
-#include <utility>
 #include <random>
+#include <utility>
 #include <genex/concepts.hpp>
-#include <genex/actions/_action_base.hpp>
-#include <genex/iterators/begin.hpp>
-#include <genex/iterators/end.hpp>
+#include <genex/iterators/iter_pair.hpp>
+#include <genex/pipe.hpp>
 
 
 namespace genex::actions::concepts {
     template <typename Rng, typename Shuffler>
-    concept can_shuffle_range =
+    concept shufflable_range =
         random_access_range<Rng> and
         std::permutable<iterator_t<Rng>> and
         std::uniform_random_bit_generator<std::remove_reference_t<Shuffler>>;
 
     template <typename Rng>
-    concept can_shuffle_random_range =
+    concept random_shufflable_range =
         random_access_range<Rng> and
         std::permutable<iterator_t<Rng>>;
 }
 
 
+namespace genex::actions::detail {
+    static thread_local std::mt19937_64 default_random{std::random_device{}()};
+}
+
+
 namespace genex::actions {
-    DEFINE_ACTION(shuffle) {
-        template <typename Rng, typename Shuffler> requires concepts::can_shuffle_range<Rng, Shuffler>
-        auto operator()(Rng &&rng, Shuffler &&shuffler) const -> void {
-            std::shuffle(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), std::forward<Shuffler>(shuffler));
+    struct shuffle_fn {
+        template <typename Rng, typename Shuffler>
+            requires concepts::shufflable_range<Rng, Shuffler>
+        auto operator()(Rng &&rng, Shuffler &&shuffler = detail::default_random) const -> decltype(auto) {
+            auto [first, last] = iterators::iter_pair(rng);
+            std::shuffle(std::move(first), std::move(last), std::forward<Shuffler>(shuffler));
+            return std::forward<Rng>(rng);
         }
 
-        template <typename Shuffler> requires (not input_range<std::remove_cvref_t<Shuffler>>)
+        template <typename Shuffler> requires
+            std::uniform_random_bit_generator<std::remove_reference_t<Shuffler>>
         auto operator()(Shuffler &&shuffler) const -> auto {
-            return
-                [FWD_CAPTURES(shuffler)]<typename Rng> requires concepts::can_shuffle_range<Rng, Shuffler>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng), std::forward<Shuffler>(shuffler));
-            };
+            return std::bind_back(shuffle_fn{}, std::forward<Shuffler>(shuffler));
         }
     };
 
-    DEFINE_ACTION(shuffle_random) {
-        template <typename Rng> requires concepts::can_shuffle_random_range<Rng>
-        auto operator()(Rng &&rng) const -> void {
-            static thread_local std::mt19937_64 gen{std::random_device{}()};
-            std::shuffle(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)), gen);
-        }
-
-        auto operator()() const -> auto {
-            return
-                [FWD_CAPTURES()]<typename Rng> requires concepts::can_shuffle_random_range<Rng>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng));
-            };
-        }
-    };
-
-    EXPORT_GENEX_ACTION(shuffle);
-    EXPORT_GENEX_ACTION(shuffle_random);
+    EXPORT_GENEX_STRUCT(shuffle);
 }

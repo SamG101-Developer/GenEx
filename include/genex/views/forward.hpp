@@ -2,10 +2,10 @@
 #include <coroutine>
 #include <utility>
 #include <genex/concepts.hpp>
-#include <genex/iterators/begin.hpp>
-#include <genex/iterators/end.hpp>
+#include <genex/generator.hpp>
+#include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
-#include <genex/views/_view_base.hpp>
+#include <genex/pipe.hpp>
 
 
 namespace genex::views::concepts {
@@ -13,7 +13,6 @@ namespace genex::views::concepts {
     concept can_forward_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
-        std::movable<I> and
         std::is_lvalue_reference_v<iter_reference_t<I>> and
         std::movable<std::remove_reference_t<iter_reference_t<I>>>;
 
@@ -25,7 +24,8 @@ namespace genex::views::concepts {
 
 
 namespace genex::views::detail {
-    template <typename I, typename S> requires concepts::can_forward_iters<I, S>
+    template <typename I, typename S>
+        requires concepts::can_forward_iters<I, S>
     auto do_forward(I first, S last) -> generator<std::remove_reference_t<iter_reference_t<I>>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -36,29 +36,24 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    DEFINE_VIEW(forward) {
-        template <typename I, typename S> requires concepts::can_forward_iters<I, S>
-        auto operator()(I first, S last) const -> auto {
-            // Call the forward inner function.
-            auto gen = detail::do_forward(std::move(first), std::move(last));
-            return forward_view(std::move(gen));
+    struct forward_fn {
+        template <typename I, typename S>
+            requires concepts::can_forward_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            return detail::do_forward(std::move(first), std::move(last));
         }
 
-        template <typename Rng> requires concepts::can_forward_range<Rng>
-        auto operator()(Rng &&rng) const -> auto {
-            // Call the forward inner function.
-            return (*this)(iterators::begin(std::forward<Rng>(rng)), iterators::end(std::forward<Rng>(rng)));
+        template <typename Rng>
+            requires concepts::can_forward_range<Rng>
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            auto [first, last] = iterators::iter_pair(rng);
+            return (*this)(std::move(first), std::move(last));
         }
 
-        auto operator()() const -> auto {
-            // Create a closure that takes a range and applies the forward.
-            return
-                [FWD_CAPTURES()]<typename Rng> requires concepts::can_forward_range<Rng>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng));
-            };
+        constexpr auto operator()() const -> auto {
+            return std::bind_back(forward_fn{});
         }
     };
 
-    EXPORT_GENEX_VIEW(forward);
+    EXPORT_GENEX_STRUCT(forward);
 }

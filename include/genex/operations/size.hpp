@@ -2,7 +2,45 @@
 #include <iterator>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
-#include <genex/operations/_operation_base.hpp>
+
+
+namespace genex::operations::concepts {
+    template <typename Rng>
+    concept sizeable_range =
+        range<Rng>;
+
+    template <typename Rng>
+    concept sizeable_select_size =
+        sizeable_range<Rng> and
+        has_member_size<Rng>;
+
+    template <typename Rng>
+    concept sizeable_select_std_size =
+        sizeable_range<Rng> and
+        has_std_size<Rng> and
+        not has_member_size<Rng>;
+
+    template <typename Rng>
+    concept sizeable_select_else =
+        sizeable_range<Rng> and
+        not has_std_size<Rng> and
+        not has_member_size<Rng>;
+
+    template <typename Rng>
+    concept emptyable_range =
+        range<Rng>;
+
+    template <typename Rng>
+    concept emptyable_select_empty =
+        emptyable_range<Rng> and
+        has_member_empty<Rng>;
+
+    template <typename Rng>
+    concept emptyable_select_size =
+        emptyable_range<Rng> and
+        sizeable_range<Rng> and
+        not has_member_empty<Rng>;
+}
 
 
 namespace genex::operations {
@@ -11,41 +49,44 @@ namespace genex::operations {
         input_range<Rng> and
         std::sized_sentinel_for<sentinel_t<Rng>, iterator_t<Rng>>;
 
-    DEFINE_OPERATION(size) {
-        template <typename Rng> requires (can_size_range<Rng> and has_member_size<Rng>)
-        auto operator()(Rng &&r) const noexcept -> std::size_t {
+    struct size_fn {
+        template <typename Rng>
+            requires concepts::sizeable_select_size<Rng>
+        constexpr auto operator()(Rng &&r) const -> std::size_t {
             return r.size();
         }
 
-        template <typename Rng> requires (can_size_range<Rng> and not has_member_size<Rng> and has_std_size<Rng>)
-        auto operator()(Rng &&r) const noexcept -> std::size_t {
+        template <typename Rng>
+            requires concepts::sizeable_select_std_size<Rng>
+        constexpr auto operator()(Rng &&r) const -> std::size_t {
             return std::size(r);
         }
 
-        template <typename Rng> requires (can_size_range<Rng> and not has_member_size<Rng> and not has_std_size<Rng>)
-        auto operator()(Rng &&gen) const noexcept -> std::size_t {
+        template <typename Rng>
+            requires concepts::sizeable_select_else<Rng>
+        constexpr auto operator()(Rng &&gen) const -> std::size_t {
             auto count = static_cast<std::size_t>(0);
-            for (auto &&_ : gen) {
-                ++count;
-            }
+            for (auto &&_ : gen) { ++count; }
             return count;
         }
     };
 
-    EXPORT_GENEX_OPERATION(size);
+    EXPORT_GENEX_STRUCT(size);
 
 
-    DEFINE_OPERATION(empty) {
-        template <typename Rng> requires (has_member_empty<Rng>)
-        auto operator()(Rng &&r) const noexcept -> bool {
+    struct empty_fn {
+        template <typename Rng>
+            requires concepts::emptyable_select_empty<Rng>
+        constexpr auto operator()(Rng &&r) const -> bool {
             return r.empty();
         }
 
-        template <typename Rng> requires (can_size_range<Rng> and not has_member_empty<Rng>)
-        auto operator()(Rng &&r) const noexcept -> bool {
-            return size(std::forward<Rng>(r)) == 0;
+        template <typename Rng>
+            requires concepts::emptyable_select_size<Rng>
+        constexpr auto operator()(Rng &&rng) const -> bool {
+            return operations::size(rng) == 0;
         }
     };
 
-    EXPORT_GENEX_OPERATION(empty);
+    EXPORT_GENEX_STRUCT(empty);
 }

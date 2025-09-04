@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <genex/actions/push.hpp>
+#include <genex/actions/insert.hpp>
+#include <genex/actions/push_back.hpp>
+#include <genex/actions/push_front.hpp>
 
 
 TEST(GenexActionsPushBack, VecInput) {
@@ -21,7 +23,7 @@ TEST(GenexActionsPushFront, VecInput) {
 
 TEST(GenexActionsPush, VecInput) {
     auto vec = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    vec |= genex::actions::push(vec.begin() + 4, 0);
+    vec |= genex::actions::insert(vec.begin() + 4, 0);
     const auto exp = std::vector{0, 1, 2, 3, 0, 4, 5, 6, 7, 8, 9};
     EXPECT_EQ(vec, exp);
 }

@@ -24,7 +24,7 @@ TEST(GenexViewsReverse, MultliStage) {
     const auto rng = vec
         | genex::views::map([](const int i) { return i * 2; })
         | genex::views::filter([](const int i) { return i % 4 == 0; })
-        | genex::views::materialize
+        | genex::views::materialize()
         | genex::views::reverse
         | genex::views::to<std::vector>();
     const auto exp = std::vector{16, 12, 8, 4, 0};

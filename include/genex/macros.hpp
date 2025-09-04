@@ -39,5 +39,9 @@
     inline constexpr name ## _fn name
 
 
+#define GENEX_ASSERT(E, cond) \
+    if (!(cond)) { throw E("Runtime assertion failed: " #cond); }
+
+
 #define GENEX_PRAGMA(x) _Pragma(#x)
 #define BROKEN(message) GENEX_PRAGMA(GCC warning message)

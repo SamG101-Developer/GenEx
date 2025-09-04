@@ -243,12 +243,15 @@ namespace genex {
     struct is_tuple_like : std::false_type {
     };
 
-    template <typename ...Ts>
+    template <typename... Ts>
     struct is_tuple_like<std::tuple<Ts...>> : std::true_type {
     };
 
     template <typename T>
     concept tuple_like = is_tuple_like<std::remove_cvref_t<T>>::value;
+
+    template <typename T>
+    concept integer_like = std::is_integral_v<std::remove_cvref_t<T>>;
 }
 
 

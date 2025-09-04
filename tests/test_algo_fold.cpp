@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <genex/algorithms/fold.hpp>
+#include <genex/algorithms/fold_left.hpp>
+#include <genex/algorithms/fold_left_first.hpp>
+#include <genex/algorithms/fold_right.hpp>
+#include <genex/algorithms/fold_right_first.hpp>
 
 
 TEST(GenexAlgosFoldLeft, FoldLeftWithInit) {

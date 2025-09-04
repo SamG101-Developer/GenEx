@@ -1,30 +1,30 @@
 #pragma once
 #include <coroutine>
 #include <utility>
-#include <genex/iterators/begin.hpp>
-#include <genex/iterators/end.hpp>
 #include <genex/concepts.hpp>
+#include <genex/generator.hpp>
+#include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
-#include <genex/views/_view_base.hpp>
+#include <genex/pipe.hpp>
 
 
 namespace genex::views::concepts {
     template <typename I, typename S>
-    concept can_move_iters =
+    concept movable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
-        std::movable<I> and
         std::movable<iter_value_t<I>>;
 
     template <typename Rng>
-    concept can_move_range =
+    concept movable_range =
         input_range<Rng> and
-        can_move_iters<iterator_t<Rng>, sentinel_t<Rng>>;
+        movable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
 
 namespace genex::views::detail {
     template <typename I, typename S>
+        requires concepts::movable_iters<I, S>
     auto do_move(I first, S last) -> generator<iter_value_t<I>&&> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -35,30 +35,23 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-
-    DEFINE_VIEW(move) {
-        template <typename I, typename S> requires concepts::can_move_iters<I, S>
-        auto operator()(I first, S last) const -> auto {
-            // Call the move inner function.
-            auto gen = detail::do_move(std::move(first), std::move(last));
-            return move_view(std::move(gen));
+    struct move_fn {
+        template <typename I, typename S>
+            requires concepts::movable_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            return detail::do_move(std::move(first), std::move(last));
         }
 
-        template <typename Rng> requires concepts::can_move_range<Rng>
-        auto operator()(Rng &&rng) const -> auto {
-            // Call the move inner function.
-            return (*this)(iterators::begin(rng), iterators::end(rng));
+        template <typename Rng> requires concepts::movable_range<Rng>
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            auto [first, last] = iterators::iter_pair(rng);
+            return (*this)(std::move(first), std::move(last));
         }
 
-        auto operator()() const -> auto {
-            // Create a closure that takes a range and applies the move.
-            return
-                [FWD_CAPTURES()]<typename Rng> requires concepts::can_move_range<Rng>
-                (Rng &&rng) mutable -> auto {
-                return (*this)(std::forward<Rng>(rng));
-            };
+        constexpr auto operator()() const -> auto {
+            return std::bind_back(move_fn{});
         }
     };
 
-    EXPORT_GENEX_VIEW(move);
+    EXPORT_GENEX_STRUCT(move);
 }

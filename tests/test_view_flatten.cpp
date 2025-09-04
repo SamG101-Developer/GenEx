@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/flatten.hpp>
+#include <genex/views/flatten_with.hpp>
 #include <genex/views/to.hpp>
 
 
@@ -32,6 +33,7 @@ TEST(GenexViewsFlatten, StrInput) {
 
 TEST(GenexViewsFlattenWith, VecInput) {
     auto vec = std::vector<std::vector<int>>{{1, 2, 3}, {4, 5}, {6}};
+
     const auto rng = vec
         | genex::views::flatten_with(0)
         | genex::views::to<std::vector>();

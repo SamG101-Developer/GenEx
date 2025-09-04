@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/actions/remove.hpp>
+#include <genex/actions/remove_if.hpp>
 #include <genex/views/ptr.hpp>
 #include <genex/views/to.hpp>
 
@@ -42,6 +43,7 @@ TEST(GenexActionsRemoveIf, DISABLED_VecInputUniquePtr) {
     vec.push_back(std::make_unique<int>(1));
     vec.push_back(std::make_unique<int>(2));
     vec.push_back(std::make_unique<int>(3));
+
     vec |= genex::actions::remove_if([](auto &&x) { return *x % 2 == 0; });
     const auto exp = std::vector{1, 3};
 

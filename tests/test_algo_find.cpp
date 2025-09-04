@@ -1,6 +1,11 @@
 #include <gtest/gtest.h>
 
 #include <genex/algorithms/find.hpp>
+#include <genex/algorithms/find_last.hpp>
+#include <genex/algorithms/find_if.hpp>
+#include <genex/algorithms/find_last_if.hpp>
+#include <genex/algorithms/find_if_not.hpp>
+#include <genex/algorithms/find_last_if_not.hpp>
 #include <genex/iterators/distance.hpp>
 
 
