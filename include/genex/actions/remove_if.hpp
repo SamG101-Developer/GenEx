@@ -23,6 +23,7 @@ namespace genex::actions {
         template <typename Rng, typename Pred, typename Proj = meta::identity>
             requires concepts::removable_if_range<Rng, Pred, Proj>
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> decltype(auto) {
+            // todo: optimize to prevent multi-passes.
             while (true) {
                 auto it = algorithms::find_if(rng, std::forward<Pred>(pred), std::forward<Proj>(proj));
                 if (it == iterators::end(rng)) { break; }

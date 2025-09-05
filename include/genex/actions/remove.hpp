@@ -14,7 +14,7 @@ namespace genex::actions::concepts {
         forward_range<Rng> and
         erasable_range<Rng, iterator_t<Rng>, sentinel_t<Rng>> and
         std::permutable<iterator_t<Rng>> and
-        std::indirect_equivalence_relation<operations::eq, std::projected<iterator_t<Rng>, Proj>, const E*>;
+        std::indirect_equivalence_relation<operations::eq, std::projected<iterator_t<Rng>, Proj>, std::remove_cvref_t<E> const*>;
 }
 
 
@@ -23,6 +23,7 @@ namespace genex::actions {
         template <typename Rng, typename E, typename Proj = meta::identity>
             requires concepts::removable_range<Rng, E, Proj>
         constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> decltype(auto) {
+            // todo: optimize to prevent multi-passes.
             while (true) {
                 auto it = algorithms::find(rng, std::forward<E>(elem), std::forward<Proj>(proj));
                 if (it == iterators::end(rng)) { break; }
@@ -31,10 +32,10 @@ namespace genex::actions {
             return std::forward<Rng>(rng);
         }
 
-        template <typename E>
-            requires (not input_range<std::remove_cvref_t<E>>)
-        constexpr auto operator()(E &&elem) const -> auto {
-            return std::bind_back(remove_fn{}, std::forward<E>(elem));
+        template <typename E, typename Proj = meta::identity>
+            requires(not range<E>)
+        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
+            return std::bind_back(remove_fn{}, std::forward<E>(elem), std::forward<Proj>(proj));
         }
     };
 
