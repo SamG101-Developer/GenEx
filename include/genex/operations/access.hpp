@@ -12,7 +12,7 @@ namespace genex::operations::concepts {
 
     template <typename Rng>
     concept frontable_range =
-        forward_range<Rng> and
+        input_range<Rng> and
         iterators::concepts::beginable_range<Rng>;
 
     template <typename Rng>
