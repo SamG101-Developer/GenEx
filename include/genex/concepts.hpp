@@ -36,12 +36,6 @@ namespace genex {
 
     template <typename T>
     using iter_difference_t = std::iter_difference_t<T>;
-
-    template <std::size_t N, typename... Ts>
-    struct nth_type;
-
-    template <std::size_t N, typename... Ts>
-    using nth_type_t = nth_type<N, Ts...>::type;
 }
 
 
@@ -246,6 +240,17 @@ namespace genex {
 
     template <typename T>
     concept integer_like = std::is_integral_v<std::remove_cvref_t<T>>;
+
+    template <typename T>
+    struct is_pair_like : std::false_type {
+    };
+
+    template <typename T1, typename T2>
+    struct is_pair_like<std::pair<T1, T2>> : std::true_type {
+    };
+
+    template <typename T>
+    concept pair_like = is_pair_like<std::remove_cvref_t<T>>::value;
 }
 
 
@@ -276,17 +281,4 @@ struct genex::sentinel<Rng> {
 template <typename T> requires requires(T &&t) { *std::declval<T>(); }
 struct genex::deref_value<T> {
     using type = decltype(*std::declval<T>());
-};
-
-
-template <typename First, typename... Rest>
-struct genex::nth_type<0, First, Rest...> {
-    using type = First;
-};
-
-
-template <std::size_t N, typename First, typename... Rest>
-struct genex::nth_type<N, First, Rest...> {
-    static_assert(N < 1 + sizeof...(Rest), "Index out of bounds");
-    using type = nth_type<N - 1, Rest...>::type;
 };

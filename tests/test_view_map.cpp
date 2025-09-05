@@ -1,77 +1,36 @@
+#include <map>
+
 #include <gtest/gtest.h>
 
 #include <genex/views/map.hpp>
 #include <genex/views/to.hpp>
 
 
-struct TestStruct {
-    std::string a;
-    std::uint32_t b;
-
-    auto operator==(const TestStruct &other) const -> bool {
-        return a == other.a && b == other.b;
-    }
-};
-
-
-TEST(GenexViewsMap, VecInput) {
-    auto vec = std::vector{1, 2, 3, 4, 5, 6};
-
-    const auto rng = vec
-        | genex::views::map([](auto x) { return x * 2; })
-        | genex::views::to<std::vector>();
-    const auto exp = std::vector{2, 4, 6, 8, 10, 12};
-    EXPECT_EQ(rng, exp);
-}
-
-
-TEST(GenexViewsMap, GenInput) {
-    auto vec = std::vector{1, 2, 3, 4, 5, 6};
-
-    const auto rng = vec
-        | genex::views::map([](auto x) { return x * 2; })
-        | genex::views::map([](auto x) { return x + 5; })
-        | genex::views::to<std::vector>();
-    const auto exp = std::vector{7, 9, 11, 13, 15, 17};
-    EXPECT_EQ(rng, exp);
-}
-
-
-TEST(GenexViewsMap, VecInputStruct) {
-    auto vec = std::vector{
-        TestStruct{"one", 1}, TestStruct{"two", 2}, TestStruct{"three", 3}, TestStruct{"four", 4},
-        TestStruct{"five", 5}, TestStruct{"six", 6}
+TEST(GenexViewsKeys, MapInput) {
+    auto map = std::map{
+        std::pair{"one", 1}, std::pair{"two", 2}, std::pair{"three", 3},
+        std::pair{"four", 4}, std::pair{"five", 5}, std::pair{"six", 6}
     };
 
-    const auto rng = vec
-        | genex::views::map([](auto const &x) { return TestStruct{x.a + "!!!", x.b * 2}; })
+    const auto keys = map
+        | genex::views::keys
         | genex::views::to<std::vector>();
-    const auto exp = std::vector{TestStruct{"one!!!", 2}, TestStruct{"two!!!", 4}, TestStruct{"three!!!", 6}, TestStruct{"four!!!", 8}, TestStruct{"five!!!", 10}, TestStruct{"six!!!", 12}};
-    EXPECT_EQ(rng, exp);
+
+    const auto exp = std::vector{"one", "two", "three", "four", "five", "six"};
+    EXPECT_EQ(keys, exp);
 }
 
 
-TEST(GenexViewsMap, VecWithProj) {
-    auto vec = std::vector{
-        TestStruct{"one", 1}, TestStruct{"two", 2}, TestStruct{"three", 3}, TestStruct{"four", 4},
-        TestStruct{"five", 5}, TestStruct{"six", 6}
+TEST(GenexViewsVals, MapInput) {
+    auto map = std::map{
+        std::pair{"one", 1}, std::pair{"two", 2}, std::pair{"three", 3},
+        std::pair{"four", 4}, std::pair{"five", 5}, std::pair{"six", 6}
     };
 
-    genex::views::map([](auto x) { return x + 1; }, &TestStruct::b)(vec);
-
-    const auto rng = vec
-        | genex::views::map([](auto x) { return x + 1; }, &TestStruct::b)
+    const auto vals = map
+        | genex::views::vals
         | genex::views::to<std::vector>();
-    const auto exp = std::vector<unsigned int>{2, 3, 4, 5, 6, 7};
-    EXPECT_EQ(rng, exp);
-}
 
-
-TEST(GenexViewsMap, IterInput) {
-    auto vec = std::vector{0, 1, 2, 3, 4, 5, 6};
-    const auto it_begin = vec.begin();
-    const auto it_end = vec.end();
-    const auto rng = genex::views::map(it_begin, it_end, [](auto x) { return x + 1; }) | genex::views::to<std::vector>();
-    const auto exp = std::vector{1, 2, 3, 4, 5, 6, 7};
-    EXPECT_EQ(rng, exp);
+    const auto exp = std::vector{1, 2, 3, 4, 5, 6};
+    EXPECT_EQ(vals, exp);
 }

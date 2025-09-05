@@ -4,59 +4,91 @@
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
 #include <genex/iterators/iter_pair.hpp>
-#include <genex/macros.hpp>
-#include <genex/meta.hpp>
-#include <genex/pipe.hpp>
 
 
 namespace genex::views::concepts {
-    template <typename I, typename S, typename F, typename Proj = meta::identity>
-    concept mappable_iters =
+    template <typename I, typename S>
+    concept keyable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
-        std::indirectly_unary_invocable<Proj, I> and
-        std::indirectly_unary_invocable<F, std::projected<I, Proj>>;
+        pair_like<iter_reference_t<I>>;
 
-    template <typename Rng, typename F, typename Proj = meta::identity>
-    concept mappable_range =
+    template <typename I, typename S>
+    concept valable_iters =
+        std::input_iterator<I> and
+        std::sentinel_for<S, I> and
+        pair_like<iter_reference_t<I>>;
+
+    template <typename Rng>
+    concept keyable_range =
         input_range<Rng> and
-        mappable_iters<iterator_t<Rng>, sentinel_t<Rng>, F, Proj>;
+        keyable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
+
+    template <typename Rng>
+    concept valable_range =
+        input_range<Rng> and
+        valable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
 
 namespace genex::views::detail {
-    template <typename I, typename S, typename F, typename Proj>
-        requires concepts::mappable_iters<I, S, F, Proj>
-    auto do_map(I first, S last, F &&f, Proj &&proj) -> generator<std::invoke_result_t<F, std::invoke_result_t<Proj, iter_value_t<I>>>> {
+    template <typename I, typename S>
+        requires concepts::keyable_iters<I, S>
+    auto do_keys(I first, S last) -> generator<typename iter_value_t<I>::first_type> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
-            co_yield std::invoke(std::forward<F>(f), std::invoke(std::forward<Proj>(proj), *first));
+            co_yield std::get<0>(*first);
+        }
+    }
+
+    template <typename I, typename S>
+        requires concepts::valable_iters<I, S>
+    auto do_vals(I first, S last) -> generator<typename iter_value_t<I>::second_type> {
+        if (first == last) { co_return; }
+        for (; first != last; ++first) {
+            co_yield std::get<1>(*first);
         }
     }
 }
 
 
 namespace genex::views {
-    struct map_fn {
-        template <typename I, typename S, typename F, typename Proj = meta::identity>
-            requires concepts::mappable_iters<I, S, F, Proj>
-        constexpr auto operator()(I first, S last, F &&f, Proj &&proj = {}) const -> auto {
-            return detail::do_map(
-                std::move(first), std::move(last), std::forward<F>(f), std::forward<Proj>(proj));
+    struct keys_fn {
+        template <typename I, typename S>
+            requires concepts::keyable_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            return detail::do_keys(std::move(first), std::move(last));
         }
 
-        template <typename Rng, typename F, typename Proj> requires concepts::mappable_range<Rng, F, Proj>
-        constexpr auto operator()(Rng &&rng, F &&f, Proj &&proj = {}) const -> auto {
+        template <typename Rng> requires concepts::keyable_range<Rng>
+        constexpr auto operator()(Rng &&rng) const -> auto {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last), std::forward<F>(f), std::forward<Proj>(proj));
+            return (*this)(std::move(first), std::move(last));
         }
 
-        template <typename F, typename Proj = meta::identity> requires (not input_range<std::remove_cvref_t<F>>)
-        constexpr auto operator()(F &&f, Proj &&proj = {}) const -> auto {
-            return std::bind_back(map_fn{}, std::forward<F>(f), std::forward<Proj>(proj));
+        constexpr auto operator()() const -> auto {
+            return std::bind_back(keys_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(map);
+    struct vals_fn {
+        template <typename I, typename S>
+            requires concepts::valable_iters<I, S>
+        constexpr auto operator()(I first, S last) const -> auto {
+            return detail::do_vals(std::move(first), std::move(last));
+        }
+
+        template <typename Rng> requires concepts::valable_range<Rng>
+        constexpr auto operator()(Rng &&rng) const -> auto {
+            auto [first, last] = iterators::iter_pair(rng);
+            return (*this)(std::move(first), std::move(last));
+        }
+
+        constexpr auto operator()() const -> auto {
+            return std::bind_back(vals_fn{});
+        }
+    };
+
+    GENEX_EXPORT_STRUCT(keys);
+    GENEX_EXPORT_STRUCT(vals);
 }

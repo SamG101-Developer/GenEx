@@ -25,7 +25,7 @@ auto main() -> int {
     auto vec = std::vector<int>{1, 2, 3, 4, 5};
 
     auto result = vec
-        | genex::views::map([](const int i) { return i * 2; })
+        | genex::views::transform([](const int i) { return i * 2; })
         | genex::views::filter([](const int i) { return i % 4 == 0; })
         | genex::views::materialize
         | genex::views::reverse
@@ -39,7 +39,7 @@ auto main() -> int {
 }
 ```
 
-In this example, the range is mapped to double each element and then filtered to only include elements that are
+In this example, the range is transformed to double each element and then filtered to only include elements that are
 divisible by 4. That range cannot be reversed, because generators cannot be reversed, so instead, the `materialize` view
 is used, which doesn't immediately unroll the generator into a vector, but will yield into a vector when iterated over,
 allowing the bidirectional `reverse` view to be applied. Finally, the range is converted to a vector using the `to`

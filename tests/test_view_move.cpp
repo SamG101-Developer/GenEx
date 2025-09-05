@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <genex/views/map.hpp>
 #include <genex/views/move.hpp>
 #include <genex/views/to.hpp>
+#include <genex/views/transform.hpp>
 
 
 struct TestStruct {
@@ -22,7 +22,7 @@ TEST(GenexViewsMove, VecInput) {
 
     const auto rng = vec
         | genex::views::move
-        | genex::views::map([](auto &&x) { return x->b; })
+        | genex::views::transform([](auto &&x) { return x->b; })
         | genex::views::to<std::vector>();
     const auto exp = std::vector<unsigned int>{1, 2};
     EXPECT_EQ(rng, exp);

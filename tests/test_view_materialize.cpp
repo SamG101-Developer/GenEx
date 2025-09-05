@@ -5,7 +5,7 @@
 #include <vector>
 
 #include <genex/views/filter.hpp>
-#include <genex/views/map.hpp>
+#include <genex/views/transform.hpp>
 #include <genex/views/materialize.hpp>
 #include <genex/views/to.hpp>
 #include <genex/views/zip.hpp>
