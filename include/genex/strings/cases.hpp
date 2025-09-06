@@ -8,6 +8,7 @@
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
 #include <genex/strings/_concepts.hpp>
+#include <genex/pipe.hpp>
 
 
 namespace genex::strings::concepts {
