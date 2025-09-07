@@ -124,19 +124,19 @@ namespace genex::views::detail {
         }
     }
 
-    template <typename I1, typename S1, typename I2, typename S2, typename Proj>
-        requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
-    auto do_set_difference_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj) -> generator<iter_value_t<I1>> {
+    template <typename I1, typename S1, typename I2, typename S2, typename Proj1, typename Proj2>
+        requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
+    auto do_set_difference_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         for (; first1 != last1; ++first1) {
-            if (not algorithms::contains(first2, last2, std::invoke(std::forward<Proj>(proj), *first1))) { co_yield *first1; }
+            if (not algorithms::contains(first2, last2, std::invoke(std::forward<Proj1>(proj1), *first1), std::forward<Proj2>(proj2))) { co_yield *first1; }
         }
     }
 
-    template <typename I1, typename S1, typename I2, typename S2, typename Proj>
-        requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
-    auto do_set_intersection_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj) -> generator<iter_value_t<I1>> {
+    template <typename I1, typename S1, typename I2, typename S2, typename Proj1, typename Proj2>
+        requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
+    auto do_set_intersection_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         for (; first1 != last1; ++first1) {
-            if (algorithms::contains(first2, last2, std::invoke(std::forward<Proj>(proj), *first1))) { co_yield *first1; }
+            if (algorithms::contains(first2, last2, std::invoke(std::forward<Proj1>(proj1), *first1), std::forward<Proj2>(proj2))) { co_yield *first1; }
         }
     }
 
@@ -154,13 +154,13 @@ namespace genex::views::detail {
         }
     }
 
-    template <typename I1, typename S1, typename I2, typename S2, typename Proj>
-        requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
-    auto do_set_union_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj) -> generator<iter_value_t<I1>> {
+    template <typename I1, typename S1, typename I2, typename S2, typename Proj1, typename Proj2>
+        requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
+    auto do_set_union_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         auto f1 = first1;
         for (; first1 != last1; ++first1) { co_yield *first1; }
         for (; first2 != last2; ++first2) {
-            if (not algorithms::contains(f1, last1, *first2, std::forward<Proj>(proj))) { co_yield *first2; }
+            if (not algorithms::contains(f1, last1, std::invoke(std::forward<Proj2>(proj2), *first2), std::forward<Proj1>(proj1))) { co_yield *first2; }
         }
     }
 }
@@ -198,21 +198,22 @@ namespace genex::views {
 
     template <auto Func>
     struct set_algorithm_unsorted_base_fn {
-        template <typename I1, typename S1, typename I2, typename S2, typename Proj = meta::identity>
-            requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
-        constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj = {}) const -> auto {
+        template <typename I1, typename S1, typename I2, typename S2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+            requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
+        constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1 = {}, Proj2 &&proj2 = {}) const -> auto {
             return std::invoke(
                 Func, std::move(first1), std::move(last1), std::move(first2), std::move(last2),
-                std::forward<Proj>(proj));
+                std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
         }
 
-        template <typename Rng1, typename Rng2, typename Proj = meta::identity>
-            requires concepts::set_algorithmicable_range<Rng1, Rng2, operations::eq, Proj, meta::identity>
-        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj &&proj = {}) const -> auto {
+        template <typename Rng1, typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+            requires concepts::set_algorithmicable_range<Rng1, Rng2, operations::eq, Proj1, Proj2>
+        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj1 &&proj1 = {}, Proj2 &&proj2 = {}) const -> auto {
             auto [first1, last1] = iterators::iter_pair(rng1);
             auto [first2, last2] = iterators::iter_pair(rng2);
             return (*this)(
-                std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::forward<Proj>(proj));
+                std::move(first1), std::move(last1), std::move(first2), std::move(last2),
+                std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
         }
 
         template <typename Rng2, typename Proj = meta::identity>
@@ -263,39 +264,42 @@ namespace genex::views {
     };
 
     struct set_difference_unsorted_fn : set_algorithm_unsorted_base_fn<
-            []<typename I1, typename S1, typename I2, typename S2, typename Proj = meta::identity>
-                requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
-            (I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj) {
+            []<typename I1, typename S1, typename I2, typename S2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+                requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
+            (I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) {
                 return detail::do_set_difference_unsorted(
-                    std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::forward<Proj>(proj));
+                    std::move(first1), std::move(last1), std::move(first2), std::move(last2),
+                    std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
             }> {
     };
 
     struct set_intersection_unsorted_fn : set_algorithm_unsorted_base_fn<
-            []<typename I1, typename S1, typename I2, typename S2, typename Proj = meta::identity>
-                requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
-            (I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj) {
+            []<typename I1, typename S1, typename I2, typename S2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+                requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
+            (I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) {
                 return detail::do_set_intersection_unsorted(
-                    std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::forward<Proj>(proj));
+                    std::move(first1), std::move(last1), std::move(first2), std::move(last2),
+                    std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
             }> {
     };
 
     struct set_symmetric_difference_unsorted_fn : set_algorithm_unsorted_base_fn<
-            []<typename I1, typename S1, typename I2, typename S2, typename Proj = meta::identity>
-                requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
-            (I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj) {
+            []<typename I1, typename S1, typename I2, typename S2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+                requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
+            (I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) {
                 return detail::do_set_symmetric_difference_unsorted(
                     std::move(first1), std::move(last1), std::move(first2), std::move(last2),
-                    std::forward<Proj>(proj), meta::identity{});
+                    std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
             }> {
     };
 
     struct set_union_unsorted_fn : set_algorithm_unsorted_base_fn<
-            []<typename I1, typename S1, typename I2, typename S2, typename Proj = meta::identity>
-                requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj, meta::identity>
-            (I1 first1, S1 last1, I2 first2, S2 last2, Proj &&proj) {
+            []<typename I1, typename S1, typename I2, typename S2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+                requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
+            (I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) {
                 return detail::do_set_union_unsorted(
-                    std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::forward<Proj>(proj));
+                    std::move(first1), std::move(last1), std::move(first2), std::move(last2),
+                    std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
             }> {
     };
 
