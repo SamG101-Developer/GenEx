@@ -12,6 +12,7 @@ namespace genex::algorithms::concepts {
     concept containable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
+        algorithms::concepts::findable_iters<I, S, E, Proj> and
         std::indirectly_comparable<I, const std::remove_cvref_t<E>*, operations::eq, Proj, meta::identity>;
 
     template <typename Rng, typename E, typename Proj>
