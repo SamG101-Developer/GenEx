@@ -128,7 +128,9 @@ namespace genex::views::detail {
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
     auto do_set_difference_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         for (; first1 != last1; ++first1) {
-            if (not algorithms::contains(first2, last2, std::invoke(std::forward<Proj1>(proj1), *first1), std::forward<Proj2>(proj2))) { co_yield *first1; }
+            if (not algorithms::contains(first2, last2, std::invoke(std::forward<Proj1>(proj1), *first1), std::forward<Proj2>(proj2))) {
+                co_yield *first1;
+            }
         }
     }
 
@@ -136,7 +138,9 @@ namespace genex::views::detail {
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
     auto do_set_intersection_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         for (; first1 != last1; ++first1) {
-            if (algorithms::contains(first2, last2, std::invoke(std::forward<Proj1>(proj1), *first1), std::forward<Proj2>(proj2))) { co_yield *first1; }
+            if (algorithms::contains(first2, last2, std::invoke(std::forward<Proj1>(proj1), *first1), std::forward<Proj2>(proj2))) {
+                co_yield *first1;
+            }
         }
     }
 
@@ -147,10 +151,14 @@ namespace genex::views::detail {
         auto f2 = first2;
 
         for (; first1 != last1; ++first1) {
-            if (not algorithms::contains(f2, last2, *first1, std::forward<Proj2>(proj2))) { co_yield *first1; }
+            if (not algorithms::contains(f2, last2, *first1, std::forward<Proj2>(proj2))) {
+                co_yield *first1;
+            }
         }
         for (; first2 != last2; ++first2) {
-            if (not algorithms::contains(f1, last1, *first2, std::forward<Proj1>(proj1))) { co_yield *first2; }
+            if (not algorithms::contains(f1, last1, *first2, std::forward<Proj1>(proj1))) {
+                co_yield *first2;
+            }
         }
     }
 
@@ -160,7 +168,9 @@ namespace genex::views::detail {
         auto f1 = first1;
         for (; first1 != last1; ++first1) { co_yield *first1; }
         for (; first2 != last2; ++first2) {
-            if (not algorithms::contains(f1, last1, std::invoke(std::forward<Proj2>(proj2), *first2), std::forward<Proj1>(proj1))) { co_yield *first2; }
+            if (not algorithms::contains(f1, last1, std::invoke(std::forward<Proj2>(proj2), *first2), std::forward<Proj1>(proj1))) {
+                co_yield *first2;
+            }
         }
     }
 }
@@ -216,10 +226,11 @@ namespace genex::views {
                 std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
         }
 
-        template <typename Rng2, typename Proj = meta::identity>
-            requires (not range<Proj>)
-        constexpr auto operator()(Rng2 &&rng2, Proj &&proj = {}) const -> auto {
-            return std::bind_back(*this, std::forward<Rng2>(rng2), std::forward<Proj>(proj));
+        template <typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+            requires (not range<Proj1>)
+        constexpr auto operator()(Rng2 &&rng2, Proj1 &&proj = {}, Proj2 &&proj2 = {}) const -> auto {
+            return std::bind_back(
+                *this, std::forward<Rng2>(rng2), std::forward<Proj1>(proj), std::forward<Proj2>(proj2));
         }
     };
 
