@@ -28,6 +28,7 @@ namespace genex::strings::concepts {
 namespace genex::strings::detail {
     template <typename I, typename S>
         requires (concepts::can_case_iters<I, S> and genex::strings::strict_char_like<iter_value_t<I>>)
+    GENEX_NO_ASAN
     auto do_upper_case(I first, S last) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             co_yield static_cast<iter_value_t<I>>(std::toupper(*first));
@@ -36,6 +37,7 @@ namespace genex::strings::detail {
 
     template <typename I, typename S>
         requires (concepts::can_case_iters<I, S> and genex::strings::wide_char_like<iter_value_t<I>>)
+    GENEX_NO_ASAN
     auto do_upper_case(I first, S last) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             co_yield static_cast<iter_value_t<I>>(std::towupper(*first));
@@ -44,6 +46,7 @@ namespace genex::strings::detail {
 
     template <typename I, typename S>
         requires (concepts::can_case_iters<I, S> and genex::strings::strict_char_like<iter_value_t<I>>)
+    GENEX_NO_ASAN
     auto do_lower_case(I first, S last) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             co_yield static_cast<iter_value_t<I>>(std::tolower(*first));
@@ -52,6 +55,7 @@ namespace genex::strings::detail {
 
     template <typename I, typename S>
         requires (concepts::can_case_iters<I, S> and genex::strings::wide_char_like<iter_value_t<I>>)
+    GENEX_NO_ASAN
     auto do_lower_case(I first, S last) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             co_yield static_cast<iter_value_t<I>>(std::towlower(*first));

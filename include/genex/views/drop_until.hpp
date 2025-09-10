@@ -23,6 +23,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S, typename Pred, typename Proj>
         requires concepts::droppable_until_iters<I, S, Pred, Proj>
+    GENEX_NO_ASAN
     auto do_drop_until(I first, S last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
         if (first == last) { co_return; }
         auto dropping = true;

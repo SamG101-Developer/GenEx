@@ -34,6 +34,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S>
         requires concepts::keyable_iters<I, S>
+    GENEX_NO_ASAN
     auto do_keys(I first, S last) -> generator<typename iter_value_t<I>::first_type> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -43,6 +44,7 @@ namespace genex::views::detail {
 
     template <typename I, typename S>
         requires concepts::valable_iters<I, S>
+    GENEX_NO_ASAN
     auto do_vals(I first, S last) -> generator<typename iter_value_t<I>::second_type> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {

@@ -44,6 +44,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S, typename Int>
         requires concepts::droppable_iters_optimized_2<I, S, Int>
+    GENEX_NO_ASAN
     auto do_drop(I first, S last, const Int n) -> generator<iter_value_t<I>> {
         if (first == last) { co_return; }
         const auto size = iterators::distance(first, last);
@@ -56,6 +57,7 @@ namespace genex::views::detail {
 
     template <typename I, typename S, typename Int>
         requires concepts::droppable_iters_optimized_1<I, S, Int>
+    GENEX_NO_ASAN
     auto do_drop(I first, S last, const Int n) -> generator<iter_value_t<I>> {
         if (first == last) { co_return; }
         first = iterators::next(first, n, last);

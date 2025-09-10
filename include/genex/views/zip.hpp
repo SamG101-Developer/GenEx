@@ -35,6 +35,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename... Is, typename... Ss>
         requires concepts::can_zip_iters<std::tuple<Is...>, std::tuple<Ss...>>
+    GENEX_NO_ASAN
     auto do_zip(std::tuple<Is...> first, std::tuple<Ss...> last) -> generator<std::tuple<iter_value_t<Is>...>> {
         auto starts = std::move(first);
         auto ends = std::move(last);

@@ -25,6 +25,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S>
         requires concepts::flattenable_iters<I, S>
+    GENEX_NO_ASAN
     auto do_flatten(I first, S last) -> generator<range_value_t<iter_value_t<I>>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {

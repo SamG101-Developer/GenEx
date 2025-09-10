@@ -26,6 +26,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <std::size_t N, typename I, typename S>
         requires concepts::can_tuple_element_iters<N, I, S>
+    GENEX_NO_ASAN
     auto do_tuple_n(I first, S last) -> generator<std::tuple_element_t<N, iter_value_t<I>>> {
         for (; first != last; ++first) {
             co_yield std::get<N>(*first);

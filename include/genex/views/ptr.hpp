@@ -24,6 +24,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S>
         requires (concepts::ptr_gettable_iters<I, S> and unique_ptr<iter_value_t<I>>)
+    GENEX_NO_ASAN
     auto do_ptr(I first, S last) -> generator<std::add_pointer_t<typename iter_value_t<I>::element_type>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {

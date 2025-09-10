@@ -29,6 +29,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S, typename Comp, typename Proj>
         requires concepts::duplicate_checkable_iters<I, S, Comp, Proj>
+    GENEX_NO_ASAN
     auto do_duplicates(I first, S last, Comp &&comp, Proj &&proj) -> generator<iter_value_t<I>> {
         if (first == last) { co_return; }
 

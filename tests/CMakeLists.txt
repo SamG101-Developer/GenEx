@@ -12,4 +12,3 @@ target_link_libraries(GenExTests PRIVATE GTest::gtest_main GenExLib)
 # Register the tests.
 include(GoogleTest)
 gtest_discover_tests(GenExTests)
-

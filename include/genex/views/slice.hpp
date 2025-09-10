@@ -42,6 +42,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S, typename Int>
         requires concepts::can_slice_iters_optimized_2<I, S, Int>
+    GENEX_NO_ASAN
     auto do_slice(I first, S last, const Int start_index, const Int end_index, const Int step = 1) -> generator<iter_value_t<I>> {
         if (step <= 0) { throw std::invalid_argument("Step cannot be <= 0."); }
         if (first == last) { co_return; }
@@ -52,6 +53,7 @@ namespace genex::views::detail {
 
     template <typename I, typename S, typename Int>
         requires concepts::can_slice_iters_optimized_1<I, S, Int>
+    GENEX_NO_ASAN
     auto do_slice(I first, S last, const Int start_index, const Int end_index, const Int step = 1) -> generator<iter_value_t<I>> {
         if (step <= 0) { throw std::invalid_argument("Step cannot be <= 0."); }
         if (first == last) { co_return; }
@@ -64,6 +66,7 @@ namespace genex::views::detail {
 
     template <typename I, typename S, typename Int>
         requires concepts::can_slice_iters_unoptimized<I, S, Int>
+    GENEX_NO_ASAN
     auto do_slice(I first, S last, const Int start_index, const Int end_index, const Int step = 1) -> generator<iter_value_t<I>> {
         if (step <= 0) { throw std::invalid_argument("Step cannot be <= 0."); }
         if (first == last) { co_return; }

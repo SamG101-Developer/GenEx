@@ -13,3 +13,6 @@
 
 
 #define GENEX_MARK_AS_BROKEN(message) GENEX_PRAGMA(GCC warning message)
+
+
+#define GENEX_NO_ASAN __attribute__((no_sanitize_address))

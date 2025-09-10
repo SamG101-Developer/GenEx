@@ -35,6 +35,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S>
         requires concepts::reversible_iters_optimized<I, S>
+    GENEX_NO_ASAN
     auto do_reverse(I first, S last) -> generator<iter_value_t<I>> {
         if (first == last) { co_return; }
         while (first < last) {
@@ -45,6 +46,7 @@ namespace genex::views::detail {
 
     template <typename I, typename S>
         requires concepts::reversible_iters_unoptimized<I, S>
+    GENEX_NO_ASAN
     auto do_reverse(I first, S last) -> generator<iter_value_t<I>> {
         if (first == last) { co_return; }
         while (first != last) {

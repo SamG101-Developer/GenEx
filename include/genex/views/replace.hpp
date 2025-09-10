@@ -28,6 +28,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S, typename Old, typename New, typename Proj>
         requires concepts::replaceable_iters<I, S, Old, New, Proj>
+    GENEX_NO_ASAN
     auto do_replace(I first, S last, Old &&old_val, New &&new_val, Proj &&proj) -> generator<iter_value_t<I>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {

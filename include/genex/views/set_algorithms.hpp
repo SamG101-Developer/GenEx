@@ -29,6 +29,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
+    GENEX_NO_ASAN
     auto do_set_difference(I1 first1, S1 last1, I2 first2, S2 last2, Comp &&comp, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         if (first1 == last1) { co_return; }
         while (first1 != last1) {
@@ -52,6 +53,7 @@ namespace genex::views::detail {
 
     template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
+    GENEX_NO_ASAN
     auto do_set_intersection(I1 first1, S1 last1, I2 first2, S2 last2, Comp &&comp, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         if (first1 == last1) { co_return; }
         while (first1 != last1 and first2 != last2) {
@@ -71,6 +73,7 @@ namespace genex::views::detail {
 
     template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
+    GENEX_NO_ASAN
     auto do_set_symmetric_difference(I1 first1, S1 last1, I2 first2, S2 last2, Comp &&comp, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         while (first1 != last1 or first2 != last2) {
             if (first1 == last1) {
@@ -98,6 +101,7 @@ namespace genex::views::detail {
 
     template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
+    GENEX_NO_ASAN
     auto do_set_union(I1 first1, S1 last1, I2 first2, S2 last2, Comp &&comp, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         while (first1 != last1 or first2 != last2) {
             if (first1 == last1) {
@@ -126,6 +130,7 @@ namespace genex::views::detail {
 
     template <typename I1, typename S1, typename I2, typename S2, typename Proj1, typename Proj2>
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
+    GENEX_NO_ASAN
     auto do_set_difference_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         for (; first1 != last1; ++first1) {
             if (not algorithms::contains(first2, last2, std::invoke(std::forward<Proj1>(proj1), *first1), std::forward<Proj2>(proj2))) {
@@ -136,6 +141,7 @@ namespace genex::views::detail {
 
     template <typename I1, typename S1, typename I2, typename S2, typename Proj1, typename Proj2>
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
+    GENEX_NO_ASAN
     auto do_set_intersection_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         for (; first1 != last1; ++first1) {
             if (algorithms::contains(first2, last2, std::invoke(std::forward<Proj1>(proj1), *first1), std::forward<Proj2>(proj2))) {
@@ -146,6 +152,7 @@ namespace genex::views::detail {
 
     template <typename I1, typename S1, typename I2, typename S2, typename Proj1, typename Proj2>
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
+    GENEX_NO_ASAN
     auto do_set_symmetric_difference_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         auto f1 = first1;
         auto f2 = first2;
@@ -164,6 +171,7 @@ namespace genex::views::detail {
 
     template <typename I1, typename S1, typename I2, typename S2, typename Proj1, typename Proj2>
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
+    GENEX_NO_ASAN
     auto do_set_union_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 &&proj1, Proj2 &&proj2) -> generator<iter_value_t<I1>> {
         auto f1 = first1;
         for (; first1 != last1; ++first1) { co_yield *first1; }

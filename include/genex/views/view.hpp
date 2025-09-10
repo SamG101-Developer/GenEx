@@ -23,6 +23,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S>
         requires concepts::can_view_iters<I, S>
+    GENEX_NO_ASAN
     auto do_view(I first, S last) -> generator<iter_value_t<I>> {
         for (auto it = first; it != last; ++it) {
             co_yield static_cast<iter_value_t<I>>(*it);

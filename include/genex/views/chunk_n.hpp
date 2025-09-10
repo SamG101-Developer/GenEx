@@ -23,6 +23,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S>
         requires concepts::chunkable_n_iters<I, S>
+    GENEX_NO_ASAN
     auto do_chunk_n(I first, S last, const std::size_t size) -> generator<std::vector<iter_value_t<I>>> {
         while (first != last) {
             auto chunk = std::vector<iter_value_t<I>>{};

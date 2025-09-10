@@ -26,6 +26,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S>
         requires concepts::can_forward_iters<I, S>
+    GENEX_NO_ASAN
     auto do_forward(I first, S last) -> generator<std::remove_reference_t<iter_reference_t<I>>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {

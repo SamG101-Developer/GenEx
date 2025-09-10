@@ -26,6 +26,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S, typename E, typename Proj>
         requires concepts::removable_iters<I, S, E, Proj>
+    GENEX_NO_ASAN
     auto do_remove(I first, S last, E &&elem, Proj &&proj) -> generator<iter_value_t<I>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {

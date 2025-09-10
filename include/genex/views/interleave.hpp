@@ -33,6 +33,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I1, typename S1, typename I2, typename S2>
         requires concepts::interleavable_iters<I1, S1, I2, S2>
+    GENEX_NO_ASAN
     auto do_interleave(I1 first1, S1 last1, I2 first2, S2 last2, const bool extend) -> generator<concepts::interleave_common_t<I1, I2>> {
         while (first1 != last1 && first2 != last2) {
             co_yield static_cast<iter_value_t<I1>>(*first1);

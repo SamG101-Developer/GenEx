@@ -42,6 +42,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S, typename Int>
         requires concepts::takeable_iters_optimized_2<I, S, Int>
+    GENEX_NO_ASAN
     auto do_take(I first, S last, const Int n) -> generator<iter_value_t<I>> {
         if (first == last or n == 0) { co_return; }
         const auto size = std::distance(first, last);
@@ -53,6 +54,7 @@ namespace genex::views::detail {
 
     template <typename I, typename S, typename Int>
         requires concepts::takeable_iters_optimized_1<I, S, Int>
+    GENEX_NO_ASAN
     auto do_take(I first, S last, const Int n) -> generator<iter_value_t<I>> {
         if (first == last or n == 0) { co_return; }
         auto limit = std::next(first, n, last);
@@ -63,6 +65,7 @@ namespace genex::views::detail {
 
     template <typename I, typename S, typename Int>
         requires concepts::takeable_iters_unoptimized<I, S, Int>
+    GENEX_NO_ASAN
     auto do_take(I first, S last, const Int n) -> generator<iter_value_t<I>> {
         if (first == last or n == 0) { co_return; }
         for (auto m = n; first != last and m > 0; ++first, --m) {

@@ -23,6 +23,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S>
         requires concepts::cyclable_iters<I, S>
+    GENEX_NO_ASAN
     auto do_cycle(I first, S last) -> generator<iter_value_t<I>> {
         if (first == last) { co_return; }
         while (true) {

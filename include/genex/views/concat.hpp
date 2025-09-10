@@ -37,6 +37,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I1, typename S1>
         requires concepts::concatenatable_iters<std::tuple<I1>, std::tuple<S1>>
+    GENEX_NO_ASAN
     auto do_concat(I1 first1, S1 last1) -> generator<iter_value_t<I1>> {
         for (; first1 != last1; ++first1) {
             co_yield static_cast<std::common_type_t<iter_value_t<I1>, iter_value_t<I1>>>(*first1);
@@ -45,6 +46,7 @@ namespace genex::views::detail {
 
     template <typename I1, typename S1, typename... Is, typename... Ss>
         requires (concepts::concatenatable_iters<std::tuple<I1, Is...>, std::tuple<S1, Ss...>> and sizeof...(Is) == sizeof...(Ss))
+    GENEX_NO_ASAN
     auto do_concat(I1 first1, S1 last1, std::tuple<Is...> firsts, std::tuple<Ss...> lasts) -> generator<std::common_type_t<iter_value_t<I1>, iter_value_t<Is>...>> {
         for (auto gen = do_concat(std::move(first1), std::move(last1)); auto &&x : gen) {
             co_yield std::forward<decltype(x)>(x);

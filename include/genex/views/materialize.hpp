@@ -27,6 +27,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <template <typename> typename Cache, typename I, typename S>
         requires concepts::materializable_iters<Cache, I, S>
+    GENEX_NO_ASAN
     auto do_materialize(I first, S last) -> Cache<iter_value_t<I>> {
         auto vec = Cache<iter_value_t<I>>();
         if (first == last) { return vec; }

@@ -23,6 +23,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S, typename Pred, typename Proj>
         requires concepts::takeable_while_iters<I, S, Pred, Proj>
+    GENEX_NO_ASAN
     auto do_take_while(I first, S last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {

@@ -48,6 +48,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S, typename Int>
         requires concepts::droppable_last_iters_optimized_3<I, S, Int>
+    GENEX_NO_ASAN
     auto do_drop_last(I first, S last, const Int n) -> generator<iter_value_t<I>> {
         // Use the distance to optimize random access ranges.
         if (first == last) { co_return; }
@@ -60,6 +61,7 @@ namespace genex::views::detail {
 
     template <typename I, typename S, typename Int>
         requires concepts::droppable_last_iters_optimized_2<I, S, Int>
+    GENEX_NO_ASAN
     auto do_drop_last(I first, S last, const Int n) -> generator<iter_value_t<I>> {
         // Use the prev iterator to optimize bidirectional ranges.
         if (first == last) { co_return; }
@@ -71,6 +73,7 @@ namespace genex::views::detail {
 
     template <typename I, typename S, typename Int>
         requires concepts::droppable_last_iters_optimized_1<I, S, Int>
+    GENEX_NO_ASAN
     auto do_drop_last(I first, S last, const Int n) -> generator<iter_value_t<I>> {
         // Use the n-steps-ahead iterator to optimize forward ranges.
         if (first == last) { co_return; }
@@ -82,6 +85,7 @@ namespace genex::views::detail {
 
     template <typename I, typename S, typename Int>
         requires concepts::droppable_last_iters_unoptimized<I, S, Int>
+    GENEX_NO_ASAN
     auto do_drop_last(I first, S last, Int n) -> generator<iter_value_t<I>> {
         // Fallback for input iterators: count the distance and increment.
         if (first == last) { co_return; }

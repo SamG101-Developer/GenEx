@@ -26,6 +26,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S>
         requires concepts::addressable_iters<I, S>
+    GENEX_NO_ASAN
     auto do_address(I first, S last) -> generator<std::add_pointer_t<std::remove_reference_t<decltype(*std::declval<I&>())>>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {

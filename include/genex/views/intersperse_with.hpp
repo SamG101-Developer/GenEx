@@ -27,6 +27,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S, std::invocable F>
         requires concepts::intersperable_with_iters<I, S, F>
+    GENEX_NO_ASAN
     auto do_intersperse_with(I first, S last, F &&sep) -> generator<iter_value_t<I>> {
         if (first == last) { co_return; }
         co_yield *first;

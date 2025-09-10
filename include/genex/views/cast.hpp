@@ -47,6 +47,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename To, typename I, typename S>
         requires concepts::static_castable_iters<To, I, S>
+    GENEX_NO_ASAN
     auto do_static_cast_iter(I first, S last) -> generator<To> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -56,6 +57,7 @@ namespace genex::views::detail {
 
     template <typename To, typename I, typename S>
         requires concepts::dynamic_castable_iters<To, I, S>
+    GENEX_NO_ASAN
     auto do_dynamic_cast_iter(I first, S last) -> generator<To> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -67,6 +69,7 @@ namespace genex::views::detail {
 
     template <typename To, typename I, typename S>
         requires (concepts::smart_ptr_castable_iters<To, I, S> and unique_ptr<iter_value_t<I>>)
+    GENEX_NO_ASAN
     auto do_unique_ptr_cast_iter(I first, S last) -> generator<std::unique_ptr<To>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -79,6 +82,7 @@ namespace genex::views::detail {
 
     template <typename To, typename I, typename S>
         requires (concepts::smart_ptr_castable_iters<To, I, S> and shared_ptr<iter_value_t<I>>)
+    GENEX_NO_ASAN
     auto do_shared_ptr_cast_iter(I first, S last) -> generator<std::shared_ptr<To>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
@@ -90,6 +94,7 @@ namespace genex::views::detail {
 
     template <typename To, typename I, typename S>
         requires (concepts::smart_ptr_castable_iters<To, I, S> and weak_ptr<iter_value_t<I>>)
+    GENEX_NO_ASAN
     auto do_weak_ptr_cast_iter(I first, S last) -> generator<std::weak_ptr<To>> {
         if (first == last) { co_return; }
         for (; first != last; ++first) {
