@@ -6,6 +6,7 @@
 namespace genex::views {
     template <template <typename> typename Out, typename Rng>
         requires input_range<Rng>
+    GENEX_NO_ASAN
     auto to_base_fn(Rng &&rng) -> Out<range_value_t<Rng>> {
         Out<range_value_t<Rng>> out;
         auto [first, last] = iterators::iter_pair(rng);
@@ -18,6 +19,7 @@ namespace genex::views {
 
     template <typename Out, typename Rng>
         requires input_range<Rng>
+    GENEX_NO_ASAN
     auto to_base_fn(Rng &&rng) -> Out {
         Out out;
         auto [first, last] = iterators::iter_pair(rng);
@@ -28,6 +30,7 @@ namespace genex::views {
     }
 
     template <template <typename...> typename Out>
+    GENEX_NO_ASAN
     auto to() -> auto {
         return []<typename Rng> requires input_range<Rng>(Rng &&rng) {
             return to_base_fn<Out>(std::forward<Rng>(rng));
@@ -35,6 +38,7 @@ namespace genex::views {
     }
 
     template <typename Out>
+    GENEX_NO_ASAN
     auto to() -> auto {
         return []<typename Rng> requires input_range<Rng>(Rng &&rng) {
             return to_base_fn<Out>(std::forward<Rng>(rng));
