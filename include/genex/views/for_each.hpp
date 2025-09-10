@@ -24,6 +24,7 @@ namespace genex::views::concepts {
 namespace genex::views::detail {
     template <typename I, typename S, typename F>
         requires concepts::for_eachable_iters<I, S, F>
+    GENEX_NO_ASAN
     auto do_for_each(I first, S last, F &&f) -> void {
         if (first == last) { return; }
         for (; first != last; ++first) {
