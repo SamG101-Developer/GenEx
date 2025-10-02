@@ -1,14 +1,14 @@
 #pragma once
-#include <coroutine>
-#include <utility>
 #include <cctype>
+#include <coroutine>
 #include <cwctype>
+#include <utility>
 #include <genex/concepts.hpp>
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
-#include <genex/strings/_concepts.hpp>
 #include <genex/pipe.hpp>
+#include <genex/iterators/iter_pair.hpp>
+#include <genex/strings/_concepts.hpp>
 
 
 namespace genex::strings::concepts {

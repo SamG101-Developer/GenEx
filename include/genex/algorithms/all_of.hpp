@@ -1,9 +1,9 @@
 #pragma once
-#include <genex/algorithms/_concepts.hpp>
-#include <genex/algorithms/find_if_not.hpp>
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
+#include <genex/algorithms/find_if_not.hpp>
+#include <genex/algorithms/_concepts.hpp>
+#include <genex/iterators/iter_pair.hpp>
 
 
 namespace genex::algorithms {

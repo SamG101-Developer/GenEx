@@ -1,15 +1,15 @@
 #pragma once
 #include <coroutine>
-#include <vector>
 #include <functional>
 #include <optional>
+#include <vector>
 #include <genex/concepts.hpp>
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
-#include <genex/operations/cmp.hpp>
 #include <genex/pipe.hpp>
+#include <genex/iterators/iter_pair.hpp>
+#include <genex/operations/cmp.hpp>
 
 
 namespace genex::views::concepts {

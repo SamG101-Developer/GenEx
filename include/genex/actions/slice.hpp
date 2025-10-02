@@ -1,10 +1,10 @@
 #pragma once
 #include <functional>
 #include <genex/concepts.hpp>
+#include <genex/pipe.hpp>
 #include <genex/actions/erase.hpp>
 #include <genex/iterators/iter_pair.hpp>
 #include <genex/iterators/next.hpp>
-#include <genex/pipe.hpp>
 
 
 // Todo: random_access_iterator versions with optimizations.

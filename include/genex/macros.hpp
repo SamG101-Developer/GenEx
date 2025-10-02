@@ -16,3 +16,6 @@
 
 
 #define GENEX_NO_ASAN __attribute__((no_sanitize_address))
+
+
+#define GENEX_INLINE inline __attribute__((always_inline))

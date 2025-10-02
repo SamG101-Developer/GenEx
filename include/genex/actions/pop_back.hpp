@@ -1,10 +1,10 @@
 #pragma once
 #include <functional>
 #include <genex/concepts.hpp>
+#include <genex/pipe.hpp>
 #include <genex/actions/erase.hpp>
 #include <genex/iterators/access.hpp>
 #include <genex/iterators/prev.hpp>
-#include <genex/pipe.hpp>
 
 
 namespace genex::actions::concepts {

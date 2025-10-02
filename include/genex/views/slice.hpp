@@ -2,10 +2,10 @@
 #include <coroutine>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
-#include <genex/iterators/iter_pair.hpp>
-#include <genex/iterators/next.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
+#include <genex/iterators/iter_pair.hpp>
+#include <genex/iterators/next.hpp>
 
 
 namespace genex::views::concepts {

@@ -1,11 +1,11 @@
 #pragma once
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
+#include <genex/pipe.hpp>
 #include <genex/iterators/distance.hpp>
+#include <genex/iterators/iter_pair.hpp>
 #include <genex/iterators/next.hpp>
 #include <genex/iterators/prev.hpp>
-#include <genex/iterators/iter_pair.hpp>
-#include <genex/pipe.hpp>
 
 
 namespace genex::views::concepts {

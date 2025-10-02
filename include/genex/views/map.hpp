@@ -3,6 +3,7 @@
 #include <functional>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
+#include <genex/pipe.hpp>
 #include <genex/iterators/iter_pair.hpp>
 
 

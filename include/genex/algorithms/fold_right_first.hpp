@@ -2,8 +2,8 @@
 #include <functional>
 #include <utility>
 #include <genex/concepts.hpp>
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
+#include <genex/iterators/iter_pair.hpp>
 
 
 namespace genex::algorithms::concepts {

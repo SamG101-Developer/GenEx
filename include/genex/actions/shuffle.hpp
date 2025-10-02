@@ -2,8 +2,8 @@
 #include <random>
 #include <utility>
 #include <genex/concepts.hpp>
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/pipe.hpp>
+#include <genex/iterators/iter_pair.hpp>
 
 
 namespace genex::actions::concepts {

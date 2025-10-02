@@ -14,7 +14,8 @@ namespace genex::iterators::concepts {
 
 namespace genex::iterators {
     struct advance_fn {
-        template <typename I> requires concepts::advancable_iters<I>
+        template <typename I>
+            requires concepts::advancable_iters<I>
         constexpr auto operator()(I &it, const iter_difference_t<I> n = 1) const -> I {
             std::advance(it, n);
             return it;

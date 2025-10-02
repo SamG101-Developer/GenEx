@@ -1,11 +1,11 @@
 #pragma once
-#include <utility>
 #include <functional>
+#include <utility>
+#include <genex/meta.hpp>
+#include <genex/pipe.hpp>
 #include <genex/actions/erase.hpp>
 #include <genex/algorithms/find_if.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/meta.hpp>
-#include <genex/pipe.hpp>
 
 
 namespace genex::actions::concepts {

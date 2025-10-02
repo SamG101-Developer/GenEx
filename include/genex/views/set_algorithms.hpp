@@ -1,12 +1,12 @@
 #pragma once
 #include <coroutine>
-#include <genex/algorithms/contains.hpp>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
-#include <genex/operations/cmp.hpp>
 #include <genex/pipe.hpp>
+#include <genex/algorithms/contains.hpp>
+#include <genex/iterators/iter_pair.hpp>
+#include <genex/operations/cmp.hpp>
 
 
 namespace genex::views::concepts {

@@ -67,6 +67,16 @@ TEST(GenexViewsTransform, VecWithProj) {
 }
 
 
+TEST(GenexViewsTransform, EmptyInput) {
+    auto vec = std::vector<std::unique_ptr<int>>{};
+    const auto rng = vec
+        | genex::views::transform([](auto &&x) { return x == nullptr ? 0 : *x + 1; })
+        | genex::views::to<std::vector>();
+    const auto exp = std::vector<int>{};
+    EXPECT_EQ(rng, exp);
+}
+
+
 TEST(GenexViewsTransform, IterInput) {
     auto vec = std::vector{0, 1, 2, 3, 4, 5, 6};
     const auto it_begin = vec.begin();

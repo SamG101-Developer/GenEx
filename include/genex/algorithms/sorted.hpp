@@ -1,8 +1,9 @@
 #pragma once
+#include <functional>
 #include <vector>
 #include <genex/concepts.hpp>
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/meta.hpp>
+#include <genex/iterators/iter_pair.hpp>
 #include <genex/operations/cmp.hpp>
 
 
@@ -29,8 +30,8 @@ namespace genex::algorithms {
             auto vec = std::vector<iter_value_t<I>>(
                 std::make_move_iterator(first),
                 std::make_move_iterator(last));
-            std::sort(vec.begin(), vec.end(), [comp, proj]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
-                return std::invoke(std::move(comp), std::invoke(proj, std::forward<Lhs>(lhs)), std::invoke(proj, std::forward<Rhs>(rhs)));
+            std::sort(vec.begin(), vec.end(), [comp=std::forward<Comp>(comp), proj=std::forward<Proj>(proj)]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
+                return std::invoke(comp, std::invoke(proj, std::forward<Lhs>(lhs)), std::invoke(proj, std::forward<Rhs>(rhs)));
             });
             return vec;
         }

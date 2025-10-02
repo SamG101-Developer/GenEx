@@ -1,9 +1,9 @@
 #pragma once
-#include <genex/actions/erase.hpp>
-#include <genex/algorithms/find_if_not.hpp>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
+#include <genex/actions/erase.hpp>
+#include <genex/algorithms/find_if_not.hpp>
 
 
 namespace genex::actions::concepts {

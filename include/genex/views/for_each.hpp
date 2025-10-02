@@ -2,9 +2,9 @@
 #include <coroutine>
 #include <functional>
 #include <genex/concepts.hpp>
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
+#include <genex/iterators/iter_pair.hpp>
 
 
 namespace genex::views::concepts {

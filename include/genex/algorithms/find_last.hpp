@@ -1,10 +1,10 @@
 #pragma once
 #include <functional>
-#include <genex/iterators/iter_pair.hpp>
-#include <genex/iterators/prev.hpp>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
+#include <genex/iterators/iter_pair.hpp>
+#include <genex/iterators/prev.hpp>
 
 
 namespace genex::algorithms::concepts {

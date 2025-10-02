@@ -1,10 +1,9 @@
 #pragma once
 #include <functional>
 #include <genex/concepts.hpp>
+#include <genex/pipe.hpp>
 #include <genex/actions/erase.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/iterators/prev.hpp>
-#include <genex/pipe.hpp>
 
 
 namespace genex::actions::concepts {
@@ -28,12 +27,14 @@ namespace genex::actions::concepts {
 
 namespace genex::actions {
     struct pop_front_fn {
-        template <typename Rng> requires concepts::front_poppable_select_pop_front<Rng>
+        template <typename Rng>
+            requires concepts::front_poppable_select_pop_front<Rng>
         constexpr auto operator()(Rng &&rng) const -> auto {
             return rng.pop_front();
         }
 
-        template <typename Rng> requires concepts::front_poppable_select_erase<Rng>
+        template <typename Rng>
+            requires concepts::front_poppable_select_erase<Rng>
         auto operator()(Rng &&rng) const -> auto {
             return actions::erase(rng, iterators::begin(rng));
         }

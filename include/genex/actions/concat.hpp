@@ -1,8 +1,8 @@
 #pragma once
-#include <genex/actions/insert.hpp>
 #include <genex/concepts.hpp>
-#include <genex/iterators/access.hpp>
 #include <genex/pipe.hpp>
+#include <genex/actions/insert.hpp>
+#include <genex/iterators/access.hpp>
 
 
 namespace genex::actions::concepts {

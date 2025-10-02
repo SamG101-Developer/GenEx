@@ -1,9 +1,9 @@
 #pragma once
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/meta.hpp>
 #include <genex/pipe.hpp>
+#include <genex/iterators/iter_pair.hpp>
 
 
 namespace genex::views::concepts {

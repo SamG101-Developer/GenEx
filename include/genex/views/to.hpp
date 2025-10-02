@@ -1,6 +1,6 @@
 #pragma once
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/pipe.hpp>
+#include <genex/iterators/iter_pair.hpp>
 
 
 namespace genex::views {

@@ -1,7 +1,7 @@
 #pragma once
+#include <genex/pipe.hpp>
 #include <genex/actions/insert.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/pipe.hpp>
 
 
 namespace genex::actions::concepts {
@@ -32,17 +32,20 @@ namespace genex::actions::concepts {
 
 namespace genex::actions {
     struct push_back_fn {
-        template <typename Rng, typename E> requires concepts::back_insertable_select_emplace_back<Rng, E>
+        template <typename Rng, typename E>
+            requires concepts::back_insertable_select_emplace_back<Rng, E>
         constexpr auto operator()(Rng &&rng, E &&elem) const -> auto {
             return rng.emplace_back(std::forward<E>(elem));
         }
 
-        template <typename Rng, typename E> requires concepts::back_insertable_select_push_back<Rng, E>
+        template <typename Rng, typename E>
+            requires concepts::back_insertable_select_push_back<Rng, E>
         constexpr auto operator()(Rng &&rng, E &&elem) const -> auto {
             return rng.push_back(std::forward<E>(elem));
         }
 
-        template <typename Rng, typename E> requires concepts::back_insertable_select_insert<Rng, E>
+        template <typename Rng, typename E>
+            requires concepts::back_insertable_select_insert<Rng, E>
         constexpr auto operator()(Rng &&rng, E &&elem) const -> auto {
             return actions::insert(rng, iterators::end(rng), std::forward<E>(elem));
         }

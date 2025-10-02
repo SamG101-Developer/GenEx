@@ -1,9 +1,9 @@
 #pragma once
 #include <functional>
 #include <genex/concepts.hpp>
-#include <genex/operations/cmp.hpp>
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/meta.hpp>
+#include <genex/iterators/iter_pair.hpp>
+#include <genex/operations/cmp.hpp>
 
 
 namespace genex::algorithms::concepts {

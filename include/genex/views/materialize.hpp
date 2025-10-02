@@ -1,11 +1,11 @@
 #pragma once
 #include <coroutine>
 #include <vector>
-#include <genex/actions/push_back.hpp>
 #include <genex/concepts.hpp>
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
+#include <genex/actions/push_back.hpp>
+#include <genex/iterators/iter_pair.hpp>
 
 
 namespace genex::views::concepts {
@@ -59,7 +59,7 @@ namespace genex::views {
         template <template <typename> typename Cache = std::vector>
         constexpr auto operator()() const -> auto {
             return [*this]<typename Rng>requires concepts::materializable_range<Cache, Rng>(Rng &&rng) {
-                return this->operator()<Cache>(std::move(rng));
+                return this->operator()<Cache>(std::forward<Rng>(rng));
             };
         }
     };

@@ -1,7 +1,7 @@
 #pragma once
 #include <iterator>
-#include <genex/macros.hpp>
 #include <genex/concepts.hpp>
+#include <genex/macros.hpp>
 #include <genex/iterators/iter_pair.hpp>
 
 

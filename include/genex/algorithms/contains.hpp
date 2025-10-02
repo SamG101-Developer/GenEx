@@ -1,9 +1,9 @@
 #pragma once
-#include <genex/algorithms/find.hpp>
 #include <genex/concepts.hpp>
-#include <genex/iterators/iter_pair.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
+#include <genex/algorithms/find.hpp>
+#include <genex/iterators/iter_pair.hpp>
 #include <genex/operations/cmp.hpp>
 
 
