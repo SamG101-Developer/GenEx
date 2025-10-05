@@ -1,9 +1,12 @@
 # GenEx
 
-GenEx (generator extensions) is a C++ library inspired by `ranges-v3` that provides a set of utilities for working with
-ranges and iterators. It is designed with a generator interface, which allows for lazy evaluation of operations on
-ranges. Concepts are used to restrict the operations that can be performed on which types; for example, reversing a
-range will require the range be bidirectional.
+GenEx (generating extensions) is a C++ library inspired by `ranges-v3` that provides a set of utilities for working with
+ranges and iterators. It is designed with a "view" interface, which allows for lazy evaluation of operations on ranges.
+Concepts are used to restrict the operations that can be performed on which types; for example, reversing a range will
+require the range be bidirectional.
+
+GenEx was originally "generator extensions", using coroutines and `std::generator`, but the coroutine overhead was too
+high for many use cases, so the library was redesigned to use a view interface instead.
 
 ## Views
 
@@ -26,6 +29,7 @@ auto main() -> int {
     auto result = vec
         | genex::views::transform([](const int i) { return i * 2; })
         | genex::views::filter([](const int i) { return i % 4 == 0; })
+        | genex::views::to<std::vector>()
         | genex::views::reverse
         | genex::views::to<std::vector>();
 
