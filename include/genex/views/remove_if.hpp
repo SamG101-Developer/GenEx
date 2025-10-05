@@ -42,7 +42,7 @@ namespace genex::views::detail {
             std::is_nothrow_move_constructible_v<Pred> and
             std::is_nothrow_move_constructible_v<Proj>) :
             it(std::move(it)), st(std::move(st)), pred(std::move(pred)), proj(std::move(proj)) {
-            while (it != st and std::invoke(pred, std::invoke(proj, *it))) { ++it; }
+            while (this->it != this->st and std::invoke(this->pred, std::invoke(this->proj, *this->it))) { ++this->it; }
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(noexcept(*it))
@@ -57,8 +57,7 @@ namespace genex::views::detail {
 
         GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it) and std::is_nothrow_invocable_v<Pred, std::invoke_result_t<Proj, iter_reference_t<I>>>)
             -> remove_if_iterator& {
-            ++it;
-            while (it != st and std::invoke(pred, std::invoke(proj, *it))) { ++it; }
+            do { ++it; } while (it != st and std::invoke(pred, std::invoke(proj, *it)));
             return *this;
         }
     };

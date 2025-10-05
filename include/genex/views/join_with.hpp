@@ -47,9 +47,9 @@ namespace genex::views::detail {
             std::is_nothrow_move_constructible_v<S> and
             std::is_nothrow_move_constructible_v<New>) :
             it(std::move(it)), st(std::move(st)), sep(std::move(sep)) {
-            if (it != st) {
-                sub_it = iterators::begin(*it);
-                sub_st = iterators::end(*it);
+            if (this->it != this->st) {
+                sub_it = iterators::begin(*this->it);
+                sub_st = iterators::end(*this->it);
             }
         }
 
