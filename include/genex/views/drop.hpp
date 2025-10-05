@@ -1,38 +1,20 @@
 #pragma once
-#include <functional>
 #include <genex/concepts.hpp>
-#include <genex/generator.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
-#include <genex/iterators/advance.hpp>
-#include <genex/iterators/distance.hpp>
-#include <genex/iterators/iter_pair.hpp>
+#include <genex/iterators/access.hpp>
 #include <genex/iterators/next.hpp>
+#include <genex/operations/data.hpp>
+#include <genex/operations/size.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Int>
     concept droppable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
-        integer_like<Int>;
-
-    template <typename I, typename S, typename Int>
-    concept droppable_iters_optimized_2 =
-        std::random_access_iterator<I> and
-        droppable_iters<I, S, Int>;
-
-    template <typename I, typename S, typename Int>
-    concept droppable_iters_optimized_1 =
-        std::forward_iterator<I> and
-        not std::random_access_iterator<I> and
-        droppable_iters<I, S, Int>;
-
-    template <typename I, typename S, typename Int>
-    concept droppable_iters_unoptimized =
-        std::input_iterator<I> and
-        not std::forward_iterator<I> and
-        droppable_iters<I, S, Int>;
+        std::weakly_incrementable<Int> and
+        std::movable<I>;
 
     template <typename Rng, typename Int>
     concept droppable_range =
@@ -43,65 +25,97 @@ namespace genex::views::concepts {
 
 namespace genex::views::detail {
     template <typename I, typename S, typename Int>
-        requires concepts::droppable_iters_optimized_2<I, S, Int>
-    GENEX_NO_ASAN
-    auto do_drop(I first, S last, const Int n) -> generator<iter_value_t<I>> {
-        if (first == last) { co_return; }
-        const auto size = iterators::distance(first, last);
-        if (n >= size) { co_return; }
-        iterators::advance(first, n);
-        for (; first != last; ++first) {
-            co_yield *first;
-        }
-    }
+    requires concepts::droppable_iters<I, S, Int>
+    struct drop_iterator {
+        using reference = iter_reference_t<I>;
+        using value_type = iter_value_t<I>;
+        using pointer = std::add_pointer_t<value_type>;
 
-    template <typename I, typename S, typename Int>
-        requires concepts::droppable_iters_optimized_1<I, S, Int>
-    GENEX_NO_ASAN
-    auto do_drop(I first, S last, const Int n) -> generator<iter_value_t<I>> {
-        if (first == last) { co_return; }
-        first = iterators::next(first, n, last);
-        for (; first != last; ++first) {
-            co_yield *first;
-        }
-    }
+        GENEX_VIEW_ITERATOR_TYPE_DEFINITIONS(std::iterator_traits<I>::iterator_category);
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(drop_iterator);
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(drop_iterator);
 
-    template <typename I, typename S, typename Int>
-        requires concepts::droppable_iters_unoptimized<I, S, Int>
-    auto do_drop(I first, S last, const Int n) -> generator<iter_value_t<I>> {
-        if (first == last) { co_return; }
-        for (auto i = 0u; i < n and first != last; ++i, ++first) {
+        GENEX_INLINE constexpr explicit drop_iterator(I it, S st) noexcept(
+            std::is_nothrow_move_constructible_v<I> and
+            std::is_nothrow_move_constructible_v<S>) :
+            it(std::move(it)), st(std::move(st)) {
         }
-        for (; first != last; ++first) {
-            co_yield *first;
+
+        GENEX_INLINE constexpr auto operator*() const noexcept(noexcept(*it))
+            -> reference {
+            return *it;
         }
-    }
+
+        GENEX_INLINE constexpr auto operator->() const noexcept(noexcept(std::addressof(*it)))
+            -> pointer {
+            GENEX_ITERATOR_PROXY_ACCESS
+        }
+
+        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it))
+            -> drop_iterator& {
+            ++it;
+            return *this;
+        }
+    };
+
+    template <typename S, typename Int>
+    struct drop_sentinel {
+        GENEX_VIEW_SENTINEL_CTOR_DEFINITIONS(drop_sentinel);
+        GENEX_VIEW_SENTINEL_FUNC_DEFINITIONS(drop_iterator, drop_sentinel, Int);
+    };
+
+    template <typename V, typename Int>
+    requires concepts::droppable_range<V, Int>
+    struct drop_view : std::ranges::view_interface<drop_view<V, Int>> {
+        GENEX_VIEW_VIEW_CTOR_DEFINITIONS(drop_view);
+        GENEX_VIEW_VIEW_TYPE_DEFINITIONS(drop_iterator, drop_sentinel, Int);
+        GENEX_VIEW_VIEW_FUNC_DEFINITIONS();
+        GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE;
+
+        Int drop_n;
+
+        GENEX_INLINE constexpr explicit drop_view(V rng, Int drop_n) noexcept(
+            std::is_nothrow_move_constructible_v<V> and
+            std::is_nothrow_move_constructible_v<Int>) :
+            base_rng(std::move(rng)), drop_n(std::max(0, drop_n)) {
+        }
+
+        GENEX_INLINE constexpr auto internal_begin() const noexcept(noexcept(iterators::begin(base_rng))) {
+            return iterators::next(iterators::begin(base_rng), drop_n, iterators::end(base_rng));
+        }
+
+        GENEX_INLINE constexpr auto internal_end() const noexcept(noexcept(iterators::end(base_rng))) {
+            return iterators::end(base_rng);
+        }
+    };
 }
 
 
 namespace genex::views {
     struct drop_fn {
-        template <typename I, typename S, typename Int>
-            requires concepts::droppable_iters<I, S, Int>
-        auto operator()(I first, S last, const Int n) const -> auto {
-            return detail::do_drop(
-                std::move(first), std::move(last), n);
+        template <typename Rng, typename Int>
+        requires detail::concepts::droppable_range<Rng, Int>
+        GENEX_INLINE constexpr auto operator()(Rng&& rng, Int drop_n) const -> auto {
+            using V = std::views::all_t<Rng>;
+            return detail::drop_view<V, Int>{
+                std::views::all(std::forward<Rng>(rng)), drop_n};
         }
 
         template <typename Rng, typename Int>
-            requires concepts::droppable_range<Rng, Int>
-        auto operator()(Rng &&rng, const Int n) const -> auto {
-            auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last), n);
+        requires detail::concepts::droppable_range<Rng, Int> and contiguous_range<Rng> and borrowed_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng&& rng, Int drop_n) const -> auto {
+            using V = std::views::all_t<Rng>;
+            return detail::drop_view<V, Int>{
+                std::views::all(std::forward<Rng>(rng)), drop_n}; // .as_pointer_subrange();
         }
 
         template <typename Int>
-            requires integer_like<Int>
-        auto operator()(Int n) const -> auto {
-            return std::bind_back(drop_fn{}, n);
+        requires std::weakly_incrementable<Int>
+        GENEX_INLINE constexpr auto operator()(Int drop_n) const -> auto {
+            return std::bind_back(
+                drop_fn{}, drop_n);
         }
     };
 
-    GENEX_EXPORT_STRUCT(drop);
+    inline constexpr drop_fn drop{};
 }

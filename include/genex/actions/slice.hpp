@@ -22,8 +22,8 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct slice_fn {
         template <typename Rng, typename Int>
-            requires concepts::sliceable_range<Rng, Int>
-        constexpr auto operator()(Rng &&rng, Int from, Int to) const -> decltype(auto) {
+        requires concepts::sliceable_range<Rng, Int>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Int from, Int to) const -> decltype(auto) {
             actions::erase(
                 rng, iterators::begin(rng), iterators::next(iterators::begin(rng), from, iterators::end(rng)));
             actions::erase(
@@ -32,22 +32,22 @@ namespace genex::actions {
         }
 
         template <typename Rng, typename Int>
-            requires concepts::sliceable_range<Rng, Int>
-        constexpr auto operator()(Rng &&rng, Int from) const -> decltype(auto) {
+        requires concepts::sliceable_range<Rng, Int>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Int from) const -> decltype(auto) {
             actions::erase(
                 rng, iterators::begin(rng), iterators::next(iterators::begin(rng), from, iterators::end(rng)));
             return std::forward<Rng>(rng);
         }
 
         template <typename Int>
-            requires integer_like<Int>
-        constexpr auto operator()(const Int from, const Int to) const -> auto {
+        requires integer_like<Int>
+        GENEX_INLINE constexpr auto operator()(const Int from, const Int to) const -> auto {
             return std::bind_back(slice_fn{}, from, to);
         }
 
         template <typename Int>
-            requires integer_like<Int>
-        constexpr auto operator()(const Int from) const -> auto {
+        requires integer_like<Int>
+        GENEX_INLINE constexpr auto operator()(const Int from) const -> auto {
             return std::bind_back(slice_fn{}, from);
         }
     };

@@ -23,7 +23,7 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct count_if_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-            requires concepts::can_count_if_iters<I, S, Pred, Proj>
+        requires concepts::can_count_if_iters<I, S, Pred, Proj>
         auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
             auto count = 0uz;
             for (; first != last; ++first) {
@@ -35,7 +35,7 @@ namespace genex::algorithms {
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
-            requires concepts::can_count_if_range<Rng, Pred, Proj>
+        requires concepts::can_count_if_range<Rng, Pred, Proj>
         auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             auto [first, last] = iterators::iter_pair(rng);
             return (*this)(

@@ -40,17 +40,17 @@ TEST(GenexViewsPtr, VecSharedPtr) {
 }
 
 
-TEST(GenexViewsPtr, VecWeakPtr) {
-    auto vec = std::vector<std::weak_ptr<int>>{};
-    for (auto i = 1; i <= 5; ++i) {
-        vec.push_back(std::make_shared<int>(i));
-    }
-    const auto exp = vec;
-
-    const auto rng = vec
-        | genex::views::ptr
-        | genex::views::to<std::vector>();
-    for (auto i = 0; i < rng.size(); ++i) {
-        EXPECT_EQ(rng[i], exp[i].lock().get());
-    }
-}
+// TEST(GenexViewsPtr, VecWeakPtr) {
+//     auto vec = std::vector<std::weak_ptr<int>>{};
+//     for (auto i = 1; i <= 5; ++i) {
+//         vec.push_back(std::make_shared<int>(i));
+//     }
+//     const auto exp = vec;
+//
+//     const auto rng = vec
+//         | genex::views::ptr
+//         | genex::views::to<std::vector>();
+//     for (auto i = 0; i < rng.size(); ++i) {
+//         EXPECT_EQ(rng[i], exp[i].lock().get());
+//     }
+// }

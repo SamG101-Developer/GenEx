@@ -18,8 +18,8 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct sort_fn {
         template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
-            requires concepts::can_sorted_range<Rng, Comp, Proj>
-        constexpr auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> decltype(auto) {
+        requires concepts::can_sorted_range<Rng, Comp, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> decltype(auto) {
             auto [first, last] = iterators::iter_pair(rng);
             auto sorter = [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
                 return std::invoke(
@@ -30,8 +30,8 @@ namespace genex::actions {
         }
 
         template <typename Comp = operations::lt, typename Proj = meta::identity>
-            requires (not input_range<std::remove_cvref_t<Comp>>)
-        constexpr auto operator()(Comp &&comp = {}, Proj &&proj = {}) const -> auto {
+        requires (not input_range<std::remove_cvref_t<Comp>>)
+        GENEX_INLINE constexpr auto operator()(Comp &&comp = {}, Proj &&proj = {}) const -> auto {
             return std::bind_back(sort_fn{}, std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
     };

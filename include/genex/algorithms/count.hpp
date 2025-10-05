@@ -24,7 +24,7 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct count_fn {
         template <typename I, typename S, typename E, typename Proj = meta::identity>
-            requires concepts::can_count_iters<I, S, E, Proj>
+        requires concepts::can_count_iters<I, S, E, Proj>
         constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> auto {
             auto count = 0uz;
             for (; first != last; ++first) {
@@ -34,7 +34,7 @@ namespace genex::algorithms {
         }
 
         template <typename Rng, typename E, std::invocable<E> Proj = meta::identity>
-            requires concepts::can_count_range<Rng, E, Proj>
+        requires concepts::can_count_range<Rng, E, Proj>
         constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> auto {
             auto [first, last] = iterators::iter_pair(rng);
             return (*this)(

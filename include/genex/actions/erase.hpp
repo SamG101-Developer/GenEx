@@ -18,14 +18,14 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct erase_fn final {
         template <typename Rng, typename I, typename S>
-            requires concepts::erasable_range<Rng, I, S>
-        constexpr auto operator()(Rng &&rng, I it, S end) const -> auto {
+        requires concepts::erasable_range<Rng, I, S>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, S end) const -> auto {
             return rng.erase(std::move(it), std::move(end));
         }
 
         template <typename Rng, typename I>
-            requires concepts::erasable_range<Rng, I, sentinel_t<Rng>>
-        constexpr auto operator()(Rng &&rng, I it) const -> auto {
+        requires concepts::erasable_range<Rng, I, sentinel_t<Rng>>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, I it) const -> auto {
             return rng.erase(std::move(it));
         }
     };

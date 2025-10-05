@@ -15,7 +15,6 @@ operations on ranges.
 
 ```cpp
 #include <genex/views/filter.hpp>
-#include <genex/views/materialize.hpp>
 #include <genex/views/reverse.hpp>
 #include <genex/views/transform.hpp>
 #include <genex/views/to.hpp>
@@ -27,7 +26,6 @@ auto main() -> int {
     auto result = vec
         | genex::views::transform([](const int i) { return i * 2; })
         | genex::views::filter([](const int i) { return i % 4 == 0; })
-        | genex::views::materialize
         | genex::views::reverse
         | genex::views::to<std::vector>();
 

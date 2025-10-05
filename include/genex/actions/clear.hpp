@@ -17,13 +17,13 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct clear_fn {
         template <typename Rng>
-            requires concepts::clearable_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+        requires concepts::clearable_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
             rng.clear();
             return std::forward<Rng>(rng);
         }
 
-        constexpr auto operator()() const -> auto {
+        GENEX_INLINE constexpr auto operator()() const -> auto {
             return std::bind_back(clear_fn{});
         }
     };

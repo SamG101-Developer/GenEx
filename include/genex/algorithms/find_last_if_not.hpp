@@ -35,8 +35,9 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct find_last_if_not_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-            requires concepts::findable_last_if_not_iters_unoptimized<I, S, Pred, Proj>
+        requires concepts::findable_last_if_not_iters_unoptimized<I, S, Pred, Proj>
         constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
+            if (first == last) { return last; }
             auto found_last = last;
             for (; first != last; ++first) {
                 if (not std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
@@ -47,8 +48,9 @@ namespace genex::algorithms {
         }
 
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-            requires concepts::findable_last_if_not_iters_optimized<I, S, Pred, Proj>
+        requires concepts::findable_last_if_not_iters_optimized<I, S, Pred, Proj>
         constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
+            if (first == last) { return last; }
             auto true_last = last;
             for (; last != first; --last) {
                 if (not std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *iterators::prev(last)))) {
@@ -59,7 +61,7 @@ namespace genex::algorithms {
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
-            requires concepts::findable_last_if_not_range<Rng, Pred, Proj>
+        requires concepts::findable_last_if_not_range<Rng, Pred, Proj>
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             auto [first, last] = iterators::iter_pair(rng);
             return (*this)(

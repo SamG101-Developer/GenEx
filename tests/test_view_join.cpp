@@ -1,24 +1,25 @@
 #include <gtest/gtest.h>
 
-#include <genex/views/flatten.hpp>
-#include <genex/views/flatten_with.hpp>
+#include <genex/views/join.hpp>
+#include <genex/views/join_with.hpp>
 #include <genex/views/to.hpp>
 
 
-TEST(GenexViewsFlatten, VecInput) {
+TEST(GenexViewsJoin, VecInput) {
     auto vec = std::vector<std::vector<int>>{{1, 2, 3}, {4, 5}, {6}};
+
     const auto rng = vec
-        | genex::views::flatten
+        | genex::views::join
         | genex::views::to<std::vector>();
     const auto exp = std::vector<int>{1, 2, 3, 4, 5, 6};
     EXPECT_EQ(rng, exp);
 }
 
 
-TEST(GenexViewsFlatten, StrInput) {
+TEST(GenexViewsJoin, StrInput) {
     auto vec = std::vector<std::string>{"hello", "world", "!"};
     const auto rng = vec
-        | genex::views::flatten
+        | genex::views::join
         | genex::views::to<std::vector>();
     const auto exp = std::vector{'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!'};
     EXPECT_EQ(rng, exp);
@@ -31,21 +32,21 @@ TEST(GenexViewsFlatten, StrInput) {
 }
 
 
-TEST(GenexViewsFlattenWith, VecInput) {
+TEST(GenexViewsJoinWith, VecInput) {
     auto vec = std::vector<std::vector<int>>{{1, 2, 3}, {4, 5}, {6}};
 
     const auto rng = vec
-        | genex::views::flatten_with(0)
+        | genex::views::join_with(0)
         | genex::views::to<std::vector>();
     const auto exp = std::vector{1, 2, 3, 0, 4, 5, 0, 6};
     EXPECT_EQ(rng, exp);
 }
 
 
-TEST(GenexViewsFlattenWith, StrInput) {
+TEST(GenexViewsJoinWith, StrInput) {
     auto vec = std::vector<std::string>{"hello", "world", "!"};
     const auto rng = vec
-        | genex::views::flatten_with(' ')
+        | genex::views::join_with(' ')
         | genex::views::to<std::vector>();
     const auto exp = std::vector{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', ' ', '!'};
     EXPECT_EQ(rng, exp);

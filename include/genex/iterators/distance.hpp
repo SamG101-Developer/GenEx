@@ -21,14 +21,14 @@ namespace genex::iterators::concepts {
 namespace genex::iterators {
     struct distance_fn {
         template <typename I, typename S>
-            requires concepts::distancable_iters<I, S>
-        auto operator()(I first, S last) const noexcept -> std::size_t {
+        requires concepts::distancable_iters<I, S>
+        GENEX_INLINE auto operator()(I first, S last) const noexcept -> std::size_t {
             return std::distance(std::move(first), std::move(last));
         }
 
         template <typename Rng>
-            requires concepts::distancable_range<Rng>
-        auto operator()(Rng &&rng) const noexcept -> std::size_t {
+        requires concepts::distancable_range<Rng>
+        GENEX_INLINE auto operator()(Rng &&rng) const noexcept -> std::size_t {
             auto [first, last] = iter_pair(rng);
             return (*this)(
                 std::move(first), std::move(last));

@@ -35,8 +35,8 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct position_last_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity, typename Int>
-            requires concepts::positionable_last_iters<I, S, Pred, Proj, Int>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z) const -> auto {
+        requires concepts::positionable_last_iters<I, S, Pred, Proj, Int>
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z) const -> auto {
             auto pos = def;
             for (Int i = 0; first != last; ++first, ++i) {
                 if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
@@ -47,8 +47,8 @@ namespace genex::algorithms {
         }
 
         template <typename I, typename S, typename Pred, typename Proj = meta::identity, typename Int>
-            requires concepts::positionable_last_iters_optimized<I, S, Pred, Proj, Int>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z) const -> auto {
+        requires concepts::positionable_last_iters_optimized<I, S, Pred, Proj, Int>
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z) const -> auto {
             auto pos = static_cast<Int>(iterators::distance(first, last));
             while (first != last) {
                 --last;
@@ -61,8 +61,8 @@ namespace genex::algorithms {
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity, typename Int = ssize_t>
-            requires concepts::positionable_last_range<Rng, Pred, Proj, Int>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}, const Int def = -1z) const -> auto {
+        requires concepts::positionable_last_range<Rng, Pred, Proj, Int>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}, const Int def = -1z) const -> auto {
             auto [first, last] = iterators::iter_pair(rng);
             return (*this)(
                 std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj), def);

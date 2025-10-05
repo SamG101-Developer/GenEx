@@ -1,75 +1,168 @@
 #pragma once
-#include <coroutine>
+#include <tuple>
+
 #include <genex/concepts.hpp>
-#include <genex/generator.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename T1, typename T2>
-    struct can_zip_iters_helper : std::false_type {
+    struct zippable_iters_helper : std::false_type {
     };
 
     template <typename... Is, typename... Ss>
-    struct can_zip_iters_helper<std::tuple<Is...>, std::tuple<Ss...>> {
+    struct zippable_iters_helper<std::tuple<Is...>, std::tuple<Ss...>> {
         static constexpr bool value =
             sizeof...(Is) > 0 and
             sizeof...(Is) == sizeof...(Ss) and
             (std::input_iterator<Is> and ...) and
-            (std::sentinel_for<Ss, Is> and ...);
+            (std::sentinel_for<Ss, Is> and ...) and
+            (std::movable<Is> and ...);
     };
 
     template <typename T1, typename T2>
-    concept can_zip_iters = can_zip_iters_helper<T1, T2>::value;
+    concept zippable_iters = zippable_iters_helper<T1, T2>::value;
 
     template <typename... Rngs>
-    concept can_zip_range =
+    concept zippable_range =
         sizeof...(Rngs) > 0 and
         (input_range<Rngs> and ...) and
-        can_zip_iters<std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>>;
+        zippable_iters<std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>>;
 }
 
 
 namespace genex::views::detail {
-    template <typename... Is, typename... Ss>
-        requires concepts::can_zip_iters<std::tuple<Is...>, std::tuple<Ss...>>
-    GENEX_NO_ASAN
-    auto do_zip(std::tuple<Is...> first, std::tuple<Ss...> last) -> generator<std::tuple<iter_value_t<Is>...>> {
-        auto starts = std::move(first);
-        auto ends = std::move(last);
+    template <typename... Rngs>
+    requires concepts::zippable_range<Rngs...>
+    struct zip_iterator {
+        static constexpr auto N = sizeof...(Rngs);
 
-        while (not any_iterator_finished(starts, ends)) {
-            co_yield deref_tuple(starts);
-            advance_tuple(starts);
+        using reference = std::tuple<range_reference_t<Rngs>...>;
+        using value_type = std::tuple<range_value_t<Rngs>...>;
+        using pointer = std::add_pointer_t<value_type>;
+
+        using iterator_concept =
+            std::conditional_t<(std::random_access_iterator<iterator_t<Rngs>> and ...), std::random_access_iterator_tag,
+            std::conditional_t<(std::bidirectional_iterator<iterator_t<Rngs>> and ...), std::bidirectional_iterator_tag,
+            std::conditional_t<(std::forward_iterator<iterator_t<Rngs>> and ...), std::forward_iterator_tag, std::input_iterator_tag>>>;
+
+        using iterator_category = iterator_concept;
+        using difference_type = difference_type_selector_t<iterator_t<Rngs>...>;
+
+        GENEX_INLINE constexpr explicit zip_iterator() = default;
+
+        std::tuple<iterator_t<Rngs>...> its;
+        std::tuple<sentinel_t<Rngs>...> sts;
+        std::size_t index;
+
+        GENEX_INLINE constexpr explicit zip_iterator(std::tuple<iterator_t<Rngs>...> its, std::tuple<sentinel_t<Rngs>...> sts) noexcept(
+            (std::is_nothrow_move_constructible_v<iterator_t<Rngs>> and ...) and
+            (std::is_nothrow_move_constructible_v<sentinel_t<Rngs>> and ...)) :
+            its(std::move(its)), sts(std::move(sts)), index(0) {
         }
-    }
+
+        GENEX_INLINE constexpr auto operator*() const noexcept
+            -> reference {
+            return std::apply([](auto &... iters) { return std::tie(*iters...); }, its);
+        }
+
+        GENEX_INLINE constexpr auto operator->() const noexcept
+            -> pointer {
+            return std::apply([](auto &... iters) { return std::make_tuple(std::addressof(*iters)...); }, its);
+        }
+
+        GENEX_INLINE constexpr auto operator++() noexcept
+            -> zip_iterator& {
+            auto at_end = [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+                return ((std::get<Is>(its) == std::get<Is>(sts)) || ...);
+            }(std::index_sequence_for<Rngs...>{});
+            if (at_end) { return *this; }
+
+            std::apply([](auto &... iters) { ((void)++iters, ...); }, its);
+            ++index;
+            return *this;
+        }
+
+        GENEX_INLINE constexpr auto operator++(int) noexcept
+            -> zip_iterator {
+            auto temp = *this;
+            ++*this;
+            return temp;
+        }
+    };
+
+    template <typename... Rngs>
+    struct zip_sentinel {
+        static constexpr auto N = sizeof...(Rngs);
+
+        GENEX_INLINE constexpr zip_sentinel() = default;
+
+        GENEX_INLINE constexpr auto operator==(zip_iterator<Rngs...> const &it) const noexcept -> bool {
+            return it.index == N;
+        }
+    };
+
+    template <typename... Vs>
+    requires concepts::zippable_range<Vs...> and (sizeof...(Vs) > 1)
+    struct zip_view : std::ranges::view_interface<zip_view<Vs...>> {
+        GENEX_INLINE constexpr explicit zip_view() = default;
+
+        using iterator = zip_iterator<Vs...>;
+        using sentinel = zip_sentinel<Vs...>;
+
+        std::tuple<Vs...> base_rngs;
+
+        GENEX_INLINE constexpr explicit zip_view(Vs ...rngs) :
+            base_rngs(std::move(rngs)...) {
+        }
+
+        GENEX_INLINE constexpr auto begin() noexcept(
+            (std::is_nothrow_copy_constructible_v<iterator_t<Vs>> and ...)) -> iterator {
+            return iterator{
+                std::make_from_tuple<std::tuple<iterator_t<Vs>...>>(std::apply([](auto &...rngs) { return std::make_tuple(iterators::begin(rngs)...); }, base_rngs)),
+                std::make_from_tuple<std::tuple<sentinel_t<Vs>...>>(std::apply([](auto &...rngs) { return std::make_tuple(iterators::end(rngs)...); }, base_rngs))};
+        }
+
+        GENEX_INLINE constexpr auto begin() const noexcept(
+            (std::is_nothrow_copy_constructible_v<iterator_t<Vs>> and ...)) -> iterator {
+            return iterator{
+                std::make_from_tuple<std::tuple<iterator_t<Vs>...>>(std::apply([](auto &...rngs) { return std::make_tuple(iterators::begin(rngs)...); }, base_rngs)),
+                std::make_from_tuple<std::tuple<sentinel_t<Vs>...>>(std::apply([](auto &...rngs) { return std::make_tuple(iterators::end(rngs)...); }, base_rngs))};
+        }
+
+        GENEX_INLINE constexpr auto end() noexcept(
+            (std::is_nothrow_copy_constructible_v<sentinel_t<Vs>> and ...))
+            -> sentinel {
+            return sentinel{};
+        }
+
+        GENEX_INLINE constexpr auto end() const noexcept(
+            (std::is_nothrow_copy_constructible_v<sentinel_t<Vs>> and ...))
+            -> sentinel requires (range<Vs*> and ...) {
+            return sentinel{};
+        }
+    };
 }
 
 
 namespace genex::views {
     struct zip_fn {
-        template <typename... Is, typename... Ss>
-            requires concepts::can_zip_iters<std::tuple<Is...>, std::tuple<Ss...>>
-        constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const -> auto {
-            return detail::do_zip(std::move(first), std::move(last));
+        template <typename ...Rng>
+        requires (sizeof...(Rng) > 1 and (detail::concepts::zippable_range<Rng> and ...))
+        GENEX_INLINE constexpr auto operator()(Rng &&...rng) const noexcept -> auto {
+            return detail::zip_view<std::views::all_t<Rng>...>{
+                std::views::all(std::forward<Rng>(rng))...};
         }
 
-        template <typename... Rngs>
-            requires (concepts::can_zip_range<Rngs...> and sizeof...(Rngs) > 1)
-        constexpr auto operator()(Rngs &&... ranges) const -> auto {
-            return (*this)(
-                std::make_tuple(iterators::begin(std::forward<Rngs>(ranges))...),
-                std::make_tuple(iterators::end(std::forward<Rngs>(ranges))...));
-        }
-
-        template <typename Rng2>
-            requires concepts::can_zip_range<Rng2>
-        constexpr auto operator()(Rng2 &&rng2) const -> auto {
-            return std::bind_back(zip_fn{}, std::forward<Rng2>(rng2));
+        template <typename Rng>
+        requires detail::concepts::zippable_range<Rng> and contiguous_range<Rng> and borrowed_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
+            return std::bind_back(
+                zip_fn{}, std::forward<Rng>(rng));
         }
     };
 
-    GENEX_EXPORT_STRUCT(zip);
+    inline constexpr zip_fn zip{};
 }

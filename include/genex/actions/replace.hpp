@@ -22,8 +22,8 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct replace_fn {
         template <typename Rng, typename Old, typename New, typename Proj = meta::identity>
-            requires concepts::replaceable_range<Rng, Old, New, Proj>
-        constexpr auto operator()(Rng &&rng, Old &&old_val, New &&new_val, Proj &&proj = {}) const -> decltype(auto) {
+        requires concepts::replaceable_range<Rng, Old, New, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Old &&old_val, New &&new_val, Proj &&proj = {}) const -> decltype(auto) {
             // todo: optimize to prevent multi-passes.
             while (true) {
                 auto it = algorithms::find(rng, std::forward<Old>(old_val), std::forward<Proj>(proj));
@@ -34,8 +34,8 @@ namespace genex::actions {
         }
 
         template <typename Old, typename New, typename Proj = meta::identity>
-            requires(not range<Old>)
-        constexpr auto operator()(Old &&old_val, New &&new_val, Proj &&proj = {}) const -> auto {
+        requires(not range<Old>)
+        GENEX_INLINE constexpr auto operator()(Old &&old_val, New &&new_val, Proj &&proj = {}) const -> auto {
             return std::bind_back(
                 replace_fn{}, std::forward<Old>(old_val), std::forward<New>(new_val), std::forward<Proj>(proj));
         }

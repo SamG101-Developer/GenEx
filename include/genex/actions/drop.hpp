@@ -19,8 +19,8 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct drop_fn {
         template <typename Rng, typename Int>
-            requires concepts::droppable_range<Rng, Int>
-        constexpr auto operator()(Rng &&rng, const Int n) const -> decltype(auto) {
+        requires concepts::droppable_range<Rng, Int>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const -> decltype(auto) {
             GENEX_ASSERT(std::out_of_range, n > 0);
             actions::erase(
                 rng, iterators::begin(rng), iterators::next(iterators::begin(rng), n, iterators::end(rng)));
@@ -28,8 +28,8 @@ namespace genex::actions {
         }
 
         template <typename Int>
-            requires integer_like<Int>
-        constexpr auto operator()(const Int n) const -> auto {
+        requires integer_like<Int>
+        GENEX_INLINE constexpr auto operator()(const Int n) const -> auto {
             GENEX_ASSERT(std::out_of_range, n > 0);
             return std::bind_back(drop_fn{}, n);
         }

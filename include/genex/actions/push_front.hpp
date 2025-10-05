@@ -33,25 +33,25 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct push_front_fn {
         template <typename Rng, typename E>
-            requires concepts::front_insertable_select_emplace_front<Rng, E>
-        constexpr auto operator()(Rng &&rng, E &&elem) const -> auto {
+        requires concepts::front_insertable_select_emplace_front<Rng, E>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E &&elem) const -> auto {
             return rng.emplace_front(std::forward<E>(elem));
         }
 
         template <typename Rng, typename E>
-            requires concepts::front_insertable_select_push_front<Rng, E>
-        constexpr auto operator()(Rng &&rng, E &&elem) const -> auto {
+        requires concepts::front_insertable_select_push_front<Rng, E>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E &&elem) const -> auto {
             return rng.push_front(std::forward<E>(elem));
         }
 
         template <typename Rng, typename E>
-            requires concepts::front_insertable_select_insert<Rng, E>
-        constexpr auto operator()(Rng &&rng, E &&elem) const -> auto {
+        requires concepts::front_insertable_select_insert<Rng, E>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E &&elem) const -> auto {
             return actions::insert(rng, iterators::begin(rng), std::forward<E>(elem));
         }
 
         template <typename E>
-        constexpr auto operator()(E &&elem) const -> auto {
+        GENEX_INLINE constexpr auto operator()(E &&elem) const -> auto {
             return std::bind_back(push_front_fn{}, std::forward<E>(elem));
         }
     };

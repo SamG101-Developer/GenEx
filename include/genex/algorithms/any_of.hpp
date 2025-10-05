@@ -9,7 +9,7 @@
 namespace genex::algorithms {
     struct any_of_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-            requires concepts::quantifiable_iters<I, S, Pred, Proj>
+        requires concepts::quantifiable_iters<I, S, Pred, Proj>
         constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
             // Check for an iterator that DOES satisfy the predicate; if one exists, an element satisfies it.
             auto it = algorithms::find_if(
@@ -18,7 +18,7 @@ namespace genex::algorithms {
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
-            requires concepts::quantifiable_range<Rng, Pred, Proj>
+        requires concepts::quantifiable_range<Rng, Pred, Proj>
         constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             // Convert the range into iterators and call the iterator overload.
             auto [first, last] = iterators::iter_pair(rng);

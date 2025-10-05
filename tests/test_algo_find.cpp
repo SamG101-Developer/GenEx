@@ -7,7 +7,6 @@
 #include <genex/algorithms/find_if_not.hpp>
 #include <genex/algorithms/find_last_if_not.hpp>
 #include <genex/iterators/distance.hpp>
-#include <genex/views/materialize.hpp>
 #include <genex/views/view.hpp>
 
 
@@ -27,7 +26,7 @@ TEST(GenexAlgosFind, FindElementNotExists) {
 
 
 TEST(GenexAlgosFind, FindElementExistsInGenerator) {
-    auto vec = std::vector{1, 2, 3, 4, 5, 6} | genex::views::view | genex::views::materialize();
+    auto vec = std::vector{1, 2, 3, 4, 5, 6};
     const auto it = genex::algorithms::find(vec, 4);
     EXPECT_EQ(*it, 4);
 }
@@ -49,7 +48,7 @@ TEST(GenexAlgosFindLast, FindLastElementNotExists) {
 
 
 TEST(GenexAlgosFindLast, FindLastElementExistsInGenerator) {
-    auto vec = std::vector{1, 2, 3, 4, 5, 6, 4} | genex::views::view | genex::views::materialize();
+    auto vec = std::vector{1, 2, 3, 4, 5, 6, 4};
     const auto it = genex::algorithms::find_last(vec, 4);
     EXPECT_EQ(*it, 4);
 }
@@ -71,7 +70,7 @@ TEST(GenexAlgosFindIf, FindIfElementNotExists) {
 
 
 TEST(GenexAlgosFindIf, FindIfElementExistsInGenerator) {
-    auto vec = std::vector{1, 2, 3, 4, 5, 6} | genex::views::view | genex::views::materialize();
+    auto vec = std::vector{1, 2, 3, 4, 5, 6};
     const auto it = genex::algorithms::find_if(vec, [](const int v) { return v % 2 == 0; });
     EXPECT_EQ(*it, 2);
 }
@@ -93,7 +92,7 @@ TEST(GenexAlgosFindLastIf, FindLastIfElementNotExists) {
 
 
 TEST(GenexAlgosFindLastIf, FindLastIfElementExistsInGenerator) {
-    auto vec = std::vector{1, 2, 3, 4, 5, 6, 4} | genex::views::view | genex::views::materialize();
+    auto vec = std::vector{1, 2, 3, 4, 5, 6, 4};
     const auto it = genex::algorithms::find_last_if(vec, [](const int v) { return v % 2 == 0; });
     EXPECT_EQ(*it, 4);
 }
@@ -115,7 +114,7 @@ TEST(GenexAlgosFindIfNot, FindIfNotElementNotExists) {
 
 
 TEST(GenexAlgosFindIfNot, FindIfNotElementExistsInGenerator) {
-    auto vec = std::vector{1, 2, 3, 4, 5, 6} | genex::views::view | genex::views::materialize();
+    auto vec = std::vector{1, 2, 3, 4, 5, 6};
     const auto it = genex::algorithms::find_if_not(vec, [](const int v) { return v % 2 == 0; });
     EXPECT_EQ(*it, 1);
 }
@@ -137,7 +136,7 @@ TEST(GenexAlgosFindLastIfNot, FindLastIfNotElementNotExists) {
 
 
 TEST(GenexAlgosFindLastIfNot, FindLastIfNotElementExistsInGenerator) {
-    auto vec = std::vector{1, 2, 3, 4, 5, 6, 3} | genex::views::view | genex::views::materialize();
+    auto vec = std::vector{1, 2, 3, 4, 5, 6, 3};
     const auto it = genex::algorithms::find_last_if_not(vec, [](const int v) { return v % 2 == 0; });
     EXPECT_EQ(*it, 3);
 }

@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/filter.hpp>
-#include <genex/views/materialize.hpp>
 #include <genex/views/reverse.hpp>
 #include <genex/views/to.hpp>
 #include <genex/views/transform.hpp>
@@ -24,7 +23,7 @@ TEST(GenexViewsReverse, MultliStage) {
     const auto rng = vec
         | genex::views::transform([](const int i) { return i * 2; })
         | genex::views::filter([](const int i) { return i % 4 == 0; })
-        | genex::views::materialize()
+        | genex::views::to<std::vector>()
         | genex::views::reverse
         | genex::views::to<std::vector>();
     const auto exp = std::vector{16, 12, 8, 4, 0};

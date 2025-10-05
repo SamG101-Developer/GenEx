@@ -24,15 +24,15 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct binary_search_fn {
         template <typename I, typename S, typename E, typename Comp = operations::lt, typename Proj = meta::identity>
-            requires concepts::binary_searchable_iters<I, S, E, Comp, Proj>
+        requires concepts::binary_searchable_iters<I, S, E, Comp, Proj>
         constexpr auto operator()(I first, S last, E &&elem, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
             first = std::lower_bound(std::forward<I>(first), std::forward<S>(last), std::forward<E>(elem));
-            return first != last && !std::invoke(
+            return first != last and !std::invoke(
                 std::forward<Comp>(comp), std::invoke(std::forward<Proj>(proj), *first), std::forward<E>(elem));
         }
 
         template <typename Rng, typename E, typename Comp = operations::lt, typename Proj = meta::identity>
-            requires concepts::binary_searchable_range<Rng, E, Comp, Proj>
+        requires concepts::binary_searchable_range<Rng, E, Comp, Proj>
         constexpr auto operator()(Rng &&rng, E &&elem, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
             auto [first, last] = iterators::iter_pair(rng);
             return (*this)(

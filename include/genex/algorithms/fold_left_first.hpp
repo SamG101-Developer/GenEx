@@ -25,8 +25,8 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct fold_left_first_fn {
         template <typename I, typename S, typename F>
-            requires concepts::left_foldable_first_iters<I, S, F>
-        constexpr auto operator()(I first, S last, F &&f) const -> auto {
+        requires concepts::left_foldable_first_iters<I, S, F>
+        GENEX_INLINE constexpr auto operator()(I first, S last, F &&f) const -> auto {
             auto acc = *first;
             ++first;
             for (; first != last; ++first) {
@@ -36,8 +36,8 @@ namespace genex::algorithms {
         }
 
         template <typename Rng, typename F>
-            requires concepts::left_foldable_first_range<Rng, F>
-        constexpr auto operator()(Rng &&rng, F &&f) const -> auto {
+        requires concepts::left_foldable_first_range<Rng, F>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, F &&f) const -> auto {
             auto [first, last] = iterators::iter_pair(rng);
             return (*this)(std::move(first), std::move(last), std::forward<F>(f));
         }

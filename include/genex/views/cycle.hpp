@@ -1,17 +1,19 @@
 #pragma once
-#include <coroutine>
+
 #include <genex/concepts.hpp>
-#include <genex/generator.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
-#include <genex/iterators/iter_pair.hpp>
+#include <genex/iterators/access.hpp>
+#include <genex/operations/data.hpp>
+#include <genex/operations/size.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept cyclable_iters =
         std::forward_iterator<I> and
-        std::sentinel_for<S, I>;
+        std::sentinel_for<S, I> and
+        std::movable<I>;
 
     template <typename Rng>
     concept cyclable_range =
@@ -22,38 +24,95 @@ namespace genex::views::concepts {
 
 namespace genex::views::detail {
     template <typename I, typename S>
-        requires concepts::cyclable_iters<I, S>
-    GENEX_NO_ASAN
-    auto do_cycle(I first, S last) -> generator<iter_value_t<I>> {
-        if (first == last) { co_return; }
-        while (true) {
-            for (auto it = first; it != last; ++it) {
-                co_yield static_cast<iter_value_t<I>>(*it);
-            }
+    requires concepts::cyclable_iters<I, S>
+    struct cycle_iterator {
+        using reference = iter_reference_t<I>;
+        using value_type = iter_value_t<I>;
+        using pointer = std::add_pointer_t<value_type>;
+
+        GENEX_VIEW_ITERATOR_TYPE_DEFINITIONS(std::iterator_traits<I>::iterator_category);
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(cycle_iterator);
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(cycle_iterator);
+
+        I copy_it;
+
+        GENEX_INLINE constexpr explicit cycle_iterator(I it, S st) noexcept(
+            std::is_nothrow_move_constructible_v<I> and
+            std::is_nothrow_move_constructible_v<S>) :
+            it(std::move(it)), st(std::move(st)) {
+            copy_it = it;
         }
-    }
+
+        GENEX_INLINE constexpr auto operator*() const noexcept(noexcept(*it))
+            -> reference {
+            return *it;
+        }
+
+        GENEX_INLINE constexpr auto operator->() const noexcept(noexcept(std::addressof(*it)))
+            -> pointer {
+            GENEX_ITERATOR_PROXY_ACCESS
+        }
+
+        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it))
+            -> cycle_iterator& {
+            ++it;
+            if (it == st) { it = copy_it; }
+            return *this;
+        }
+    };
+
+    template <typename S>
+    struct cycle_sentinel {
+        GENEX_VIEW_SENTINEL_CTOR_DEFINITIONS(cycle_sentinel);
+        GENEX_VIEW_SENTINEL_FUNC_DEFINITIONS(cycle_iterator, cycle_sentinel);
+    };
+
+    template <typename V>
+    requires (concepts::cyclable_range<V>)
+    struct cycle_view : std::ranges::view_interface<cycle_view<V>> {
+        GENEX_VIEW_VIEW_CTOR_DEFINITIONS(cycle_view);
+        GENEX_VIEW_VIEW_TYPE_DEFINITIONS(cycle_iterator, cycle_sentinel);
+        GENEX_VIEW_VIEW_FUNC_DEFINITIONS();
+        GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE;
+
+        GENEX_INLINE constexpr explicit cycle_view(V rng) noexcept(
+            std::is_nothrow_move_constructible_v<V>) :
+            base_rng(std::move(rng)) {
+        }
+
+        GENEX_INLINE constexpr auto internal_begin() const noexcept(noexcept(iterators::begin(base_rng))) {
+            return iterators::begin(base_rng);
+        }
+
+        GENEX_INLINE constexpr auto internal_end() const noexcept(noexcept(iterators::end(base_rng))) {
+            return iterators::end(base_rng);
+        }
+    };
 }
 
 
 namespace genex::views {
     struct cycle_fn {
-        template <typename I, typename S>
-            requires concepts::cyclable_iters<I, S>
-        constexpr auto operator()(I first, S last) const -> auto {
-            return detail::do_cycle(std::move(first), std::move(last));
+        template <typename Rng>
+        requires detail::concepts::cyclable_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> auto {
+            using V = std::views::all_t<Rng>;
+            return detail::cycle_view<V>{
+                std::views::all(std::forward<Rng>(rng))};
         }
 
         template <typename Rng>
-            requires concepts::cyclable_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
-            auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last));
+        requires detail::concepts::cyclable_range<Rng> and contiguous_range<Rng> and borrowed_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> auto {
+            using V = std::views::all_t<Rng>;
+            return detail::cycle_view<V>{
+                std::views::all(std::forward<Rng>(rng))}; // .as_pointer_subrange();
         }
 
-        constexpr auto operator()() const -> auto {
-            return std::bind_back(cycle_fn{});
+        GENEX_INLINE constexpr auto operator()() const -> auto {
+            return std::bind_front(cycle_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(cycle);
+    inline constexpr cycle_fn cycle{};
 }

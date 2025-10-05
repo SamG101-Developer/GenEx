@@ -29,18 +29,18 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct pop_back_fn {
         template <typename Rng>
-            requires concepts::back_poppable_select_pop_back<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        requires concepts::back_poppable_select_pop_back<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> auto {
             return rng.pop_back();
         }
 
         template <typename Rng>
-            requires concepts::back_poppable_select_erase<Rng>
-        auto operator()(Rng &&rng) const -> auto {
+        requires concepts::back_poppable_select_erase<Rng>
+        GENEX_INLINE auto operator()(Rng &&rng) const -> auto {
             return actions::erase(rng, iterators::prev(iterators::end(rng)));
         }
 
-        constexpr auto operator()() const -> auto {
+        GENEX_INLINE constexpr auto operator()() const -> auto {
             return std::bind_back(pop_back_fn{});
         }
     };

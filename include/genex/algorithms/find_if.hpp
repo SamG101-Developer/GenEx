@@ -24,8 +24,8 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct find_if_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-            requires concepts::findable_if_iters<I, S, Pred, Proj>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
+        requires concepts::findable_if_iters<I, S, Pred, Proj>
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
             for (; first != last; ++first) {
                 if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
                     break;
@@ -35,8 +35,8 @@ namespace genex::algorithms {
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
-            requires concepts::findable_if_range<Rng, Pred, Proj>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+        requires concepts::findable_if_range<Rng, Pred, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
             auto [first, last] = iterators::iter_pair(rng);
             return (*this)(
                 std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));

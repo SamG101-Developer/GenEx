@@ -27,8 +27,8 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct reverse_fn {
         template <typename Rng>
-            requires concepts::reversible_range_optimized<Rng>
-        constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+        requires concepts::reversible_range_optimized<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
             auto [first, last] = iterators::iter_pair(rng);
             while (first < --last) {
                 std::iter_swap(first++, last);
@@ -37,8 +37,8 @@ namespace genex::actions {
         }
 
         template <typename Rng>
-            requires concepts::reversible_range_unoptimized<Rng>
-        constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+        requires concepts::reversible_range_unoptimized<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
             auto [first, last] = iterators::iter_pair(rng);
             while (first != last and first != --last) {
                 std::iter_swap(first++, last);

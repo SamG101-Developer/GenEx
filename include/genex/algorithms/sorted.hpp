@@ -24,8 +24,8 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct sorted_fn {
         template <typename I, typename S, typename Comp = operations::lt, typename Proj = meta::identity>
-            requires concepts::sortabled_iters<I, S, Comp, Proj>
-        constexpr auto operator()(I first, S last, Comp &&comp = {}, Proj &&proj = {}) const -> decltype(auto) {
+        requires concepts::sortabled_iters<I, S, Comp, Proj>
+        GENEX_INLINE constexpr auto operator()(I first, S last, Comp &&comp = {}, Proj &&proj = {}) const -> decltype(auto) {
             // Create a new, sorted, range.
             auto vec = std::vector<iter_value_t<I>>(
                 std::make_move_iterator(first),
@@ -37,8 +37,8 @@ namespace genex::algorithms {
         }
 
         template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
-            requires concepts::sortabled_range<Rng, Comp, Proj>
-        constexpr auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> decltype(auto) {
+        requires concepts::sortabled_range<Rng, Comp, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> decltype(auto) {
             // Get the iterators and call the iterator version.
             auto [first, last] = iterators::iter_pair(rng);
             return (*this)(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
