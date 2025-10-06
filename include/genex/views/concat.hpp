@@ -59,8 +59,8 @@ namespace genex::views::detail {
 
         GENEX_INLINE constexpr explicit concat_iterator() noexcept = default;
 
-        GENEX_INLINE constexpr explicit concat_iterator(std::tuple<iterator_t<Rngs>...> its, std::tuple<sentinel_t<Rngs>...> sts)  :
-            its(std::move(its)), sts(std::move(sts)), index(0) {
+        GENEX_INLINE constexpr explicit concat_iterator(Rngs... rngs)  :
+            its(iterators::begin(rngs)...), sts(iterators::end(rngs)...), index(0) {
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -178,7 +178,7 @@ namespace genex::views::detail {
 
     template <typename ...Rngs>
     requires concepts::concatenatable_iters<std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>>
-    concat_iterator(std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>) -> concat_iterator<Rngs...>;
+    concat_iterator(Rngs...) -> concat_iterator<Rngs...>;
 
     template <typename ...Rngs>
     requires concepts::concatenatable_iters<std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>>
@@ -193,22 +193,24 @@ namespace genex::views::detail {
 
         GENEX_INLINE constexpr concat_view() noexcept = default;
 
-        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(
-            concat_iterator, concat_sentinel, base_rngs)
-
-        GENEX_INLINE constexpr explicit concat_view(Vs ...rngs) noexcept(
-            (std::is_nothrow_move_constructible_v<Vs> and ...)) :
+        GENEX_INLINE constexpr explicit concat_view(Vs ...rngs) :
             base_rngs(std::move(rngs)...) {
         }
 
-        GENEX_INLINE constexpr auto internal_begin() const noexcept(
-            noexcept(std::apply([](auto &...rngs) { return std::make_tuple(iterators::begin(rngs)...); }, base_rngs))) {
-            return std::make_from_tuple<std::tuple<iterator_t<Vs>...>>(std::apply([](auto &...rngs) { return std::make_tuple(iterators::begin(rngs)...); }, base_rngs));
+        GENEX_INLINE constexpr auto begin() {
+            return std::apply([](auto &...rngs) { return concat_iterator{rngs...}; }, base_rngs);
         }
 
-        GENEX_INLINE constexpr auto internal_end() const noexcept(
-            noexcept(std::apply([](auto &...rngs) { return std::make_tuple(iterators::end(rngs)...); }, base_rngs))) {
-            return std::make_from_tuple<std::tuple<sentinel_t<Vs>...>>(std::apply([](auto &...rngs) { return std::make_tuple(iterators::end(rngs)...); }, base_rngs));
+        GENEX_INLINE constexpr auto begin() const requires range<const decltype(base_rngs)> {
+            return std::apply([](auto const &...rngs) { return concat_iterator{rngs...}; }, base_rngs);
+        }
+
+        GENEX_INLINE constexpr auto end() {
+            return concat_sentinel{};
+        }
+
+        GENEX_INLINE constexpr auto end() const requires range<const decltype(base_rngs)> {
+            return concat_sentinel{};
         }
     };
 }
