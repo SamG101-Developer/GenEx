@@ -119,6 +119,8 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept -> range_size_t<V> = delete;
     };
 }
 
@@ -138,15 +140,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(Rng &&rng, E val) const -> auto {
             using V = std::views::all_t<Rng>;
             return detail::split_view<V, E>{
-                std::views::all(std::forward<Rng>(rng)), std::move(val)};
-        }
-
-        template <typename E, typename Rng>
-        requires detail::concepts::splittable_range<Rng, E> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, E val) const -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::split_view<V, E>{
-                std::views::all(std::forward<Rng>(rng)), std::move(val)}; // .as_pointer_subrange();
+                std::forward<Rng>(rng), std::move(val)};
         }
 
         template <typename E>

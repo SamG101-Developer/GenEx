@@ -28,9 +28,9 @@ namespace genex::views::detail {
     template <typename I, typename S>
     requires concepts::addressable_iters<I, S>
     struct address_iterator {
-        using reference = std::add_pointer_t<std::iter_value_t<I>>;
-        using value_type = reference;
-        using pointer = reference;
+        using reference = std::add_pointer_t<iter_value_t<I>>;
+        using value_type = std::add_pointer_t<iter_value_t<I>>;
+        using pointer = std::add_pointer_t<iter_value_t<I>>;
 
         using iterator_category = std::iterator_traits<I>::iterator_category;
         using iterator_concept = iterator_category;
@@ -50,9 +50,8 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
-            noexcept(std::addressof(*it))) -> value_type {
-            if constexpr (std::is_pointer_v<I>) { return it; }
-            else { return std::addressof(*it); }
+            noexcept(std::addressof(*it))) -> reference {
+            return const_cast<reference>(std::addressof(*it));
         }
 
         GENEX_INLINE constexpr auto operator++() noexcept(
@@ -98,22 +97,12 @@ namespace genex::views::detail {
 
         GENEX_INLINE constexpr auto internal_begin() const noexcept(
             noexcept(iterators::begin(base_rng))) {
-            if constexpr(contiguous_range<V>) {
-                return operations::data(base_rng);
-            }
-            else {
-                return iterators::begin(base_rng);
-            }
+            return iterators::begin(base_rng);
         }
 
         GENEX_INLINE constexpr auto internal_end() const noexcept(
             noexcept(iterators::end(base_rng))) {
-            if constexpr(contiguous_range<V>) {
-                return operations::data(base_rng) + operations::size(base_rng);
-            }
-            else {
-                return iterators::end(base_rng);
-            }
+            return iterators::end(base_rng);
         }
     };
 }
@@ -134,15 +123,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::address_view<V>{
-                std::views::all(std::forward<Rng>(rng))};
-        }
-
-        template <typename Rng>
-        requires detail::concepts::addressable_range<Rng> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::address_view<V>{
-                std::views::all(std::forward<Rng>(rng))}; // .as_pointer_subrange();
+                std::forward<Rng>(rng)};
         }
 
         GENEX_INLINE constexpr auto operator()() const noexcept -> auto {

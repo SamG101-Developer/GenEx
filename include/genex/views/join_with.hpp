@@ -130,6 +130,14 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept(
+            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            const auto n = operations::size(base_rng);
+            auto total_size = static_cast<range_size_t<V>>(0);
+            for (auto const& sub_rng : base_rng) { total_size += operations::size(sub_rng); }
+            return total_size + (n > 0 ? n - 1 : 0);
+        }
     };
 }
 
@@ -138,7 +146,7 @@ namespace genex::views {
     struct join_with_fn {
         template <typename I, typename S, typename New>
         requires detail::concepts::joinable_with_iters<I, S, New>
-        GENEX_INLINE constexpr auto operator()(I it, S st, New sep) const -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, New sep) const noexcept -> auto {
             using V = std::ranges::subrange<I, S>;
             return detail::join_with_view<V, New>{
                 std::ranges::subrange{std::move(it), std::move(st)}, std::move(sep)};
@@ -149,15 +157,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(Rng &&rng, New sep) const -> auto {
             using V = std::views::all_t<Rng>;
             return detail::join_with_view<V, New>{
-                std::views::all(std::forward<Rng>(rng)), std::move(sep)};
-        }
-
-        template <typename Rng, typename New>
-        requires detail::concepts::joinable_with_range<Rng, New> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, New sep) const -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::join_with_view<V, New>{
-                std::views::all(std::forward<Rng>(rng)), std::move(sep)}; // .as_pointer_subrange();
+                std::forward<Rng>(rng), std::move(sep)};
         }
 
         template <typename New>

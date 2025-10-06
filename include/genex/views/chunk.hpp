@@ -122,6 +122,12 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept(
+            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            const auto total_size = operations::size(base_rng);
+            return (total_size + chunk_size - 1) / chunk_size;
+        }
     };
 }
 
@@ -145,15 +151,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(Rng &&rng, const std::size_t chunk_size) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::chunk_view<V>{
-                std::views::all(std::forward<Rng>(rng)), chunk_size};
-        }
-
-        template <typename Rng>
-        requires detail::concepts::chunkable_range<Rng> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, std::size_t chunk_size) const noexcept -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::chunk_view<V>{
-                std::views::all(std::forward<Rng>(rng)), chunk_size}; // .as_pointer_subrange();
+                std::forward<Rng>(rng), chunk_size};
         }
 
         GENEX_INLINE constexpr auto operator()(const std::size_t chunk_size) const noexcept -> auto {

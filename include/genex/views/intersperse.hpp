@@ -116,6 +116,11 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept(
+            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            return operations::size(base_rng) * 2 - (operations::size(base_rng) > 0 ? 1 : 0);
+        }
     };
 }
 
@@ -124,7 +129,7 @@ namespace genex::views {
     struct intersperse_fn {
         template <typename I, typename S, typename New>
         requires detail::concepts::interspersable_iters<I, S, New>
-        GENEX_INLINE constexpr auto operator()(I it, S st, New sep) const -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, New sep) const noexcept -> auto {
             using V = std::ranges::subrange<I, S>;
             return detail::intersperse_view<V, New>{
                 std::ranges::subrange{std::move(it), std::move(st)}, std::move(sep)};
@@ -132,18 +137,10 @@ namespace genex::views {
 
         template <typename Rng, typename New>
         requires detail::concepts::interspersable_range<Rng, New>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, New sep) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, New sep) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::intersperse_view<V, New>{
-                std::views::all(std::forward<Rng>(rng)), std::move(sep)};
-        }
-
-        template <typename Rng, typename New>
-        requires detail::concepts::interspersable_range<Rng, New> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, New sep) const -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::intersperse_view<V, New>{
-                std::views::all(std::forward<Rng>(rng)), std::move(sep)}; // .as_pointer_subrange();
+                std::forward<Rng>(rng), std::move(sep)};
         }
 
         template <typename New>

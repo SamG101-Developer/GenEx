@@ -4,7 +4,6 @@
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
 #include <genex/iterators/next.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -108,6 +107,12 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng))) {
             return iterators::next(iterators::begin(base_rng), take_n, iterators::end(base_rng));
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept(
+            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            auto sz = sized_range<V> ? operations::size(base_rng) : take_n;
+            return sz < take_n ? sz : take_n;
+        }
     };
 }
 
@@ -116,7 +121,7 @@ namespace genex::views {
     struct take_fn {
         template <typename I, typename S, typename Int>
         requires detail::concepts::takeable_iters<I, S, Int>
-        GENEX_INLINE constexpr auto operator()(I it, S st, Int n) const -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, Int n) const noexcept -> auto {
             using V = std::ranges::subrange<I, S>;
             return detail::take_view<V, Int>{
                 std::ranges::subrange{std::move(it), std::move(st)}, std::move(n)};
@@ -124,18 +129,10 @@ namespace genex::views {
 
         template <typename Rng, typename Int>
         requires detail::concepts::takeable_range<Rng, Int>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Int n) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Int n) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::take_view<V, Int>{
-                std::views::all(std::forward<Rng>(rng)), std::move(n)};
-        }
-
-        template <typename Rng, typename Int>
-        requires detail::concepts::takeable_range<Rng, Int> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Int n) const -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::take_view<V, Int>{
-                std::views::all(std::forward<Rng>(rng)), std::move(n)}; // .as_pointer_subrange();
+                std::forward<Rng>(rng), std::move(n)};
         }
 
         template <typename Int>

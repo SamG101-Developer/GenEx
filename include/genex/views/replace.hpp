@@ -120,6 +120,11 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept(
+            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            return operations::size(base_rng);
+        }
     };
 }
 
@@ -128,7 +133,7 @@ namespace genex::views {
     struct replace_fn {
         template <typename I, typename S, typename Old, typename New, typename Proj = std::identity>
         requires detail::concepts::replaceable_iters<I, S, Old, New, Proj>
-        GENEX_INLINE constexpr auto operator()(I it, S st, Old old_val, New new_val, Proj proj = {}) const -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, Old old_val, New new_val, Proj proj = {}) const noexcept -> auto {
             using V = std::ranges::subrange<I, S>;
             return detail::replace_view<V, Old, New, Proj>{
                 std::ranges::subrange{std::move(it), std::move(st)}, std::move(old_val), std::move(new_val), std::move(proj)};
@@ -136,18 +141,10 @@ namespace genex::views {
 
         template <typename Rng, typename Old, typename New, typename Proj = std::identity>
         requires detail::concepts::replaceable_range<Rng, Old, New, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng, Old old_val, New new_val, Proj proj = {}) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng&& rng, Old old_val, New new_val, Proj proj = {}) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::replace_view<V, Old, New, Proj>{
-                std::views::all(std::forward<Rng>(rng)), std::move(old_val), std::move(new_val), std::move(proj)};
-        }
-
-        template <typename Rng, typename Old, typename New, typename Proj = std::identity>
-        requires detail::concepts::replaceable_range<Rng, Old, New, Proj> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng, Old old_val, New new_val, Proj proj = {}) const -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::replace_view<V, Old, New, Proj>{
-                std::views::all(std::forward<Rng>(rng)), std::move(old_val), std::move(new_val), std::move(proj)}; // .as_pointer_subrange();
+                std::forward<Rng>(rng), std::move(old_val), std::move(new_val), std::move(proj)};
         }
 
         template <typename Old, typename New, typename Proj = std::identity>

@@ -121,6 +121,8 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept -> range_size_t<V> = delete;
     };
 }
 
@@ -137,18 +139,10 @@ namespace genex::views {
 
         template <typename Rng, typename E, typename Proj = meta::identity>
         requires detail::concepts::removable_range<Rng, E, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, E val, Proj proj = {}) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E val, Proj proj = {}) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::remove_view<V, E, Proj>{
-                std::views::all(std::forward<Rng>(rng)), std::move(val), std::move(proj)};
-        }
-
-        template <typename Rng, typename E, typename Proj = meta::identity>
-        requires detail::concepts::removable_range<Rng, E, Proj> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, E val, Proj proj = {}) const -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::remove_view<V, E, Proj>{
-                std::views::all(std::forward<Rng>(rng)), std::move(val), std::move(proj)}; // .as_pointer_subrange();
+                std::forward<Rng>(rng), std::move(val), std::move(proj)};
         }
 
         template <typename E, typename Proj = meta::identity>

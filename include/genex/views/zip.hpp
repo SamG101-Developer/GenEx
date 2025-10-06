@@ -5,6 +5,7 @@
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
+#include <genex/operations/size.hpp>
 
 
 namespace genex::views::detail::concepts {
@@ -129,6 +130,10 @@ namespace genex::views::detail {
         GENEX_INLINE constexpr auto end() const requires range<const decltype(base_rngs)> {
             return zip_sentinel{};
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<Vs>...> {
+            return std::apply([](auto &... rngs) { return std::min({operations::size(rngs)...}); }, base_rngs);
+        }
     };
 }
 
@@ -139,11 +144,11 @@ namespace genex::views {
         requires (sizeof...(Rng) > 1 and (detail::concepts::zippable_range<Rng> and ...))
         GENEX_INLINE constexpr auto operator()(Rng &&...rng) const noexcept -> auto {
             return detail::zip_view<std::views::all_t<Rng>...>{
-                std::views::all(std::forward<Rng>(rng))...};
+                std::forward<Rng>(rng)...};
         }
 
         template <typename Rng>
-        requires detail::concepts::zippable_range<Rng> and contiguous_range<Rng> and borrowed_range<Rng>
+        requires detail::concepts::zippable_range<Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
             return std::bind_back(
                 zip_fn{}, std::views::all(std::forward<Rng>(rng)));

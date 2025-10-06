@@ -43,7 +43,7 @@ namespace genex::algorithms {
                     continue;
                 }
 
-                for (const auto &s : seen) {
+                for (auto const &s : seen) {
                     if (std::invoke(comp, cur, std::invoke(proj, s))) {
                         dupe_element = cur;
                         out.emplace_back(static_cast<iter_value_t<I>>(*dupe_element));

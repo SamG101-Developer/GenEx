@@ -4,7 +4,7 @@
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
 #include <genex/pipe.hpp>
-#include <genex/iterators/iter_pair.hpp>
+#include <genex/iterators/access.hpp>
 
 
 namespace genex::views::detail::concepts {
@@ -126,6 +126,11 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept(
+            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            return operations::size(base_rng);
+        }
     };
 }
 
@@ -145,15 +150,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(Rng&& rng, Pred pred, New new_val, Proj proj = {}) const -> auto {
             using V = std::views::all_t<Rng>;
             return detail::replace_if_view<V, Pred, New, Proj>{
-                std::views::all(std::forward<Rng>(rng)), std::move(pred), std::move(new_val), std::move(proj)};
-        }
-
-        template <typename Rng, typename Pred, typename New, typename Proj = std::identity>
-        requires detail::concepts::replaceable_if_range<Rng, Pred, New, Proj> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng, Pred pred, New new_val, Proj proj = {}) const -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::replace_if_view<V, Pred, New, Proj>{
-                std::views::all(std::forward<Rng>(rng)), std::move(pred), std::move(new_val), std::move(proj)}; // .as_pointer_subrange();
+                std::forward<Rng>(rng), std::move(pred), std::move(new_val), std::move(proj)};
         }
 
         template <typename Pred, typename New, typename Proj = std::identity>

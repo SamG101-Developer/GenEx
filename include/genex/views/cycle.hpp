@@ -4,7 +4,6 @@
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -46,7 +45,7 @@ namespace genex::views::detail {
             std::is_nothrow_move_constructible_v<I> and
             std::is_nothrow_move_constructible_v<S>) :
             it(std::move(it)), st(std::move(st)) {
-            copy_it = it;
+            copy_it = this->it;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -104,6 +103,8 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept -> range_size_t<V> = delete;
     };
 }
 
@@ -123,15 +124,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::cycle_view<V>{
-                std::views::all(std::forward<Rng>(rng))};
-        }
-
-        template <typename Rng>
-        requires detail::concepts::cyclable_range<Rng> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::cycle_view<V>{
-                std::views::all(std::forward<Rng>(rng))}; // .as_pointer_subrange();
+                std::forward<Rng>(rng)};
         }
 
         GENEX_INLINE constexpr auto operator()() const noexcept -> auto {

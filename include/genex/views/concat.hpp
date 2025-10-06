@@ -212,6 +212,8 @@ namespace genex::views::detail {
         GENEX_INLINE constexpr auto end() const requires range<const decltype(base_rngs)> {
             return concat_sentinel{};
         }
+
+        // todo: custom size()?
     };
 }
 
@@ -222,7 +224,7 @@ namespace genex::views {
         requires (sizeof...(Rng) > 1 and (detail::concepts::concatenatable_range<Rng> and ...))
         GENEX_INLINE constexpr auto operator()(Rng &&...rng) const noexcept -> auto {
             return detail::concat_view<std::views::all_t<Rng>...>{
-                std::views::all(std::forward<Rng>(rng))...};
+                std::forward<Rng>(rng)...};
         }
 
         template <typename Rng>

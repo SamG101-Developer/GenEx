@@ -112,6 +112,14 @@ namespace genex::views::detail {
             const auto cut = dist > end_idx ? dist - end_idx : 0;
             return iterators::next(iterators::begin(base_rng), start_idx + cut + 1, iterators::end(base_rng));
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept(
+            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            const auto total_size = operations::size(base_rng);
+            if (end_idx <= start_idx or start_idx >= total_size) { return 0; }
+            const auto actual_end = std::min(end_idx, static_cast<Int>(total_size));
+            return static_cast<range_size_t<V>>((actual_end - start_idx + step - 1) / step);
+        }
     };
 }
 
@@ -136,23 +144,23 @@ namespace genex::views {
 
         template <typename Rng, typename Int>
         requires detail::concepts::sliceable_range<Rng, Int>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng, Int start_idx, Int end_idx, Int step = static_cast<Int>(1)) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng&& rng, Int start_idx, Int end_idx, Int step = static_cast<Int>(1)) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::slice_view<V, Int>{
-                std::views::all(std::forward<Rng>(rng)), std::move(start_idx), std::move(end_idx), std::move(step)};
+                std::forward<Rng>(rng), std::move(start_idx), std::move(end_idx), std::move(step)};
         }
 
         template <typename Rng, typename Int>
         requires detail::concepts::sliceable_range<Rng, Int>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng, Int end_idx) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng&& rng, Int end_idx) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::slice_view<V, Int>{
-                std::views::all(std::forward<Rng>(rng)), static_cast<Int>(0), std::move(end_idx), static_cast<Int>(1)};
+                std::forward<Rng>(rng), static_cast<Int>(0), std::move(end_idx), static_cast<Int>(1)};
         }
 
         template <typename Int>
         requires (not range<Int>)
-        GENEX_INLINE constexpr auto operator()(Int start_idx, Int end_idx, Int step = static_cast<Int>(1)) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Int start_idx, Int end_idx, Int step = static_cast<Int>(1)) const noexcept -> auto {
             return std::bind_back(
                 slice_fn{}, std::move(start_idx), std::move(end_idx), std::move(step));
         }

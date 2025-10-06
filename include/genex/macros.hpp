@@ -97,22 +97,32 @@
     GENEX_INLINE constexpr auto operator==(iter<__VA_ARGS__> const &it, sent const &se) -> bool
 
 
-#define GENEX_VIEW_VIEW_FUNC_DEFINITIONS(iter, sent, base, ...)                                                        \
-    GENEX_INLINE constexpr auto begin() {                                      \
-        return iter{internal_begin(), internal_end() __VA_OPT__(, __VA_ARGS__)}; \
-    }                                                                                                            \
-                                                                                                                 \
-    GENEX_INLINE constexpr auto begin() const requires range<const decltype(base)> { \
-        return iter{internal_begin(), internal_end() __VA_OPT__(, __VA_ARGS__)}; \
-    }                                                                                                            \
-                                                                                                                 \
-    GENEX_INLINE constexpr auto end() {                                      \
-        return sent{};                                                                                   \
-    }                                                                                                            \
-                                                                                                                 \
-    GENEX_INLINE constexpr auto end() const requires range<const decltype(base)> { \
-        return sent{};                                                                                   \
-    }                                                                                                            \
+#define GENEX_VIEW_VIEW_FUNC_DEFINITIONS(iter, sent, base, ...)                                                                \
+    GENEX_INLINE constexpr auto begin() {                                                                                      \
+        return iter{internal_begin(), internal_end() __VA_OPT__(, __VA_ARGS__)};                                               \
+    }                                                                                                                          \
+                                                                                                                               \
+    GENEX_INLINE constexpr auto begin() const requires range<const decltype(base)> {                                           \
+        return iter{internal_begin(), internal_end() __VA_OPT__(, __VA_ARGS__)};                                               \
+    }                                                                                                                          \
+                                                                                                                               \
+    GENEX_INLINE constexpr auto end() {                                                                                        \
+        return sent{};                                                                                                         \
+    }                                                                                                                          \
+                                                                                                                               \
+    GENEX_INLINE constexpr auto end() const requires range<const decltype(base)> {                                             \
+        return sent{};                                                                                                         \
+    }                                                                                                                          \
+
+    // GENEX_INLINE constexpr auto as_pointer_subrange() const {                                                                  \
+    // using elem_t = std::remove_reference_t<iter_reference_t<iter>>;                                                        \
+    // if constexpr (sized_range<V>) {                                                                                            \
+    //     auto *data = operations::data(base_rng);                                                                               \
+    //     return std::ranges::subrange<elem_t>{data, data + operations::size(base_rng)};                                         \
+    // }                                                                                                                          \
+    // return std::ranges::subrange<elem_t>{operations::data(base_rng), operations::data(base_rng) + operations::size(base_rng)}; \
+}
+
 
     // GENEX_INLINE constexpr auto size() const                                                                     \
     //     -> range_size_t<decltype(base)> requires sized_range<decltype(base)> {                                   \
@@ -121,14 +131,7 @@
 
 
 // #define GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE
-    // GENEX_INLINE constexpr auto as_pointer_subrange() const {                                   \
-    //     using elem_t = std::remove_reference_t<iter_reference_t<iterator>>;                                                        \
-    //     if constexpr (sized_range<V>) {                                                                                            \
-    //         auto *data = operations::data(base_rng);                                                                               \
-    //         return std::ranges::subrange<elem_t>{data, data + operations::size(base_rng)};                                         \
-    //     }                                                                                                                          \
-    //     return std::ranges::subrange<elem_t>{operations::data(base_rng), operations::data(base_rng) + operations::size(base_rng)}; \
-    // }
+
 
 
 // #define GENEX_ITERATOR_PROXY_ACCESS                                                   \

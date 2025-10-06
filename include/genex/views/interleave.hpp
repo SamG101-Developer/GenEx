@@ -114,17 +114,10 @@ namespace genex::views::detail {
     template <typename I, typename S, typename I2, typename S2>
     requires concepts::interleavable_iters<I, S, I2, S2>
     GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(interleave_iterator, interleave_sentinel, I, S, I2, S2) {
-        // If "exhausting", then both iterators need to match their sentinel.
-        // If not "exhausting", then only one iterator needs to match its sentinel, but if we are interleaving [1, 3]
-        // and [2, 4], when after 3 is done, it matches the sentinel, but 4 still needs to be added, so ensure that
-        // we are on the correct turn. Turn is "true" when we are on the first iterator, and "false" when we are to
-        // yield from the first iterator.
         if (it.exhaust) {
             return it.it1 == it.st1 and it.it2 == it.st2;
         }
-        else {
-            return (it.it1 == it.st1 or it.it2 == it.st2) and it.turn;
-        }
+        return (it.it1 == it.st1 or it.it2 == it.st2) and it.turn;
     }
 
     template <typename V1, typename V2>
@@ -155,6 +148,15 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng1)) and noexcept(iterators::end(base_rng2))) {
             return iterators::end(base_rng1);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept(
+            noexcept(operations::size(base_rng1)) and
+            noexcept(operations::size(base_rng2))) -> range_size_t<V1> {
+            if (exhaust) {
+                return operations::size(base_rng1) + operations::size(base_rng2);
+            }
+            return std::min(operations::size(base_rng1), operations::size(base_rng2)) * 2;
+        }
     };
 }
 
@@ -167,7 +169,8 @@ namespace genex::views {
             using V1 = std::ranges::subrange<I1, S1>;
             using V2 = std::ranges::subrange<I2, S2>;
             return detail::interleave_view<V1, V2>{
-                std::ranges::subrange<I1, S1>{std::move(it1), std::move(st1)}, std::ranges::subrange<I2, S2>{std::move(it2), std::move(st2)}, exhaust};
+                std::ranges::subrange<I1, S1>{std::move(it1), std::move(st1)},
+                std::ranges::subrange<I2, S2>{std::move(it2), std::move(st2)}, exhaust};
         }
 
         template <typename Rng1, typename Rng2>
@@ -176,16 +179,7 @@ namespace genex::views {
             using V1 = std::views::all_t<Rng1>;
             using V2 = std::views::all_t<Rng2>;
             return detail::interleave_view<V1, V2>{
-                std::views::all(std::forward<Rng1>(rng1)), std::views::all(std::forward<Rng2>(rng2)), exhaust};
-        }
-
-        template <typename Rng1, typename Rng2>
-        requires detail::concepts::interleavable_range<Rng1, Rng2> and contiguous_range<Rng1> and borrowed_range<Rng1> and contiguous_range<Rng2> and borrowed_range<Rng2>
-        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, bool exhaust = false) const noexcept -> auto {
-            using V1 = std::views::all_t<Rng1>;
-            using V2 = std::views::all_t<Rng2>;
-            return detail::interleave_view<V1, V2>{
-                std::views::all(std::forward<Rng1>(rng1)), std::views::all(std::forward<Rng2>(rng2)), exhaust}; // .as_pointer_subrange();
+                std::forward<Rng1>(rng1), std::forward<Rng2>(rng2), exhaust};
         }
 
         template <typename Rng2>

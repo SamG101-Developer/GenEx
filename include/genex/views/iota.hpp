@@ -94,11 +94,6 @@ namespace genex::views::detail {
             return iota_sentinel{};
         }
 
-        GENEX_INLINE constexpr auto size() const -> Int
-        requires sized_range<iota_view> {
-            return (to - from) / step + ((to - from) % step != 0 ? 1 : 0);
-        }
-
         GENEX_INLINE constexpr auto internal_begin() const noexcept(
             std::is_nothrow_copy_constructible_v<Int>){
             return from;
@@ -107,6 +102,11 @@ namespace genex::views::detail {
         GENEX_INLINE constexpr auto internal_end() const noexcept(
             std::is_nothrow_copy_constructible_v<Int>){
             return to;
+        }
+
+        GENEX_INLINE constexpr auto size() const -> Int
+            requires sized_range<iota_view> {
+            return (to - from) / step + ((to - from) % step != 0 ? 1 : 0);
         }
     };
 }

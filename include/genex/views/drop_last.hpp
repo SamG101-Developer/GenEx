@@ -106,6 +106,12 @@ namespace genex::views::detail {
             const auto cut = dist > drop_n ? dist - drop_n : 0;
             return iterators::next(iterators::begin(base_rng), cut, iterators::end(base_rng));
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept(
+            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            const auto total_size = operations::size(base_rng);
+            return total_size > drop_n ? total_size - drop_n : 0;
+        }
     };
 }
 
@@ -125,15 +131,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Int drop_n) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::drop_last_view<V, Int>{
-                std::views::all(std::forward<Rng>(rng)), drop_n};
-        }
-
-        template <typename Rng, typename Int>
-        requires detail::concepts::droppable_last_range<Rng, Int> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Int drop_n) const noexcept -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::drop_last_view<V, Int>{
-                std::views::all(std::forward<Rng>(rng)), drop_n}; // .as_pointer_subrange();
+                std::forward<Rng>(rng), drop_n};
         }
 
         template <typename Int>

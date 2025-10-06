@@ -44,6 +44,7 @@ namespace genex::views::detail {
 
         GENEX_INLINE constexpr explicit cast_smart_iterator(I it, S st) :
             it(std::move(it)), st(std::move(st)) {
+            satisfy();
         }
 
         GENEX_INLINE constexpr auto operator*() const // todo: optimize noexcept?
@@ -61,7 +62,13 @@ namespace genex::views::detail {
         GENEX_INLINE constexpr auto operator++() noexcept(
             noexcept(++it)) -> cast_smart_iterator& {
             ++it;
+            satisfy();
             return *this;
+        }
+
+    private:
+        GENEX_INLINE constexpr auto satisfy() noexcept {
+            while (it != st and dynamic_cast<To*>((*it).get()) == nullptr) { ++it; }
         }
     };
 
@@ -97,6 +104,11 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept(
+            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            return operations::size(base_rng);
+        }
     };
 }
 
@@ -112,19 +124,11 @@ namespace genex::views {
         }
 
         template <typename To, typename Rng>
-        requires detail::concepts::smart_castable_range<Rng, To> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::cast_smart_view<V, To>{
-                std::views::all(std::forward<Rng>(rng))}; // .as_pointer_subrange();
-        }
-
-        template <typename To, typename Rng>
         requires detail::concepts::smart_castable_range<Rng, To>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> auto {
             using V = std::views::all_t<Rng>;
             return detail::cast_smart_view<V, To>{
-                std::views::all(std::forward<Rng>(rng))};
+                std::forward<Rng>(rng)};
         }
 
         template <typename To>

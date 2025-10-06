@@ -120,6 +120,13 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept(
+            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            auto total_size = static_cast<range_size_t<V>>(0);
+            for (auto const& sub_rng : base_rng) { total_size += operations::size(sub_rng); }
+            return total_size;
+        }
     };
 }
 
@@ -128,7 +135,7 @@ namespace genex::views {
     struct join_fn {
         template <typename I, typename S>
         requires detail::concepts::joinable_iters<I, S>
-        GENEX_INLINE constexpr auto operator()(I it, S st) const -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept -> auto {
             using V = std::ranges::subrange<I, S>;
             return detail::join_view<V>{
                 std::ranges::subrange{std::move(it), std::move(st)}};
@@ -136,16 +143,9 @@ namespace genex::views {
 
         template <typename Rng>
         requires detail::concepts::joinable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng&& rng) const noexcept -> auto {
             return detail::join_view{
-                std::views::all(std::forward<Rng>(rng))};
-        }
-
-        template <typename Rng>
-        requires detail::concepts::joinable_range<Rng> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng) const -> auto {
-            return detail::join_view{
-                std::views::all(std::forward<Rng>(rng))}; // .as_pointer_subrange();
+                std::forward<Rng>(rng)};
         }
 
         GENEX_INLINE constexpr auto operator()() const noexcept -> auto {

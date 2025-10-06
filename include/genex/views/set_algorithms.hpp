@@ -3,7 +3,7 @@
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
 #include <genex/algorithms/contains.hpp>
-#include <genex/iterators/iter_pair.hpp>
+#include <genex/iterators/access.hpp>
 #include <genex/operations/cmp.hpp>
 #include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
@@ -760,6 +760,8 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng1))) {
             return iterators::end(base_rng1);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
     };
 
     template <typename V1, typename V2, typename Comp, typename Proj1, typename Proj2>
@@ -795,6 +797,8 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng1))) {
             return iterators::end(base_rng1);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
     };
 
     template <typename V1, typename V2, typename Comp, typename Proj1, typename Proj2>
@@ -829,6 +833,8 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng1))) {
             return iterators::end(base_rng1);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
     };
 
     template <typename V1, typename V2, typename Comp, typename Proj1, typename Proj2>
@@ -863,6 +869,8 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng1))) {
             return iterators::end(base_rng1);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
     };
 
     template <typename V1, typename V2, typename Proj1, typename Proj2>
@@ -894,6 +902,8 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng1))) {
             return iterators::end(base_rng1);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
     };
 
     template <typename V1, typename V2, typename Proj1, typename Proj2>
@@ -925,6 +935,8 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng1))) {
             return iterators::end(base_rng1);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
     };
 
     template <typename V1, typename V2, typename Proj1, typename Proj2>
@@ -956,6 +968,8 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng1))) {
             return iterators::end(base_rng1);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
     };
 
     template <typename V1, typename V2, typename Proj1, typename Proj2>
@@ -987,6 +1001,8 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng1))) {
             return iterators::end(base_rng1);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
     };
 }
 
@@ -996,7 +1012,7 @@ namespace genex::views {
     struct set_algorithm_sorted_base_fn {
         template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
-        constexpr auto operator()(I1 it1, S1 st1, I2 it2, S2 st2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const -> auto {
+        constexpr auto operator()(I1 it1, S1 st1, I2 it2, S2 st2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept -> auto {
             using V1 = std::ranges::subrange<I1, S1>;
             using V2 = std::ranges::subrange<I2, S2>;
             return View<V1, V2>{
@@ -1006,11 +1022,11 @@ namespace genex::views {
 
         template <typename Rng1, typename Rng2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires concepts::set_algorithmicable_range<Rng1, Rng2, Comp, Proj1, Proj2>
-        auto operator()(Rng1 &&rng1, Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const -> auto {
+        auto operator()(Rng1 &&rng1, Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept -> auto {
             using V1 = std::views::all_t<Rng1>;
             using V2 = std::views::all_t<Rng2>;
             return View<V1, V2>{
-                std::views::all(std::forward<Rng1>(rng1)), std::views::all(std::forward<Rng2>(rng2)),
+                std::forward<Rng1>(rng1), std::forward<Rng2>(rng2),
                 std::move(comp), std::move(proj1), std::move(proj2)};
         }
 
@@ -1039,7 +1055,7 @@ namespace genex::views {
             using V1 = std::views::all_t<Rng1>;
             using V2 = std::views::all_t<Rng2>;
             return View<V1, V2, Proj1, Proj2>{
-                std::views::all(std::forward<Rng1>(rng1)), std::views::all(std::forward<Rng2>(rng2)),
+                std::forward<Rng1>(rng1), std::forward<Rng2>(rng2),
                 std::move(proj1), std::move(proj2)};
         }
 

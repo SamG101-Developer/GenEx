@@ -113,6 +113,11 @@ namespace genex::views::detail {
             noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
+
+        GENEX_INLINE constexpr auto size() const noexcept(
+            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            return operations::size(base_rng);
+        }
     };
 }
 
@@ -121,7 +126,7 @@ namespace genex::views {
     struct transform_fn {
         template <typename I, typename S, typename F, typename Proj = meta::identity>
         requires detail::concepts::transformable_iters<I, S, F, Proj>
-        GENEX_INLINE constexpr auto operator()(I it, S st, F f, Proj proj = {}) const -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, F f, Proj proj = {}) const noexcept -> auto {
             using V = std::ranges::subrange<I, S>;
             return detail::transform_view<V, F, Proj>{
                 std::ranges::subrange{std::move(it), std::move(st)}, std::move(f), std::move(proj)};
@@ -129,23 +134,15 @@ namespace genex::views {
 
         template <typename Rng, typename F, typename Proj = meta::identity>
         requires detail::concepts::transformable_range<Rng, F, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::transform_view<V, F, Proj>{
-                std::views::all(std::forward<Rng>(rng)), std::move(f), std::move(proj)};
-        }
-
-        template <typename Rng, typename F, typename Proj = meta::identity>
-        requires detail::concepts::transformable_range<Rng, F, Proj> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const -> auto {
-            using V = std::views::all_t<Rng>;
-            return detail::transform_view<V, F, Proj>{
-                std::views::all(std::forward<Rng>(rng)), std::move(f), std::move(proj)}; // .as_pointer_subrange();
+                std::forward<Rng>(rng), std::move(f), std::move(proj)};
         }
 
         template <typename F, typename Proj = meta::identity>
         requires (not range<F>)
-        GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const -> auto {
+        GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const noexcept -> auto {
             return std::bind_back(
                 transform_fn{}, std::move(f), std::move(proj));
         }
