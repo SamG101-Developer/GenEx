@@ -3,6 +3,7 @@
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
+#include <genex/iterators/next.hpp>
 #include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
@@ -32,12 +33,16 @@ namespace genex::views::detail {
         using value_type = std::common_type_t<iter_value_t<I>, New>;
         using pointer = std::add_pointer_t<value_type>;
 
-        GENEX_VIEW_ITERATOR_TYPE_DEFINITIONS(std::iterator_traits<I>::iterator_category);
-        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(intersperse_iterator);
-        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(intersperse_iterator);
+        using iterator_category = std::iterator_traits<I>::iterator_category;
+        using iterator_concept = iterator_category;
+        using difference_type = difference_type_selector_t<I>;
 
+        I it; S st;
         New sep;
         bool at_sep = false;
+
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            intersperse_iterator, it);
 
         GENEX_INLINE constexpr explicit intersperse_iterator(I it, S st, New sep) noexcept(
             std::is_nothrow_move_constructible_v<I> and
@@ -46,21 +51,13 @@ namespace genex::views::detail {
             it(std::move(it)), st(std::move(st)), sep(std::move(sep)) {
         }
 
-        GENEX_INLINE constexpr auto operator*() const noexcept(noexcept(*it))
-            -> reference {
-            if (at_sep) {
-                return sep;
-            }
-            return *it;
+        GENEX_INLINE constexpr auto operator*() const noexcept(
+            noexcept(*it)) -> reference {
+            return at_sep ? sep : *it;
         }
 
-        GENEX_INLINE constexpr auto operator->() const noexcept(noexcept(std::addressof(*it)))
-            -> pointer {
-            GENEX_ITERATOR_PROXY_ACCESS
-        }
-
-        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it))
-            -> intersperse_iterator& {
+        GENEX_INLINE constexpr auto operator++() noexcept(
+            noexcept(++it)) -> intersperse_iterator& {
             if (at_sep) {
                 at_sep = false;
                 ++it;
@@ -79,21 +76,28 @@ namespace genex::views::detail {
         }
     };
 
-    template <typename S, typename New>
-    struct intersperse_sentinel {
-        GENEX_VIEW_SENTINEL_CTOR_DEFINITIONS(intersperse_sentinel);
-        GENEX_VIEW_SENTINEL_FUNC_DEFINITIONS(intersperse_iterator, intersperse_sentinel, New);
-    };
+    struct intersperse_sentinel { };
+
+    template <typename I, typename S, typename New>
+    requires concepts::interspersable_iters<I, S, New>
+    intersperse_iterator(I, S, New) -> intersperse_iterator<I, S, New>;
+
+    template <typename I, typename S, typename New>
+    requires concepts::interspersable_iters<I, S, New>
+    GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(intersperse_iterator, intersperse_sentinel, I, S, New) {
+        return iterators::next(it.it) == it.st and it.at_sep;
+    }
 
     template <typename V, typename New>
     requires concepts::interspersable_range<V, New>
     struct intersperse_view : std::ranges::view_interface<intersperse_view<V, New>> {
-        GENEX_VIEW_VIEW_CTOR_DEFINITIONS(intersperse_view);
-        GENEX_VIEW_VIEW_TYPE_DEFINITIONS(intersperse_iterator, intersperse_sentinel, New);
-        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(sep);
-        GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE;
-
+        V base_rng;
         New sep;
+
+        GENEX_INLINE constexpr explicit intersperse_view() noexcept = default;
+
+        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(
+            intersperse_iterator, intersperse_sentinel, base_rng, sep);
 
         GENEX_INLINE constexpr explicit intersperse_view(V rng, New sep) noexcept(
             std::is_nothrow_move_constructible_v<V> and
@@ -101,11 +105,13 @@ namespace genex::views::detail {
             base_rng(std::move(rng)), sep(std::move(sep)) {
         }
 
-        GENEX_INLINE constexpr auto internal_begin() const noexcept(noexcept(iterators::begin(base_rng))) {
+        GENEX_INLINE constexpr auto internal_begin() const noexcept(
+            noexcept(iterators::begin(base_rng))) {
             return iterators::begin(base_rng);
         }
 
-        GENEX_INLINE constexpr auto internal_end() const noexcept(noexcept(iterators::end(base_rng))) {
+        GENEX_INLINE constexpr auto internal_end() const noexcept(
+            noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
     };
@@ -114,6 +120,14 @@ namespace genex::views::detail {
 
 namespace genex::views {
     struct intersperse_fn {
+        template <typename I, typename S, typename New>
+        requires detail::concepts::interspersable_iters<I, S, New>
+        GENEX_INLINE constexpr auto operator()(I it, S st, New sep) const -> auto {
+            using V = std::ranges::subrange<I, S>;
+            return detail::intersperse_view<V, New>{
+                std::ranges::subrange{std::move(it), std::move(st)}, std::move(sep)};
+        }
+
         template <typename Rng, typename New>
         requires detail::concepts::interspersable_range<Rng, New>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, New sep) const -> auto {

@@ -31,13 +31,17 @@ namespace genex::views::detail {
         using value_type = iter_value_t<I>;
         using pointer = std::add_pointer_t<value_type>;
 
-        GENEX_VIEW_ITERATOR_TYPE_DEFINITIONS(std::iterator_traits<I>::iterator_category);
-        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(replace_if_iterator);
-        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(replace_if_iterator);
+        using iterator_category = std::iterator_traits<I>::iterator_category;
+        using iterator_concept = iterator_category;
+        using difference_type = difference_type_selector_t<I>;
 
+        I it; S st;
         Pred pred;
         New new_val;
         Proj proj;
+
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            replace_if_iterator, it);
 
         GENEX_INLINE constexpr explicit replace_if_iterator(I it, S st, Pred pred, New new_val, Proj proj) noexcept(
             std::is_nothrow_move_constructible_v<I> and
@@ -48,44 +52,60 @@ namespace genex::views::detail {
             it(std::move(it)), st(std::move(st)), pred(std::move(pred)), new_val(std::move(new_val)), proj(std::move(proj)) {
         }
 
-        GENEX_INLINE constexpr auto operator*() const noexcept(
+        GENEX_INLINE constexpr auto operator*() noexcept(
             noexcept(*it) and
             std::is_nothrow_invocable_v<Proj, iter_reference_t<I>> and
-            std::is_nothrow_invocable_v<Pred, std::invoke_result_t<Proj, iter_reference_t<I>>>)
-            -> value_type {
+            std::is_nothrow_invocable_v<Pred, std::invoke_result_t<Proj, iter_reference_t<I>>>) -> reference {
             if (std::invoke(pred, std::invoke(proj, *it))) { return new_val; }
             return *it;
         }
 
-        GENEX_INLINE constexpr auto operator->() const noexcept(noexcept(*it))
-            -> pointer {
-            GENEX_ITERATOR_PROXY_ACCESS
+        GENEX_INLINE constexpr auto operator*() const noexcept(
+            noexcept(*it) and
+            std::is_nothrow_invocable_v<Proj, iter_reference_t<I>> and
+            std::is_nothrow_invocable_v<Pred, std::invoke_result_t<Proj, iter_reference_t<I>>>) -> std::add_const_t<reference> {
+            if (std::invoke(pred, std::invoke(proj, *it))) { return new_val; }
+            return *it;
         }
 
-        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it))
-            -> replace_if_iterator& {
+        GENEX_INLINE constexpr auto operator++() noexcept(
+            noexcept(++it)) -> replace_if_iterator& {
             ++it;
             return *this;
         }
+
+        GENEX_INLINE constexpr auto operator++(int) noexcept(
+            noexcept(it++)) -> replace_if_iterator {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
     };
 
-    template <typename S, typename Pred, typename New, typename Proj>
-    struct replace_if_sentinel {
-        GENEX_VIEW_SENTINEL_CTOR_DEFINITIONS(replace_if_sentinel);
-        GENEX_VIEW_SENTINEL_FUNC_DEFINITIONS(replace_if_iterator, replace_if_sentinel, Pred, New, Proj);
-    };
+    struct replace_if_sentinel { };
+
+    template <typename I, typename S, typename Pred, typename New, typename Proj>
+    requires concepts::replaceable_if_iters<I, S, Pred, New, Proj>
+    replace_if_iterator(I, S, Pred, New, Proj) -> replace_if_iterator<I, S, Pred, New, Proj>;
+
+    template <typename I, typename S, typename Pred, typename New, typename Proj>
+    requires concepts::replaceable_if_iters<I, S, Pred, New, Proj>
+    GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(replace_if_iterator, replace_if_sentinel, I, S, Pred, New, Proj) {
+        return it.it == it.st;
+    }
 
     template <typename V, typename Pred, typename New, typename Proj>
     requires concepts::replaceable_if_range<V, Pred, New, Proj>
     struct replace_if_view : std::ranges::view_interface<replace_if_view<V, Pred, New, Proj>> {
-        GENEX_VIEW_VIEW_CTOR_DEFINITIONS(replace_if_view);
-        GENEX_VIEW_VIEW_TYPE_DEFINITIONS(replace_if_iterator, replace_if_sentinel, Pred, New, Proj);
-        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(pred, new_val, proj);
-        GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE;
-
+        V base_rng;
         Pred pred;
         New new_val;
         Proj proj;
+
+        GENEX_INLINE constexpr explicit replace_if_view() noexcept = default;
+
+        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(
+            replace_if_iterator, replace_if_sentinel, base_rng, pred, new_val, proj);
 
         GENEX_INLINE constexpr explicit replace_if_view(V rng, Pred pred, New new_val, Proj proj) noexcept(
             std::is_nothrow_move_constructible_v<V> and
@@ -95,11 +115,13 @@ namespace genex::views::detail {
             base_rng(std::move(rng)), pred(std::move(pred)), new_val(std::move(new_val)), proj(std::move(proj)) {
         }
 
-        GENEX_INLINE constexpr auto internal_begin() const noexcept(noexcept(iterators::begin(base_rng))) {
+        GENEX_INLINE constexpr auto internal_begin() const noexcept(
+            noexcept(iterators::begin(base_rng))) {
             return iterators::begin(base_rng);
         }
 
-        GENEX_INLINE constexpr auto internal_end() const noexcept(noexcept(iterators::end(base_rng))) {
+        GENEX_INLINE constexpr auto internal_end() const noexcept(
+            noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
     };
@@ -108,6 +130,14 @@ namespace genex::views::detail {
 
 namespace genex::views {
     struct replace_if_fn {
+        template <typename I, typename S, typename Pred, typename New, typename Proj = std::identity>
+        requires detail::concepts::replaceable_if_iters<I, S, Pred, New, Proj>
+        GENEX_INLINE constexpr auto operator()(I it, S st, Pred pred, New new_val, Proj proj = {}) const noexcept -> auto {
+            using V = std::ranges::subrange<I, S>;
+            return detail::replace_if_view<V, Pred, New, Proj>{
+                std::ranges::subrange{std::move(it), std::move(st)}, std::move(pred), std::move(new_val), std::move(proj)};
+        }
+
         template <typename Rng, typename Pred, typename New, typename Proj = std::identity>
         requires detail::concepts::replaceable_if_range<Rng, Pred, New, Proj>
         GENEX_INLINE constexpr auto operator()(Rng&& rng, Pred pred, New new_val, Proj proj = {}) const -> auto {

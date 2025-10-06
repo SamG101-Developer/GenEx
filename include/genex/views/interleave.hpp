@@ -38,87 +38,120 @@ namespace genex::views::detail::concepts {
 
 
 namespace genex::views::detail {
-    template <typename I, typename S, typename I2, typename S2>
-    requires concepts::interleavable_iters<I, S, I2, S2>
+    template <typename I1, typename S1, typename I2, typename S2>
+    requires concepts::interleavable_iters<I1, S1, I2, S2>
     struct interleave_iterator {
-        using reference = std::common_reference_t<iter_reference_t<I>, iter_reference_t<I2>>;
-        using value_type = std::common_type_t<iter_value_t<I>, iter_value_t<I2>>;
+        using reference = std::common_reference_t<iter_reference_t<I1>, iter_reference_t<I2>>;
+        using value_type = std::common_type_t<iter_value_t<I1>, iter_value_t<I2>>;
         using pointer = std::add_pointer_t<value_type>;
+
         using iterator_concept = common_iterator_category_t<
-            typename std::iterator_traits<I>::iterator_category,
+            typename std::iterator_traits<I1>::iterator_category,
             typename std::iterator_traits<I2>::iterator_category>;
         using iterator_category = iterator_concept;
-        using difference_type = difference_type_selector_t<I>;
+        using difference_type = difference_type_selector_t<I1, I2>;
 
-        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(interleave_iterator);
-        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(interleave_iterator);
-
-        I2 it2;
-        S2 st2;
+        I1 it1; S1 st1;
+        I2 it2; S2 st2;
         bool exhaust;
-
         bool turn = true;
 
-        GENEX_INLINE constexpr explicit interleave_iterator(I it1, S st1, I2 it2, S2 st2, const bool exhaust) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S> and
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            interleave_iterator, it1);
+
+        GENEX_INLINE constexpr explicit interleave_iterator(I1 it1, S1 st1, I2 it2, S2 st2, const bool exhaust) noexcept(
+            std::is_nothrow_move_constructible_v<I1> and
+            std::is_nothrow_move_constructible_v<S1> and
             std::is_nothrow_move_constructible_v<I2> and
             std::is_nothrow_move_constructible_v<S2>) :
-            it(std::move(it1)), st(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)), exhaust(exhaust) {
+            it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)), exhaust(exhaust) {
         }
 
-        GENEX_INLINE constexpr auto operator*() const noexcept(noexcept(*it) and noexcept(*it2))
-            -> reference {
-            return turn ? *it : *it2;
+        GENEX_INLINE constexpr auto operator*() const noexcept(
+            noexcept(*it1) and noexcept(*it2)) -> reference {
+            return turn ? *it1 : *it2;
         }
 
-        GENEX_INLINE constexpr auto operator->() const noexcept(noexcept(std::addressof(*it)) and noexcept(std::addressof(*it2)))
-            -> pointer {
-            GENEX_ITERATOR_PROXY_ACCESS
-        }
+        GENEX_INLINE constexpr auto operator++() noexcept(
+            noexcept(++it1) and noexcept(++it2)) -> interleave_iterator& {
 
-        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it) and noexcept(++it2))
-            -> interleave_iterator& {
             if (turn) {
-                if (it != st) { ++it; }
+                if (it1 != st1) { ++it1; }
             }
             else {
                 if (it2 != st2) { ++it2; }
             }
-            turn = not turn;
+
+            if (exhaust and it1 == st1) {
+                turn = false;
+            }
+            else if (exhaust and it2 == st2) {
+                turn = true;
+            }
+            else {
+                turn = not turn;
+            }
+
             return *this;
         }
+
+        GENEX_INLINE constexpr auto operator++(int) noexcept
+        -> interleave_iterator {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
     };
 
-    template <typename S, typename I2, typename S2>
-    struct interleave_sentinel {
-        GENEX_VIEW_SENTINEL_CTOR_DEFINITIONS(interleave_sentinel);
-        GENEX_VIEW_SENTINEL_FUNC_DEFINITIONS(interleave_iterator, interleave_sentinel, I2, S2);
-    };
+    struct interleave_sentinel { };
 
-    template <typename V, typename V2>
-    requires concepts::interleavable_range<V, V2>
-    struct interleave_view : std::ranges::view_interface<interleave_view<V, V2>> {
-        GENEX_VIEW_VIEW_CTOR_DEFINITIONS(interleave_view);
-        GENEX_VIEW_VIEW_TYPE_DEFINITIONS(interleave_iterator, interleave_sentinel, iterator_t<V2>, sentinel_t<V2>);
-        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(iterators::begin(base_rng2), iterators::end(base_rng2), exhaust);
-        GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE;
+    template <typename I1, typename S1, typename I2, typename S2>
+    requires concepts::interleavable_iters<I1, S1, I2, S2>
+    interleave_iterator(I1, S1, I2, S2, bool) -> interleave_iterator<I1, S1, I2, S2>;
 
+    template <typename I, typename S, typename I2, typename S2>
+    requires concepts::interleavable_iters<I, S, I2, S2>
+    GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(interleave_iterator, interleave_sentinel, I, S, I2, S2) {
+        // If "exhausting", then both iterators need to match their sentinel.
+        // If not "exhausting", then only one iterator needs to match its sentinel, but if we are interleaving [1, 3]
+        // and [2, 4], when after 3 is done, it matches the sentinel, but 4 still needs to be added, so ensure that
+        // we are on the correct turn. Turn is "true" when we are on the first iterator, and "false" when we are to
+        // yield from the first iterator.
+        if (it.exhaust) {
+            return it.it1 == it.st1 and it.it2 == it.st2;
+        }
+        else {
+            return (it.it1 == it.st1 or it.it2 == it.st2) and it.turn;
+        }
+    }
+
+    template <typename V1, typename V2>
+    requires concepts::interleavable_range<V1, V2>
+    struct interleave_view : std::ranges::view_interface<interleave_view<V1, V2>> {
+        V1 base_rng1;
         V2 base_rng2;
-        bool exhaust;
+        bool exhaust = false;
 
-        GENEX_INLINE constexpr explicit interleave_view(V rng1, V2 rng2, const bool exhaust) noexcept(
-            std::is_nothrow_move_constructible_v<V> and
+        GENEX_INLINE constexpr interleave_view() noexcept = default;
+
+        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(
+            interleave_iterator, interleave_sentinel, base_rng1,
+            iterators::begin(base_rng2), iterators::end(base_rng2), exhaust);
+
+        GENEX_INLINE constexpr explicit interleave_view(V1 rng1, V2 rng2, const bool exhaust) noexcept(
+            std::is_nothrow_move_constructible_v<V1> and
             std::is_nothrow_move_constructible_v<V2>) :
-            base_rng(std::move(rng1)), base_rng2(std::move(rng2)), exhaust(exhaust) {
+            base_rng1(std::move(rng1)), base_rng2(std::move(rng2)), exhaust(exhaust) {
         }
 
-        GENEX_INLINE constexpr auto internal_begin() const noexcept(noexcept(iterators::begin(base_rng)) and noexcept(iterators::begin(base_rng2))) {
-            return iterators::begin(base_rng);
+        GENEX_INLINE constexpr auto internal_begin() const noexcept(
+            noexcept(iterators::begin(base_rng1)) and noexcept(iterators::begin(base_rng2))) {
+            return iterators::begin(base_rng1);
         }
 
-        GENEX_INLINE constexpr auto internal_end() const noexcept(noexcept(iterators::end(base_rng)) and noexcept(iterators::end(base_rng2))) {
-            return iterators::end(base_rng);
+        GENEX_INLINE constexpr auto internal_end() const noexcept(
+            noexcept(iterators::end(base_rng1)) and noexcept(iterators::end(base_rng2))) {
+            return iterators::end(base_rng1);
         }
     };
 }
@@ -129,23 +162,27 @@ namespace genex::views {
         template <typename I1, typename S1, typename I2, typename S2>
         requires detail::concepts::interleavable_iters<I1, S1, I2, S2>
         GENEX_INLINE constexpr auto operator()(I1 it1, S1 st1, I2 it2, S2 st2, bool exhaust = false) const noexcept -> auto {
-            return detail::interleave_view{
-                std::ranges::subrange<I1, S1>{std::move(it1), std::move(st1)},
-                std::ranges::subrange<I2, S2>{std::move(it2), std::move(st2)},
-                exhaust};
+            using V1 = std::ranges::subrange<I1, S1>;
+            using V2 = std::ranges::subrange<I2, S2>;
+            return detail::interleave_view<V1, V2>{
+                std::ranges::subrange<I1, S1>{std::move(it1), std::move(st1)}, std::ranges::subrange<I2, S2>{std::move(it2), std::move(st2)}, exhaust};
         }
 
         template <typename Rng1, typename Rng2>
         requires detail::concepts::interleavable_range<Rng1, Rng2>
-        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, bool exhaust = false) const -> auto {
-            return detail::interleave_view{
+        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, bool exhaust = false) const noexcept -> auto {
+            using V1 = std::views::all_t<Rng1>;
+            using V2 = std::views::all_t<Rng2>;
+            return detail::interleave_view<V1, V2>{
                 std::views::all(std::forward<Rng1>(rng1)), std::views::all(std::forward<Rng2>(rng2)), exhaust};
         }
 
         template <typename Rng1, typename Rng2>
         requires detail::concepts::interleavable_range<Rng1, Rng2> and contiguous_range<Rng1> and borrowed_range<Rng1> and contiguous_range<Rng2> and borrowed_range<Rng2>
-        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, bool exhaust = false) const -> auto {
-            return detail::interleave_view{
+        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, bool exhaust = false) const noexcept -> auto {
+            using V1 = std::views::all_t<Rng1>;
+            using V2 = std::views::all_t<Rng2>;
+            return detail::interleave_view<V1, V2>{
                 std::views::all(std::forward<Rng1>(rng1)), std::views::all(std::forward<Rng2>(rng2)), exhaust}; // .as_pointer_subrange();
         }
 

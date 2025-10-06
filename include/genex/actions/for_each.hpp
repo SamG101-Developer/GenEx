@@ -5,6 +5,7 @@
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
+#include <genex/operations/access.hpp>
 
 
 namespace genex::actions::details::concepts {
@@ -27,7 +28,7 @@ namespace genex::actions {
         template <typename Rng, typename F>
         requires details::concepts::for_eachable_range<Rng, F>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, F f) const -> Rng& {
-            for (auto it = std::begin(rng), end = std::end(rng); it != end; ++it) { std::invoke(f, *it); }
+            for (auto it = iterators::begin(rng), end = iterators::end(rng); it != end; ++it) { std::invoke(f, *it); }
             return rng;
         }
 

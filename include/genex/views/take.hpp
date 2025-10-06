@@ -31,48 +31,62 @@ namespace genex::views::detail {
         using value_type = iter_value_t<I>;
         using pointer = std::add_pointer_t<value_type>;
 
-        GENEX_VIEW_ITERATOR_TYPE_DEFINITIONS(std::iterator_traits<I>::iterator_category);
-        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(take_iterator);
-        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(take_iterator);
+        using iterator_category = std::iterator_traits<I>::iterator_category;
+        using iterator_concept = iterator_category;
+        using difference_type = difference_type_selector_t<I>;
 
-        GENEX_INLINE constexpr explicit take_iterator(I it, S st) noexcept(
+        I it; S st;
+
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            take_iterator, it);
+
+        GENEX_INLINE constexpr explicit take_iterator(I it, S st, Int) noexcept(
             std::is_nothrow_move_constructible_v<I> and
             std::is_nothrow_move_constructible_v<S>) :
             it(std::move(it)), st(std::move(st)) {
         }
 
-        GENEX_INLINE constexpr auto operator*() const noexcept(noexcept(*it))
-            -> reference {
+        GENEX_INLINE constexpr auto operator*() const noexcept(
+            noexcept(*it)) -> reference {
             return *it;
         }
 
-        GENEX_INLINE constexpr auto operator->() const noexcept(noexcept(std::addressof(*it)))
-            -> pointer {
-            GENEX_ITERATOR_PROXY_ACCESS
-        }
-
-        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it))
-            -> take_iterator& {
+        GENEX_INLINE constexpr auto operator++() noexcept(
+            noexcept(++it)) -> take_iterator& {
             ++it;
             return *this;
         }
+
+        GENEX_INLINE constexpr auto operator++(int) noexcept(
+            noexcept(it++)) -> take_iterator {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
     };
 
-    template <typename S, typename Int>
-    struct take_sentinel {
-        GENEX_VIEW_SENTINEL_CTOR_DEFINITIONS(take_sentinel);
-        GENEX_VIEW_SENTINEL_FUNC_DEFINITIONS(take_iterator, take_sentinel, Int);
-    };
+    struct take_sentinel { };
+
+    template <typename I, typename S, typename Int>
+    requires concepts::takeable_iters<I, S, Int>
+    take_iterator(I, S, Int) -> take_iterator<I, S, Int>;
+
+    template <typename I, typename S, typename Int>
+    requires concepts::takeable_iters<I, S, Int>
+    GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(take_iterator, take_sentinel, I, S, Int) {
+        return it.it == it.st;
+    }
 
     template <typename V, typename Int>
     requires concepts::takeable_range<V, Int>
     struct take_view : std::ranges::view_interface<take_view<V, Int>> {
-        GENEX_VIEW_VIEW_CTOR_DEFINITIONS(take_view);
-        GENEX_VIEW_VIEW_TYPE_DEFINITIONS(take_iterator, take_sentinel, Int);
-        GENEX_VIEW_VIEW_FUNC_DEFINITIONS();
-        GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE;
-
+        V base_rng;
         Int take_n;
+
+        GENEX_INLINE constexpr explicit take_view() noexcept = default;
+
+        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(
+            take_iterator, take_sentinel, base_rng, take_n);
 
         GENEX_INLINE constexpr explicit take_view(V rng, Int n) noexcept(
             std::is_nothrow_move_constructible_v<V> and
@@ -80,11 +94,14 @@ namespace genex::views::detail {
             base_rng(std::move(rng)), take_n(std::max(0, n)) {
         }
 
-        GENEX_INLINE constexpr auto internal_begin() const noexcept(noexcept(iterators::begin(base_rng))) {
+        GENEX_INLINE constexpr auto internal_begin() const noexcept(
+            noexcept(iterators::begin(base_rng))) {
             return iterators::begin(base_rng);
         }
 
-        GENEX_INLINE constexpr auto internal_end() const noexcept(noexcept(iterators::begin(base_rng))) requires random_access_range<V> {
+        GENEX_INLINE constexpr auto internal_end() const noexcept(
+            noexcept(iterators::begin(base_rng)) and
+            noexcept(iterators::end(base_rng))) {
             return iterators::next(iterators::begin(base_rng), take_n, iterators::end(base_rng));
         }
     };
@@ -93,6 +110,14 @@ namespace genex::views::detail {
 
 namespace genex::views {
     struct take_fn {
+        template <typename I, typename S, typename Int>
+        requires detail::concepts::takeable_iters<I, S, Int>
+        GENEX_INLINE constexpr auto operator()(I it, S st, Int n) const -> auto {
+            using V = std::ranges::subrange<I, S>;
+            return detail::take_view<V, Int>{
+                std::ranges::subrange{std::move(it), std::move(st)}, std::move(n)};
+        }
+
         template <typename Rng, typename Int>
         requires detail::concepts::takeable_range<Rng, Int>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Int n) const -> auto {

@@ -51,19 +51,19 @@ namespace genex::operations {
 
     struct size_fn {
         template <typename Rng>
-            requires detail::concepts::sizeable_select_size<Rng>
+        requires detail::concepts::sizeable_select_size<Rng>
         constexpr auto operator()(Rng &&r) const -> std::size_t {
             return r.size();
         }
 
         template <typename Rng>
-            requires detail::concepts::sizeable_select_std_size<Rng>
+        requires detail::concepts::sizeable_select_std_size<Rng>
         constexpr auto operator()(Rng &&r) const -> std::size_t {
             return std::size(r);
         }
 
         template <typename Rng>
-            requires detail::concepts::sizeable_select_else<Rng>
+        requires detail::concepts::sizeable_select_else<Rng>
         constexpr auto operator()(Rng &&gen) const -> std::size_t {
             auto count = static_cast<std::size_t>(0);
             for (auto &&_ : gen) { ++count; }
@@ -76,13 +76,13 @@ namespace genex::operations {
 
     struct empty_fn {
         template <typename Rng>
-            requires detail::concepts::emptyable_select_empty<Rng>
+        requires detail::concepts::emptyable_select_empty<Rng>
         constexpr auto operator()(Rng &&r) const -> bool {
             return r.empty();
         }
 
         template <typename Rng>
-            requires detail::concepts::emptyable_select_size<Rng>
+        requires detail::concepts::emptyable_select_size<Rng>
         constexpr auto operator()(Rng &&rng) const -> bool {
             return operations::size(rng) == 0;
         }

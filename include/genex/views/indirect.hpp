@@ -31,9 +31,11 @@ namespace genex::views::detail {
         using value_type = std::remove_reference_t<std::remove_cv_t<std::remove_reference_t<decltype(**std::declval<I&>())>>>;
         using pointer = std::add_pointer_t<value_type>;
 
-        GENEX_VIEW_ITERATOR_TYPE_DEFINITIONS(std::forward_iterator_tag);
-        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(indirect_iterator);
-        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(indirect_iterator);
+        using iterator_category = std::forward_iterator_tag;
+        using iterator_concept = iterator_category;
+        using difference_type = difference_type_selector_t<I>;
+
+        I it; S st;
 
         GENEX_INLINE constexpr explicit indirect_iterator(I it, S st) noexcept(
             std::is_nothrow_move_constructible_v<I> and
@@ -41,47 +43,59 @@ namespace genex::views::detail {
             it(std::move(it)), st(std::move(st)) {
         }
 
-        GENEX_INLINE constexpr auto operator*() const noexcept(noexcept(**it))
-            -> reference {
+        GENEX_INLINE constexpr auto operator*() const noexcept(
+            noexcept(**it)) -> reference {
             return **it;
         }
 
-        GENEX_INLINE constexpr auto operator->() const noexcept(noexcept(std::addressof(**it)))
-            -> pointer {
-            GENEX_ITERATOR_PROXY_ACCESS
-        }
-
-        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it))
-            -> indirect_iterator& {
+        GENEX_INLINE constexpr auto operator++() noexcept(
+            noexcept(++it)) -> indirect_iterator& {
             ++it;
             return *this;
         }
+
+        GENEX_INLINE constexpr auto operator++(int) noexcept(
+        noexcept(it++)) -> indirect_iterator {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
     };
 
-    template <typename S>
-    struct indirect_sentinel {
-        GENEX_VIEW_SENTINEL_CTOR_DEFINITIONS(indirect_sentinel);
-        GENEX_VIEW_SENTINEL_FUNC_DEFINITIONS(indirect_iterator, indirect_sentinel);
-    };
+    struct indirect_sentinel { };
+
+    template <typename I, typename S>
+    requires concepts::indirectable_iters<I, S>
+    indirect_iterator(I, S) -> indirect_iterator<I, S>;
+
+    template <typename I, typename S>
+    requires concepts::indirectable_iters<I, S>
+    GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(indirect_iterator, indirect_sentinel, I, S) {
+        return it.it == it.st;
+    }
 
     template <typename V>
     requires concepts::indirectable_range<V>
     struct indirect_view : std::ranges::view_interface<indirect_view<V>> {
-        GENEX_VIEW_VIEW_CTOR_DEFINITIONS(indirect_view);
-        GENEX_VIEW_VIEW_TYPE_DEFINITIONS(indirect_iterator, indirect_sentinel);
-        GENEX_VIEW_VIEW_FUNC_DEFINITIONS();
-        GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE;
+        V base_rng;
+
+        GENEX_INLINE constexpr explicit indirect_view() = default;
+
+        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(
+            indirect_iterator, indirect_sentinel, base_rng);
 
         GENEX_INLINE explicit indirect_view(V rng) noexcept(
             std::is_nothrow_move_constructible_v<V>) :
             base_rng(std::move(rng)) {
         }
 
-        GENEX_INLINE constexpr auto internal_begin() const noexcept(noexcept(iterators::begin(base_rng))) {
+        GENEX_INLINE constexpr auto internal_begin() const noexcept(
+            noexcept(iterators::begin(base_rng))) {
             return iterators::begin(base_rng);
         }
 
-        GENEX_INLINE constexpr auto internal_end() const noexcept(noexcept(iterators::end(base_rng))) {
+        GENEX_INLINE constexpr auto internal_end() const noexcept(
+            noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
     };
@@ -90,9 +104,17 @@ namespace genex::views::detail {
 
 namespace genex::views {
     struct indirect_fn {
+        template <typename I, typename S>
+        requires detail::concepts::indirectable_iters<I, S>
+        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept -> auto {
+            using V = std::ranges::subrange<I, S>;
+            return detail::indirect_view<V>{
+                std::ranges::subrange<I, S>{std::move(it), std::move(st)}};
+        }
+
         template <typename Rng>
         requires detail::concepts::indirectable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng&& rng) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::indirect_view<V>{
                 std::views::all(std::forward<Rng>(rng))};
@@ -100,7 +122,7 @@ namespace genex::views {
 
         template <typename Rng>
         requires detail::concepts::indirectable_range<Rng> and contiguous_range<Rng> and borrowed_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng&& rng) const noexcept -> auto {
             using V = std::views::all_t<Rng>;
             return detail::indirect_view<V>{
                 std::views::all(std::forward<Rng>(rng))}; // .as_pointer_subrange();

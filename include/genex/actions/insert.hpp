@@ -39,21 +39,21 @@ namespace genex::actions {
         template <typename Rng, typename I, typename E>
         requires concepts::insertable_select_emplace<Rng, I, E>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, E &&elem) const -> auto {
-            GENEX_ASSERT(std::out_of_range, it >= std::begin(rng) and it <= std::end(rng));
+            // GENEX_ASSERT(std::out_of_range, it >= std::begin(rng) and it <= std::end(rng));
             return rng.emplace(std::move(it), std::forward<E>(elem));
         }
 
         template <typename Rng, typename I, typename E>
         requires concepts::insertable_select_push<Rng, I, E>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, E &&elem) const -> auto {
-            GENEX_ASSERT(std::out_of_range, it >= std::begin(rng) and it <= std::end(rng));
+            // GENEX_ASSERT(std::out_of_range, it >= std::begin(rng) and it <= std::end(rng));
             return rng.push(std::move(it), std::forward<E>(elem));
         }
 
         template <typename Rng, typename I, typename E>
         requires concepts::insertable_select_insert<Rng, I, E>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, E &&elem) const -> auto {
-            GENEX_ASSERT(std::out_of_range, it >= std::begin(rng) and it <= std::end(rng));
+            // GENEX_ASSERT(std::out_of_range, it >= std::begin(rng) and it <= std::end(rng));
             return rng.insert(std::move(it), std::forward<E>(elem));
         }
 

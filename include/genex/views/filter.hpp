@@ -32,10 +32,11 @@ namespace genex::views::detail {
         using value_type = iter_value_t<I>;
         using pointer = std::add_pointer_t<value_type>;
 
-        GENEX_VIEW_ITERATOR_TYPE_DEFINITIONS(std::forward_iterator_tag);
-        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(filter_iterator);
-        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(filter_iterator);
+        using iterator_category = std::iterator_traits<I>::iterator_category;
+        using iterator_concept = iterator_category;
+        using difference_type = difference_type_selector_t<I>;
 
+        I it; S st;
         Pred pred;
         Proj proj;
 
@@ -45,42 +46,58 @@ namespace genex::views::detail {
             std::is_nothrow_move_constructible_v<Pred> and
             std::is_nothrow_move_constructible_v<Proj>) :
             it(std::move(it)), st(std::move(st)), pred(std::move(pred)), proj(std::move(proj)) {
-            while (this->it != this->st and not std::invoke(this->pred, std::invoke(this->proj, *this->it))) { ++this->it; }
+            satisfy();
         }
 
-        GENEX_INLINE constexpr auto operator*() const noexcept(noexcept(*it))
-            -> reference {
+        GENEX_INLINE constexpr auto operator*() const noexcept(
+            noexcept(*it)) -> reference {
             return *it;
         }
 
-        GENEX_INLINE constexpr auto operator->() const noexcept(noexcept(std::addressof(*it)))
-            -> pointer {
-            GENEX_ITERATOR_PROXY_ACCESS
-        }
-
-        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it) and std::is_nothrow_invocable_v<Pred&, std::invoke_result_t<Proj&, iter_reference_t<I>>>)
-            -> filter_iterator& {
-            do { ++it; } while (it != st and not std::invoke(pred, std::invoke(proj, *it)));
+        GENEX_INLINE constexpr auto operator++() noexcept(
+            noexcept(++it) and noexcept(satisfy())) -> filter_iterator& {
+            ++it;
+            satisfy();
             return *this;
         }
+
+        GENEX_INLINE constexpr auto operator++(int) noexcept(
+        noexcept(it++)) -> filter_iterator {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
+
+    private:
+        GENEX_INLINE auto satisfy() noexcept(
+            std::is_nothrow_invocable_v<Pred&, std::invoke_result_t<Proj&, iter_reference_t<I>>>) -> void {
+            while (it != st and not std::invoke(pred, std::invoke(proj, *it))) { ++it; }
+        }
     };
 
-    template <typename S, typename Pred, typename Proj>
-    struct filter_sentinel {
-        GENEX_VIEW_SENTINEL_CTOR_DEFINITIONS(filter_sentinel);
-        GENEX_VIEW_SENTINEL_FUNC_DEFINITIONS(filter_iterator, filter_sentinel, Pred, Proj);
-    };
+    struct filter_sentinel { };
+
+    template <typename I, typename S, typename Pred, typename Proj>
+    requires concepts::filterable_iters<I, S, Pred, Proj>
+    filter_iterator(I, S, Pred, Proj) -> filter_iterator<I, S, Pred, Proj>;
+
+    template <typename I, typename S, typename Pred, typename Proj>
+    requires concepts::filterable_iters<I, S, Pred, Proj>
+    GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(filter_iterator, filter_sentinel, I, S, Pred, Proj) {
+        return it.it == it.st;
+    }
 
     template <typename V, typename Pred, typename Proj>
     requires concepts::filterable_range<V, Pred, Proj>
     struct filter_view : std::ranges::view_interface<filter_view<V, Pred, Proj>> {
-        GENEX_VIEW_VIEW_CTOR_DEFINITIONS(filter_view);
-        GENEX_VIEW_VIEW_TYPE_DEFINITIONS(filter_iterator, filter_sentinel, Pred, Proj);
-        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(pred, proj);
-        GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE;
-
+        V base_rng;
         Pred pred;
         Proj proj;
+
+        GENEX_INLINE constexpr explicit filter_view() noexcept = default;
+
+        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(
+            filter_iterator, filter_sentinel, base_rng, pred, proj);
 
         GENEX_INLINE constexpr explicit filter_view(V rng, Pred pred, Proj proj) noexcept(
             std::is_nothrow_move_constructible_v<V> and
@@ -89,11 +106,13 @@ namespace genex::views::detail {
             base_rng(std::move(rng)), pred(std::move(pred)), proj(std::move(proj)) {
         }
 
-        GENEX_INLINE constexpr auto internal_begin() const noexcept(noexcept(iterators::begin(base_rng))) {
+        GENEX_INLINE constexpr auto internal_begin() const noexcept(
+            noexcept(iterators::begin(base_rng))) {
             return iterators::begin(base_rng);
         }
 
-        GENEX_INLINE constexpr auto internal_end() const noexcept(noexcept(iterators::end(base_rng))) {
+        GENEX_INLINE constexpr auto internal_end() const noexcept(
+            noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
     };
@@ -105,21 +124,24 @@ namespace genex::views {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::filterable_iters<I, S, Pred, Proj>
         GENEX_INLINE constexpr auto operator()(I it, S st, Pred pred, Proj proj = {}) const noexcept -> auto {
-            return detail::filter_view{
+            using V = std::ranges::subrange<I, S>;
+            return detail::filter_view<V, Pred, Proj>{
                 std::ranges::subrange{std::move(it), std::move(st)}, std::move(pred), std::move(proj)};
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::filterable_range<Rng, Pred, Proj>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const noexcept -> auto {
-            return detail::filter_view{
+            using V = std::views::all_t<Rng>;
+            return detail::filter_view<V, Pred, Proj>{
                 std::views::all(std::forward<Rng>(rng)), std::move(pred), std::move(proj)};
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::filterable_range<Rng, Pred, Proj> and contiguous_range<Rng> and borrowed_range<Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const noexcept -> auto {
-            return detail::filter_view{
+            using V = std::views::all_t<Rng>;
+            return detail::filter_view<V, Pred, Proj>{
                 std::views::all(std::forward<Rng>(rng)), std::move(pred), std::move(proj)}; // .as_pointer_subrange();
         }
 

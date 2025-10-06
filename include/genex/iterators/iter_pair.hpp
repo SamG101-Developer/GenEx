@@ -13,7 +13,8 @@ namespace genex::iterators {
     struct iter_pair_fn {
         template <typename Rng>
         requires concepts::can_iter_pair_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            noexcept(iterators::begin(rng)) and noexcept(iterators::end(rng))) {
             return std::make_pair(iterators::begin(rng), iterators::end(rng));
         }
     };

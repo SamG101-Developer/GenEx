@@ -47,11 +47,8 @@ namespace genex::views::detail {
             std::conditional_t<(std::random_access_iterator<iterator_t<Rngs>> and ...), std::random_access_iterator_tag,
             std::conditional_t<(std::bidirectional_iterator<iterator_t<Rngs>> and ...), std::bidirectional_iterator_tag,
             std::conditional_t<(std::forward_iterator<iterator_t<Rngs>> and ...), std::forward_iterator_tag, std::input_iterator_tag>>>;
-
         using iterator_category = iterator_concept;
         using difference_type = difference_type_selector_t<iterator_t<Rngs>...>;
-
-        GENEX_INLINE constexpr explicit zip_iterator() = default;
 
         std::tuple<iterator_t<Rngs>...> its;
         std::tuple<sentinel_t<Rngs>...> sts;
@@ -93,55 +90,36 @@ namespace genex::views::detail {
         }
     };
 
-    template <typename... Rngs>
-    struct zip_sentinel {
-        static constexpr auto N = sizeof...(Rngs);
+    struct zip_sentinel { };
 
-        GENEX_INLINE constexpr zip_sentinel() = default;
-
-        GENEX_INLINE constexpr auto operator==(zip_iterator<Rngs...> const &it) const noexcept -> bool {
-            return it.index == N;
-        }
-    };
+    template <typename ...Rngs>
+    requires concepts::zippable_range<Rngs...>
+    GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(zip_iterator, zip_sentinel, Rngs...) {
+        return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+            return ((std::get<Is>(it.its) == std::get<Is>(it.sts)) || ...);
+        }(std::index_sequence_for<Rngs...>{});
+    }
 
     template <typename... Vs>
     requires concepts::zippable_range<Vs...> and (sizeof...(Vs) > 1)
     struct zip_view : std::ranges::view_interface<zip_view<Vs...>> {
-        GENEX_INLINE constexpr explicit zip_view() = default;
-
-        using iterator = zip_iterator<Vs...>;
-        using sentinel = zip_sentinel<Vs...>;
-
         std::tuple<Vs...> base_rngs;
+
+        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(
+            zip_iterator, zip_sentinel, base_rngs);
 
         GENEX_INLINE constexpr explicit zip_view(Vs ...rngs) :
             base_rngs(std::move(rngs)...) {
         }
 
-        GENEX_INLINE constexpr auto begin() noexcept(
-            (std::is_nothrow_copy_constructible_v<iterator_t<Vs>> and ...)) -> iterator {
-            return iterator{
-                std::make_from_tuple<std::tuple<iterator_t<Vs>...>>(std::apply([](auto &...rngs) { return std::make_tuple(iterators::begin(rngs)...); }, base_rngs)),
-                std::make_from_tuple<std::tuple<sentinel_t<Vs>...>>(std::apply([](auto &...rngs) { return std::make_tuple(iterators::end(rngs)...); }, base_rngs))};
+        GENEX_INLINE constexpr auto internal_begin() const noexcept(
+            noexcept(std::apply([](auto &...rngs) { return std::make_tuple(iterators::begin(rngs)...); }, base_rngs))) {
+            return std::make_from_tuple<std::tuple<iterator_t<Vs>...>>(std::apply([](auto &...rngs) { return std::make_tuple(iterators::begin(rngs)...); }, base_rngs));
         }
 
-        GENEX_INLINE constexpr auto begin() const noexcept(
-            (std::is_nothrow_copy_constructible_v<iterator_t<Vs>> and ...)) -> iterator {
-            return iterator{
-                std::make_from_tuple<std::tuple<iterator_t<Vs>...>>(std::apply([](auto &...rngs) { return std::make_tuple(iterators::begin(rngs)...); }, base_rngs)),
-                std::make_from_tuple<std::tuple<sentinel_t<Vs>...>>(std::apply([](auto &...rngs) { return std::make_tuple(iterators::end(rngs)...); }, base_rngs))};
-        }
-
-        GENEX_INLINE constexpr auto end() noexcept(
-            (std::is_nothrow_copy_constructible_v<sentinel_t<Vs>> and ...))
-            -> sentinel {
-            return sentinel{};
-        }
-
-        GENEX_INLINE constexpr auto end() const noexcept(
-            (std::is_nothrow_copy_constructible_v<sentinel_t<Vs>> and ...))
-            -> sentinel requires (range<Vs*> and ...) {
-            return sentinel{};
+        GENEX_INLINE constexpr auto internal_end() const noexcept(
+            noexcept(std::apply([](auto &...rngs) { return std::make_tuple(iterators::end(rngs)...); }, base_rngs))) {
+            return std::make_from_tuple<std::tuple<sentinel_t<Vs>...>>(std::apply([](auto &...rngs) { return std::make_tuple(iterators::end(rngs)...); }, base_rngs));
         }
     };
 }

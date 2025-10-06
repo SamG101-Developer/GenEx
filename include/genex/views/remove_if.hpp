@@ -3,7 +3,7 @@
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
 #include <genex/pipe.hpp>
-#include <genex/iterators/iter_pair.hpp>
+#include <genex/iterators/access.hpp>
 
 
 namespace genex::views::detail::concepts {
@@ -29,55 +29,76 @@ namespace genex::views::detail {
         using value_type = iter_value_t<I>;
         using pointer = std::add_pointer_t<value_type>;
 
-        GENEX_VIEW_ITERATOR_TYPE_DEFINITIONS(std::iterator_traits<I>::iterator_category);
-        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(remove_if_iterator);
-        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(remove_if_iterator);
+        using iterator_category = std::iterator_traits<I>::iterator_category;
+        using iterator_concept = iterator_category;
+        using difference_type = difference_type_selector_t<I>;
 
+        I it; S st;
         Pred pred;
         Proj proj;
+
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            remove_if_iterator, it);
 
         GENEX_INLINE constexpr explicit remove_if_iterator(I it, S st, Pred pred, Proj proj) noexcept(
             std::is_nothrow_move_constructible_v<I> and
             std::is_nothrow_move_constructible_v<S> and
             std::is_nothrow_move_constructible_v<Pred> and
-            std::is_nothrow_move_constructible_v<Proj>) :
+            std::is_nothrow_move_constructible_v<Proj> and
+            noexcept(satisfy())) :
             it(std::move(it)), st(std::move(st)), pred(std::move(pred)), proj(std::move(proj)) {
-            while (this->it != this->st and std::invoke(this->pred, std::invoke(this->proj, *this->it))) { ++this->it; }
+            satisfy();
         }
 
-        GENEX_INLINE constexpr auto operator*() const noexcept(noexcept(*it))
-            -> reference {
+        GENEX_INLINE constexpr auto operator*() const noexcept(
+            noexcept(*it)) -> reference {
             return *it;
         }
 
-        GENEX_INLINE constexpr auto operator->() const noexcept(noexcept(std::addressof(*it)))
-            -> pointer {
-            GENEX_ITERATOR_PROXY_ACCESS
-        }
-
-        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it) and std::is_nothrow_invocable_v<Pred, std::invoke_result_t<Proj, iter_reference_t<I>>>)
-            -> remove_if_iterator& {
-            do { ++it; } while (it != st and std::invoke(pred, std::invoke(proj, *it)));
+        GENEX_INLINE constexpr auto operator++() noexcept(
+            noexcept(++it) and noexcept(satisfy())) -> remove_if_iterator& {
+            ++it;
+            satisfy();
             return *this;
         }
+
+        GENEX_INLINE constexpr auto operator++(int) noexcept(
+            noexcept(it++)) -> remove_if_iterator {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
+
+    private:
+        GENEX_INLINE auto satisfy() noexcept(
+            std::is_nothrow_invocable_v<Pred&, std::invoke_result_t<Proj&, iter_reference_t<I>>>) -> void {
+            while (it != st and std::invoke(pred, std::invoke(proj, *it))) { ++it; }
+        }
     };
 
-    template <typename S, typename Pred, typename Proj>
-    struct remove_if_sentinel {
-        GENEX_VIEW_SENTINEL_CTOR_DEFINITIONS(remove_if_sentinel);
-        GENEX_VIEW_SENTINEL_FUNC_DEFINITIONS(remove_if_iterator, remove_if_sentinel, Pred, Proj);
-    };
+    struct remove_if_sentinel { };
+
+    template <typename I, typename S, typename Pred, typename Proj>
+    requires concepts::removable_if_iters<I, S, Pred, Proj>
+    remove_if_iterator(I, S, Pred, Proj) -> remove_if_iterator<I, S, Pred, Proj>;
+
+    template <typename I, typename S, typename Pred, typename Proj>
+    requires concepts::removable_if_iters<I, S, Pred, Proj>
+    GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(remove_if_iterator, remove_if_sentinel, I, S, Pred, Proj) {
+        return it.it == it.st;
+    }
 
     template <typename V, typename Pred, typename Proj>
     requires concepts::removable_if_range<V, Pred, Proj>
     struct remove_if_view : std::ranges::view_interface<remove_if_view<V, Pred, Proj>> {
-        GENEX_VIEW_VIEW_CTOR_DEFINITIONS(remove_if_view);
-        GENEX_VIEW_VIEW_TYPE_DEFINITIONS(remove_if_iterator, remove_if_sentinel, Pred, Proj);
-        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(pred, proj);
-        GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE;
-
+        V base_rng;
         Pred pred;
         Proj proj;
+
+        GENEX_INLINE constexpr explicit remove_if_view() noexcept = default;
+
+        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(
+            remove_if_iterator, remove_if_sentinel, base_rng, pred, proj);
 
         GENEX_INLINE constexpr explicit remove_if_view(V rng, Pred pred, Proj proj) noexcept(
             std::is_nothrow_move_constructible_v<V> and
@@ -86,11 +107,13 @@ namespace genex::views::detail {
             base_rng(std::move(rng)), pred(std::move(pred)), proj(std::move(proj)) {
         }
 
-        GENEX_INLINE constexpr auto internal_begin() const noexcept(noexcept(iterators::begin(base_rng))) {
+        GENEX_INLINE constexpr auto internal_begin() const noexcept(
+            noexcept(iterators::begin(base_rng))) {
             return iterators::begin(base_rng);
         }
 
-        GENEX_INLINE constexpr auto internal_end() const noexcept(noexcept(iterators::end(base_rng))) {
+        GENEX_INLINE constexpr auto internal_end() const noexcept(
+            noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
     };
@@ -99,6 +122,14 @@ namespace genex::views::detail {
 
 namespace genex::views {
     struct remove_if_fn {
+        template <typename I, typename S, typename Pred, typename Proj = meta::identity>
+        requires detail::concepts::removable_if_iters<I, S, Pred, Proj>
+        GENEX_INLINE constexpr auto operator()(I it, S st, Pred pred, Proj proj = {}) const noexcept -> auto {
+            using V = std::ranges::subrange<I, S>;
+            return detail::remove_if_view<V, Pred, Proj>{
+                std::ranges::subrange<I, S>{std::move(it), std::move(st)}, std::move(pred), std::move(proj)};
+        }
+
         template <typename Rng, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::removable_if_range<Rng, Pred, Proj>
         GENEX_INLINE constexpr auto operator()(Rng&& rng, Pred pred, Proj proj = {}) const -> auto {

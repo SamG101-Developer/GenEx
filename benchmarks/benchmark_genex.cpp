@@ -330,36 +330,36 @@ static auto bm_ranges_cast_static(benchmark::State &state) -> void {
 // }
 
 
-static auto bm_genex_split(benchmark::State &state) -> void {
-    auto vec = std::vector<int>();
-    for (auto x = 0; x < 100; ++x) {
-        for (auto y = 0; y < 10; ++y) {
-            vec.push_back(y);
-        }
-    }
-
-    for (auto _ : state) {
-        auto vec2 = vec
-            | genex::views::split(9)
-            | genex::views::to<std::vector>();
-    }
-}
-
-
-static auto bm_ranges_split(benchmark::State &state) -> void {
-    auto vec = std::vector<int>();
-    for (auto x = 0; x < 100; ++x) {
-        for (auto y = 0; y < 10; ++y) {
-            vec.push_back(y);
-        }
-    }
-
-    for (auto _ : state) {
-        auto vec2 = vec
-            | ranges::views::split(9)
-            | ranges::to<std::vector>();
-    }
-}
+// static auto bm_genex_split(benchmark::State &state) -> void {
+//     auto vec = std::vector<int>();
+//     for (auto x = 0; x < 100; ++x) {
+//         for (auto y = 0; y < 10; ++y) {
+//             vec.push_back(y);
+//         }
+//     }
+//
+//     for (auto _ : state) {
+//         auto vec2 = vec
+//             | genex::views::split(9)
+//             | genex::views::to<std::vector>();
+//     }
+// }
+//
+//
+// static auto bm_ranges_split(benchmark::State &state) -> void {
+//     auto vec = std::vector<int>();
+//     for (auto x = 0; x < 100; ++x) {
+//         for (auto y = 0; y < 10; ++y) {
+//             vec.push_back(y);
+//         }
+//     }
+//
+//     for (auto _ : state) {
+//         auto vec2 = vec
+//             | ranges::views::split(9)
+//             | ranges::to<std::vector>();
+//     }
+// }
 
 
 static auto bm_genex_chunk(benchmark::State &state) -> void {
@@ -394,31 +394,28 @@ static auto bm_ranges_chunk(benchmark::State &state) -> void {
 }
 
 
-static auto bm_genex_concat(benchmark::State &state) -> void {
-    auto vec1 = std::vector(1000, 42);
-    auto vec2 = std::vector(1000, 43);
-    auto vec3 = std::vector(1000, 44);
-
-    auto temp_1 = vec1 | genex::views::concat(vec2);
-    auto temp_2 = genex::views::to<std::vector>()(temp_1);
-
-    for (auto _ : state) {
-        auto vec4 = vec1
-            | genex::views::concat(vec2)
-            | genex::views::to<std::vector>();
-    }
-}
-
-
-static auto bm_ranges_concat(benchmark::State &state) -> void {
-    auto vec1 = std::vector(1000, 42);
-    auto vec2 = std::vector(1000, 43);
-
-    for (auto _ : state) {
-        auto vec4 = ranges::views::concat(vec1, vec2)
-            | ranges::to<std::vector>();
-    }
-}
+// static auto bm_genex_concat(benchmark::State &state) -> void {
+//     auto vec1 = std::vector(1000, 42);
+//     auto vec2 = std::vector(1000, 43);
+//     auto vec3 = std::vector(1000, 44);
+//
+//     for (auto _ : state) {
+//         auto vec4 = vec1
+//             | genex::views::concat(vec2)
+//             | genex::views::to<std::vector>();
+//     }
+// }
+//
+//
+// static auto bm_ranges_concat(benchmark::State &state) -> void {
+//     auto vec1 = std::vector(1000, 42);
+//     auto vec2 = std::vector(1000, 43);
+//
+//     for (auto _ : state) {
+//         auto vec4 = ranges::views::concat(vec1, vec2)
+//             | ranges::to<std::vector>();
+//     }
+// }
 
 
 // static auto bm_genex_cycle(benchmark::State &state) -> void {
@@ -1044,27 +1041,27 @@ static auto bm_ranges_view(benchmark::State &state) -> void {
 }
 
 
-static auto bm_genex_zip(benchmark::State &state) -> void {
-    auto vec1 = std::vector(1000, 42);
-    auto vec2 = std::vector(1000, 43);
-
-    for (auto _ : state) {
-        auto vec3 = vec1
-            | genex::views::zip(vec2)
-            | genex::views::to<std::vector>();
-    }
-}
-
-
-static auto bm_ranges_zip(benchmark::State &state) -> void {
-    auto vec1 = std::vector(1000, 42);
-    auto vec2 = std::vector(1000, 43);
-
-    for (auto _ : state) {
-        auto vec3 = ranges::views::zip(vec1, vec2)
-            | ranges::to<std::vector>();
-    }
-}
+// static auto bm_genex_zip(benchmark::State &state) -> void {
+//     auto vec1 = std::vector(1000, 42);
+//     auto vec2 = std::vector(1000, 43);
+//
+//     for (auto _ : state) {
+//         auto vec3 = vec1
+//             | genex::views::zip(vec2)
+//             | genex::views::to<std::vector>();
+//     }
+// }
+//
+//
+// static auto bm_ranges_zip(benchmark::State &state) -> void {
+//     auto vec1 = std::vector(1000, 42);
+//     auto vec2 = std::vector(1000, 43);
+//
+//     for (auto _ : state) {
+//         auto vec3 = ranges::views::zip(vec1, vec2)
+//             | ranges::to<std::vector>();
+//     }
+// }
 
 
 BENCHMARK(bm_genex_to_vector);
@@ -1085,12 +1082,12 @@ BENCHMARK(bm_ranges_cast_static);
 // BENCHMARK(bm_ranges_cast_unique_ptr);
 // BENCHMARK(bm_genex_cast_shared_ptr);
 // BENCHMARK(bm_ranges_cast_shared_ptr);
-BENCHMARK(bm_genex_split);
-BENCHMARK(bm_ranges_split);
+// BENCHMARK(bm_genex_split);
+// BENCHMARK(bm_ranges_split);
 BENCHMARK(bm_genex_chunk);
 BENCHMARK(bm_ranges_chunk);
-BENCHMARK(bm_genex_concat);
-BENCHMARK(bm_ranges_concat);
+// BENCHMARK(bm_genex_concat);
+// BENCHMARK(bm_ranges_concat);
 // BENCHMARK(bm_genex_cycle);
 // BENCHMARK(bm_ranges_cycle);
 BENCHMARK(bm_genex_drop);
@@ -1143,8 +1140,8 @@ BENCHMARK(bm_genex_tuple_nth);
 BENCHMARK(bm_ranges_tuple_nth);
 BENCHMARK(bm_genex_view);
 BENCHMARK(bm_ranges_view);
-BENCHMARK(bm_genex_zip);
-BENCHMARK(bm_ranges_zip);
+// BENCHMARK(bm_genex_zip);
+// BENCHMARK(bm_ranges_zip);
 
 
 BENCHMARK_MAIN();

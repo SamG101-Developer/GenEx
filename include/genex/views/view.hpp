@@ -28,9 +28,14 @@ namespace genex::views::detail {
         using value_type = iter_value_t<I>;
         using pointer = std::add_pointer_t<value_type>;
 
-        GENEX_VIEW_ITERATOR_TYPE_DEFINITIONS(std::iterator_traits<I>::iterator_category);
-        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(view_iterator);
-        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(view_iterator);
+        using iterator_category = std::iterator_traits<I>::iterator_category;
+        using iterator_concept = iterator_category;
+        using difference_type = difference_type_selector_t<I>;
+
+        I it; S st;
+
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            view_iterator, it);
 
         GENEX_INLINE constexpr explicit view_iterator(I it, S st) noexcept(
             std::is_nothrow_move_constructible_v<I> and
@@ -38,46 +43,58 @@ namespace genex::views::detail {
             it(std::move(it)), st(std::move(st)) {
         }
 
-        GENEX_INLINE constexpr auto operator*() const noexcept(noexcept(*it))
-            -> reference {
+        GENEX_INLINE constexpr auto operator*() const noexcept(
+            noexcept(*it)) -> reference {
             return *it;
         }
 
-        GENEX_INLINE constexpr auto operator->() const noexcept(noexcept(std::addressof(*it)))
-            -> pointer {
-            GENEX_ITERATOR_PROXY_ACCESS
-        }
-
-        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it))
-            -> view_iterator& {
+        GENEX_INLINE constexpr auto operator++() noexcept(
+            noexcept(++it)) -> view_iterator& {
             ++it;
             return *this;
         }
+
+        GENEX_INLINE constexpr auto operator++(int) noexcept(
+            noexcept(it++)) -> view_iterator {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
     };
 
-    template <typename S>
-    struct view_sentinel {
-        GENEX_VIEW_SENTINEL_CTOR_DEFINITIONS(view_sentinel);
-        GENEX_VIEW_SENTINEL_FUNC_DEFINITIONS(view_iterator, view_sentinel);
-    };
+    struct view_sentinel { };
+
+    template <typename I, typename S>
+    requires concepts::viewable_iters<I, S>
+    view_iterator(I, S) -> view_iterator<I, S>;
+
+    template <typename I, typename S>
+    requires concepts::viewable_iters<I, S>
+    GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(view_iterator, view_sentinel, I, S) {
+        return it.it == it.st;
+    }
 
     template <typename V>
     struct view_view : std::ranges::view_interface<view_view<V>> {
-        GENEX_VIEW_VIEW_CTOR_DEFINITIONS(view_view);
-        GENEX_VIEW_VIEW_TYPE_DEFINITIONS(view_iterator, view_sentinel);
-        GENEX_VIEW_VIEW_FUNC_DEFINITIONS();
-        GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE;
+        V base_rng;
+
+        GENEX_INLINE constexpr explicit view_view() noexcept = default;
+
+        GENEX_VIEW_VIEW_FUNC_DEFINITIONS(
+            view_iterator, view_sentinel, base_rng);
 
         GENEX_INLINE constexpr explicit view_view(V rng) noexcept(
             std::is_nothrow_move_constructible_v<V>) :
             base_rng(std::move(rng)) {
         }
 
-        GENEX_INLINE constexpr auto internal_begin() const noexcept(noexcept(iterators::begin(base_rng))) {
+        GENEX_INLINE constexpr auto internal_begin() const noexcept(
+            noexcept(iterators::begin(base_rng))) {
             return iterators::begin(base_rng);
         }
 
-        GENEX_INLINE constexpr auto internal_end() const noexcept(noexcept(iterators::end(base_rng))) {
+        GENEX_INLINE constexpr auto internal_end() const noexcept(
+            noexcept(iterators::end(base_rng))) {
             return iterators::end(base_rng);
         }
     };
@@ -86,6 +103,14 @@ namespace genex::views::detail {
 
 namespace genex::views {
     struct view_fn {
+        template <typename I, typename S>
+        requires detail::concepts::viewable_iters<I, S>
+        GENEX_INLINE constexpr auto operator()(I it, S st) const -> auto {
+            using V = std::ranges::subrange<I, S>;
+            return detail::view_view<V>{
+                std::ranges::subrange{std::move(it), std::move(st)}};
+        }
+
         template <typename Rng>
         requires detail::concepts::viewable_range<Rng>
         GENEX_INLINE constexpr auto operator()(Rng&& rng) const -> auto {

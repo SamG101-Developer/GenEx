@@ -35,6 +35,7 @@ TEST(GenexViewsChunkN, StrInput) {
 
 TEST(GenexViewsChunk, VecInput) {
     auto vec = std::vector{1, 2, 3, 4, 2, 5};
+
     const auto rng = vec
         | genex::views::split(2)
         | genex::views::transform([](auto sub_rng) { return sub_rng | genex::views::to<std::vector>(); })

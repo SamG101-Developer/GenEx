@@ -23,6 +23,7 @@ TEST(GenexViewsAddress, VecInput) {
     const auto t3 = TestStruct1{3};
 
     auto vec = std::vector{t1, t2, t3};
+
     const auto rng = vec
         | genex::views::address
         | genex::views::to<std::vector>();

@@ -1,6 +1,9 @@
 #pragma once
 
 
+#define COMMA ,
+
+
 #define GENEX_EXPORT_STRUCT(name) \
     inline constexpr name ## _fn name
 
@@ -21,33 +24,30 @@
 #define GENEX_INLINE [[gnu::always_inline]] inline __attribute__((always_inline))
 
 
-#define GENEX_VIEW_ITERATOR_TYPE_DEFINITIONS(con)     \
-    using iterator_concept = con;                     \
-    using iterator_category = iterator_concept;       \
-    using difference_type = difference_type_selector_t<I>
+#define GENEX_NODISCARD [[nodiscard]]
 
-#define GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(name, ...) \
-    I it;                                               \
-    S st;                                               \
-                                                        \
-    constexpr name() = default;
 
-#define GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(iter, ...)               \
+// #define GENEX_VIEW_ITERATOR_TYPE_DEFINITIONS(con)     \
+//     using iterator_concept = con;                     \
+//     using iterator_category = iterator_concept;       \
+//     using difference_type = difference_type_selector_t<I>
+
+#define GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(iter, it, ...)           \
     GENEX_INLINE constexpr auto operator++(int)                       \
-    -> iter requires std::forward_iterator<I> {                       \
+    -> iter requires std::forward_iterator<decltype(it)> {            \
         auto tmp = *this;                                             \
         ++it;                                                         \
         return tmp;                                                   \
     }                                                                 \
                                                                       \
     GENEX_INLINE constexpr auto operator--() noexcept(noexcept(--it)) \
-    -> iter& requires std::bidirectional_iterator<I> {                \
+    -> iter& requires std::bidirectional_iterator<decltype(it)> {     \
         --it;                                                         \
         return *this;                                                 \
     }                                                                 \
                                                                       \
     GENEX_INLINE constexpr auto operator--(int)                       \
-    -> iter requires std::bidirectional_iterator<I> {                 \
+    -> iter requires std::bidirectional_iterator<decltype(it)> {      \
         auto tmp = *this;                                             \
         --it;                                                         \
         return tmp;                                                   \
@@ -55,27 +55,27 @@
                                                                       \
     GENEX_INLINE constexpr auto operator+=(                           \
     difference_type n) noexcept(noexcept(it += n))                    \
-    -> iter& requires std::random_access_iterator<I> {                \
+    -> iter& requires std::random_access_iterator<decltype(it)> {     \
         it += n;                                                      \
         return *this;                                                 \
     }                                                                 \
                                                                       \
     GENEX_INLINE constexpr auto operator+(                            \
     difference_type n) const noexcept(noexcept(it + n))               \
-    -> iter requires std::random_access_iterator<I> {                 \
+    -> iter requires std::random_access_iterator<decltype(it)> {      \
         return iter{it + n, __VA_ARGS__};                             \
     }                                                                 \
                                                                       \
     GENEX_INLINE constexpr auto operator-=(                           \
     difference_type n) noexcept(noexcept(it -= n))                    \
-    -> iter& requires std::random_access_iterator<I> {                \
+    -> iter& requires std::random_access_iterator<decltype(it)> {     \
         it -= n;                                                      \
         return *this;                                                 \
     }                                                                 \
                                                                       \
     GENEX_INLINE constexpr auto operator-(                            \
     difference_type n) const noexcept(noexcept(it - n))               \
-    -> iter requires std::random_access_iterator<I> {                 \
+    -> iter requires std::random_access_iterator<decltype(it)> {      \
         return iter{it - n, __VA_ARGS__};                             \
     }                                                                 \
                                                                       \
@@ -91,59 +91,36 @@
         return it != other.it;                                        \
     }
 
-#define GENEX_VIEW_SENTINEL_CTOR_DEFINITIONS(name)               \
-    S s;                                                         \
-                                                                 \
-    GENEX_INLINE constexpr name() = default;                     \
-                                                                 \
-    GENEX_INLINE constexpr explicit name(                        \
-        S s) noexcept(std::is_nothrow_move_constructible_v<S>) : \
-        s(std::move(s)) {                                        \
-    }
 
-#define GENEX_VIEW_SENTINEL_FUNC_DEFINITIONS(iter, sent, ...)                                                                                    \
-    template <typename I>                                                                                                                        \
-    friend constexpr auto operator==(sent const &se, iter<I, S __VA_OPT__(, __VA_ARGS__)> const &it) noexcept(noexcept(it.it == se.s)) -> bool { \
-        return it.it == se.s;                                                                                                                    \
-    }                                                                                                                                            \
-                                                                                                                                                 \
-    template <typename I>                                                                                                                        \
-    friend constexpr auto operator!=(sent const &se, iter<I, S __VA_OPT__(, __VA_ARGS__)> const &it) noexcept(noexcept(it.it != se.s)) -> bool { \
-        return it.it != se.s;                                                                                                                    \
-    }
-
-#define GENEX_VIEW_VIEW_CTOR_DEFINITIONS(name) \
-    V base_rng;                                \
-                                               \
-    GENEX_INLINE constexpr explicit name() = default;
-
-#define GENEX_VIEW_VIEW_TYPE_DEFINITIONS(iter, sent, ...) \
-    using iterator = iter<iterator_t<V>, sentinel_t<V> __VA_OPT__(, __VA_ARGS__)>;    \
-    using sentinel = sent<sentinel_t<V> __VA_OPT__(, __VA_ARGS__)>;
-
-#define GENEX_VIEW_VIEW_FUNC_DEFINITIONS(...)                                                                                        \
-    GENEX_INLINE constexpr auto begin() noexcept(std::is_nothrow_copy_constructible_v<iterator_t<V>>) -> iterator {                  \
-        return iterator{internal_begin(), internal_end() __VA_OPT__(, __VA_ARGS__)};                             \
-    }                                                                                                                                \
-                                                                                                                                     \
-    GENEX_INLINE constexpr auto begin() const noexcept(std::is_nothrow_copy_constructible_v<iterator_t<V>>) -> iterator requires range<const V> { \
-        return iterator{internal_begin(), internal_end() __VA_OPT__(, __VA_ARGS__)};                             \
-    }                                                                                                                                \
-                                                                                                                                     \
-    GENEX_INLINE constexpr auto end() noexcept(std::is_nothrow_copy_constructible_v<sentinel_t<V>>) -> sentinel {                    \
-        return sentinel{internal_end()};                                                                                   \
-    }                                                                                                                                \
-                                                                                                                                     \
-    GENEX_INLINE constexpr auto end() const noexcept(std::is_nothrow_copy_constructible_v<sentinel_t<V>>) -> sentinel requires range<const V> {   \
-        return sentinel{internal_end()};                                                                                   \
-    }                                                                                                                                \
-                                                                                                                                     \
-    GENEX_INLINE constexpr auto size() const -> range_size_t<V> requires sized_range<V> {                                            \
-        return operations::size(base_rng);                                                                                           \
-    }                                                                                                                                \
+// op and deduction guide for iterator ctor
+#define GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(iter, sent, ...) \
+    GENEX_INLINE constexpr auto operator==(iter<__VA_ARGS__> const &it, sent const &se) -> bool
 
 
-#define GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE
+#define GENEX_VIEW_VIEW_FUNC_DEFINITIONS(iter, sent, base, ...)                                                        \
+    GENEX_INLINE constexpr auto begin() {                                      \
+        return iter{internal_begin(), internal_end() __VA_OPT__(, __VA_ARGS__)}; \
+    }                                                                                                            \
+                                                                                                                 \
+    GENEX_INLINE constexpr auto begin() const requires range<const decltype(base)> { \
+        return iter{internal_begin(), internal_end() __VA_OPT__(, __VA_ARGS__)}; \
+    }                                                                                                            \
+                                                                                                                 \
+    GENEX_INLINE constexpr auto end() {                                      \
+        return sent{};                                                                                   \
+    }                                                                                                            \
+                                                                                                                 \
+    GENEX_INLINE constexpr auto end() const requires range<const decltype(base)> { \
+        return sent{};                                                                                   \
+    }                                                                                                            \
+
+    // GENEX_INLINE constexpr auto size() const                                                                     \
+    //     -> range_size_t<decltype(base)> requires sized_range<decltype(base)> {                                   \
+    //     return operations::size(base);                                                                           \ TODO: add constraint back
+    // }
+
+
+// #define GENEX_VIEW_VIEW_FUNC_DEFINITION_SUB_RANGE
     // GENEX_INLINE constexpr auto as_pointer_subrange() const {                                   \
     //     using elem_t = std::remove_reference_t<iter_reference_t<iterator>>;                                                        \
     //     if constexpr (sized_range<V>) {                                                                                            \
@@ -154,9 +131,9 @@
     // }
 
 
-#define GENEX_ITERATOR_PROXY_ACCESS                                                   \
-    if constexpr (std::is_pointer_v<I> || requires(const I& i) { i.operator->(); }) { \
-        return it;                                                                    \
-    } else {                                                                          \
-        return std::addressof(operator*());                                           \
-    }
+// #define GENEX_ITERATOR_PROXY_ACCESS                                                   \
+//     if constexpr (std::is_pointer_v<I> || requires(const I& i) { i.operator->(); }) { \
+//         return it;                                                                    \
+//     } else {                                                                          \
+//         return std::addressof(operator*());                                           \
+//     }
