@@ -36,14 +36,17 @@ namespace genex::views::detail {
         using difference_type = difference_type_selector_t<I>;
 
         I it; S st;
+        Int rem;
+
+        GENEX_INLINE constexpr take_iterator() noexcept = default;
 
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             take_iterator, it);
 
-        GENEX_INLINE constexpr explicit take_iterator(I it, S st, Int) noexcept(
+        GENEX_INLINE constexpr explicit take_iterator(I it, S st, Int rem) noexcept(
             std::is_nothrow_move_constructible_v<I> and
             std::is_nothrow_move_constructible_v<S>) :
-            it(std::move(it)), st(std::move(st)) {
+            it(std::move(it)), st(std::move(st)), rem(rem) {
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -54,6 +57,7 @@ namespace genex::views::detail {
         GENEX_INLINE constexpr auto operator++() noexcept(
             noexcept(++it)) -> take_iterator& {
             ++it;
+            --rem;
             return *this;
         }
 
@@ -74,7 +78,7 @@ namespace genex::views::detail {
     template <typename I, typename S, typename Int>
     requires concepts::takeable_iters<I, S, Int>
     GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(take_iterator, take_sentinel, I, S, Int) {
-        return it.it == it.st;
+        return it.rem <= 0 or it.it == it.st;
     }
 
     template <typename V, typename Int>

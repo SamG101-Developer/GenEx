@@ -40,6 +40,8 @@ namespace genex::views::detail {
         iterator_t<iter_value_t<I>> sub_it;
         iterator_t<iter_value_t<I>> sub_st;
 
+        GENEX_INLINE constexpr explicit join_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             join_iterator, it);
 

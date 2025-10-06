@@ -50,6 +50,8 @@ namespace genex::views::detail {
 
         I it; S st;
 
+        GENEX_INLINE constexpr explicit keys_iterator() noexcept = default;
+
         GENEX_INLINE constexpr explicit keys_iterator(I it, S st) noexcept(
             std::is_nothrow_move_constructible_v<I> and
             std::is_nothrow_move_constructible_v<S>) :
@@ -87,6 +89,8 @@ namespace genex::views::detail {
         using difference_type = difference_type_selector_t<I>;
 
         I it; S st;
+
+        GENEX_INLINE constexpr explicit vals_iterator() noexcept = default;
 
         GENEX_INLINE constexpr explicit vals_iterator(I it, S st) noexcept(
             std::is_nothrow_move_constructible_v<I> and

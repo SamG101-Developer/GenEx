@@ -40,6 +40,8 @@ namespace genex::views::detail {
         Pred pred;
         Proj proj;
 
+        GENEX_INLINE constexpr explicit filter_iterator() noexcept = default;
+
         GENEX_INLINE constexpr explicit filter_iterator(I it, S st, Pred pred, Proj proj) noexcept(
             std::is_nothrow_move_constructible_v<I> and
             std::is_nothrow_move_constructible_v<S> and

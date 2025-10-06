@@ -40,6 +40,8 @@ namespace genex::views::detail {
 
         I it; S st;
 
+        GENEX_INLINE constexpr explicit tuple_n_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             tuple_n_iterator, it);
 

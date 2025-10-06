@@ -39,6 +39,8 @@ namespace genex::views::detail {
         I it; S st;
         Int step;
 
+        GENEX_INLINE constexpr explicit slice_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             slice_iterator, it);
 

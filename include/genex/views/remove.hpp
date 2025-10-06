@@ -40,6 +40,8 @@ namespace genex::views::detail {
         E val;
         Proj proj;
 
+        GENEX_INLINE constexpr explicit remove_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             remove_iterator, it);
 

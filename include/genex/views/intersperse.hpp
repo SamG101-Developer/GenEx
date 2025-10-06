@@ -41,6 +41,8 @@ namespace genex::views::detail {
         New sep;
         bool at_sep = false;
 
+        GENEX_INLINE constexpr explicit intersperse_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             intersperse_iterator, it);
 

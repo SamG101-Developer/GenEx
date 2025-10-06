@@ -36,6 +36,8 @@ namespace genex::views::detail {
 
         I it; S st;
 
+        GENEX_INLINE constexpr explicit ptr_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             ptr_iterator, it);
 

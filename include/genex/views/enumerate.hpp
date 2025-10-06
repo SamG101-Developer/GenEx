@@ -36,6 +36,8 @@ namespace genex::views::detail {
         I it; S st;
         std::size_t index;
 
+        GENEX_INLINE constexpr explicit enum_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             enum_iterator, it);
 

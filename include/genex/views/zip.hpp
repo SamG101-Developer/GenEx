@@ -54,6 +54,11 @@ namespace genex::views::detail {
         std::tuple<sentinel_t<Rngs>...> sts;
         std::size_t index;
 
+        GENEX_INLINE constexpr explicit zip_iterator() noexcept = default;
+
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            zip_iterator, its);
+
         GENEX_INLINE constexpr explicit zip_iterator(std::tuple<iterator_t<Rngs>...> its, std::tuple<sentinel_t<Rngs>...> sts) noexcept(
             (std::is_nothrow_move_constructible_v<iterator_t<Rngs>> and ...) and
             (std::is_nothrow_move_constructible_v<sentinel_t<Rngs>> and ...)) :

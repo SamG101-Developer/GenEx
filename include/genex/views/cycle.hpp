@@ -37,6 +37,8 @@ namespace genex::views::detail {
         I it; S st;
         I copy_it;
 
+        GENEX_INLINE constexpr explicit cycle_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             cycle_iterator, it);
 

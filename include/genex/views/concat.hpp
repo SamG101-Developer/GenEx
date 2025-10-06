@@ -57,6 +57,8 @@ namespace genex::views::detail {
         std::tuple<sentinel_t<Rngs>...> sts;
         std::size_t index = N;
 
+        GENEX_INLINE constexpr explicit concat_iterator() noexcept = default;
+
         GENEX_INLINE constexpr explicit concat_iterator(std::tuple<iterator_t<Rngs>...> its, std::tuple<sentinel_t<Rngs>...> sts)  :
             its(std::move(its)), sts(std::move(sts)), index(0) {
         }

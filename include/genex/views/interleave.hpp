@@ -56,6 +56,8 @@ namespace genex::views::detail {
         bool exhaust;
         bool turn = true;
 
+        GENEX_INLINE constexpr explicit interleave_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             interleave_iterator, it1);
 

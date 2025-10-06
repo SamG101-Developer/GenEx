@@ -26,6 +26,8 @@ namespace genex::views::detail {
         I it; S st;
         Int step;
 
+        GENEX_INLINE constexpr explicit iota_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             iota_iterator, it);
 

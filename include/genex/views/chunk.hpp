@@ -40,6 +40,8 @@ namespace genex::views::detail {
         std::size_t chunk_size;
         I chunk_end;
 
+        GENEX_INLINE constexpr explicit chunk_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             chunk_iterator, it);
 

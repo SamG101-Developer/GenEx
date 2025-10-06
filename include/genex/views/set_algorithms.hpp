@@ -46,6 +46,8 @@ namespace genex::views::detail {
         Proj1 proj1;
         Proj2 proj2;
 
+        GENEX_INLINE constexpr explicit set_difference_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             set_difference_iterator, it1);
 
@@ -67,7 +69,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++() noexcept(
-            noexcept(++it1)) -> set_difference_iterator& {
+            noexcept(satisfy())) -> set_difference_iterator& {
             ++it1;
             satisfy();
             return *this;
@@ -118,6 +120,8 @@ namespace genex::views::detail {
         Proj1 proj1;
         Proj2 proj2;
 
+        GENEX_INLINE constexpr explicit set_intersection_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             set_intersection_iterator, it1);
 
@@ -139,7 +143,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++() noexcept(
-            noexcept(++it1) and noexcept(++it2)) -> set_intersection_iterator& {
+            noexcept(satisfy())) -> set_intersection_iterator& {
             ++it1;
             if (it1 != st1) {
                 ++it2;
@@ -149,7 +153,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++(int) noexcept(
-        noexcept(it1++)) -> set_intersection_iterator {
+            noexcept(it1++)) -> set_intersection_iterator {
             auto tmp = *this;
             ++*this;
             return tmp;
@@ -197,6 +201,8 @@ namespace genex::views::detail {
         Proj2 proj2;
         bool from_first = true;
 
+        GENEX_INLINE constexpr explicit set_symmetric_difference_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             set_symmetric_difference_iterator, it1);
 
@@ -218,7 +224,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++() noexcept(
-            noexcept(++it1) and noexcept(++it2)) -> set_symmetric_difference_iterator& {
+            noexcept(satisfy())) -> set_symmetric_difference_iterator& {
             satisfy();
             return *this;
         }
@@ -288,6 +294,8 @@ namespace genex::views::detail {
         Proj2 proj2;
         bool from_first = true;
 
+        GENEX_INLINE constexpr explicit set_union_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             set_union_iterator, it1);
 
@@ -309,7 +317,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++() noexcept(
-            noexcept(++it1) and noexcept(++it2)) -> set_union_iterator& {
+            noexcept(satisfy())) -> set_union_iterator& {
             satisfy();
             return *this;
         }
@@ -363,6 +371,8 @@ namespace genex::views::detail {
         Proj1 proj1;
         Proj2 proj2;
 
+        GENEX_INLINE constexpr explicit set_difference_unsorted_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             set_difference_unsorted_iterator, it1);
 
@@ -384,7 +394,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++() noexcept(
-            noexcept(++it1)) -> set_difference_unsorted_iterator& {
+            noexcept(satisfy())) -> set_difference_unsorted_iterator& {
             ++it1;
             satisfy();
             return *this;
@@ -424,6 +434,11 @@ namespace genex::views::detail {
         Proj1 proj1;
         Proj2 proj2;
 
+        GENEX_INLINE constexpr explicit set_intersection_unsorted_iterator() noexcept = default;
+
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            set_intersection_unsorted_iterator, it1);
+
         GENEX_INLINE constexpr explicit set_intersection_unsorted_iterator(I1 it1, S1 st1, I2 it2, S2 st2, Proj1 proj1, Proj2 proj2) noexcept(
             std::is_nothrow_move_constructible_v<I1> and
             std::is_nothrow_move_constructible_v<S1> and
@@ -442,7 +457,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++() noexcept(
-            noexcept(++it1)) -> set_intersection_unsorted_iterator& {
+            noexcept(satisfy())) -> set_intersection_unsorted_iterator& {
             ++it1;
             satisfy();
             return *this;
@@ -486,6 +501,11 @@ namespace genex::views::detail {
         I1 first_it;
         S1 first_st;
 
+        GENEX_INLINE constexpr explicit set_symmetric_difference_unsorted_iterator() noexcept = default;
+
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            set_symmetric_difference_unsorted_iterator, it1);
+
         GENEX_INLINE constexpr explicit set_symmetric_difference_unsorted_iterator(I1 it1, S1 st1, I2 it2, S2 st2, Proj1 proj1, Proj2 proj2) noexcept(
             std::is_nothrow_move_constructible_v<I1> and
             std::is_nothrow_move_constructible_v<S1> and
@@ -495,7 +515,6 @@ namespace genex::views::detail {
             std::is_nothrow_move_constructible_v<Proj2>) :
             it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)),
             proj1(std::move(proj1)), proj2(std::move(proj2)), first_it(it1), first_st(st1) {
-            satisfy();
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -503,8 +522,8 @@ namespace genex::views::detail {
             return from_first ? *it1 : *it2;
         }
 
-        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it1) and noexcept(++it2))
-            -> set_symmetric_difference_unsorted_iterator& {
+        GENEX_INLINE constexpr auto operator++() noexcept(
+            noexcept(satisfy())) -> set_symmetric_difference_unsorted_iterator& {
             satisfy();
             return *this;
         }
@@ -518,24 +537,20 @@ namespace genex::views::detail {
 
     private:
         GENEX_INLINE auto satisfy() -> void {
-            while (it1 != st1) {
-                if (not algorithms::contains(it2, st2, std::invoke(proj1, *it1), proj2)) {
+            ++(from_first ? it1 : it2);
+            while (it1 != st1 or it2 != st2) {
+                if (it1 != st1 and not algorithms::contains(it2, st2, std::invoke(proj1, *it1), proj2)) {
                     from_first = true;
-                    ++it1;
                     return;
-                }
-                else {
-                    ++it1;
                 }
 
-                if (not algorithms::contains(first_it, first_st, std::invoke(proj2, *it2), proj1)) {
+                if (it2 != st2 and not algorithms::contains(first_it, first_st, std::invoke(proj2, *it2), proj1)) {
                     from_first = false;
-                    ++it2;
                     return;
                 }
-                else {
-                    ++it2;
-                }
+
+                if (it1 != st1) { ++it1; }
+                if (it2 != st2) { ++it2; }
             }
         }
     };
@@ -560,6 +575,11 @@ namespace genex::views::detail {
         I1 first_it;
         S1 first_st;
 
+        GENEX_INLINE constexpr explicit set_union_unsorted_iterator() noexcept = default;
+
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            set_union_unsorted_iterator, it1);
+
         GENEX_INLINE constexpr explicit set_union_unsorted_iterator(I1 it1, S1 st1, I2 it2, S2 st2, Proj1 proj1, Proj2 proj2) noexcept(
             std::is_nothrow_move_constructible_v<I1> and
             std::is_nothrow_move_constructible_v<S1> and
@@ -569,7 +589,6 @@ namespace genex::views::detail {
             std::is_nothrow_move_constructible_v<Proj2>) :
             it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)),
             proj1(std::move(proj1)), proj2(std::move(proj2)), first_it(it1), first_st(st1) {
-            satisfy();
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -578,8 +597,8 @@ namespace genex::views::detail {
         }
 
 
-        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it1) and noexcept(++it2))
-            -> set_union_unsorted_iterator& {
+        GENEX_INLINE constexpr auto operator++() noexcept(
+            noexcept(satisfy())) -> set_union_unsorted_iterator& {
             satisfy();
             return *this;
         }
@@ -593,20 +612,20 @@ namespace genex::views::detail {
 
     private:
         GENEX_INLINE auto satisfy() -> void {
-            while (it1 != st1 or it2 != st2) {
+            ++(from_first ? it1 : it2);
+            while (true) {
                 if (it1 != st1) {
                     from_first = true;
-                    ++it1;
                     return;
                 }
-                else if (it2 != st2 and not algorithms::contains(first_it, first_st, std::invoke(proj2, *it2), proj1)) {
+                while (it2 != st2 && algorithms::contains(first_it, first_st, std::invoke(proj2, *it2), proj1)) {
+                    ++it2;
+                }
+                if (it2 != st2) {
                     from_first = false;
-                    ++it2;
                     return;
                 }
-                else {
-                    ++it2;
-                }
+                break;
             }
         }
     };

@@ -36,6 +36,8 @@ namespace genex::views::detail {
 
         I it; S st;
 
+        GENEX_INLINE constexpr explicit reverse_iterator() noexcept = default;
+
         GENEX_INLINE constexpr explicit reverse_iterator(I it, S st) noexcept(
             std::is_nothrow_move_constructible_v<I> and
             std::is_nothrow_move_constructible_v<S>) :

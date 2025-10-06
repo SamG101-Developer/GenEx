@@ -40,6 +40,8 @@ namespace genex::views::detail {
         F f;
         Proj proj;
 
+        GENEX_INLINE constexpr explicit transform_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             transform_iterator, it);
 

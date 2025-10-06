@@ -37,6 +37,11 @@ namespace genex::views::detail {
 
         I it; S st;
 
+        GENEX_INLINE constexpr explicit indirect_iterator() noexcept = default;
+
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            indirect_iterator, it);
+
         GENEX_INLINE constexpr explicit indirect_iterator(I it, S st) noexcept(
             std::is_nothrow_move_constructible_v<I> and
             std::is_nothrow_move_constructible_v<S>) :

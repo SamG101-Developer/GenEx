@@ -44,6 +44,8 @@ namespace genex::views::detail {
         New new_val;
         Proj proj;
 
+        GENEX_INLINE constexpr explicit replace_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             replace_iterator, it);
 

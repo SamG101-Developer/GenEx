@@ -37,6 +37,8 @@ namespace genex::views::detail {
         Pred pred;
         Proj proj;
 
+        GENEX_INLINE constexpr explicit remove_if_iterator() noexcept = default;
+
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             remove_if_iterator, it);
 
