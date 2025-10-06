@@ -51,8 +51,8 @@ namespace genex::views::detail {
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
             noexcept(std::addressof(*it))) -> value_type {
-            if constexpr (std::is_pointer_v<I>) { return *it; }
-            else { return const_cast<value_type>(std::addressof(*it)); }
+            if constexpr (std::is_pointer_v<I>) { return it; }
+            else { return std::addressof(*it); }
         }
 
         GENEX_INLINE constexpr auto operator++() noexcept(
@@ -98,12 +98,22 @@ namespace genex::views::detail {
 
         GENEX_INLINE constexpr auto internal_begin() const noexcept(
             noexcept(iterators::begin(base_rng))) {
-            return iterators::begin(base_rng);
+            if constexpr(contiguous_range<V>) {
+                return operations::data(base_rng);
+            }
+            else {
+                return iterators::begin(base_rng);
+            }
         }
 
         GENEX_INLINE constexpr auto internal_end() const noexcept(
             noexcept(iterators::end(base_rng))) {
-            return iterators::end(base_rng);
+            if constexpr(contiguous_range<V>) {
+                return operations::data(base_rng) + operations::size(base_rng);
+            }
+            else {
+                return iterators::end(base_rng);
+            }
         }
     };
 }
