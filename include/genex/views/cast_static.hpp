@@ -2,6 +2,7 @@
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
+#include <genex/iterators/access.hpp>
 #include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 

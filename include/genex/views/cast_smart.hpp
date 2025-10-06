@@ -78,8 +78,10 @@ namespace genex::views::detail {
     struct cast_smart_view : std::ranges::view_interface<cast_smart_view<V, To>> {
         V base_rng;
 
+        GENEX_INLINE constexpr explicit cast_smart_view() noexcept = default;
+
         GENEX_VIEW_VIEW_FUNC_DEFINITIONS(
-            cast_smart_iterator, cast_smart_sentinel, base_rng);
+            cast_smart_iterator<iterator_t<V> COMMA sentinel_t<V> COMMA To>, cast_smart_sentinel, base_rng);
 
         GENEX_INLINE constexpr explicit cast_smart_view(V rng) noexcept(
             std::is_nothrow_move_constructible_v<V>) :

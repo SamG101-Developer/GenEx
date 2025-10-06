@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <genex/views/cast.hpp>
+#include <genex/views/cast_smart.hpp>
+#include <genex/views/cast_static.hpp>
+#include <genex/views/cast_dynamic.hpp>
 #include <genex/views/to.hpp>
 
 
@@ -71,7 +73,7 @@ TEST(GenexViewsSharedCast, VecPolymorphicSmartPtr) {
     auto vec = std::vector<std::shared_ptr<Base>>{a1, b1, a2, b2};
 
     const auto rng = vec
-        | genex::views::cast_smart_ptr<DerivedA>()
+        | genex::views::cast_smart<DerivedA>()
         | genex::views::to<std::vector>();
     const auto exp = std::vector{a1, a2};
     EXPECT_EQ(rng, exp);
@@ -86,7 +88,7 @@ TEST(GenexViewsUniqueCast, VecPolymorphicSmartPtr) {
     vec.push_back(std::make_unique<DerivedB>("four"));
 
     const auto rng = vec
-        | genex::views::cast_smart_ptr<DerivedA>()
+        | genex::views::cast_smart<DerivedA>()
         | genex::views::to<std::vector>();
     auto exp = std::vector<std::unique_ptr<DerivedA>>{};
     exp.emplace_back(std::make_unique<DerivedA>(1));
