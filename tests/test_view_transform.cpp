@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <genex/views/transform.hpp>
+#include <genex/views/intersperse.hpp>
+#include <genex/views/join.hpp>
 #include <genex/views/to.hpp>
+#include <genex/views/transform.hpp>
 
 
 struct TestStruct {
@@ -12,6 +14,39 @@ struct TestStruct {
         return a == other.a and b == other.b;
     }
 };
+
+
+TEST(GenexViewsTransform, StackInput) {
+    auto vec = std::vector{0, 1, 2, 3, 4, 5, 7};
+
+    const auto test1 = vec
+        | genex::views::transform([](auto &&x) { return std::to_string(x); })
+        | genex::views::to<std::vector>();
+    const auto exp1 = std::vector<std::string>{"0", "1", "2", "3", "4", "5", "7"};
+    EXPECT_EQ(test1, exp1);
+
+    const auto test2 = vec
+        | genex::views::transform([](auto &&x) { return std::to_string(x); })
+        | genex::views::intersperse(std::string(", "))
+        | genex::views::to<std::vector>();
+    const auto exp2 = std::vector<std::string>{"0", ", ", "1", ", ", "2", ", ", "3", ", ", "4", ", ", "5", ", ", "7"};
+    EXPECT_EQ(test2, exp2);
+
+    const auto test3 = exp1
+        | genex::views::intersperse(std::string(", "))
+        | genex::views::join
+        | genex::views::to<std::vector>();
+    const auto exp3 = std::vector{'0', ',', ' ', '1', ',', ' ', '2', ',', ' ', '3', ',', ' ', '4', ',', ' ', '5', ',', ' ', '7'};
+    EXPECT_EQ(test3, exp3);
+
+    const auto rng = vec
+        | genex::views::transform([](auto &&x) { return std::to_string(x); })
+        | genex::views::intersperse(std::string(", "))
+        | genex::views::join
+        | genex::views::to<std::string>();
+    const auto exp = std::string("0, 1, 2, 3, 4, 5, 7");
+    EXPECT_EQ(rng, exp);
+}
 
 
 TEST(GenexViewsTransform, VecInput) {

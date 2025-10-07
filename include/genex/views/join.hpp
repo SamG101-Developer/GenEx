@@ -60,6 +60,7 @@ namespace genex::views::detail {
 
         GENEX_INLINE constexpr auto operator++() noexcept(
             noexcept(++it) and noexcept(++sub_it) and noexcept(satisfy())) -> join_iterator& {
+            if (it == st) return *this;
             ++sub_it;
             if (sub_it == sub_st and it != st) {
                 ++it;
@@ -79,8 +80,12 @@ namespace genex::views::detail {
         GENEX_INLINE auto satisfy() noexcept(
             noexcept(iterators::begin(*it)) and
             noexcept(iterators::end(*it))) -> void {
-            sub_it = iterators::begin(*it);
-            sub_st = iterators::end(*it);
+            while (it != st) {
+                sub_it = iterators::begin(*it);
+                sub_st = iterators::end(*it);
+                if (sub_it != sub_st) break;
+                ++it;
+            }
         }
     };
 
