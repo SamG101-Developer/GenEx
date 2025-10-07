@@ -1,5 +1,6 @@
 #pragma once
-#include <functional>
+#include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
 #include <genex/iterators/distance.hpp>
@@ -35,14 +36,14 @@ namespace genex::views::detail {
 
         I it; S st;
 
-        GENEX_INLINE constexpr explicit take_last_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            take_last_iterator);
 
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             take_last_iterator, it);
 
         GENEX_INLINE constexpr explicit take_last_iterator(I it, S st, Int) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Int>) :
             it(std::move(it)), st(std::move(st)) {
         }
 
@@ -89,7 +90,7 @@ namespace genex::views::detail {
             take_last_iterator, take_last_sentinel, base_rng, take_n);
 
         GENEX_INLINE constexpr explicit take_last_view(V rng, Int take_n) noexcept(
-            std::is_nothrow_move_constructible_v<V>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V, Int>) :
             base_rng(std::move(rng)), take_n(std::move(take_n)) {
         }
 
@@ -106,7 +107,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             const auto total_size = operations::size(base_rng);
             return total_size > take_n ? take_n : total_size;
         }
@@ -118,7 +119,8 @@ namespace genex::views {
     struct take_last_fn {
         template <typename I, typename S, typename Int>
         requires detail::concepts::takeable_last_iters<I, S, Int>
-        GENEX_INLINE constexpr auto operator()(I it, S st, Int n) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, Int n) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Int>) {
             using V = std::ranges::subrange<I, S>;
             return detail::take_last_view<V, Int>{
                 std::ranges::subrange<I, S>{std::move(it), std::move(st)}, std::move(n)};
@@ -126,7 +128,9 @@ namespace genex::views {
 
         template <typename Rng, typename Int>
         requires detail::concepts::takeable_last_range<Rng, Int>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng, Int n) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng&& rng, Int n) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Int>) {
             using V = std::views::all_t<Rng>;
             return detail::take_last_view<V, Int>{
                 std::forward<Rng>(rng), std::move(n)};
@@ -134,7 +138,8 @@ namespace genex::views {
 
         template <typename Int>
         requires std::weakly_incrementable<Int>
-        GENEX_INLINE constexpr auto operator()(Int n) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Int n) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, Int>) {
             return std::bind_back(
                 take_last_fn{}, std::move(n));
         }

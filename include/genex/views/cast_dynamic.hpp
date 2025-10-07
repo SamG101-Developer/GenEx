@@ -1,9 +1,9 @@
 #pragma once
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -43,10 +43,23 @@ namespace genex::views::detail {
             cast_dynamic_iterator, it);
 
         GENEX_INLINE constexpr explicit cast_dynamic_iterator(I it, S st) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) :
             it(std::move(it)), st(std::move(st)) {
             satisfy();
+        }
+
+        GENEX_INLINE constexpr cast_dynamic_iterator(cast_dynamic_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) :
+            it(std::move(other.it)), st(std::move(other.st)) {
+            satisfy();
+        }
+
+        GENEX_INLINE constexpr auto operator=(cast_dynamic_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I, S>) -> cast_dynamic_iterator& {
+            it = std::move(other.it);
+            st = std::move(other.st);
+            satisfy();
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -69,7 +82,8 @@ namespace genex::views::detail {
         }
 
     private:
-        GENEX_INLINE constexpr auto satisfy() noexcept {
+        GENEX_INLINE auto satisfy() noexcept
+            -> void {
             while (it != st and dynamic_cast<To>(*it) == nullptr) { ++it; }
         }
     };
@@ -106,7 +120,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             return operations::size(base_rng);
         }
     };
@@ -117,15 +131,17 @@ namespace genex::views {
     struct cast_dynamic_fn {
         template <typename To, typename I, typename S>
         requires detail::concepts::dynamic_castable_iters<I, S, To>
-        GENEX_INLINE constexpr auto operator()(I it, S st) const -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) {
             using V = std::ranges::subrange<I, S>;
             return detail::cast_dynamic_view<V, To>{
-                std::ranges::subrange(it, st)};
+                std::ranges::subrange{std::move(it), std::move(st)}};
         }
 
         template <typename To, typename Rng>
         requires detail::concepts::dynamic_castable_range<Rng, To>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
             using V = std::views::all_t<Rng>;
             return detail::cast_dynamic_view<V, To>{
                 std::forward<Rng>(rng)};
@@ -134,7 +150,8 @@ namespace genex::views {
         template <typename To>
         requires std::is_pointer_v<To> or std::is_reference_v<To>
         GENEX_INLINE constexpr auto operator()() const -> auto {
-            return [*this]<typename Rng>(Rng &&rng) requires detail::concepts::dynamic_castable_range<Rng, To> {
+            return [*this]<typename Rng>(Rng &&rng) noexcept(meta::all_of_v<std::is_nothrow_constructible, Rng&&>)
+            requires detail::concepts::dynamic_castable_range<Rng, To> {
                 return this->operator()<To>(std::forward<Rng>(rng));
             };
         }

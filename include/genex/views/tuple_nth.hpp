@@ -1,12 +1,9 @@
 #pragma once
-#include <iterator>
-#include <utility>
-
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -40,14 +37,14 @@ namespace genex::views::detail {
 
         I it; S st;
 
-        GENEX_INLINE constexpr explicit tuple_n_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            tuple_n_iterator);
 
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             tuple_n_iterator, it);
 
         GENEX_INLINE constexpr explicit tuple_n_iterator(I it, S st) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) :
             it(std::move(it)), st(std::move(st)) {
         }
 
@@ -89,7 +86,7 @@ namespace genex::views::detail {
             tuple_n_iterator<iterator_t<V> COMMA sentinel_t<V> COMMA N>, tuple_n_sentinel, base_rng);
 
         GENEX_INLINE constexpr explicit tuple_n_view(V rng) noexcept(
-            std::is_nothrow_move_constructible_v<V>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V>) :
             base_rng(std::move(rng)) {
         }
 
@@ -104,7 +101,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             return operations::size(base_rng);
         }
     };
@@ -115,7 +112,8 @@ namespace genex::views {
     struct tuple_nth_fn {
         template <std::size_t N, typename I, typename S>
         requires detail::concepts::tuple_nth_iters<I, S, N>
-        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) {
             using V = std::ranges::subrange<I, S>;
             return detail::tuple_n_view<V, N>{
                 std::ranges::subrange{std::move(it), std::move(st)}};
@@ -123,15 +121,17 @@ namespace genex::views {
 
         template <std::size_t N, typename Rng>
         requires detail::concepts::tuple_nth_range<Rng, N>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
             using V = std::views::all_t<Rng>;
             return detail::tuple_n_view<V, N>{
                 std::forward<Rng>(rng)};
         }
 
         template <std::size_t N>
-        GENEX_INLINE constexpr auto operator()() const noexcept -> auto {
-            return [*this]<typename Rng> requires detail::concepts::tuple_nth_range<Rng, N>(Rng &&rng) {
+        GENEX_INLINE constexpr auto operator()() const noexcept {
+            return [*this]<typename Rng>
+            requires detail::concepts::tuple_nth_range<Rng, N>(Rng &&rng) noexcept(meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
                 return this->operator()<N>(std::forward<Rng>(rng));
             };
         }

@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
@@ -40,16 +39,14 @@ namespace genex::views::detail {
         F f;
         Proj proj;
 
-        GENEX_INLINE constexpr explicit transform_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            transform_iterator);
 
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             transform_iterator, it);
 
         GENEX_INLINE constexpr explicit transform_iterator(I it, S st, F f, Proj proj) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S> and
-            std::is_nothrow_move_constructible_v<F> and
-            std::is_nothrow_move_constructible_v<Proj>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, F, Proj>) :
             it(std::move(it)), st(std::move(st)), f(std::move(f)), proj(std::move(proj)) {
         }
 
@@ -59,14 +56,14 @@ namespace genex::views::detail {
             return std::invoke(f, std::invoke(proj, *it));
         }
 
-        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it))
-            -> transform_iterator& {
+        GENEX_INLINE constexpr auto operator++() noexcept(
+            noexcept(++it)) -> transform_iterator& {
             ++it;
             return *this;
         }
 
         GENEX_INLINE constexpr auto operator++(int) noexcept(
-        noexcept(it++)) -> transform_iterator {
+            noexcept(it++)) -> transform_iterator {
             auto tmp = *this;
             ++*this;
             return tmp;
@@ -98,9 +95,7 @@ namespace genex::views::detail {
             transform_iterator, transform_sentinel, base_rng, f, proj);
 
         GENEX_INLINE constexpr explicit transform_view(V rng, F f, Proj proj) noexcept(
-            std::is_nothrow_move_constructible_v<V> and
-            std::is_nothrow_move_constructible_v<F> and
-            std::is_nothrow_move_constructible_v<Proj>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V, F, Proj>) :
             base_rng(std::move(rng)), f(std::move(f)), proj(std::move(proj)) {
         }
 
@@ -115,7 +110,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             return operations::size(base_rng);
         }
     };
@@ -126,7 +121,8 @@ namespace genex::views {
     struct transform_fn {
         template <typename I, typename S, typename F, typename Proj = meta::identity>
         requires detail::concepts::transformable_iters<I, S, F, Proj>
-        GENEX_INLINE constexpr auto operator()(I it, S st, F f, Proj proj = {}) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, F f, Proj proj = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, F, Proj>) {
             using V = std::ranges::subrange<I, S>;
             return detail::transform_view<V, F, Proj>{
                 std::ranges::subrange{std::move(it), std::move(st)}, std::move(f), std::move(proj)};
@@ -134,7 +130,9 @@ namespace genex::views {
 
         template <typename Rng, typename F, typename Proj = meta::identity>
         requires detail::concepts::transformable_range<Rng, F, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&> and
+            meta::all_of_v<std::is_nothrow_move_constructible, F, Proj>) {
             using V = std::views::all_t<Rng>;
             return detail::transform_view<V, F, Proj>{
                 std::forward<Rng>(rng), std::move(f), std::move(proj)};
@@ -142,7 +140,9 @@ namespace genex::views {
 
         template <typename F, typename Proj = meta::identity>
         requires (not range<F>)
-        GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, transform_fn> and
+            meta::all_of_v<std::is_nothrow_move_constructible, F, Proj>) {
             return std::bind_back(
                 transform_fn{}, std::move(f), std::move(proj));
         }

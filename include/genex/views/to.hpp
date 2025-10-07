@@ -13,13 +13,15 @@ namespace genex::views {
      */
     template <template <typename> typename Out, typename Rng>
     requires input_range<Rng> and std::copyable<range_value_t<Rng>> and requires(Rng &&rng) { Out<range_value_t<Rng>>(iterators::begin(rng), iterators::end(rng)); }
-    GENEX_INLINE auto to_base_fn(Rng &&rng) noexcept(noexcept(iterators::begin(rng)) and noexcept(iterators::end(rng))) -> Out<range_value_t<Rng>> {
+    GENEX_INLINE auto to_base_fn(Rng &&rng) noexcept(
+        noexcept(iterators::begin(rng)) and noexcept(iterators::end(rng))) -> Out<range_value_t<Rng>> {
         return Out<range_value_t<Rng>>(iterators::begin(rng), iterators::end(rng));
     }
 
     template <typename Out, typename Rng>
     requires input_range<Rng> and std::copyable<range_value_t<Rng>> and requires(Rng &&rng) { Out(iterators::begin(rng), iterators::end(rng)); }
-    GENEX_INLINE auto to_base_fn(Rng &&rng) noexcept(noexcept(iterators::begin(rng)) and noexcept(iterators::end(rng))) -> Out {
+    GENEX_INLINE auto to_base_fn(Rng &&rng) noexcept(
+        noexcept(iterators::begin(rng)) and noexcept(iterators::end(rng))) -> Out {
         return Out(iterators::begin(rng), iterators::end(rng));
     }
 

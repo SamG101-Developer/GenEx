@@ -1,12 +1,9 @@
 #pragma once
-#include <utility>
-
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/iterators/next.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -70,42 +67,53 @@ namespace genex::views::detail {
             join_with_iterator, it);
 
         GENEX_INLINE constexpr explicit join_with_iterator(I it, S st, New sep) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S> and
-            std::is_nothrow_move_constructible_v<New> and
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, New> and
             noexcept(satisfy())) :
             it(std::move(it)), st(std::move(st)), sep(std::move(sep)) {
             if (this->it != this->st) { satisfy(); }
         }
 
         GENEX_INLINE constexpr join_with_iterator(join_with_iterator &&other) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S> and
-            std::is_nothrow_move_constructible_v<iter_value_t<I>> and
-            std::is_nothrow_move_constructible_v<iterator_t<iter_value_t<I>>> and
-            std::is_nothrow_move_constructible_v<New>) :
-            it(std::move(other.it)),
-            st(std::move(other.st)),
-            sub_rng(std::move(other.sub_rng)),
-            sub_it(std::move(other.sub_it)),
-            sub_st(std::move(other.sub_st)),
-            sep(std::move(other.sep)),
-            at_sep(other.at_sep) {
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, iter_value_t<I>, iterator_t<iter_value_t<I>>, New> and
+            noexcept(satisfy())) :
+            it(std::move(other.it)), st(std::move(other.st)),
+            sub_rng(std::move(other.sub_rng)), sub_it(std::move(other.sub_it)), sub_st(std::move(other.sub_st)),
+            sep(std::move(other.sep)), at_sep(other.at_sep) {
+            if (this->it != this->st) { satisfy(); }
+        }
+
+        GENEX_INLINE constexpr join_with_iterator(const join_with_iterator &other) noexcept(
+            meta::all_of_v<std::is_nothrow_copy_constructible, I, S, iter_value_t<I>, iterator_t<iter_value_t<I>>, New> and
+            noexcept(satisfy())) :
+            it(other.it), st(other.st),
+            sub_rng(other.sub_rng), sub_it(other.sub_it), sub_st(other.sub_st),
+            sep(other.sep), at_sep(other.at_sep) {
             if (this->it != this->st) { satisfy(); }
         }
 
         GENEX_INLINE constexpr join_with_iterator &operator=(join_with_iterator &&other) noexcept(
-            std::is_nothrow_move_assignable_v<I> and
-            std::is_nothrow_move_assignable_v<S> and
-            std::is_nothrow_move_assignable_v<iter_value_t<I>> and
-            std::is_nothrow_move_assignable_v<iterator_t<iter_value_t<I>>> and
-            std::is_nothrow_move_assignable_v<New>) {
+            meta::all_of_v<std::is_nothrow_move_assignable, I, S, iter_value_t<I>, iterator_t<iter_value_t<I>>, New> and
+            noexcept(satisfy())) {
             it = std::move(other.it);
             st = std::move(other.st);
             sub_rng = std::move(other.sub_rng);
             sub_it = std::move(other.sub_it);
             sub_st = std::move(other.sub_st);
             sep = std::move(other.sep);
+            at_sep = other.at_sep;
+            if (this->it != this->st) { satisfy(); }
+            return *this;
+        }
+
+        GENEX_INLINE constexpr join_with_iterator &operator=(const join_with_iterator &other) noexcept(
+            meta::all_of_v<std::is_nothrow_copy_assignable, I, S, iter_value_t<I>, iterator_t<iter_value_t<I>>, New> and
+            noexcept(satisfy())) {
+            it = other.it;
+            st = other.st;
+            sub_rng = other.sub_rng;
+            sub_it = other.sub_it;
+            sub_st = other.sub_st;
+            sep = other.sep;
             at_sep = other.at_sep;
             if (this->it != this->st) { satisfy(); }
             return *this;
@@ -189,8 +197,7 @@ namespace genex::views::detail {
             join_with_iterator, join_with_sentinel, base_rng, sep);
 
         GENEX_INLINE constexpr explicit join_with_view(V it, New sep) noexcept(
-            std::is_nothrow_move_constructible_v<V> and
-            std::is_nothrow_move_constructible_v<New>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V, New>) :
             base_rng(std::move(it)), sep(std::move(sep)) {
         }
 
@@ -205,7 +212,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             const auto n = operations::size(base_rng);
             auto total_size = static_cast<range_size_t<V>>(0);
             for (auto const& sub_rng : base_rng) { total_size += operations::size(sub_rng); }

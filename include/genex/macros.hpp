@@ -32,6 +32,26 @@
 //     using iterator_category = iterator_concept;       \
 //     using difference_type = difference_type_selector_t<I>
 
+
+// default ctor, move ctor, copy ctor, move assign, copy assign, dtor
+#define GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(iter, ...)                                                \
+    constexpr explicit iter() noexcept = default;                                                      \
+                                                                                                       \
+    constexpr iter(iter &&other) noexcept(                                                             \
+        meta::all_of_v<std::is_nothrow_move_constructible __VA_OPT__(, __VA_ARGS__)>) = default;       \
+                                                                                                       \
+    constexpr iter(iter const &other) noexcept(                                                        \
+        meta::all_of_v<std::is_nothrow_copy_constructible __VA_OPT__(, __VA_ARGS__)>) = default;       \
+                                                                                                       \
+    constexpr auto operator=(iter &&other) noexcept(                                                   \
+        meta::all_of_v<std::is_nothrow_move_assignable __VA_OPT__(, __VA_ARGS__)>) -> iter& = default; \
+                                                                                                       \
+    constexpr auto operator=(iter const &other) noexcept(                                              \
+        meta::all_of_v<std::is_nothrow_copy_assignable __VA_OPT__(, __VA_ARGS__)>) -> iter& = default; \
+                                                                                                       \
+    ~iter() noexcept = default
+
+
 #define GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(iter, it, ...)           \
     GENEX_INLINE constexpr auto operator++(int)                       \
     -> iter requires std::forward_iterator<decltype(it)> {            \

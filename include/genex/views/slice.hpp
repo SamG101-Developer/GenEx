@@ -1,11 +1,11 @@
 #pragma once
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
 #include <genex/iterators/advance.hpp>
 #include <genex/iterators/next.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -39,15 +39,15 @@ namespace genex::views::detail {
         I it; S st;
         Int step;
 
-        GENEX_INLINE constexpr explicit slice_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            slice_iterator);
 
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             slice_iterator, it);
 
         GENEX_INLINE constexpr explicit slice_iterator(I it, S st, Int step) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
-            it(std::move(it)), st(std::move(st)), step(std::max(1, step)) {
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Int>) :
+            it(std::move(it)), st(std::move(st)), step(std::move(step)) {
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -95,10 +95,9 @@ namespace genex::views::detail {
             slice_iterator, slice_sentinel, base_rng, step);
 
         GENEX_INLINE constexpr explicit slice_view(V rng, Int start_idx, Int end_idx, Int step) noexcept(
-            std::is_nothrow_move_constructible_v<V> and
-            std::is_nothrow_move_constructible_v<Int>) :
-            base_rng(std::move(rng)), start_idx(std::max(0, start_idx)), end_idx(std::max(0, end_idx)),
-            step(std::max(1, step)) {
+            meta::all_of_v<std::is_nothrow_move_constructible, V, Int>) :
+            base_rng(std::move(rng)), start_idx(std::move(start_idx)), end_idx(std::move(end_idx)),
+            step(std::move(step)) {
         }
 
         GENEX_INLINE constexpr auto internal_begin() const noexcept(
@@ -114,9 +113,9 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             const auto total_size = operations::size(base_rng);
-            if (end_idx <= start_idx or start_idx >= total_size) { return 0; }
+            if (end_idx <= start_idx or start_idx >= total_size) { return static_cast<range_size_t<V>>(0); }
             const auto actual_end = std::min(end_idx, static_cast<Int>(total_size));
             return static_cast<range_size_t<V>>((actual_end - start_idx + step - 1) / step);
         }
@@ -128,7 +127,8 @@ namespace genex::views {
     struct slice_fn {
         template <typename I, typename S, typename Int>
         requires detail::concepts::sliceable_iters<I, S, Int>
-        GENEX_INLINE constexpr auto operator()(I it, S st, Int start_idx, Int end_idx, Int step = static_cast<Int>(1)) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, Int start_idx, Int end_idx, Int step = static_cast<Int>(1)) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Int>) {
             using V = std::ranges::subrange<I, S>;
             return detail::slice_view<V, Int>{
                 std::ranges::subrange<I, S>{std::move(it), std::move(st)}, std::move(start_idx), std::move(end_idx), std::move(step)};
@@ -136,7 +136,8 @@ namespace genex::views {
 
         template <typename I, typename S, typename Int>
         requires detail::concepts::sliceable_iters<I, S, Int>
-        GENEX_INLINE constexpr auto operator()(I it, S st, Int end_idx) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, Int end_idx) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Int>) {
             using V = std::ranges::subrange<I, S>;
             return detail::slice_view<V, Int>{
                 std::ranges::subrange<I, S>{std::move(it), std::move(st)}, static_cast<Int>(0), std::move(end_idx), static_cast<Int>(1)};
@@ -144,7 +145,9 @@ namespace genex::views {
 
         template <typename Rng, typename Int>
         requires detail::concepts::sliceable_range<Rng, Int>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng, Int start_idx, Int end_idx, Int step = static_cast<Int>(1)) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng&& rng, Int start_idx, Int end_idx, Int step = static_cast<Int>(1)) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Int>) {
             using V = std::views::all_t<Rng>;
             return detail::slice_view<V, Int>{
                 std::forward<Rng>(rng), std::move(start_idx), std::move(end_idx), std::move(step)};
@@ -152,7 +155,9 @@ namespace genex::views {
 
         template <typename Rng, typename Int>
         requires detail::concepts::sliceable_range<Rng, Int>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng, Int end_idx) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng&& rng, Int end_idx) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Int>) {
             using V = std::views::all_t<Rng>;
             return detail::slice_view<V, Int>{
                 std::forward<Rng>(rng), static_cast<Int>(0), std::move(end_idx), static_cast<Int>(1)};
@@ -160,18 +165,22 @@ namespace genex::views {
 
         template <typename Int>
         requires (not range<Int>)
-        GENEX_INLINE constexpr auto operator()(Int start_idx, Int end_idx, Int step = static_cast<Int>(1)) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Int start_idx, Int end_idx, Int step = static_cast<Int>(1)) const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, slice_fn> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Int>) {
             return std::bind_back(
                 slice_fn{}, std::move(start_idx), std::move(end_idx), std::move(step));
         }
 
         template <typename Int>
         requires (not range<Int>)
-        GENEX_INLINE constexpr auto operator()(Int end_idx) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Int end_idx) const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, slice_fn> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Int>) {
             return std::bind_back(
                 slice_fn{}, static_cast<Int>(0), std::move(end_idx), static_cast<Int>(1));
         }
     };
 
-    GENEX_EXPORT_STRUCT(slice);
+    inline constexpr slice_fn slice{};
 }

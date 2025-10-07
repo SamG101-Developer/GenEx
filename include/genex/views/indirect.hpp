@@ -3,7 +3,6 @@
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -37,14 +36,14 @@ namespace genex::views::detail {
 
         I it; S st;
 
-        GENEX_INLINE constexpr explicit indirect_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            indirect_iterator);
 
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             indirect_iterator, it);
 
         GENEX_INLINE constexpr explicit indirect_iterator(I it, S st) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) :
             it(std::move(it)), st(std::move(st)) {
         }
 
@@ -60,7 +59,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++(int) noexcept(
-        noexcept(it++)) -> indirect_iterator {
+            noexcept(it++)) -> indirect_iterator {
             auto tmp = *this;
             ++*this;
             return tmp;
@@ -105,7 +104,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             return operations::size(base_rng);
         }
     };
@@ -116,7 +115,8 @@ namespace genex::views {
     struct indirect_fn {
         template <typename I, typename S>
         requires detail::concepts::indirectable_iters<I, S>
-        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) {
             using V = std::ranges::subrange<I, S>;
             return detail::indirect_view<V>{
                 std::ranges::subrange<I, S>{std::move(it), std::move(st)}};
@@ -124,13 +124,15 @@ namespace genex::views {
 
         template <typename Rng>
         requires detail::concepts::indirectable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng&& rng) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
             using V = std::views::all_t<Rng>;
             return detail::indirect_view<V>{
                 std::forward<Rng>(rng)};
         }
 
-        GENEX_INLINE constexpr auto operator()() const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()() const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, indirect_fn>) {
             return std::bind_back(
                 indirect_fn{});
         }

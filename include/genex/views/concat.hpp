@@ -3,10 +3,9 @@
 
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/operations/data.hpp>
-#include <genex/operations/size.hpp>
 
 
 namespace genex::views::detail::concepts {
@@ -57,9 +56,10 @@ namespace genex::views::detail {
         std::tuple<sentinel_t<Rngs>...> sts;
         std::size_t index = N;
 
-        GENEX_INLINE constexpr explicit concat_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            concat_iterator);
 
-        GENEX_INLINE constexpr explicit concat_iterator(Rngs... rngs)  :
+        GENEX_INLINE constexpr explicit concat_iterator(Rngs... rngs) :
             its(iterators::begin(rngs)...), sts(iterators::end(rngs)...), index(0) {
         }
 
@@ -193,7 +193,8 @@ namespace genex::views::detail {
 
         GENEX_INLINE constexpr concat_view() noexcept = default;
 
-        GENEX_INLINE constexpr explicit concat_view(Vs ...rngs) :
+        GENEX_INLINE constexpr explicit concat_view(Vs ...rngs) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, Vs...>) :
             base_rngs(std::move(rngs)...) {
         }
 
@@ -222,14 +223,17 @@ namespace genex::views {
     struct concat_fn {
         template <typename ...Rng>
         requires (sizeof...(Rng) > 1 and (detail::concepts::concatenatable_range<Rng> and ...))
-        GENEX_INLINE constexpr auto operator()(Rng &&...rng) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&...rng) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&...>) {
             return detail::concat_view<std::views::all_t<Rng>...>{
                 std::forward<Rng>(rng)...};
         }
 
         template <typename Rng>
         requires detail::concepts::concatenatable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, concat_fn> and
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
             return std::bind_back(
                 concat_fn{}, std::views::all(std::forward<Rng>(rng)));
         }

@@ -3,9 +3,9 @@
 
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -50,11 +50,14 @@ namespace genex::views::detail {
 
         I it; S st;
 
-        GENEX_INLINE constexpr explicit keys_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            keys_iterator);
+
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            keys_iterator, it);
 
         GENEX_INLINE constexpr explicit keys_iterator(I it, S st) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) :
             it(std::move(it)), st(std::move(st)) {
         }
 
@@ -90,11 +93,14 @@ namespace genex::views::detail {
 
         I it; S st;
 
-        GENEX_INLINE constexpr explicit vals_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            vals_iterator);
+
+        GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
+            vals_iterator, it);
 
         GENEX_INLINE constexpr explicit vals_iterator(I it, S st) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) :
             it(std::move(it)), st(std::move(st)) {
         }
 
@@ -152,7 +158,7 @@ namespace genex::views::detail {
             keys_iterator, keys_sentinel, base_rng);
 
         GENEX_INLINE constexpr explicit keys_view(V rng) noexcept(
-            std::is_nothrow_move_constructible_v<V>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V>) :
             base_rng(std::move(rng)) {
         }
 
@@ -167,7 +173,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             return operations::size(base_rng);
         }
     };
@@ -183,7 +189,7 @@ namespace genex::views::detail {
             vals_iterator, vals_sentinel, base_rng);
 
         GENEX_INLINE constexpr explicit vals_view(V rng) noexcept(
-            std::is_nothrow_move_constructible_v<V>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V>) :
             base_rng(std::move(rng)) {
         }
 
@@ -198,7 +204,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             return operations::size(base_rng);
         }
     };
@@ -209,7 +215,8 @@ namespace genex::views {
     struct keys_fn {
         template <typename I, typename S>
         requires detail::concepts::keyable_iters<I, S>
-        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) {
             using V = std::ranges::subrange<I, S>;
             return detail::keys_view<V>{
                 std::ranges::subrange{std::move(it), std::move(st)}};
@@ -217,13 +224,15 @@ namespace genex::views {
 
         template <typename Rng>
         requires detail::concepts::keyable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
             using V = std::views::all_t<Rng>;
             return detail::keys_view<V>{
                 std::forward<Rng>(rng)};
         }
 
-        GENEX_INLINE constexpr auto operator()() const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()() const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, keys_fn>) {
             return std::bind_back(
                 keys_fn{});
         }
@@ -232,7 +241,8 @@ namespace genex::views {
     struct vals_fn {
         template <typename I, typename S>
         requires detail::concepts::valable_iters<I, S>
-        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) {
             using V = std::ranges::subrange<I, S>;
             return detail::vals_view<V>{
                 std::ranges::subrange{std::move(it), std::move(st)}};
@@ -240,13 +250,15 @@ namespace genex::views {
 
         template <typename Rng>
         requires detail::concepts::valable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
             using V = std::views::all_t<Rng>;
             return detail::vals_view<V>{
                 std::forward<Rng>(rng)};
         }
 
-        GENEX_INLINE constexpr auto operator()() const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()() const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, vals_fn>) {
             return std::bind_back(
                 vals_fn{});
         }

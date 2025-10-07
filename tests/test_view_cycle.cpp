@@ -21,6 +21,10 @@ TEST(GenexViewsCycle, VecInputNumerical) {
 TEST(GenexViewsCycle, VecInputConditional) {
     auto vec = std::vector{0, 1, 2};
 
+    auto temp_1 = genex::views::cycle(vec);
+    auto temp_2 = genex::views::take_while([] (const auto v) { return v < 2; })(temp_1);
+    auto temp_3 = genex::views::to<std::vector>()(temp_2);
+
     const auto it = vec
         | genex::views::cycle
         | genex::views::take_while([](const auto v) { return v < 2; })

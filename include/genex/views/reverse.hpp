@@ -1,10 +1,9 @@
 #pragma once
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/iterators/prev.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -36,11 +35,11 @@ namespace genex::views::detail {
 
         I it; S st;
 
-        GENEX_INLINE constexpr explicit reverse_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            reverse_iterator);
 
         GENEX_INLINE constexpr explicit reverse_iterator(I it, S st) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) :
             it(std::move(it)), st(std::move(st)) {
         }
 
@@ -132,7 +131,7 @@ namespace genex::views::detail {
             reverse_iterator, reverse_sentinel, base_rng)
 
         GENEX_INLINE constexpr explicit reverse_view(V rng) noexcept(
-            std::is_nothrow_move_constructible_v<V>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V>) :
             base_rng(std::move(rng)) {
         }
 
@@ -147,7 +146,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             return operations::size(base_rng);
         }
     };
@@ -158,7 +157,8 @@ namespace genex::views {
     struct reverse_fn {
         template <typename I, typename S>
         requires detail::concepts::reversible_iters<I, S>
-        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) {
             using V = std::ranges::subrange<I, S>;
             return detail::reverse_view<V>{
                 std::ranges::subrange{std::move(it), std::move(st)}};
@@ -166,17 +166,19 @@ namespace genex::views {
 
         template <typename Rng>
         requires detail::concepts::reversible_iters_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
             using V = std::views::all_t<Rng>;
             return detail::reverse_view<V>{
                 std::forward<Rng>(rng)};
         }
 
-        GENEX_INLINE constexpr auto operator()() const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()() const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, reverse_fn>) {
             return std::bind_back(
                 reverse_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(reverse);
+    inline constexpr reverse_fn reverse{};
 }

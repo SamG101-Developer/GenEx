@@ -1,11 +1,8 @@
 #pragma once
-#include <functional>
-
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -43,12 +40,41 @@ namespace genex::views::detail {
         GENEX_INLINE constexpr explicit filter_iterator() noexcept = default;
 
         GENEX_INLINE constexpr explicit filter_iterator(I it, S st, Pred pred, Proj proj) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S> and
-            std::is_nothrow_move_constructible_v<Pred> and
-            std::is_nothrow_move_constructible_v<Proj>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Pred, Proj>) :
             it(std::move(it)), st(std::move(st)), pred(std::move(pred)), proj(std::move(proj)) {
             satisfy();
+        }
+
+        GENEX_INLINE constexpr filter_iterator(filter_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Pred, Proj>) :
+            it(std::move(other.it)), st(std::move(other.st)), pred(std::move(other.pred)), proj(std::move(other.proj)) {
+            satisfy();
+        }
+
+        GENEX_INLINE constexpr filter_iterator(const filter_iterator &other) noexcept(
+            meta::all_of_v<std::is_nothrow_copy_constructible, I, S, Pred, Proj>) :
+            it(other.it), st(other.st), pred(other.pred), proj(other.proj) {
+            satisfy();
+        }
+
+        GENEX_INLINE constexpr auto operator=(filter_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I, S, Pred, Proj>) -> filter_iterator& {
+            it = std::move(other.it);
+            st = std::move(other.st);
+            pred = std::move(other.pred);
+            proj = std::move(other.proj);
+            satisfy();
+            return *this;
+        }
+
+        GENEX_INLINE constexpr auto operator=(const filter_iterator &other) noexcept(
+            meta::all_of_v<std::is_nothrow_copy_assignable, I, S, Pred, Proj>) -> filter_iterator& {
+            it = other.it;
+            st = other.st;
+            pred = other.pred;
+            proj = other.proj;
+            satisfy();
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -64,7 +90,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++(int) noexcept(
-        noexcept(it++)) -> filter_iterator {
+            noexcept(it++)) -> filter_iterator {
             auto tmp = *this;
             ++*this;
             return tmp;
@@ -102,9 +128,7 @@ namespace genex::views::detail {
             filter_iterator, filter_sentinel, base_rng, pred, proj);
 
         GENEX_INLINE constexpr explicit filter_view(V rng, Pred pred, Proj proj) noexcept(
-            std::is_nothrow_move_constructible_v<V> and
-            std::is_nothrow_move_constructible_v<Pred> and
-            std::is_nothrow_move_constructible_v<Proj>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V, Pred, Proj>) :
             base_rng(std::move(rng)), pred(std::move(pred)), proj(std::move(proj)) {
         }
 
@@ -118,7 +142,7 @@ namespace genex::views::detail {
             return iterators::end(base_rng);
         }
 
-        GENEX_INLINE constexpr auto size() const noexcept -> range_size_t<V> = delete;
+        GENEX_INLINE constexpr auto size() const noexcept = delete;
     };
 }
 
@@ -127,7 +151,8 @@ namespace genex::views {
     struct filter_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::filterable_iters<I, S, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(I it, S st, Pred pred, Proj proj = {}) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, Pred pred, Proj proj = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Pred, Proj>) {
             using V = std::ranges::subrange<I, S>;
             return detail::filter_view<V, Pred, Proj>{
                 std::ranges::subrange{std::move(it), std::move(st)}, std::move(pred), std::move(proj)};
@@ -135,14 +160,18 @@ namespace genex::views {
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::filterable_range<Rng, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Pred, Proj>) {
             using V = std::views::all_t<Rng>;
             return detail::filter_view<V, Pred, Proj>{
                 std::forward<Rng>(rng), std::move(pred), std::move(proj)};
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, filter_fn> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Pred, Proj>) {
             return std::bind_back(
                 filter_fn{}, std::move(pred), std::move(proj));
         }

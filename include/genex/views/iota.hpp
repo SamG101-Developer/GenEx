@@ -1,6 +1,7 @@
 #pragma once
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/operations/size.hpp>
 
@@ -26,15 +27,14 @@ namespace genex::views::detail {
         I it; S st;
         Int step;
 
-        GENEX_INLINE constexpr explicit iota_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            iota_iterator);
 
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             iota_iterator, it);
 
         GENEX_INLINE constexpr explicit iota_iterator(I it, S st, Int step) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S> and
-            std::is_nothrow_move_constructible_v<Int>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Int>) :
             it(std::move(it)), st(std::move(st)), step(step) {
         }
 
@@ -80,8 +80,8 @@ namespace genex::views::detail {
         GENEX_INLINE constexpr explicit iota_view() noexcept = default;
 
         GENEX_INLINE constexpr explicit iota_view(Int from, Int to, Int step) noexcept(
-            std::is_nothrow_move_constructible_v<Int>) :
-            from(from), to(to), step(step) {
+            meta::all_of_v<std::is_nothrow_move_constructible, Int>) :
+            from(std::move(from)), to(std::move(to)), step(std::move(step)) {
         }
         
         GENEX_INLINE constexpr auto begin() const noexcept(
@@ -116,21 +116,24 @@ namespace genex::views {
     struct iota_fn {
         template <typename Int>
         requires std::weakly_incrementable<Int>
-        GENEX_INLINE constexpr auto operator()(Int from, Int to, Int step = static_cast<Int>(1)) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Int from, Int to, Int step = static_cast<Int>(1)) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, Int>) {
             return detail::iota_view<Int>{
-                from, to, step};
+                std::move(from), std::move(to), std::move(step)};
         }
 
         template <typename Int>
         requires std::weakly_incrementable<Int>
-        GENEX_INLINE constexpr auto operator()(Int to) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Int to) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, Int>) {
             return detail::iota_view<Int>{
-                static_cast<Int>(0), to, static_cast<Int>(1)};
+                static_cast<Int>(0), std::move(to), static_cast<Int>(1)};
         }
 
         template <typename Int>
         requires std::weakly_incrementable<Int>
-        GENEX_INLINE constexpr auto operator()() const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()() const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, Int>) {
             return detail::iota_view<Int>{
                 static_cast<Int>(0), std::numeric_limits<Int>::max(), static_cast<Int>(1)};
         }

@@ -1,9 +1,9 @@
 #pragma once
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -42,9 +42,20 @@ namespace genex::views::detail {
             cast_static_iterator, it);
 
         GENEX_INLINE constexpr explicit cast_static_iterator(I it, S st) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) :
             it(std::move(it)), st(std::move(st)) {
+        }
+
+        GENEX_INLINE constexpr cast_static_iterator(cast_static_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) :
+            it(std::move(other.it)), st(std::move(other.st)) {
+        }
+
+        GENEX_INLINE constexpr auto operator=(cast_static_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I, S>) -> cast_static_iterator& {
+            it = std::move(other.it);
+            st = std::move(other.st);
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -59,7 +70,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++(int) noexcept(
-        noexcept(it++)) -> cast_static_iterator {
+            noexcept(it++)) -> cast_static_iterator {
             auto tmp = *this;
             ++*this;
             return tmp;
@@ -83,7 +94,7 @@ namespace genex::views::detail {
             cast_static_iterator<iterator_t<V> COMMA sentinel_t<V> COMMA To>, cast_static_sentinel, base_rng);
 
         GENEX_INLINE constexpr explicit cast_static_view(V rng) noexcept(
-            std::is_nothrow_move_constructible_v<V>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V>) :
             base_rng(std::move(rng)) {
         }
 
@@ -98,7 +109,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             return operations::size(base_rng);
         }
     };
@@ -109,7 +120,8 @@ namespace genex::views {
     struct cast_static_fn {
         template <typename To, typename I, typename S>
         requires detail::concepts::static_castable_iters<I, S, To>
-        GENEX_INLINE constexpr auto operator()(I it, S st) const -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) {
             using V = std::ranges::subrange<I, S>;
             return detail::cast_static_view<V, To>{
                 std::ranges::subrange<I, S>{std::move(it), std::move(st)}};
@@ -117,15 +129,17 @@ namespace genex::views {
 
         template <typename To, typename Rng>
         requires detail::concepts::static_castable_range<Rng, To>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
             using V = std::views::all_t<Rng>;
             return detail::cast_static_view<V, To>{
                 std::forward<Rng>(rng)};
         }
 
         template <typename To>
-        GENEX_INLINE constexpr auto operator()() const -> auto {
-            return [*this]<typename Rng>(Rng &&rng) requires detail::concepts::static_castable_range<Rng, To> {
+        GENEX_INLINE constexpr auto operator()() const noexcept {
+            return [*this]<typename Rng>(Rng &&rng) noexcept(meta::all_of_v<std::is_nothrow_constructible, Rng&&>)
+            requires detail::concepts::static_castable_range<Rng, To> {
                 return this->operator()<To>(std::forward<Rng>(rng));
             };
         }

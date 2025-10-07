@@ -1,13 +1,13 @@
 #pragma once
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/algorithms/contains.hpp>
 #include <genex/iterators/access.hpp>
 #include <genex/operations/cmp.hpp>
-#include <genex/operations/data.hpp>
-#include <genex/operations/size.hpp>
 
+// todo: copy ctors
 
 namespace genex::views::concepts {
     template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
@@ -52,15 +52,33 @@ namespace genex::views::detail {
             set_difference_iterator, it1);
 
         GENEX_INLINE constexpr explicit set_difference_iterator(I1 it1, S1 st1, I2 it2, S2 st2, Comp comp, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<I1> and
-            std::is_nothrow_move_constructible_v<S1> and
-            std::is_nothrow_move_constructible_v<I2> and
-            std::is_nothrow_move_constructible_v<S2> and
-            std::is_nothrow_move_constructible_v<Comp> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
-            it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)), comp(std::move(comp)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, Comp, Proj1, Proj2> and
+            noexcept(satisfy())) :
+            it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)),
+            comp(std::move(comp)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
             satisfy();
+        }
+
+        GENEX_INLINE constexpr set_difference_iterator(set_difference_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, Comp, Proj1, Proj2> and
+            noexcept(satisfy())) :
+            it1(std::move(other.it1)), st1(std::move(other.st1)), it2(std::move(other.it2)), st2(std::move(other.st2)),
+            comp(std::move(other.comp)), proj1(std::move(other.proj1)), proj2(std::move(other.proj2)) {
+            satisfy();
+        }
+
+        GENEX_INLINE constexpr auto operator=(set_difference_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I1, S1, I2, S2, Comp, Proj1, Proj2> and
+            noexcept(satisfy())) -> set_difference_iterator& {
+            it1 = std::move(other.it1);
+            st1 = std::move(other.st1);
+            it2 = std::move(other.it2);
+            st2 = std::move(other.st2);
+            comp = std::move(other.comp);
+            proj1 = std::move(other.proj1);
+            proj2 = std::move(other.proj2);
+            satisfy();
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -76,14 +94,14 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++(int) noexcept(
-        noexcept(it1++)) -> set_difference_iterator {
+            noexcept(it1++)) -> set_difference_iterator {
             auto tmp = *this;
             ++*this;
             return tmp;
         }
 
     private:
-        GENEX_INLINE auto satisfy() const -> void {
+        GENEX_INLINE auto satisfy() -> void {
             while (it1 != st1) {
                 // Advance it2 until either it2 == st2 or greater then the current value.
                 while (it2 != st2 and std::invoke(comp, std::invoke(proj2, *it2), std::invoke(proj1, *it1))) {
@@ -126,15 +144,33 @@ namespace genex::views::detail {
             set_intersection_iterator, it1);
 
         GENEX_INLINE constexpr explicit set_intersection_iterator(I1 it1, S1 st1, I2 it2, S2 st2, Comp comp, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<I1> and
-            std::is_nothrow_move_constructible_v<S1> and
-            std::is_nothrow_move_constructible_v<I2> and
-            std::is_nothrow_move_constructible_v<S2> and
-            std::is_nothrow_move_constructible_v<Comp> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
-            it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)), comp(std::move(comp)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, Comp, Proj1, Proj2> and
+            noexcept(satisfy())) :
+            it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)),
+            comp(std::move(comp)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
             satisfy();
+        }
+
+        GENEX_INLINE constexpr set_intersection_iterator(set_intersection_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, Comp, Proj1, Proj2> and
+            noexcept(satisfy())) :
+            it1(std::move(other.it1)), st1(std::move(other.st1)), it2(std::move(other.it2)), st2(std::move(other.st2)),
+            comp(std::move(other.comp)), proj1(std::move(other.proj1)), proj2(std::move(other.proj2)) {
+            satisfy();
+        }
+
+        GENEX_INLINE constexpr auto operator=(set_intersection_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I1, S1, I2, S2, Comp, Proj1, Proj2> and
+            noexcept(satisfy())) -> set_intersection_iterator& {
+            it1 = std::move(other.it1);
+            st1 = std::move(other.st1);
+            it2 = std::move(other.it2);
+            st2 = std::move(other.st2);
+            comp = std::move(other.comp);
+            proj1 = std::move(other.proj1);
+            proj2 = std::move(other.proj2);
+            satisfy();
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -207,15 +243,34 @@ namespace genex::views::detail {
             set_symmetric_difference_iterator, it1);
 
         GENEX_INLINE constexpr explicit set_symmetric_difference_iterator(I1 it1, S1 st1, I2 it2, S2 st2, Comp comp, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<I1> and
-            std::is_nothrow_move_constructible_v<S1> and
-            std::is_nothrow_move_constructible_v<I2> and
-            std::is_nothrow_move_constructible_v<S2> and
-            std::is_nothrow_move_constructible_v<Comp> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
-            it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)), comp(std::move(comp)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, Comp, Proj1, Proj2> and
+            noexcept(satisfy())) :
+            it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)),
+            comp(std::move(comp)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
             satisfy();
+        }
+
+        GENEX_INLINE constexpr set_symmetric_difference_iterator(set_symmetric_difference_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, Comp, Proj1, Proj2> and
+            noexcept(satisfy())) :
+            it1(std::move(other.it1)), st1(std::move(other.st1)), it2(std::move(other.it2)), st2(std::move(other.st2)),
+            comp(std::move(other.comp)), proj1(std::move(other.proj1)), proj2(std::move(other.proj2)), from_first(other.from_first) {
+            satisfy();
+        }
+
+        GENEX_INLINE constexpr auto operator=(set_symmetric_difference_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I1, S1, I2, S2, Comp, Proj1, Proj2> and
+            noexcept(satisfy())) -> set_symmetric_difference_iterator& {
+            it1 = std::move(other.it1);
+            st1 = std::move(other.st1);
+            it2 = std::move(other.it2);
+            st2 = std::move(other.st2);
+            comp = std::move(other.comp);
+            proj1 = std::move(other.proj1);
+            proj2 = std::move(other.proj2);
+            from_first = other.from_first;
+            satisfy();
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -300,15 +355,35 @@ namespace genex::views::detail {
             set_union_iterator, it1);
 
         GENEX_INLINE constexpr explicit set_union_iterator(I1 it1, S1 st1, I2 it2, S2 st2, Comp comp, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<I1> and
-            std::is_nothrow_move_constructible_v<S1> and
-            std::is_nothrow_move_constructible_v<I2> and
-            std::is_nothrow_move_constructible_v<S2> and
-            std::is_nothrow_move_constructible_v<Comp> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
-            it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)), comp(std::move(comp)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, Comp, Proj1, Proj2> and
+            noexcept(satisfy())) :
+            it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)),
+            comp(std::move(comp)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
             satisfy();
+        }
+
+        GENEX_INLINE constexpr set_union_iterator(set_union_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, Comp, Proj1, Proj2> and
+            noexcept(satisfy())) :
+            it1(std::move(other.it1)), st1(std::move(other.st1)), it2(std::move(other.it2)), st2(std::move(other.st2)),
+            comp(std::move(other.comp)), proj1(std::move(other.proj1)), proj2(std::move(other.proj2)),
+            from_first(other.from_first) {
+            satisfy();
+        }
+
+        GENEX_INLINE constexpr auto operator=(set_union_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I1, S1, I2, S2, Comp, Proj1, Proj2> and
+            noexcept(satisfy())) -> set_union_iterator& {
+            it1 = std::move(other.it1);
+            st1 = std::move(other.st1);
+            it2 = std::move(other.it2);
+            st2 = std::move(other.st2);
+            comp = std::move(other.comp);
+            proj1 = std::move(other.proj1);
+            proj2 = std::move(other.proj2);
+            from_first = other.from_first;
+            satisfy();
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -377,15 +452,32 @@ namespace genex::views::detail {
             set_difference_unsorted_iterator, it1);
 
         GENEX_INLINE constexpr explicit set_difference_unsorted_iterator(I1 it1, S1 st1, I2 it2, S2 st2, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<I1> and
-            std::is_nothrow_move_constructible_v<S1> and
-            std::is_nothrow_move_constructible_v<I2> and
-            std::is_nothrow_move_constructible_v<S2> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, operations::eq, Proj1, Proj2> and
+            noexcept(satisfy())) :
             it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)),
             proj1(std::move(proj1)), proj2(std::move(proj2)) {
             satisfy();
+        }
+
+        GENEX_INLINE constexpr set_difference_unsorted_iterator(set_difference_unsorted_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, operations::eq, Proj1, Proj2> and
+            noexcept(satisfy())) :
+            it1(std::move(other.it1)), st1(std::move(other.st1)), it2(std::move(other.it2)), st2(std::move(other.st2)),
+            proj1(std::move(other.proj1)), proj2(std::move(other.proj2)) {
+            satisfy();
+        }
+
+        GENEX_INLINE constexpr auto operator=(set_difference_unsorted_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I1, S1, I2, S2, operations::eq, Proj1, Proj2> and
+            noexcept(satisfy())) -> set_difference_unsorted_iterator& {
+            it1 = std::move(other.it1);
+            st1 = std::move(other.st1);
+            it2 = std::move(other.it2);
+            st2 = std::move(other.st2);
+            proj1 = std::move(other.proj1);
+            proj2 = std::move(other.proj2);
+            satisfy();
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -440,15 +532,32 @@ namespace genex::views::detail {
             set_intersection_unsorted_iterator, it1);
 
         GENEX_INLINE constexpr explicit set_intersection_unsorted_iterator(I1 it1, S1 st1, I2 it2, S2 st2, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<I1> and
-            std::is_nothrow_move_constructible_v<S1> and
-            std::is_nothrow_move_constructible_v<I2> and
-            std::is_nothrow_move_constructible_v<S2> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, operations::eq, Proj1, Proj2> and
+            noexcept(satisfy())) :
             it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)),
             proj1(std::move(proj1)), proj2(std::move(proj2)) {
             satisfy();
+        }
+
+        GENEX_INLINE constexpr set_intersection_unsorted_iterator(set_intersection_unsorted_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, operations::eq, Proj1, Proj2> and
+            noexcept(satisfy())) :
+            it1(std::move(other.it1)), st1(std::move(other.st1)), it2(std::move(other.it2)), st2(std::move(other.st2)),
+            proj1(std::move(other.proj1)), proj2(std::move(other.proj2)) {
+            satisfy();
+        }
+
+        GENEX_INLINE constexpr auto operator=(set_intersection_unsorted_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I1, S1, I2, S2, operations::eq, Proj1, Proj2> and
+            noexcept(satisfy())) -> set_intersection_unsorted_iterator& {
+            it1 = std::move(other.it1);
+            st1 = std::move(other.st1);
+            it2 = std::move(other.it2);
+            st2 = std::move(other.st2);
+            proj1 = std::move(other.proj1);
+            proj2 = std::move(other.proj2);
+            satisfy();
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -507,14 +616,33 @@ namespace genex::views::detail {
             set_symmetric_difference_unsorted_iterator, it1);
 
         GENEX_INLINE constexpr explicit set_symmetric_difference_unsorted_iterator(I1 it1, S1 st1, I2 it2, S2 st2, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<I1> and
-            std::is_nothrow_move_constructible_v<S1> and
-            std::is_nothrow_move_constructible_v<I2> and
-            std::is_nothrow_move_constructible_v<S2> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, operations::eq, Proj1, Proj2> and
+            noexcept(satisfy())) :
             it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)),
             proj1(std::move(proj1)), proj2(std::move(proj2)), first_it(it1), first_st(st1) {
+        }
+
+        GENEX_INLINE constexpr set_symmetric_difference_unsorted_iterator(set_symmetric_difference_unsorted_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, operations::eq, Proj1, Proj2> and
+            noexcept(satisfy())) :
+            it1(std::move(other.it1)), st1(std::move(other.st1)), it2(std::move(other.it2)), st2(std::move(other.st2)),
+            proj1(std::move(other.proj1)), proj2(std::move(other.proj2)),
+            from_first(other.from_first), first_it(other.first_it), first_st(other.first_st) {
+        }
+
+        GENEX_INLINE constexpr auto operator=(set_symmetric_difference_unsorted_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I1, S1, I2, S2, operations::eq, Proj1, Proj2> and
+            noexcept(satisfy())) -> set_symmetric_difference_unsorted_iterator& {
+            it1 = std::move(other.it1);
+            st1 = std::move(other.st1);
+            it2 = std::move(other.it2);
+            st2 = std::move(other.st2);
+            proj1 = std::move(other.proj1);
+            proj2 = std::move(other.proj2);
+            from_first = other.from_first;
+            first_it = other.first_it;
+            first_st = other.first_st;
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -581,14 +709,33 @@ namespace genex::views::detail {
             set_union_unsorted_iterator, it1);
 
         GENEX_INLINE constexpr explicit set_union_unsorted_iterator(I1 it1, S1 st1, I2 it2, S2 st2, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<I1> and
-            std::is_nothrow_move_constructible_v<S1> and
-            std::is_nothrow_move_constructible_v<I2> and
-            std::is_nothrow_move_constructible_v<S2> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, operations::eq, Proj1, Proj2> and
+            noexcept(satisfy())) :
             it1(std::move(it1)), st1(std::move(st1)), it2(std::move(it2)), st2(std::move(st2)),
             proj1(std::move(proj1)), proj2(std::move(proj2)), first_it(it1), first_st(st1) {
+        }
+
+        GENEX_INLINE constexpr set_union_unsorted_iterator(set_union_unsorted_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, operations::eq, Proj1, Proj2> and
+            noexcept(satisfy())) :
+            it1(std::move(other.it1)), st1(std::move(other.st1)), it2(std::move(other.it2)), st2(std::move(other.st2)),
+            proj1(std::move(other.proj1)), proj2(std::move(other.proj2)),
+            from_first(other.from_first), first_it(other.first_it), first_st(other.first_st) {
+        }
+
+        GENEX_INLINE constexpr auto operator=(set_union_unsorted_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I1, S1, I2, S2, operations::eq, Proj1, Proj2> and
+            noexcept(satisfy())) -> set_union_unsorted_iterator& {
+            it1 = std::move(other.it1);
+            st1 = std::move(other.st1);
+            it2 = std::move(other.it2);
+            st2 = std::move(other.st2);
+            proj1 = std::move(other.proj1);
+            proj2 = std::move(other.proj2);
+            from_first = other.from_first;
+            first_it = other.first_it;
+            first_st = other.first_st;
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -742,11 +889,7 @@ namespace genex::views::detail {
 
 
         GENEX_INLINE constexpr explicit set_difference_view(V1 rng1, V2 rng2, Comp comp, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<V1> and
-            std::is_nothrow_move_constructible_v<V2> and
-            std::is_nothrow_move_constructible_v<Comp> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V1, V2, Comp, Proj1, Proj2>) :
             base_rng1(std::move(rng1)), base_rng2(std::move(rng2)),
             comp(std::move(comp)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
         }
@@ -761,7 +904,7 @@ namespace genex::views::detail {
             return iterators::end(base_rng1);
         }
 
-        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
+        GENEX_INLINE constexpr auto size() const noexcept = delete;
     };
 
     template <typename V1, typename V2, typename Comp, typename Proj1, typename Proj2>
@@ -779,11 +922,7 @@ namespace genex::views::detail {
             comp, proj1, proj2);
 
         GENEX_INLINE constexpr explicit set_intersection_view(V1 rng1, V2 rng2, Comp comp, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<V1> and
-            std::is_nothrow_move_constructible_v<V2> and
-            std::is_nothrow_move_constructible_v<Comp> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V1, V2, Comp, Proj1, Proj2>) :
             base_rng1(std::move(rng1)), base_rng2(std::move(rng2)),
             comp(std::move(comp)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
         }
@@ -798,7 +937,7 @@ namespace genex::views::detail {
             return iterators::end(base_rng1);
         }
 
-        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
+        GENEX_INLINE constexpr auto size() const noexcept = delete;
     };
 
     template <typename V1, typename V2, typename Comp, typename Proj1, typename Proj2>
@@ -815,11 +954,7 @@ namespace genex::views::detail {
             iterators::begin(base_rng2), iterators::end(base_rng2), comp, proj1, proj2);
 
         GENEX_INLINE constexpr explicit set_symmetric_difference_view(V1 rng1, V2 rng2, Comp comp, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<V1> and
-            std::is_nothrow_move_constructible_v<V2> and
-            std::is_nothrow_move_constructible_v<Comp> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V1, V2, Comp, Proj1, Proj2>) :
             base_rng1(std::move(rng1)), base_rng2(std::move(rng2)),
             comp(std::move(comp)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
         }
@@ -834,7 +969,7 @@ namespace genex::views::detail {
             return iterators::end(base_rng1);
         }
 
-        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
+        GENEX_INLINE constexpr auto size() const noexcept = delete;
     };
 
     template <typename V1, typename V2, typename Comp, typename Proj1, typename Proj2>
@@ -851,11 +986,7 @@ namespace genex::views::detail {
             iterators::begin(base_rng2), iterators::end(base_rng2), comp, proj1, proj2);
 
         GENEX_INLINE constexpr explicit set_union_view(V1 rng1, V2 rng2, Comp comp, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<V1> and
-            std::is_nothrow_move_constructible_v<V2> and
-            std::is_nothrow_move_constructible_v<Comp> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V1, V2, Comp, Proj1, Proj2>) :
             base_rng1(std::move(rng1)), base_rng2(std::move(rng2)),
             comp(std::move(comp)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
         }
@@ -870,7 +1001,7 @@ namespace genex::views::detail {
             return iterators::end(base_rng1);
         }
 
-        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
+        GENEX_INLINE constexpr auto size() const noexcept = delete;
     };
 
     template <typename V1, typename V2, typename Proj1, typename Proj2>
@@ -886,10 +1017,7 @@ namespace genex::views::detail {
             iterators::begin(base_rng2), iterators::end(base_rng2), proj1, proj2);
 
         GENEX_INLINE constexpr explicit set_difference_unsorted_view(V1 rng1, V2 rng2, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<V1> and
-            std::is_nothrow_move_constructible_v<V2> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V1, V2, operations::eq, Proj1, Proj2>) :
             base_rng1(std::move(rng1)), base_rng2(std::move(rng2)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
         }
 
@@ -903,7 +1031,7 @@ namespace genex::views::detail {
             return iterators::end(base_rng1);
         }
 
-        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
+        GENEX_INLINE constexpr auto size() const noexcept = delete;
     };
 
     template <typename V1, typename V2, typename Proj1, typename Proj2>
@@ -919,10 +1047,7 @@ namespace genex::views::detail {
             iterators::begin(base_rng2), iterators::end(base_rng2), proj1, proj2);
 
         GENEX_INLINE constexpr explicit set_intersection_unsorted_view(V1 rng1, V2 rng2, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<V1> and
-            std::is_nothrow_move_constructible_v<V2> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V1, V2, operations::eq, Proj1, Proj2>) :
             base_rng1(std::move(rng1)), base_rng2(std::move(rng2)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
         }
 
@@ -936,7 +1061,7 @@ namespace genex::views::detail {
             return iterators::end(base_rng1);
         }
 
-        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
+        GENEX_INLINE constexpr auto size() const noexcept = delete;
     };
 
     template <typename V1, typename V2, typename Proj1, typename Proj2>
@@ -952,10 +1077,7 @@ namespace genex::views::detail {
             iterators::begin(base_rng2), iterators::end(base_rng2), proj1, proj2);
 
         GENEX_INLINE constexpr explicit set_symmetric_difference_unsorted_view(V1 rng1, V2 rng2, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<V1> and
-            std::is_nothrow_move_constructible_v<V2> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V1, V2, operations::eq, Proj1, Proj2>) :
             base_rng1(std::move(rng1)), base_rng2(std::move(rng2)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
         }
 
@@ -969,7 +1091,7 @@ namespace genex::views::detail {
             return iterators::end(base_rng1);
         }
 
-        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
+        GENEX_INLINE constexpr auto size() const noexcept = delete;
     };
 
     template <typename V1, typename V2, typename Proj1, typename Proj2>
@@ -985,10 +1107,7 @@ namespace genex::views::detail {
             iterators::begin(base_rng2), iterators::end(base_rng2), proj1, proj2);
 
         GENEX_INLINE constexpr explicit set_union_unsorted_view(V1 rng1, V2 rng2, Proj1 proj1, Proj2 proj2) noexcept(
-            std::is_nothrow_move_constructible_v<V1> and
-            std::is_nothrow_move_constructible_v<V2> and
-            std::is_nothrow_move_constructible_v<Proj1> and
-            std::is_nothrow_move_constructible_v<Proj2>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V1, V2, operations::eq, Proj1, Proj2>) :
             base_rng1(std::move(rng1)), base_rng2(std::move(rng2)), proj1(std::move(proj1)), proj2(std::move(proj2)) {
         }
 
@@ -1002,7 +1121,7 @@ namespace genex::views::detail {
             return iterators::end(base_rng1);
         }
 
-        GENEX_INLINE constexpr auto size() const noexcept -> std::common_type_t<range_size_t<V1>, range_size_t<V2>> = delete;
+        GENEX_INLINE constexpr auto size() const noexcept = delete;
     };
 }
 
@@ -1012,7 +1131,8 @@ namespace genex::views {
     struct set_algorithm_sorted_base_fn {
         template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
-        constexpr auto operator()(I1 it1, S1 st1, I2 it2, S2 st2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept -> auto {
+        constexpr auto operator()(I1 it1, S1 st1, I2 it2, S2 st2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, Comp, Proj1, Proj2>) {
             using V1 = std::ranges::subrange<I1, S1>;
             using V2 = std::ranges::subrange<I2, S2>;
             return View<V1, V2>{
@@ -1022,7 +1142,9 @@ namespace genex::views {
 
         template <typename Rng1, typename Rng2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires concepts::set_algorithmicable_range<Rng1, Rng2, Comp, Proj1, Proj2>
-        auto operator()(Rng1 &&rng1, Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept -> auto {
+        auto operator()(Rng1 &&rng1, Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng1&&, Rng2&&> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Comp, Proj1, Proj2>) {
             using V1 = std::views::all_t<Rng1>;
             using V2 = std::views::all_t<Rng2>;
             return View<V1, V2>{
@@ -1030,8 +1152,12 @@ namespace genex::views {
                 std::move(comp), std::move(proj1), std::move(proj2)};
         }
 
-        template <typename Rng2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity> requires (not range<Comp>)
-        constexpr auto operator()(Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const -> auto {
+        template <typename Rng2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+        requires (not range<Comp>)
+        constexpr auto operator()(Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, set_algorithm_sorted_base_fn> and
+            meta::all_of_v<std::is_nothrow_constructible, Rng2&&> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Comp, Proj1, Proj2>) {
             return std::bind_back(
                 set_algorithm_sorted_base_fn{}, std::forward<Rng2>(rng2), std::move(comp), std::move(proj1), std::move(proj2));
         }
@@ -1041,7 +1167,8 @@ namespace genex::views {
     struct set_algorithm_unsorted_base_fn {
         template <typename I1, typename S1, typename I2, typename S2, typename Proj1, typename Proj2>
         requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, operations::eq, Proj1, Proj2>
-        constexpr auto operator()(I1 it1, S1 st1, I2 it2, S2 st2, Proj1 proj1 = {}, Proj2 proj2 = {}) const -> auto {
+        constexpr auto operator()(I1 it1, S1 st1, I2 it2, S2 st2, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I1, S1, I2, S2, Proj1, Proj2>) {
             using V1 = std::ranges::subrange<I1, S1>;
             using V2 = std::ranges::subrange<I2, S2>;
             return View<V1, V2, Proj1, Proj2>{
@@ -1051,7 +1178,9 @@ namespace genex::views {
 
         template <typename Rng1, typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires concepts::set_algorithmicable_range<Rng1, Rng2, operations::eq, Proj1, Proj2>
-        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const -> auto {
+        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng1&&, Rng2&&> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Proj1, Proj2>) {
             using V1 = std::views::all_t<Rng1>;
             using V2 = std::views::all_t<Rng2>;
             return View<V1, V2, Proj1, Proj2>{
@@ -1061,7 +1190,10 @@ namespace genex::views {
 
         template <typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires (not range<Proj1>)
-        constexpr auto operator()(Rng2 &&rng2, Proj1 proj = {}, Proj2 proj2 = {}) const -> auto {
+        constexpr auto operator()(Rng2 &&rng2, Proj1 proj = {}, Proj2 proj2 = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, set_algorithm_unsorted_base_fn> and
+            meta::all_of_v<std::is_nothrow_constructible, Rng2&&> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Proj1, Proj2>) {
             return std::bind_back(
                 set_algorithm_unsorted_base_fn{}, std::forward<Rng2>(rng2), std::move(proj), std::move(proj2));
         }

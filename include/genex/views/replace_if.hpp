@@ -1,10 +1,10 @@
 #pragma once
-#include <functional>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
+#include <genex/operations/size.hpp>
 
 
 namespace genex::views::detail::concepts {
@@ -46,12 +46,38 @@ namespace genex::views::detail {
             replace_if_iterator, it);
 
         GENEX_INLINE constexpr explicit replace_if_iterator(I it, S st, Pred pred, New new_val, Proj proj) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S> and
-            std::is_nothrow_move_constructible_v<Pred> and
-            std::is_nothrow_move_constructible_v<New> and
-            std::is_nothrow_move_constructible_v<Proj>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Pred, New, Proj>) :
             it(std::move(it)), st(std::move(st)), pred(std::move(pred)), new_val(std::move(new_val)), proj(std::move(proj)) {
+        }
+
+        GENEX_INLINE constexpr replace_if_iterator(replace_if_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Pred, New, Proj>) :
+            it(std::move(other.it)), st(std::move(other.st)), pred(std::move(other.pred)), new_val(std::move(other.new_val)), proj(std::move(other.proj)) {
+        }
+
+        GENEX_INLINE constexpr replace_if_iterator(const replace_if_iterator &other) noexcept(
+            meta::all_of_v<std::is_nothrow_copy_constructible, I, S, Pred, New, Proj>) :
+            it(other.it), st(other.st), pred(other.pred), new_val(other.new_val), proj(other.proj) {
+        }
+
+        GENEX_INLINE constexpr auto operator=(replace_if_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I, S, Pred, New, Proj>) -> replace_if_iterator& {
+            it = std::move(other.it);
+            st = std::move(other.st);
+            pred = std::move(other.pred);
+            new_val = std::move(other.new_val);
+            proj = std::move(other.proj);
+            return *this;
+        }
+
+        GENEX_INLINE constexpr auto operator=(const replace_if_iterator &other) noexcept(
+            meta::all_of_v<std::is_nothrow_copy_assignable, I, S, Pred, New, Proj>) -> replace_if_iterator& {
+            it = other.it;
+            st = other.st;
+            pred = other.pred;
+            new_val = other.new_val;
+            proj = other.proj;
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() noexcept(
@@ -110,10 +136,7 @@ namespace genex::views::detail {
             replace_if_iterator, replace_if_sentinel, base_rng, pred, new_val, proj);
 
         GENEX_INLINE constexpr explicit replace_if_view(V rng, Pred pred, New new_val, Proj proj) noexcept(
-            std::is_nothrow_move_constructible_v<V> and
-            std::is_nothrow_move_constructible_v<Pred> and
-            std::is_nothrow_move_constructible_v<New> and
-            std::is_nothrow_move_constructible_v<Proj>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V, Pred, New, Proj>) :
             base_rng(std::move(rng)), pred(std::move(pred)), new_val(std::move(new_val)), proj(std::move(proj)) {
         }
 
@@ -128,7 +151,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             return operations::size(base_rng);
         }
     };
@@ -139,7 +162,8 @@ namespace genex::views {
     struct replace_if_fn {
         template <typename I, typename S, typename Pred, typename New, typename Proj = std::identity>
         requires detail::concepts::replaceable_if_iters<I, S, Pred, New, Proj>
-        GENEX_INLINE constexpr auto operator()(I it, S st, Pred pred, New new_val, Proj proj = {}) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, Pred pred, New new_val, Proj proj = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Pred, New, Proj>) {
             using V = std::ranges::subrange<I, S>;
             return detail::replace_if_view<V, Pred, New, Proj>{
                 std::ranges::subrange{std::move(it), std::move(st)}, std::move(pred), std::move(new_val), std::move(proj)};
@@ -147,14 +171,18 @@ namespace genex::views {
 
         template <typename Rng, typename Pred, typename New, typename Proj = std::identity>
         requires detail::concepts::replaceable_if_range<Rng, Pred, New, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng, Pred pred, New new_val, Proj proj = {}) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng&& rng, Pred pred, New new_val, Proj proj = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Pred, New, Proj>) {
             using V = std::views::all_t<Rng>;
             return detail::replace_if_view<V, Pred, New, Proj>{
                 std::forward<Rng>(rng), std::move(pred), std::move(new_val), std::move(proj)};
         }
 
         template <typename Pred, typename New, typename Proj = std::identity>
-        GENEX_INLINE constexpr auto operator()(Pred pred, New new_val, Proj proj = {}) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Pred pred, New new_val, Proj proj = {}) const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, replace_if_fn> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Pred, New, Proj>) {
             return std::bind_back(
                 replace_if_fn{}, std::move(pred), std::move(new_val), std::move(proj));
         }

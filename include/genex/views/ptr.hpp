@@ -1,10 +1,9 @@
 #pragma once
-
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -36,14 +35,14 @@ namespace genex::views::detail {
 
         I it; S st;
 
-        GENEX_INLINE constexpr explicit ptr_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            ptr_iterator);
 
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             ptr_iterator, it);
 
         GENEX_INLINE constexpr explicit ptr_iterator(I it, S st) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) :
             it(std::move(it)), st(std::move(st)) {
         }
 
@@ -94,7 +93,7 @@ namespace genex::views::detail {
             ptr_iterator, ptr_sentinel, base_rng);
 
         GENEX_INLINE constexpr explicit ptr_view(V rng) noexcept(
-            std::is_nothrow_move_constructible_v<V>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V>) :
             base_rng(std::move(rng)) {
         }
 
@@ -120,7 +119,8 @@ namespace genex::views {
     struct ptr_fn {
         template <typename I, typename S>
         requires detail::concepts::ptr_gettable_iters<I, S>
-        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) {
             using V = std::ranges::subrange<I, S>;
             return detail::ptr_view<V>{
                 std::ranges::subrange<I, S>{std::move(it), std::move(st)}};
@@ -128,13 +128,15 @@ namespace genex::views {
 
         template <typename Rng>
         requires detail::concepts::ptr_gettable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
             using V = std::views::all_t<Rng>;
             return detail::ptr_view<V>{
                 std::forward<Rng>(rng)};
         }
 
-        GENEX_INLINE constexpr auto operator()() const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()() const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, ptr_fn>) {
             return std::bind_back(
                 ptr_fn{});
         }

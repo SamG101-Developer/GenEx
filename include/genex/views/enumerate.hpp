@@ -1,9 +1,9 @@
 #pragma once
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -34,16 +34,16 @@ namespace genex::views::detail {
         using difference_type = difference_type_selector_t<I>;
 
         I it; S st;
-        std::size_t index;
+        std::size_t index = 0;
 
-        GENEX_INLINE constexpr explicit enum_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            enum_iterator);
 
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             enum_iterator, it);
 
         GENEX_INLINE constexpr explicit enum_iterator(I it, S st) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) :
             it(std::move(it)), st(std::move(st)), index(0) {
         }
 
@@ -105,7 +105,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             return operations::size(base_rng);
         }
     };
@@ -116,7 +116,8 @@ namespace genex::views {
     struct enumerate_fn {
         template <typename I, typename S>
         requires detail::concepts::enumerable_iters<I, S>
-        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) {
             using V = std::ranges::subrange<I, S>;
             return detail::enum_view<V>{
                 std::ranges::subrange<I, S>{std::move(it), std::move(st)}};
@@ -124,13 +125,15 @@ namespace genex::views {
 
         template <typename Rng>
         requires detail::concepts::enumerable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
             using V = std::views::all_t<Rng>;
             return detail::enum_view<V>{
                 std::forward<Rng>(rng)};
         }
 
-        GENEX_INLINE constexpr auto operator()() const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()() const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, enumerate_fn>) {
             return std::bind_back(
                 enumerate_fn{});
         }

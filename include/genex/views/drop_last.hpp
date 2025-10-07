@@ -1,5 +1,7 @@
 #pragma once
 #include <genex/concepts.hpp>
+#include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
 #include <genex/iterators/distance.hpp>
@@ -36,14 +38,14 @@ namespace genex::views::detail {
 
         I it; S st;
 
-        GENEX_INLINE constexpr explicit drop_last_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            drop_last_iterator);
 
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             drop_last_iterator, it);
 
         GENEX_INLINE constexpr explicit drop_last_iterator(I it, S st, Int) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Int>) :
             it(std::move(it)), st(std::move(st)) {
         }
 
@@ -90,8 +92,8 @@ namespace genex::views::detail {
             drop_last_iterator, drop_last_sentinel, base_rng, drop_n);
 
         GENEX_INLINE constexpr explicit drop_last_view(V rng, Int drop_n) noexcept(
-            std::is_nothrow_move_constructible_v<V>) :
-            base_rng(std::move(rng)), drop_n(std::max(0, drop_n)) {
+            meta::all_of_v<std::is_nothrow_move_constructible, V, Int>) :
+            base_rng(std::move(rng)), drop_n(drop_n) {
         }
 
         GENEX_INLINE constexpr auto internal_begin() const noexcept(
@@ -108,7 +110,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             const auto total_size = operations::size(base_rng);
             return total_size > drop_n ? total_size - drop_n : 0;
         }
@@ -120,25 +122,29 @@ namespace genex::views {
     struct drop_last_fn {
         template <typename I, typename S, typename Int>
         requires detail::concepts::droppable_last_iters<I, S, Int>
-        GENEX_INLINE constexpr auto operator()(I it, S st, Int drop_n) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, Int drop_n) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, Int>) {
             using V = std::ranges::subrange<I, S>;
             return detail::drop_last_view<V, Int>{
-                std::ranges::subrange<I, S>{std::move(it), std::move(st)}, drop_n};
+                std::ranges::subrange<I, S>{std::move(it), std::move(st)}, std::move(drop_n)};
         }
 
         template <typename Rng, typename Int>
         requires detail::concepts::droppable_last_range<Rng, Int>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Int drop_n) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Int drop_n) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
             using V = std::views::all_t<Rng>;
             return detail::drop_last_view<V, Int>{
-                std::forward<Rng>(rng), drop_n};
+                std::forward<Rng>(rng), std::move(drop_n)};
         }
 
         template <typename Int>
         requires std::weakly_incrementable<Int>
-        GENEX_INLINE constexpr auto operator()(Int drop_n) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Int drop_n) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, drop_last_fn> and
+            meta::all_of_v<std::is_nothrow_move_constructible, Int>) {
             return std::bind_back(
-                drop_last_fn{}, drop_n);
+                drop_last_fn{}, std::move(drop_n));
         }
     };
 

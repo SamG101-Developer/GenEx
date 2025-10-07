@@ -11,4 +11,16 @@ namespace genex::meta {
             return std::forward<T>(x);
         }
     };
+
+    template <template <typename> typename Trait, typename... Ts>
+    struct all_of : std::bool_constant<(Trait<Ts>::value && ...)> { };
+
+    template <template <typename> typename Trait, typename... Ts>
+    inline constexpr auto all_of_v = all_of<Trait, Ts...>::value;
+
+    template <template <typename> typename Trait, typename... Ts>
+    struct any_of : std::bool_constant<(Trait<Ts>::value || ...)> { };
+
+    template <template <typename> typename Trait, typename... Ts>
+    inline constexpr auto any_of_v = any_of<Trait, Ts...>::value;
 }

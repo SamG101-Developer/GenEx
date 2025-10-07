@@ -1,12 +1,12 @@
 #pragma once
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/algorithms/find.hpp>
 #include <genex/iterators/access.hpp>
 #include <genex/iterators/next.hpp>
 #include <genex/operations/cmp.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 
@@ -42,15 +42,14 @@ namespace genex::views::detail {
         E val;
         I chunk_end;
 
-        GENEX_INLINE constexpr explicit split_iterator() noexcept = default;
+        GENEX_VIEW_ITERATOR_CTOR_DEFINITIONS(
+            split_iterator);
 
         GENEX_VIEW_ITERATOR_FUNC_DEFINITIONS(
             split_iterator, it);
 
         GENEX_INLINE constexpr explicit split_iterator(I it, S st, E val) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S> and
-            std::is_nothrow_move_constructible_v<E>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, E>) :
             it(std::move(it)), st(std::move(st)), val(std::move(val)) {
             chunk_end = algorithms::find(this->it, this->st, this->val);
         }
@@ -60,8 +59,8 @@ namespace genex::views::detail {
             return {it, chunk_end};
         }
 
-        GENEX_INLINE constexpr auto operator++() noexcept(noexcept(++it)) // next & find?
-            -> split_iterator& {
+        GENEX_INLINE constexpr auto operator++() noexcept(
+            noexcept(++it)) -> split_iterator& { // next and find? (in noexcept)
             if (it == st) { return *this; }
             if (chunk_end != st) {
                 it = st;
@@ -74,7 +73,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++(int) noexcept(
-        noexcept(it++)) -> split_iterator {
+            noexcept(it++)) -> split_iterator {
             auto tmp = *this;
             ++*this;
             return tmp;
@@ -105,8 +104,7 @@ namespace genex::views::detail {
             split_iterator, split_sentinel, base_rng, val);
 
         GENEX_INLINE constexpr explicit split_view(V rng, E val) noexcept(
-            std::is_nothrow_move_constructible_v<V> and
-            std::is_nothrow_move_constructible_v<E>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, V, E>) :
             base_rng(std::move(rng)), val(std::move(val)) {
         }
 
@@ -120,7 +118,7 @@ namespace genex::views::detail {
             return iterators::end(base_rng);
         }
 
-        GENEX_INLINE constexpr auto size() const noexcept -> range_size_t<V> = delete;
+        GENEX_INLINE constexpr auto size() const noexcept = delete;
     };
 }
 
@@ -129,7 +127,8 @@ namespace genex::views {
     struct split_fn {
         template <typename I, typename S, typename E>
         requires detail::concepts::splittable_iters<I, S, E>
-        GENEX_INLINE constexpr auto operator()(I it, S st, E val) const -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, E val) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S, E>) {
             using V = std::ranges::subrange<I, S>;
             return detail::split_view<V, E>{
                 std::ranges::subrange{std::move(it), std::move(st)}, std::move(val)};
@@ -137,14 +136,18 @@ namespace genex::views {
 
         template <typename E, typename Rng>
         requires detail::concepts::splittable_range<Rng, E>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, E val) const -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E val) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&> and
+            meta::all_of_v<std::is_nothrow_move_constructible, E>) {
             using V = std::views::all_t<Rng>;
             return detail::split_view<V, E>{
                 std::forward<Rng>(rng), std::move(val)};
         }
 
         template <typename E>
-        GENEX_INLINE constexpr auto operator()(E val) const -> auto {
+        GENEX_INLINE constexpr auto operator()(E val) const noexcept(
+            meta::all_of_v<std::is_nothrow_default_constructible, split_fn> and
+            meta::all_of_v<std::is_nothrow_move_constructible, E>) {
             return std::bind_back(
                 split_fn{}, std::move(val));
         }

@@ -1,13 +1,12 @@
 #pragma once
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
 #include <genex/iterators/distance.hpp>
-#include <genex/operations/data.hpp>
+#include <genex/iterators/next.hpp>
 #include <genex/operations/size.hpp>
-
-#include "genex/iterators/next.hpp"
 
 
 namespace genex::views::detail::concepts {
@@ -46,10 +45,41 @@ namespace genex::views::detail {
             chunk_iterator, it);
 
         GENEX_INLINE constexpr explicit chunk_iterator(I it, S st, const std::size_t chunk_size) noexcept(
-            std::is_nothrow_move_constructible_v<I> and
-            std::is_nothrow_move_constructible_v<S>) :
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S> and noexcept(satisfy())) :
             it(std::move(it)), st(std::move(st)), chunk_size(chunk_size) {
-            chunk_end = iterators::next(this->it, this->chunk_size, this->st);
+            satisfy();
+        }
+
+        GENEX_INLINE constexpr chunk_iterator(chunk_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S> and noexcept(satisfy())) :
+            it(std::move(other.it)), st(std::move(other.st)), chunk_size(other.chunk_size), chunk_end(std::move(other.chunk_end)) {
+            satisfy();
+        }
+
+        GENEX_INLINE constexpr chunk_iterator(const chunk_iterator &other) noexcept(
+            meta::all_of_v<std::is_nothrow_copy_constructible, I, S> and noexcept(satisfy())) :
+            it(other.it), st(other.st), chunk_size(other.chunk_size), chunk_end(other.chunk_end) {
+            satisfy();
+        }
+
+        GENEX_INLINE constexpr auto operator=(chunk_iterator &&other) noexcept(
+            meta::all_of_v<std::is_nothrow_move_assignable, I, S> and noexcept(satisfy())) -> chunk_iterator& {
+            it = std::move(other.it);
+            st = std::move(other.st);
+            chunk_size = other.chunk_size;
+            chunk_end = std::move(other.chunk_end);
+            satisfy();
+            return *this;
+        }
+
+        GENEX_INLINE constexpr auto operator=(const chunk_iterator &other) noexcept(
+            meta::all_of_v<std::is_nothrow_copy_assignable, I, S> and noexcept(satisfy())) -> chunk_iterator& {
+            it = other.it;
+            st = other.st;
+            chunk_size = other.chunk_size;
+            chunk_end = other.chunk_end;
+            satisfy();
+            return *this;
         }
 
         GENEX_INLINE constexpr auto operator*() const noexcept(
@@ -58,10 +88,11 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++() noexcept(
-            noexcept(++it)) -> chunk_iterator& {
+            noexcept(++it) and
+            noexcept(satisfy())) -> chunk_iterator& {
             if (it != st) {
                 it = chunk_end;
-                chunk_end = iterators::next(it, chunk_size, st);
+                satisfy();
             }
             return *this;
         }
@@ -78,10 +109,18 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto operator++(int) noexcept(
-        noexcept(it++)) -> chunk_iterator {
+            noexcept(it++)) -> chunk_iterator {
             auto tmp = *this;
             ++*this;
             return tmp;
+        }
+
+    private:
+        GENEX_INLINE auto satisfy() noexcept
+            -> void {
+            if (it != st) {
+                chunk_end = iterators::next(it, chunk_size, st);
+            }
         }
     };
 
@@ -124,7 +163,7 @@ namespace genex::views::detail {
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
-            noexcept(operations::size(base_rng))) -> range_size_t<V> {
+            noexcept(operations::size(base_rng))) {
             const auto total_size = operations::size(base_rng);
             return (total_size + chunk_size - 1) / chunk_size;
         }
@@ -133,14 +172,11 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    /**
-     * The @c chunk view adaptor splits a range into subranges of a specified size. Each subrange is represented as a
-     * @c std::ranges::subrange.
-     */
     struct chunk_fn {
         template <typename I, typename S>
         requires detail::concepts::chunkable_iters<I, S>
-        GENEX_INLINE constexpr auto operator()(I it, S st, const std::size_t chunk_size) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(I it, S st, const std::size_t chunk_size) const noexcept(
+            meta::all_of_v<std::is_nothrow_move_constructible, I, S>) {
             using V = std::ranges::subrange<I, S>;
             return detail::chunk_view<V>{
                 std::ranges::subrange<I, S>{std::move(it), std::move(st)}, chunk_size};
@@ -148,13 +184,15 @@ namespace genex::views {
 
         template <typename Rng>
         requires detail::concepts::chunkable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, const std::size_t chunk_size) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, const std::size_t chunk_size) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, Rng&&>) {
             using V = std::views::all_t<Rng>;
             return detail::chunk_view<V>{
                 std::forward<Rng>(rng), chunk_size};
         }
 
-        GENEX_INLINE constexpr auto operator()(const std::size_t chunk_size) const noexcept -> auto {
+        GENEX_INLINE constexpr auto operator()(const std::size_t chunk_size) const noexcept(
+            meta::all_of_v<std::is_nothrow_constructible, chunk_fn>) {
             return std::bind_back(
                 chunk_fn{}, chunk_size);
         }
