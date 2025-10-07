@@ -104,8 +104,13 @@ namespace genex::views::detail {
 
         GENEX_INLINE constexpr auto internal_end() const noexcept(
             noexcept(iterators::begin(base_rng)) and
-            noexcept(iterators::end(base_rng))) {
-            return iterators::next(iterators::begin(base_rng), take_n, iterators::end(base_rng));
+            noexcept(iterators::end(base_rng))) requires sized_range<V> {
+                return iterators::next(iterators::begin(base_rng), take_n);
+        }
+
+        GENEX_INLINE constexpr auto internal_end() const noexcept(
+            std::is_nothrow_constructible_v<sentinel_t<V>>) {
+            return sentinel_t<V>{};
         }
 
         GENEX_INLINE constexpr auto size() const noexcept(
