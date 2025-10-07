@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include <utility>
 
 #include <genex/macros.hpp>

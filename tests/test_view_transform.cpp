@@ -69,6 +69,21 @@ TEST(GenexViewsTransform, VecInput) {
 }
 
 
+// TEST(GenexViewsTransform, VecInputLambdaCapture) {
+//     auto vec = std::vector{1, 2, 3, 4, 5, 6};
+//     auto y = 100;
+//
+//     auto temp_1 = genex::views::transform([y](auto x) { return x * y; })(vec);
+//     auto temp_2 = genex::views::to<std::vector>()(temp_1);
+//
+//     const auto rng = vec
+//         | genex::views::transform([](auto x) { return x * 2; })
+//         | genex::views::to<std::vector>();
+//     const auto exp = std::vector{2, 4, 6, 8, 10, 12};
+//     EXPECT_EQ(rng, exp);
+// }
+
+
 TEST(GenexViewsTransform, GenInput) {
     auto vec = std::vector{1, 2, 3, 4, 5, 6};
 
