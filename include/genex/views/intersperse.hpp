@@ -4,7 +4,6 @@
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
 #include <genex/iterators/next.hpp>
-#include <genex/operations/data.hpp>
 #include <genex/operations/size.hpp>
 
 

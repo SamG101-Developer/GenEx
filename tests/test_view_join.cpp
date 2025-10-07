@@ -8,6 +8,9 @@
 TEST(GenexViewsJoin, VecInput) {
     auto vec = std::vector<std::vector<int>>{{1, 2, 3}, {4, 5}, {6}};
 
+    auto temp_1 = vec | genex::views::join;
+    auto temp_2 = genex::views::to<std::vector>()(temp_1);
+
     const auto rng = vec
         | genex::views::join
         | genex::views::to<std::vector>();

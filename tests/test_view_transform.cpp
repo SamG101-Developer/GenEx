@@ -2,6 +2,7 @@
 
 #include <genex/views/intersperse.hpp>
 #include <genex/views/join.hpp>
+#include <genex/views/join_with.hpp>
 #include <genex/views/to.hpp>
 #include <genex/views/transform.hpp>
 
@@ -46,6 +47,14 @@ TEST(GenexViewsTransform, StackInput) {
         | genex::views::to<std::string>();
     const auto exp = std::string("0, 1, 2, 3, 4, 5, 7");
     EXPECT_EQ(rng, exp);
+
+    const auto rng1 = vec
+        | genex::views::transform([](auto &&x) { return std::to_string(x); })
+        | genex::views::intersperse(std::string(", "))
+        | genex::views::join_with('!')
+        | genex::views::to<std::string>();
+    const auto exp4 = std::string("0!, !1!, !2!, !3!, !4!, !5!, !7");
+    EXPECT_EQ(rng1, exp4);
 }
 
 

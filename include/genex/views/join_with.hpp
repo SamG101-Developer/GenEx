@@ -34,11 +34,31 @@ namespace genex::views::detail {
         using value_type = range_value_t<iter_value_t<I>>;
         using pointer = std::add_pointer_t<value_type>;
 
-        using iterator_category = std::iterator_traits<I>::iterator_category;
+        using _outer_cat = typename std::iterator_traits<I>::iterator_category;
+        using _inner_cat = typename std::iterator_traits<iterator_t<iter_value_t<I>>>::iterator_category;
+
+        using iterator_category = std::conditional_t<
+        std::is_same_v<_outer_cat, std::random_access_iterator_tag> &&
+        std::is_same_v<_inner_cat, std::random_access_iterator_tag>,
+        std::random_access_iterator_tag,
+        std::conditional_t<
+            std::is_same_v<_outer_cat, std::bidirectional_iterator_tag> &&
+            std::is_same_v<_inner_cat, std::bidirectional_iterator_tag>,
+            std::bidirectional_iterator_tag,
+            std::conditional_t<
+                std::is_same_v<_outer_cat, std::forward_iterator_tag> &&
+                std::is_same_v<_inner_cat, std::forward_iterator_tag>,
+                std::forward_iterator_tag,
+                std::input_iterator_tag
+                >
+            >
+        >;
+
         using iterator_concept = iterator_category;
         using difference_type = difference_type_selector_t<I>;
 
         I it; S st;
+        iter_value_t<I> sub_rng;
         iterator_t<iter_value_t<I>> sub_it;
         iterator_t<iter_value_t<I>> sub_st;
         New sep;
@@ -58,22 +78,65 @@ namespace genex::views::detail {
             if (this->it != this->st) { satisfy(); }
         }
 
+        GENEX_INLINE constexpr join_with_iterator(join_with_iterator &&other) noexcept(
+            std::is_nothrow_move_constructible_v<I> and
+            std::is_nothrow_move_constructible_v<S> and
+            std::is_nothrow_move_constructible_v<iter_value_t<I>> and
+            std::is_nothrow_move_constructible_v<iterator_t<iter_value_t<I>>> and
+            std::is_nothrow_move_constructible_v<New>) :
+            it(std::move(other.it)),
+            st(std::move(other.st)),
+            sub_rng(std::move(other.sub_rng)),
+            sub_it(std::move(other.sub_it)),
+            sub_st(std::move(other.sub_st)),
+            sep(std::move(other.sep)),
+            at_sep(other.at_sep) {
+            if (this->it != this->st) { satisfy(); }
+        }
+
+        GENEX_INLINE constexpr join_with_iterator &operator=(join_with_iterator &&other) noexcept(
+            std::is_nothrow_move_assignable_v<I> and
+            std::is_nothrow_move_assignable_v<S> and
+            std::is_nothrow_move_assignable_v<iter_value_t<I>> and
+            std::is_nothrow_move_assignable_v<iterator_t<iter_value_t<I>>> and
+            std::is_nothrow_move_assignable_v<New>) {
+            it = std::move(other.it);
+            st = std::move(other.st);
+            sub_rng = std::move(other.sub_rng);
+            sub_it = std::move(other.sub_it);
+            sub_st = std::move(other.sub_st);
+            sep = std::move(other.sep);
+            at_sep = other.at_sep;
+            if (this->it != this->st) { satisfy(); }
+            return *this;
+        }
+
         GENEX_INLINE constexpr auto operator*() const noexcept(
             noexcept(*sub_it)) -> reference {
             return at_sep ? sep : *sub_it;
         }
 
         GENEX_INLINE constexpr auto operator++() noexcept(
-            noexcept(++it) and noexcept(++sub_it) and noexcept(satisfy()))
+            noexcept(++it) and
+            noexcept(++sub_it) and
+            noexcept(satisfy()))
             -> join_with_iterator& {
+
+            if (it == st) { return *this; }
+
             if (at_sep) {
                 at_sep = false;
-                ++it;
                 if (it != st) { satisfy(); }
             }
             else {
                 ++sub_it;
-                if (sub_it == sub_st and it != st) { at_sep = true; }
+                if (sub_it == sub_st) {
+                    ++it;
+                    if (it != st) {
+                        satisfy();
+                        at_sep = true;
+                    }
+                }
             }
             return *this;
         }
@@ -89,8 +152,18 @@ namespace genex::views::detail {
         GENEX_INLINE auto satisfy() noexcept(
             noexcept(iterators::begin(*it)) and
             noexcept(iterators::end(*it))) -> void {
-            sub_it = iterators::begin(*it);
-            sub_st = iterators::end(*it);
+
+            for (; it != st; ++it) {
+                sub_rng = iter_value_t<I>(*it);
+                sub_it = iterators::begin(sub_rng);
+                sub_st = iterators::end(sub_rng);
+
+                if (sub_it != sub_st)
+                    return;
+            }
+
+            sub_it = {};
+            sub_st = {};
         }
     };
 
@@ -103,7 +176,7 @@ namespace genex::views::detail {
     template <typename I, typename S, typename New>
     requires concepts::joinable_with_iters<I, S, New>
     GENEX_VIEW_ITERSENT_EQOP_DEFINITIONS(join_with_iterator, join_with_sentinel, I, S, New) {
-        return iterators::next(it.it) == it.st and (it.sub_it == it.sub_st or it.at_sep);
+        return it.it == it.st and (it.sub_it == it.sub_st or it.at_sep);
     }
 
     template <typename V, typename New>
