@@ -19,9 +19,9 @@ namespace genex::meta {
          * f(args...).
          */
         template <typename F, typename... Args>
-        requires std::is_invocable_v<F, Args...> and (not std::is_member_pointer_v<std::remove_reference_t<F>>)
         GENEX_INLINE constexpr auto operator()(F &&f, Args &&... args) const noexcept(
-            noexcept(std::forward<F>(f)(std::forward<Args>(args)...))) -> decltype(std::forward<F>(f)(std::forward<Args>(args)...)) {
+            noexcept(std::forward<F>(f)(std::forward<Args>(args)...)))
+            -> decltype(std::forward<F>(f)(std::forward<Args>(args)...)) {
             return std::forward<F>(f)(std::forward<Args>(args)...);
         }
 
@@ -30,7 +30,9 @@ namespace genex::meta {
          * obj.*mp(args...) or mp->*obj(args...).
          */
         template <typename T, typename C, typename Obj>
-        GENEX_INLINE constexpr auto operator()(T C::*mp, Obj &&obj) const noexcept -> decltype(obj.*mp) {
+        GENEX_INLINE constexpr auto operator()(T C::*mp, Obj &&obj) const noexcept(
+            noexcept(obj.*mp))
+            -> decltype(obj.*mp) {
             return obj.*mp;
         }
 
@@ -40,7 +42,8 @@ namespace genex::meta {
          */
         template <typename R, typename C, typename Obj, typename... Args>
         GENEX_INLINE constexpr auto operator()(R C::*mp, Obj &&obj, Args &&... args) const noexcept(
-            noexcept((obj.*mp)(std::forward<Args>(args)...))) -> decltype((obj.*mp)(std::forward<Args>(args)...)) {
+            noexcept((obj.*mp)(std::forward<Args>(args)...)))
+            -> decltype((obj.*mp)(std::forward<Args>(args)...)) {
             return (obj.*mp)(std::forward<Args>(args)...);
         }
     };
