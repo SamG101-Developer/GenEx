@@ -1,5 +1,4 @@
 #pragma once
-#include <coroutine>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
@@ -7,7 +6,7 @@
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept addressable_iters =
         std::input_iterator<I> and
@@ -23,12 +22,11 @@ namespace genex::views::concepts {
 }
 
 
-namespace genex::views::detail {
+namespace genex::views::detail::coros {
     template <typename I, typename S>
-        requires concepts::addressable_iters<I, S>
-    GENEX_NO_ASAN
-    auto do_address(I first, S last) -> generator<std::add_pointer_t<std::remove_reference_t<decltype(*std::declval<I&>())>>> {
-        if (first == last) { co_return; }
+    requires concepts::addressable_iters<I, S>
+    auto do_address(I first, S last) -> generator<std::add_pointer_t<iter_value_t<I>>> {
+        GENEX_ITER_GUARD;
         for (; first != last; ++first) {
             co_yield std::addressof(*first);
         }
@@ -38,25 +36,32 @@ namespace genex::views::detail {
 
 namespace genex::views {
     struct address_fn {
+        /**
+         * Iterator interface for the address view.
+         */
         template <typename I, typename S>
-            requires concepts::addressable_iters<I, S>
-        constexpr auto operator()(I first, S last) const -> auto {
-            return detail::do_address(
-                std::move(first), std::move(last));
+        requires detail::concepts::addressable_iters<I, S>
+        GENEX_INLINE constexpr auto operator()(I first, S last) const {
+            return detail::coros::do_address(std::move(first), std::move(last));
         }
 
+        /**
+         * Range interface for the address view.
+         */
         template <typename Rng>
-            requires concepts::addressable_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        requires detail::concepts::addressable_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last));
+            return detail::coros::do_address(std::move(first), std::move(last));
         }
 
-        auto operator()() const -> auto {
+        /**
+         * Pipe interface for the address view.
+         */
+        GENEX_INLINE auto operator()() const {
             return std::bind_back(address_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(address);
+    inline constexpr address_fn address{};
 }

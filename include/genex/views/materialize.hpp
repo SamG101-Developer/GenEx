@@ -1,6 +1,4 @@
 #pragma once
-#include <coroutine>
-#include <vector>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
@@ -8,13 +6,13 @@
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <template <typename> typename Cache, typename I, typename S>
     concept materializable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
         // std::is_lvalue_reference_v<iter_reference_t<I>> and
-        actions::concepts::back_insertable_range<Cache<iter_value_t<I>>, iter_value_t<I>> and
+        actions::detail::concepts::back_insertable_range<Cache<iter_value_t<I>>, iter_value_t<I>> and
         std::is_constructible_v<Cache<iter_value_t<I>>>;
 
     template <template <typename> typename Cache, typename Rng>
@@ -24,10 +22,9 @@ namespace genex::views::concepts {
 }
 
 
-namespace genex::views::detail {
+namespace genex::views::detail::coros {
     template <template <typename> typename Cache, typename I, typename S>
-        requires concepts::materializable_iters<Cache, I, S>
-    GENEX_NO_ASAN
+    requires concepts::materializable_iters<Cache, I, S>
     auto do_materialize(I first, S last) -> Cache<iter_value_t<I>> {
         auto vec = Cache<iter_value_t<I>>();
         if (first == last) { return vec; }
@@ -40,32 +37,26 @@ namespace genex::views::detail {
 
 
 namespace genex::views {
-    struct materialize_impl_fn {
-        template <template <typename> typename Cache = std::vector, typename I, typename S>
-            requires concepts::materializable_iters<Cache, I, S>
-        constexpr auto operator()(I first, S last) const -> auto {
-            return detail::do_materialize<Cache>(
-                std::move(first), std::move(last));
+    template <template <typename> typename Cache>
+    struct materialize_fn {
+        template <typename I, typename S>
+        requires detail::concepts::materializable_iters<Cache, I, S>
+        GENEX_INLINE constexpr auto operator()(I first, S last) const {
+            return detail::coros::do_materialize<Cache>(std::move(first), std::move(last));
         }
 
-        template <template <typename> typename Cache = std::vector, typename Rng>
-            requires concepts::materializable_range<Cache, Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        template <typename Rng>
+        requires detail::concepts::materializable_range<Cache, Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return this->operator()<Cache>(
-                std::move(first), std::move(last));
+            return detail::coros::do_materialize<Cache>(std::move(first), std::move(last));
         }
 
-        template <template <typename> typename Cache = std::vector>
-        constexpr auto operator()() const -> auto {
-            return [*this]<typename Rng>requires concepts::materializable_range<Cache, Rng>(Rng &&rng) {
-                return this->operator()<Cache>(std::forward<Rng>(rng));
-            };
+        GENEX_INLINE constexpr auto operator()() const {
+            return std::bind_back(materialize_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(materialize_impl);
+    inline constexpr materialize_fn<std::vector> materialize{};
 }
 
-
-#define materialize materialize_impl.operator()

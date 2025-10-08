@@ -1,12 +1,12 @@
 #pragma once
 #include <functional>
-#include <utility>
+
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::algorithms::concepts {
+namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename E, typename F>
     concept left_foldable_iters =
         std::input_iterator<I> and
@@ -25,24 +25,23 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct fold_left_fn {
         template <typename I, typename S, typename E, typename F>
-            requires concepts::left_foldable_iters<I, S, E, F>
-        constexpr auto operator()(I first, S last, E &&init, F &&f) const -> auto {
-            auto &&acc = std::forward<E>(init);
+        requires detail::concepts::left_foldable_iters<I, S, E, F>
+        GENEX_INLINE constexpr auto operator()(I first, S last, E init, F f) const {
+            auto acc = init;
             for (; first != last; ++first) {
-                acc = std::invoke(std::forward<F>(f), std::move(acc), *first);
+                acc = std::invoke(f, std::move(acc), *first);
             }
             return acc;
         }
 
         template <typename Rng, typename E, typename F>
-            requires concepts::can_fold_left_range<Rng, E, F>
-        constexpr auto operator()(Rng &&rng, E &&init, F &&f) const -> auto {
+        requires detail::concepts::can_fold_left_range<Rng, E, F>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E init, F f) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last), std::forward<E>(init), std::forward<F>(f));
+            return (*this)(std::move(first), std::move(last), std::move(init), std::move(f));
         }
     };
 
 
-    GENEX_EXPORT_STRUCT(fold_left);
+    inline constexpr fold_left_fn fold_left{};
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include <coroutine>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
@@ -7,7 +6,7 @@
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename T1, typename T2>
     using interleave_common_t = std::common_type_t<
         std::remove_cvref_t<iter_value_t<T1>>,
@@ -30,12 +29,11 @@ namespace genex::views::concepts {
 }
 
 
-namespace genex::views::detail {
+namespace genex::views::detail::coros {
     template <typename I1, typename S1, typename I2, typename S2>
-        requires concepts::interleavable_iters<I1, S1, I2, S2>
-    GENEX_NO_ASAN
+    requires concepts::interleavable_iters<I1, S1, I2, S2>
     auto do_interleave(I1 first1, S1 last1, I2 first2, S2 last2, const bool extend) -> generator<concepts::interleave_common_t<I1, I2>> {
-        while (first1 != last1 && first2 != last2) {
+        while (first1 != last1 and first2 != last2) {
             co_yield static_cast<iter_value_t<I1>>(*first1);
             ++first1;
             co_yield static_cast<iter_value_t<I2>>(*first2);
@@ -59,27 +57,25 @@ namespace genex::views::detail {
 namespace genex::views {
     struct interleave_fn {
         template <typename I1, typename S1, typename I2, typename S2>
-            requires concepts::interleavable_iters<I1, S1, I2, S2>
-        constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, const bool extend = true) const -> auto {
-            return detail::do_interleave(
-                std::move(first1), std::move(last1), std::move(first2), std::move(last2), extend);
+        requires detail::concepts::interleavable_iters<I1, S1, I2, S2>
+        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, const bool extend = true) const {
+            return detail::coros::do_interleave(std::move(first1), std::move(last1), std::move(first2), std::move(last2), extend);
         }
 
         template <typename Rng1, typename Rng2>
-            requires concepts::interleavable_range<Rng1, Rng2>
-        constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, const bool extend = true) const -> auto {
+        requires detail::concepts::interleavable_range<Rng1, Rng2>
+        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, const bool extend = true) const {
             auto [first1, last1] = iterators::iter_pair(rng1);
             auto [first2, last2] = iterators::iter_pair(rng2);
-            return (*this)(
-                std::move(first1), std::move(last1), std::move(first2), std::move(last2), extend);
+            return detail::coros::do_interleave(std::move(first1), std::move(last1), std::move(first2), std::move(last2), extend);
         }
 
         template <typename Rng2>
-            requires range<Rng2>
-        constexpr auto operator()(Rng2 &&rng2, const bool extend = true) const -> auto {
+        requires range<Rng2>
+        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, const bool extend = true) const {
             return std::bind_back(interleave_fn{}, std::forward<Rng2>(rng2), extend);
         }
     };
 
-    GENEX_EXPORT_STRUCT(interleave);
+    inline constexpr interleave_fn interleave{};
 }

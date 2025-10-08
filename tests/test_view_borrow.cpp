@@ -9,7 +9,7 @@ struct TestStruct {
     std::uint32_t b;
 
     auto operator==(const TestStruct &other) const -> bool {
-        return a == other.a && b == other.b;
+        return a == other.a and b == other.b;
     }
 };
 

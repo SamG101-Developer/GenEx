@@ -1,11 +1,10 @@
 #pragma once
-#include <iterator>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::iterators::concepts {
+namespace genex::iterators::detail::concepts {
     template <typename I, typename S>
     concept distancable_iters =
         std::input_iterator<I> and
@@ -21,19 +20,18 @@ namespace genex::iterators::concepts {
 namespace genex::iterators {
     struct distance_fn {
         template <typename I, typename S>
-            requires concepts::distancable_iters<I, S>
-        auto operator()(I first, S last) const noexcept -> std::size_t {
+        requires detail::concepts::distancable_iters<I, S>
+        GENEX_INLINE auto operator()(I first, S last) const noexcept -> std::size_t {
             return std::distance(std::move(first), std::move(last));
         }
 
         template <typename Rng>
-            requires concepts::distancable_range<Rng>
-        auto operator()(Rng &&rng) const noexcept -> std::size_t {
+        requires detail::concepts::distancable_range<Rng>
+        GENEX_INLINE auto operator()(Rng &&rng) const noexcept -> std::size_t {
             auto [first, last] = iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last));
+            return std::distance(std::move(first), std::move(last));
         }
     };
 
-    GENEX_EXPORT_STRUCT(distance);
+    inline constexpr distance_fn distance{};
 }

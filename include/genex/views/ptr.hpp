@@ -1,5 +1,4 @@
 #pragma once
-#include <coroutine>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
@@ -7,7 +6,7 @@
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept ptr_gettable_iters =
         std::input_iterator<I> and
@@ -21,30 +20,29 @@ namespace genex::views::concepts {
 }
 
 
-namespace genex::views::detail {
+namespace genex::views::detail::coros {
     template <typename I, typename S>
-        requires (concepts::ptr_gettable_iters<I, S> and unique_ptr<iter_value_t<I>>)
-    GENEX_NO_ASAN
+    requires (concepts::ptr_gettable_iters<I, S> and unique_ptr<iter_value_t<I>>)
     auto do_ptr(I first, S last) -> generator<std::add_pointer_t<typename iter_value_t<I>::element_type>> {
-        if (first == last) { co_return; }
+        GENEX_ITER_GUARD;
         for (; first != last; ++first) {
             co_yield (*first).get();
         }
     }
 
     template <typename I, typename S>
-        requires (concepts::ptr_gettable_iters<I, S> and shared_ptr<iter_value_t<I>>)
+    requires (concepts::ptr_gettable_iters<I, S> and shared_ptr<iter_value_t<I>>)
     auto do_ptr(I first, S last) -> generator<std::add_pointer_t<typename iter_value_t<I>::element_type>> {
-        if (first == last) { co_return; }
+        GENEX_ITER_GUARD;
         for (; first != last; ++first) {
             co_yield (*first).get();
         }
     }
 
     template <typename I, typename S>
-        requires (concepts::ptr_gettable_iters<I, S> and weak_ptr<iter_value_t<I>>)
+    requires (concepts::ptr_gettable_iters<I, S> and weak_ptr<iter_value_t<I>>)
     auto do_ptr(I first, S last) -> generator<std::add_pointer_t<typename iter_value_t<I>::element_type>> {
-        if (first == last) { co_return; }
+        GENEX_ITER_GUARD;
         for (; first != last; ++first) {
             co_yield (*first).lock().get();
         }
@@ -55,22 +53,22 @@ namespace genex::views::detail {
 namespace genex::views {
     struct ptr_fn {
         template <typename I, typename S>
-            requires concepts::ptr_gettable_iters<I, S>
-        constexpr auto operator()(I first, S last) const -> auto {
-            return detail::do_ptr(std::move(first), std::move(last));
+        requires detail::concepts::ptr_gettable_iters<I, S>
+        GENEX_INLINE constexpr auto operator()(I first, S last) const {
+            return detail::coros::do_ptr(std::move(first), std::move(last));
         }
 
         template <typename Rng>
-            requires concepts::ptr_gettable_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        requires detail::concepts::ptr_gettable_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last));
+            return detail::coros::do_ptr(std::move(first), std::move(last));
         }
 
-        constexpr auto operator()() const -> auto {
+        GENEX_INLINE constexpr auto operator()() const {
             return std::bind_back(ptr_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(ptr);
+    inline constexpr ptr_fn ptr{};
 }

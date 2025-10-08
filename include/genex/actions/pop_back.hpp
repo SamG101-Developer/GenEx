@@ -7,7 +7,7 @@
 #include <genex/iterators/prev.hpp>
 
 
-namespace genex::actions::concepts {
+namespace genex::actions::detail::concepts {
     template <typename Rng>
     concept back_poppable_range =
         range<Rng>;
@@ -19,6 +19,7 @@ namespace genex::actions::concepts {
 
     template <typename Rng>
     concept back_poppable_select_erase =
+        bidirectional_range<Rng> and
         back_poppable_range<Rng> and
         erasable_range<Rng, iterator_t<Rng>, iterator_t<Rng>> and
         has_member_erase<Rng> and
@@ -29,21 +30,21 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct pop_back_fn {
         template <typename Rng>
-            requires concepts::back_poppable_select_pop_back<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        requires detail::concepts::back_poppable_select_pop_back<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
             return rng.pop_back();
         }
 
         template <typename Rng>
-            requires concepts::back_poppable_select_erase<Rng>
-        auto operator()(Rng &&rng) const -> auto {
+        requires detail::concepts::back_poppable_select_erase<Rng>
+        GENEX_INLINE auto operator()(Rng &&rng) const -> decltype(auto) {
             return actions::erase(rng, iterators::prev(iterators::end(rng)));
         }
 
-        constexpr auto operator()() const -> auto {
+        GENEX_INLINE constexpr auto operator()() const {
             return std::bind_back(pop_back_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(pop_back);
+    inline constexpr pop_back_fn pop_back{};
 }

@@ -4,7 +4,7 @@
 #include <genex/iterators/access.hpp>
 
 
-namespace genex::actions::concepts {
+namespace genex::actions::detail::concepts {
     template <typename Rng, typename E>
     concept front_insertable_range =
         range<Rng> and
@@ -33,28 +33,31 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct push_front_fn {
         template <typename Rng, typename E>
-            requires concepts::front_insertable_select_emplace_front<Rng, E>
-        constexpr auto operator()(Rng &&rng, E &&elem) const -> auto {
-            return rng.emplace_front(std::forward<E>(elem));
+        requires detail::concepts::front_insertable_select_emplace_front<Rng, E>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> decltype(auto) {
+            rng.emplace_front(std::move(elem));
+            return std::forward<Rng>(rng);
         }
 
         template <typename Rng, typename E>
-            requires concepts::front_insertable_select_push_front<Rng, E>
-        constexpr auto operator()(Rng &&rng, E &&elem) const -> auto {
-            return rng.push_front(std::forward<E>(elem));
+        requires detail::concepts::front_insertable_select_push_front<Rng, E>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> decltype(auto) {
+            rng.push_front(std::move(elem));
+            return std::forward<Rng>(rng);
         }
 
         template <typename Rng, typename E>
-            requires concepts::front_insertable_select_insert<Rng, E>
-        constexpr auto operator()(Rng &&rng, E &&elem) const -> auto {
-            return actions::insert(rng, iterators::begin(rng), std::forward<E>(elem));
+        requires detail::concepts::front_insertable_select_insert<Rng, E>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> decltype(auto) {
+            actions::insert(rng, iterators::begin(rng), std::move(elem));
+            return std::forward<Rng>(rng);
         }
 
         template <typename E>
-        constexpr auto operator()(E &&elem) const -> auto {
-            return std::bind_back(push_front_fn{}, std::forward<E>(elem));
+        GENEX_INLINE constexpr auto operator()(E elem) const {
+            return std::bind_back(push_front_fn{}, std::move(elem));
         }
     };
 
-    GENEX_EXPORT_STRUCT(push_front);
+    inline constexpr push_front_fn push_front{};
 }

@@ -6,7 +6,7 @@
 #include <genex/iterators/access.hpp>
 
 
-namespace genex::actions::concepts {
+namespace genex::actions::detail::concepts {
     template <typename Rng>
     concept front_poppable_range =
         range<Rng>;
@@ -28,21 +28,21 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct pop_front_fn {
         template <typename Rng>
-            requires concepts::front_poppable_select_pop_front<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        requires detail::concepts::front_poppable_select_pop_front<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
             return rng.pop_front();
         }
 
         template <typename Rng>
-            requires concepts::front_poppable_select_erase<Rng>
-        auto operator()(Rng &&rng) const -> auto {
+        requires detail::concepts::front_poppable_select_erase<Rng>
+        GENEX_INLINE auto operator()(Rng &&rng) const -> decltype(auto) {
             return actions::erase(rng, iterators::begin(rng));
         }
 
-        constexpr auto operator()() const -> auto {
+        GENEX_INLINE constexpr auto operator()() const {
             return std::bind_front(pop_front_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(pop_front);
+    inline constexpr pop_front_fn pop_front{};
 }

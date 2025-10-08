@@ -12,42 +12,42 @@
 namespace genex::operations {
     struct eq {
         template <typename T, typename U> requires std::equality_comparable_with<T, U>
-        constexpr auto operator()(T &&a, U &&b) const noexcept(noexcept(_GENEX_COMP_EQ)) -> bool {
+        GENEX_INLINE constexpr auto operator()(T &&a, U &&b) const noexcept(noexcept(_GENEX_COMP_EQ)) -> bool {
             return _GENEX_COMP_EQ;
         }
     };
 
     struct ne {
         template <typename T, typename U> requires std::equality_comparable_with<T, U>
-        constexpr auto operator()(T &&a, U &&b) const noexcept(noexcept(_GENEX_COMP_NE)) -> bool {
+        GENEX_INLINE constexpr auto operator()(T &&a, U &&b) const noexcept(noexcept(_GENEX_COMP_NE)) -> bool {
             return _GENEX_COMP_NE;
         }
     };
 
     struct lt {
         template <typename T, typename U> requires std::totally_ordered_with<T, U>
-        constexpr auto operator()(T &&a, U &&b) const noexcept(noexcept(_GENEX_COMP_LT)) -> bool {
+        GENEX_INLINE constexpr auto operator()(T &&a, U &&b) const noexcept(noexcept(_GENEX_COMP_LT)) -> bool {
             return _GENEX_COMP_LT;
         }
     };
 
     struct le {
         template <typename T, typename U> requires std::totally_ordered_with<T, U>
-        constexpr auto operator()(T &&a, U &&b) const noexcept(noexcept(_GENEX_COMP_LE)) -> bool {
+        GENEX_INLINE constexpr auto operator()(T &&a, U &&b) const noexcept(noexcept(_GENEX_COMP_LE)) -> bool {
             return _GENEX_COMP_LE;
         }
     };
 
     struct gt {
         template <typename T, typename U> requires std::totally_ordered_with<T, U>
-        constexpr auto operator()(T &&a, U &&b) const noexcept(noexcept(_GENEX_COMP_GT)) -> bool {
+        GENEX_INLINE constexpr auto operator()(T &&a, U &&b) const noexcept(noexcept(_GENEX_COMP_GT)) -> bool {
             return _GENEX_COMP_GT;
         }
     };
 
     struct ge {
         template <typename T, typename U> requires std::totally_ordered_with<T, U>
-        constexpr auto operator()(T &&a, U &&b) const noexcept(noexcept(_GENEX_COMP_GE)) -> bool {
+        GENEX_INLINE constexpr auto operator()(T &&a, U &&b) const noexcept(noexcept(_GENEX_COMP_GE)) -> bool {
             return _GENEX_COMP_GE;
         }
     };

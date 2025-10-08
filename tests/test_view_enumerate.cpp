@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/enumerate.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 TEST(GenexViewsEnumerate, VecInput) {
@@ -9,7 +9,7 @@ TEST(GenexViewsEnumerate, VecInput) {
 
     const auto rng = vec1
         | genex::views::enumerate
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     EXPECT_EQ(rng[0].first, 0);
     EXPECT_EQ(rng[0].second, 8);
     EXPECT_EQ(rng[1].first, 1);

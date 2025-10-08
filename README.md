@@ -18,7 +18,7 @@ operations on ranges.
 #include <genex/views/materialize.hpp>
 #include <genex/views/reverse.hpp>
 #include <genex/views/transform.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 auto main() -> int {
@@ -29,7 +29,7 @@ auto main() -> int {
         | genex::views::filter([](const int i) { return i % 4 == 0; })
         | genex::views::materialize
         | genex::views::reverse
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
 
     for (auto i : result) {
         std::cout << i << ", ";

@@ -1,5 +1,4 @@
 #pragma once
-#include <coroutine>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
@@ -7,7 +6,7 @@
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename New>
     concept interspersable_iters =
         std::input_iterator<I> and
@@ -23,12 +22,11 @@ namespace genex::views::concepts {
 }
 
 
-namespace genex::views::detail {
+namespace genex::views::detail::coros {
     template <typename I, typename S, typename New>
-        requires concepts::interspersable_iters<I, S, New>
-    GENEX_NO_ASAN
-    auto do_intersperse(I first, S last, New &&sep) -> generator<iter_value_t<I>> {
-        if (first == last) { co_return; }
+    requires concepts::interspersable_iters<I, S, New>
+    auto do_intersperse(I first, S last, New sep) -> generator<iter_value_t<I>> {
+        GENEX_ITER_GUARD;
         co_yield *first;
         ++first;
         for (; first != last; ++first) {
@@ -42,25 +40,23 @@ namespace genex::views::detail {
 namespace genex::views {
     struct intersperse_fn {
         template <typename I, typename S, typename New>
-            requires concepts::interspersable_iters<I, S, New>
-        constexpr auto operator()(I first, S last, New &&sep) const -> auto {
-            return detail::do_intersperse(
-                std::move(first), std::move(last), std::forward<New>(sep));
+        requires detail::concepts::interspersable_iters<I, S, New>
+        GENEX_INLINE constexpr auto operator()(I first, S last, New sep) const {
+            return detail::coros::do_intersperse(std::move(first), std::move(last), std::move(sep));
         }
 
         template <typename Rng, typename New>
-            requires concepts::interspersable_range<Rng, New>
-        constexpr auto operator()(Rng &&rng, New &&sep) const -> auto {
+        requires detail::concepts::interspersable_range<Rng, New>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, New sep) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last), std::forward<New>(sep));
+            return detail::coros::do_intersperse(std::move(first), std::move(last), std::move(sep));
         }
 
         template <typename New>
-        constexpr auto operator()(New &&sep) const -> auto {
-            return std::bind_back(intersperse_fn{}, std::forward<New>(sep));
+        GENEX_INLINE constexpr auto operator()(New sep) const {
+            return std::bind_back(intersperse_fn{}, std::move(sep));
         }
     };
 
-    GENEX_EXPORT_STRUCT(intersperse);
+    inline constexpr intersperse_fn intersperse{};
 }

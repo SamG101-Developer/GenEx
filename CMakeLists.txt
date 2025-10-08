@@ -8,7 +8,7 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 # Include 3rd party libraries and get headers.
-file(GLOB_RECURSE HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/**/*.hpp")
+file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/**/*.hpp")
 
 # Create the GenEx library, and link 3rd party libraries.
 add_library(GenExLib INTERFACE)

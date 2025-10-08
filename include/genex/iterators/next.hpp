@@ -1,31 +1,33 @@
 #pragma once
+#include <genex/concepts.hpp>
+#include <genex/generator.hpp>
 #include <genex/macros.hpp>
 
 
-namespace genex::iterators::concepts {
-    template <typename I>
+namespace genex::iterators::detail::concepts {
+    template <typename I, typename S = I>
     concept nextable_iters =
-        std::input_iterator<I> and
-        requires(I it, std::ptrdiff_t n) { std::next(std::move(it), n); };
+        std::input_or_output_iterator<I> and
+        std::sentinel_for<S, I>;
 }
 
 
 namespace genex::iterators {
     struct next_fn {
         template <typename I>
-            requires concepts::nextable_iters<I>
-        auto operator()(I it, const std::ptrdiff_t n = 1) const noexcept -> auto {
-            return std::next(std::move(it), n);
+        requires detail::concepts::nextable_iters<I> and std::copyable<I>
+        GENEX_INLINE auto operator()(I it, const iter_difference_t<I> n = 1) const -> I {
+            std::advance(it, n);
+            return it;
         }
 
-        template <typename I>
-            requires (concepts::nextable_iters<I> and std::random_access_iterator<I>)
-        auto operator()(I it, const std::ptrdiff_t n, const I end_it) const noexcept -> auto {
-            auto res = std::next(std::move(it), n);
-            if (res > end_it) { return end_it; }
+        template <typename I, typename S>
+        requires detail::concepts::nextable_iters<I, S> and std::copyable<I>
+        GENEX_INLINE auto operator()(I it, const iter_difference_t<I> n, const S end_it) const -> I {
+            auto res = std::next(std::move(it), n); // todo: use bound
             return res;
         }
     };
 
-    GENEX_EXPORT_STRUCT(next);
+    inline constexpr next_fn next{};
 }

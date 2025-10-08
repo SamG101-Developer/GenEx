@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/slice.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 TEST(GenexViewsSlice, VecInput) {
@@ -9,7 +9,7 @@ TEST(GenexViewsSlice, VecInput) {
 
     const auto rng = vec
         | genex::views::slice(1, 6)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{1, 2, 3, 4, 5};
     EXPECT_EQ(rng, exp);
 }

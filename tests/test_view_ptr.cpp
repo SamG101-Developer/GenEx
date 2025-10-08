@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/ptr.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 TEST(GenexViewsPtr, VecUniquePtr) {
@@ -12,7 +12,7 @@ TEST(GenexViewsPtr, VecUniquePtr) {
 
     const auto rng = vec
         | genex::views::ptr
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{new int(1), new int(2), new int(3), new int(4), new int(5)};
     for (auto i = 0; i < rng.size(); ++i) {
         EXPECT_EQ(*rng[i], *exp[i]);
@@ -33,7 +33,7 @@ TEST(GenexViewsPtr, VecSharedPtr) {
 
     const auto rng = vec
         | genex::views::ptr
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     for (auto i = 0; i < rng.size(); ++i) {
         EXPECT_EQ(rng[i], exp[i].get());
     }
@@ -49,7 +49,7 @@ TEST(GenexViewsPtr, VecWeakPtr) {
 
     const auto rng = vec
         | genex::views::ptr
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     for (auto i = 0; i < rng.size(); ++i) {
         EXPECT_EQ(rng[i], exp[i].lock().get());
     }

@@ -2,7 +2,7 @@
 
 #include <genex/views/replace.hpp>
 #include <genex/views/replace_if.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 TEST(GenexViewsReplace, VecInput) {
@@ -12,7 +12,7 @@ TEST(GenexViewsReplace, VecInput) {
 
     const auto rng = vec
         | genex::views::replace(5, 9)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{0, 1, 2, 3, 4, 9, 6, 7, 8, 9};
     EXPECT_EQ(rng, exp);
 }
@@ -24,7 +24,7 @@ TEST(GenexViewsReplace, VecInputMultiple) {
     const auto rng = vec
         | genex::views::replace(5, 9)
         | genex::views::replace(6, 9)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{0, 1, 2, 3, 4, 9, 9, 7, 8, 9};
     EXPECT_EQ(rng, exp);
 }
@@ -35,7 +35,7 @@ TEST(GenexViewsReplaceIf, VecInput) {
 
     const auto rng = vec
         | genex::views::replace_if([](auto x) { return x > 5; }, 9)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{0, 1, 2, 3, 4, 5, 9, 9, 9, 9};
     EXPECT_EQ(rng, exp);
 }
@@ -47,7 +47,7 @@ TEST(GenexViewsReplaceIf, VecInputMultiple) {
     const auto rng = vec
         | genex::views::replace_if([](auto x) { return x > 5; }, 9)
         | genex::views::replace_if([](auto x) { return x < 3; }, 9)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{9, 9, 9, 3, 4, 5, 9, 9, 9, 9};
     EXPECT_EQ(rng, exp);
 }

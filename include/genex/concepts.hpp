@@ -73,6 +73,9 @@ namespace genex {
     concept has_member_size = requires(Rng &rng) { rng.size(); };
 
     template <typename Rng>
+    concept has_member_reserve = requires(Rng &rng) { rng.reserve(std::declval<std::size_t>()); };
+
+    template <typename Rng>
     concept has_member_empty = requires(Rng &rng) { rng.empty(); };
 
     template <typename Rng>
@@ -142,6 +145,9 @@ namespace genex {
 
     template <typename Rng>
     concept contiguous_range = random_access_range<Rng> and std::contiguous_iterator<iterator_t<Rng>>;
+
+    template <typename Rng>
+    concept sized_range = input_range<Rng> and std::sized_sentinel_for<sentinel_t<Rng>, iterator_t<Rng>>;
 }
 
 
@@ -240,6 +246,30 @@ namespace genex {
 
     template <typename T>
     concept integer_like = std::is_integral_v<std::remove_cvref_t<T>>;
+
+    template <typename C>
+    concept strict_char_like =
+        std::same_as<std::remove_cv_t<C>, char> or
+        std::same_as<std::remove_cv_t<C>, signed char> or
+        std::same_as<std::remove_cv_t<C>, unsigned char>;
+
+    template <typename C>
+    concept wide_char_like =
+        std::same_as<std::remove_cv_t<C>, wchar_t>;
+
+    template <typename C>
+    concept utf_char_like =
+#if __cpp_char8_t >= 201811L
+        std::same_as<std::remove_cv_t<C>, char8_t> or
+#endif
+        std::same_as<std::remove_cv_t<C>, char16_t> or
+        std::same_as<std::remove_cv_t<C>, char32_t>;
+
+    template <typename C>
+    concept char_like =
+        strict_char_like<C> or
+        wide_char_like<C> or
+        utf_char_like<C>;
 
     template <typename T>
     struct is_pair_like : std::false_type {

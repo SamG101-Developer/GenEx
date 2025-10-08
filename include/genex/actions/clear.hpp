@@ -1,12 +1,10 @@
 #pragma once
-#include <functional>
-#include <utility>
 #include <genex/concepts.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/access.hpp>
 
 
-namespace genex::actions::concepts {
+namespace genex::actions::detail::concepts {
     template <typename Rng>
     concept clearable_range =
         input_range<Rng> and
@@ -17,16 +15,16 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct clear_fn {
         template <typename Rng>
-            requires concepts::clearable_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+        requires detail::concepts::clearable_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
             rng.clear();
             return std::forward<Rng>(rng);
         }
 
-        constexpr auto operator()() const -> auto {
+        GENEX_INLINE constexpr auto operator()() const {
             return std::bind_back(clear_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(clear);
+    inline constexpr clear_fn clear{};
 }

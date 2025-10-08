@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
@@ -7,7 +6,7 @@
 #include <genex/operations/cmp.hpp>
 
 
-namespace genex::algorithms::concepts {
+namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename E, typename Comp, typename Proj>
     concept binary_searchable_iters =
         std::forward_iterator<I> and
@@ -24,22 +23,20 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct binary_search_fn {
         template <typename I, typename S, typename E, typename Comp = operations::lt, typename Proj = meta::identity>
-            requires concepts::binary_searchable_iters<I, S, E, Comp, Proj>
-        constexpr auto operator()(I first, S last, E &&elem, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
-            first = std::lower_bound(std::forward<I>(first), std::forward<S>(last), std::forward<E>(elem));
-            return first != last && !std::invoke(
-                std::forward<Comp>(comp), std::invoke(std::forward<Proj>(proj), *first), std::forward<E>(elem));
+        requires detail::concepts::binary_searchable_iters<I, S, E, Comp, Proj>
+        GENEX_INLINE constexpr auto operator()(I first, S last, E elem, Comp comp = {}, Proj proj = {}) const -> bool {
+            first = std::lower_bound(std::move(first), std::move(last), elem);
+            return first != last and not std::invoke(comp, std::invoke(proj, *first), std::move(elem));
         }
 
         template <typename Rng, typename E, typename Comp = operations::lt, typename Proj = meta::identity>
-            requires concepts::binary_searchable_range<Rng, E, Comp, Proj>
-        constexpr auto operator()(Rng &&rng, E &&elem, Comp &&comp = {}, Proj &&proj = {}) const -> auto {
+        requires detail::concepts::binary_searchable_range<Rng, E, Comp, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem, Comp comp = {}, Proj proj = {}) const -> bool {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last), std::forward<E>(elem), std::forward<Comp>(comp),
-                std::forward<Proj>(proj));
+            first = std::lower_bound(std::move(first), std::move(last), elem);
+            return first != last and not std::invoke(comp, std::invoke(proj, *first), std::move(elem));
         }
     };
 
-    GENEX_EXPORT_STRUCT(binary_search);
+    inline constexpr binary_search_fn binary_search{};
 }

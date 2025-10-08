@@ -3,7 +3,6 @@
 #include <genex/actions/remove.hpp>
 #include <genex/actions/remove_if.hpp>
 #include <genex/views/ptr.hpp>
-#include <genex/views/to.hpp>
 
 
 TEST(GenexActionsRemove, VecInput) {
@@ -38,7 +37,7 @@ TEST(GenexActionsRemoveIf, VecInputNoMatch) {
 }
 
 
-TEST(GenexActionsRemoveIf, DISABLED_VecInputUniquePtr) {
+TEST(GenexActionsRemoveIf, VecInputUniquePtr) {
     auto vec = std::vector<std::unique_ptr<int>>{};
     vec.push_back(std::make_unique<int>(1));
     vec.push_back(std::make_unique<int>(2));

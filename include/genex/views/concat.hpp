@@ -1,5 +1,4 @@
 #pragma once
-#include <coroutine>
 #include <tuple>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
@@ -8,7 +7,7 @@
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename T1, typename T2>
     struct concatenatable_iters_helper : std::false_type {
     };
@@ -34,25 +33,29 @@ namespace genex::views::concepts {
 }
 
 
-namespace genex::views::detail {
+namespace genex::views::detail::coros {
     template <typename I1, typename S1>
-        requires concepts::concatenatable_iters<std::tuple<I1>, std::tuple<S1>>
-    GENEX_NO_ASAN
-    auto do_concat(I1 first1, S1 last1) -> generator<iter_value_t<I1>> {
-        for (; first1 != last1; ++first1) {
-            co_yield static_cast<std::common_type_t<iter_value_t<I1>, iter_value_t<I1>>>(*first1);
+    requires concepts::concatenatable_iters<std::tuple<I1>, std::tuple<S1>>
+    auto do_concat(I1 first, S1 last) -> generator<iter_value_t<I1>> {
+        GENEX_ITER_GUARD;
+        for (; first != last; ++first) {
+            co_yield static_cast<std::common_type_t<iter_value_t<I1>, iter_value_t<I1>>>(*first);
         }
     }
 
     template <typename I1, typename S1, typename... Is, typename... Ss>
-        requires (concepts::concatenatable_iters<std::tuple<I1, Is...>, std::tuple<S1, Ss...>> and sizeof...(Is) == sizeof...(Ss))
-    GENEX_NO_ASAN
+    requires (concepts::concatenatable_iters<std::tuple<I1, Is...>, std::tuple<S1, Ss...>> and sizeof...(Is) == sizeof...(Ss))
     auto do_concat(I1 first1, S1 last1, std::tuple<Is...> firsts, std::tuple<Ss...> lasts) -> generator<std::common_type_t<iter_value_t<I1>, iter_value_t<Is>...>> {
         for (auto gen = do_concat(std::move(first1), std::move(last1)); auto &&x : gen) {
             co_yield std::forward<decltype(x)>(x);
         }
         if constexpr (sizeof...(Is) > 0) {
-            for (auto rest = do_concat(std::move(std::get<0>(firsts)), std::move(std::get<0>(lasts)), tuple_tail(std::move(firsts)), tuple_tail(std::move(lasts))); auto &&x : rest) { co_yield std::forward<decltype(x)>(x); }
+            for (auto rest = do_concat(
+                     std::move(std::get<0>(firsts)),
+                     std::move(std::get<0>(lasts)),
+                     tuple_tail(std::move(firsts)),
+                     tuple_tail(std::move(lasts)));
+                 auto &&x : rest) { co_yield std::forward<decltype(x)>(x); }
         }
     }
 }
@@ -61,27 +64,27 @@ namespace genex::views::detail {
 namespace genex::views {
     struct concat_fn {
         template <typename... Is, typename... Ss>
-            requires concepts::concatenatable_iters<std::tuple<Is...>, std::tuple<Ss...>>
-        constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const -> auto {
-            return detail::do_concat(
+        requires detail::concepts::concatenatable_iters<std::tuple<Is...>, std::tuple<Ss...>>
+        GENEX_INLINE constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const {
+            return detail::coros::do_concat(
                 std::move(std::get<0>(first)), std::move(std::get<0>(last)),
                 tuple_tail(std::move(first)), tuple_tail(std::move(last)));
         }
 
         template <typename... Rngs>
-            requires (concepts::concatenatable_range<Rngs...> and sizeof...(Rngs) > 1)
-        constexpr auto operator()(Rngs &&... ranges) const -> auto {
-            return (*this)(
+        requires (detail::concepts::concatenatable_range<Rngs...> and sizeof...(Rngs) > 1)
+        GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const {
+            return (*this)( // todo: directly into do_conat
                 std::make_tuple(iterators::begin(std::forward<Rngs>(ranges))...),
                 std::make_tuple(iterators::end(std::forward<Rngs>(ranges))...));
         }
 
         template <typename Rng2>
-            requires concepts::concatenatable_range<Rng2>
-        constexpr auto operator()(Rng2 &&rng2) const -> auto {
+        requires detail::concepts::concatenatable_range<Rng2>
+        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
             return std::bind_back(concat_fn{}, std::forward<Rng2>(rng2));
         }
     };
 
-    GENEX_EXPORT_STRUCT(concat);
+    inline constexpr concat_fn concat{};
 }

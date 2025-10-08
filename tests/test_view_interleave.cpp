@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/interleave.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 struct TestStruct {
@@ -9,7 +9,7 @@ struct TestStruct {
     std::uint32_t b;
 
     auto operator==(const TestStruct &other) const -> bool {
-        return a == other.a && b == other.b;
+        return a == other.a and b == other.b;
     }
 };
 
@@ -20,7 +20,7 @@ TEST(GenexViewsInterleave, VecInput) {
 
     const auto rng = vec1
         | genex::views::interleave(vec2)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{0, 5, 1, 6, 2, 7, 3, 8, 4, 9};
     EXPECT_EQ(rng, exp);
 }
@@ -34,7 +34,7 @@ TEST(GenexViewsInterleave, GenInput) {
     const auto rng = vec1
         | genex::views::interleave(vec2)
         | genex::views::interleave(vec3)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{0, 6, 3, 7, 1, 8, 4, 9, 2, 10, 5, 11};
     EXPECT_EQ(rng, exp);
 }
@@ -46,7 +46,7 @@ TEST(GenexViewsInterleave, DifferentLengthExtend) {
 
     const auto rng = vec1
         | genex::views::interleave(vec2, true)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{0, 4, 1, 5, 2, 3};
     EXPECT_EQ(rng, exp);
 }
@@ -58,7 +58,7 @@ TEST(GenexViewsInterleave, DifferentLengthShrink) {
 
     const auto rng = vec1
         | genex::views::interleave(vec2, false)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{0, 4, 1, 5};
     EXPECT_EQ(rng, exp);
 }
@@ -73,7 +73,7 @@ TEST(GenexViewsInterleave, IterInput) {
     const auto it2_end = vec2.end();
 
     const auto rng = genex::views::interleave(it1_begin, it1_end, it2_begin, it2_end)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{0, 7, 1, 8, 2, 9, 3, 10, 4, 11, 5, 12, 6, 13};
     EXPECT_EQ(rng, exp);
 }

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/for_each.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 TEST(GenexViewsForEach, VecInput) {

@@ -1,5 +1,4 @@
 #pragma once
-#include <utility>
 #include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/actions/erase.hpp>
@@ -8,7 +7,7 @@
 #include <genex/operations/cmp.hpp>
 
 
-namespace genex::actions::concepts {
+namespace genex::actions::detail::concepts {
     template <typename Rng, typename Old, typename New, typename Proj>
     concept replaceable_range =
         forward_range<Rng> and
@@ -22,11 +21,11 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct replace_fn {
         template <typename Rng, typename Old, typename New, typename Proj = meta::identity>
-            requires concepts::replaceable_range<Rng, Old, New, Proj>
-        constexpr auto operator()(Rng &&rng, Old &&old_val, New &&new_val, Proj &&proj = {}) const -> decltype(auto) {
+        requires detail::concepts::replaceable_range<Rng, Old, New, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Old old_val, New new_val, Proj proj = {}) const -> decltype(auto) {
             // todo: optimize to prevent multi-passes.
             while (true) {
-                auto it = algorithms::find(rng, std::forward<Old>(old_val), std::forward<Proj>(proj));
+                auto it = algorithms::find(rng, old_val, proj);
                 if (it == iterators::end(rng)) { break; }
                 *it = new_val;
             }
@@ -34,12 +33,11 @@ namespace genex::actions {
         }
 
         template <typename Old, typename New, typename Proj = meta::identity>
-            requires(not range<Old>)
-        constexpr auto operator()(Old &&old_val, New &&new_val, Proj &&proj = {}) const -> auto {
-            return std::bind_back(
-                replace_fn{}, std::forward<Old>(old_val), std::forward<New>(new_val), std::forward<Proj>(proj));
+        requires (not range<Old>)
+        GENEX_INLINE constexpr auto operator()(Old old_val, New new_val, Proj proj = {}) const {
+            return std::bind_back(replace_fn{}, std::move(old_val), std::move(new_val), std::move(proj));
         }
     };
 
-    GENEX_EXPORT_STRUCT(replace);
+    inline constexpr replace_fn replace{};
 }

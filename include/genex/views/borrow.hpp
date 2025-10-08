@@ -1,5 +1,4 @@
 #pragma once
-#include <coroutine>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
@@ -7,11 +6,11 @@
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept borrowable_iters =
         std::input_iterator<I> and
-        std::sentinel_for<S, I>;;
+        std::sentinel_for<S, I>;
 
     template <typename Rng>
     concept borrowable_range =
@@ -20,12 +19,11 @@ namespace genex::views::concepts {
 }
 
 
-namespace genex::views::detail {
+namespace genex::views::detail::coros {
     template <typename I, typename S>
-        requires concepts::borrowable_iters<I, S>
-    GENEX_NO_ASAN
+    requires concepts::borrowable_iters<I, S>
     auto do_borrow(I first, S last) -> generator<iter_value_t<I>&> {
-        if (first == last) { co_return; }
+        GENEX_ITER_GUARD;
         for (; first != last; ++first) {
             co_yield *first;
         }
@@ -35,24 +33,32 @@ namespace genex::views::detail {
 
 namespace genex::views {
     struct borrow_fn {
+        /**
+         * Iterator interface for the borrow view.
+         */
         template <typename I, typename S>
-            requires concepts::borrowable_iters<I, S>
-        constexpr auto operator()(I first, S last) const -> auto {
-            return detail::do_borrow(std::move(first), std::move(last));
+        requires detail::concepts::borrowable_iters<I, S>
+        GENEX_INLINE constexpr auto operator()(I first, S last) const {
+            return detail::coros::do_borrow(std::move(first), std::move(last));
         }
 
+        /**
+         * Range interface for the borrow view.
+         */
         template <typename Rng>
-            requires concepts::borrowable_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        requires detail::concepts::borrowable_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last));
+            return detail::coros::do_borrow(std::move(first), std::move(last));
         }
 
-        constexpr auto operator()() const -> auto {
+        /**
+         * Pipe interface for the borrow view.
+         */
+        GENEX_INLINE constexpr auto operator()() const {
             return std::bind_back(borrow_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(borrow);
+    inline constexpr borrow_fn borrow{};
 }

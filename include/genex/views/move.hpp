@@ -1,6 +1,4 @@
 #pragma once
-#include <coroutine>
-#include <utility>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
@@ -8,7 +6,7 @@
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept movable_iters =
         std::input_iterator<I> and
@@ -22,12 +20,11 @@ namespace genex::views::concepts {
 }
 
 
-namespace genex::views::detail {
+namespace genex::views::detail::coros {
     template <typename I, typename S>
-        requires concepts::movable_iters<I, S>
-    GENEX_NO_ASAN
+    requires concepts::movable_iters<I, S>
     auto do_move(I first, S last) -> generator<iter_value_t<I>&&> {
-        if (first == last) { co_return; }
+        GENEX_ITER_GUARD;
         for (; first != last; ++first) {
             co_yield std::move(*first);
         }
@@ -38,21 +35,22 @@ namespace genex::views::detail {
 namespace genex::views {
     struct move_fn {
         template <typename I, typename S>
-            requires concepts::movable_iters<I, S>
-        constexpr auto operator()(I first, S last) const -> auto {
-            return detail::do_move(std::move(first), std::move(last));
+        requires detail::concepts::movable_iters<I, S>
+        GENEX_INLINE constexpr auto operator()(I first, S last) const {
+            return detail::coros::do_move(std::move(first), std::move(last));
         }
 
-        template <typename Rng> requires concepts::movable_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        template <typename Rng>
+        requires detail::concepts::movable_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last));
+            return detail::coros::do_move(std::move(first), std::move(last));
         }
 
-        constexpr auto operator()() const -> auto {
+        GENEX_INLINE constexpr auto operator()() const {
             return std::bind_back(move_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(move);
+    inline constexpr move_fn move{};
 }

@@ -1,12 +1,12 @@
 #pragma once
 #include <functional>
-#include <utility>
+
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::algorithms::concepts {
+namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename F>
     concept right_foldable_first_iters =
         std::bidirectional_iterator<I> and
@@ -25,24 +25,23 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct fold_right_first_fn {
         template <typename I, typename S, typename F>
-            requires concepts::right_foldable_first_iters<I, S, F>
-        constexpr auto operator()(I first, S last, F &&f) const -> auto {
+        requires detail::concepts::right_foldable_first_iters<I, S, F>
+        GENEX_INLINE constexpr auto operator()(I first, S last, F f) const {
             auto acc = *--last;
             while (first != last) {
                 --last;
-                acc = std::invoke(std::forward<F>(f), *last, std::move(acc));
+                acc = std::invoke(std::move(f), *last, std::move(acc));
             }
             return acc;
         }
 
         template <typename Rng, typename F>
-            requires concepts::right_foldable_first_range<Rng, F>
-        constexpr auto operator()(Rng &&rng, F &&f) const -> auto {
+        requires detail::concepts::right_foldable_first_range<Rng, F>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, F f) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last), std::forward<F>(f));
+            return (*this)(std::move(first), std::move(last), std::move(f));
         }
     };
 
-    GENEX_EXPORT_STRUCT(fold_right_first);
+    inline constexpr fold_right_first_fn fold_right_first{};
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include <utility>
 #include <genex/meta.hpp>
 #include <genex/pipe.hpp>
 #include <genex/actions/erase.hpp>
@@ -8,7 +7,7 @@
 #include <genex/operations/cmp.hpp>
 
 
-namespace genex::actions::concepts {
+namespace genex::actions::detail::concepts {
     template <typename Rng, typename E, typename Proj>
     concept removable_range =
         forward_range<Rng> and
@@ -21,11 +20,11 @@ namespace genex::actions::concepts {
 namespace genex::actions {
     struct remove_fn {
         template <typename Rng, typename E, typename Proj = meta::identity>
-            requires concepts::removable_range<Rng, E, Proj>
-        constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> decltype(auto) {
+        requires detail::concepts::removable_range<Rng, E, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem, Proj proj = {}) const -> decltype(auto) {
             // todo: optimize to prevent multi-passes.
             while (true) {
-                auto it = algorithms::find(rng, std::forward<E>(elem), std::forward<Proj>(proj));
+                auto it = algorithms::find(rng, elem, proj);
                 if (it == iterators::end(rng)) { break; }
                 actions::erase(rng, std::move(it));
             }
@@ -33,11 +32,11 @@ namespace genex::actions {
         }
 
         template <typename E, typename Proj = meta::identity>
-            requires(not range<E>)
-        constexpr auto operator()(E &&elem, Proj &&proj = {}) const -> auto {
-            return std::bind_back(remove_fn{}, std::forward<E>(elem), std::forward<Proj>(proj));
+        requires (not range<E>)
+        GENEX_INLINE constexpr auto operator()(E &&elem, Proj &&proj = {}) const {
+            return std::bind_back(remove_fn{}, std::move(elem), std::move(proj));
         }
     };
 
-    GENEX_EXPORT_STRUCT(remove);
+    inline constexpr remove_fn remove{};
 }

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/zip.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 TEST(GenexViewsZip, VecInput) {
@@ -10,7 +10,7 @@ TEST(GenexViewsZip, VecInput) {
 
     const auto rng = vec1
         | genex::views::zip(vec2)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector<std::tuple<int, int>>{{0, 5}, {1, 6}, {2, 7}, {3, 8}, {4, 9}};
 
     for (auto i = 0; i < rng.size(); ++i) {
@@ -26,7 +26,7 @@ TEST(GenexViewsZip, VecInputDiffTypes) {
 
     const auto rng = vec1
         | genex::views::zip(vec2)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector<std::tuple<int, std::string>>{{0, "a"}, {1, "b"}, {2, "c"}};
 
     for (auto i = 0; i < rng.size(); ++i) {
@@ -41,7 +41,7 @@ TEST(GenexViewsZip, VecNoPipe) {
     auto vec2 = std::vector{3, 4, 5};
 
     const auto rng = genex::views::zip(vec1, vec2)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector<std::tuple<int, int>>{{0, 3}, {1, 4}, {2, 5}};
 
     for (auto i = 0; i < rng.size(); ++i) {
@@ -57,7 +57,7 @@ TEST(GenexViewsZip, VecInputMulti) {
     auto vec3 = std::vector{6, 7, 8};
 
     const auto rng = genex::views::zip(vec1, vec2, vec3)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector<std::tuple<int, int, int>>{{0, 3, 6}, {1, 4, 7}, {2, 5, 8}};
 
     for (auto i = 0; i < rng.size(); ++i) {

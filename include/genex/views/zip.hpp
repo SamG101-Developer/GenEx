@@ -1,5 +1,4 @@
 #pragma once
-#include <coroutine>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
@@ -7,13 +6,13 @@
 #include <genex/iterators/access.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename T1, typename T2>
-    struct can_zip_iters_helper : std::false_type {
+    struct zippable_iters_helper : std::false_type {
     };
 
     template <typename... Is, typename... Ss>
-    struct can_zip_iters_helper<std::tuple<Is...>, std::tuple<Ss...>> {
+    struct zippable_iters_helper<std::tuple<Is...>, std::tuple<Ss...>> {
         static constexpr bool value =
             sizeof...(Is) > 0 and
             sizeof...(Is) == sizeof...(Ss) and
@@ -22,24 +21,22 @@ namespace genex::views::concepts {
     };
 
     template <typename T1, typename T2>
-    concept can_zip_iters = can_zip_iters_helper<T1, T2>::value;
+    concept zippable_iters = zippable_iters_helper<T1, T2>::value;
 
     template <typename... Rngs>
-    concept can_zip_range =
+    concept zippable_range =
         sizeof...(Rngs) > 0 and
         (input_range<Rngs> and ...) and
-        can_zip_iters<std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>>;
+        zippable_iters<std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>>;
 }
 
 
 namespace genex::views::detail {
     template <typename... Is, typename... Ss>
-        requires concepts::can_zip_iters<std::tuple<Is...>, std::tuple<Ss...>>
-    GENEX_NO_ASAN
+    requires concepts::zippable_iters<std::tuple<Is...>, std::tuple<Ss...>>
     auto do_zip(std::tuple<Is...> first, std::tuple<Ss...> last) -> generator<std::tuple<iter_value_t<Is>...>> {
         auto starts = std::move(first);
         auto ends = std::move(last);
-
         while (not any_iterator_finished(starts, ends)) {
             co_yield deref_tuple(starts);
             advance_tuple(starts);
@@ -51,25 +48,23 @@ namespace genex::views::detail {
 namespace genex::views {
     struct zip_fn {
         template <typename... Is, typename... Ss>
-            requires concepts::can_zip_iters<std::tuple<Is...>, std::tuple<Ss...>>
-        constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const -> auto {
+        requires detail::concepts::zippable_iters<std::tuple<Is...>, std::tuple<Ss...>>
+        GENEX_INLINE constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const {
             return detail::do_zip(std::move(first), std::move(last));
         }
 
         template <typename... Rngs>
-            requires (concepts::can_zip_range<Rngs...> and sizeof...(Rngs) > 1)
-        constexpr auto operator()(Rngs &&... ranges) const -> auto {
-            return (*this)(
-                std::make_tuple(iterators::begin(std::forward<Rngs>(ranges))...),
-                std::make_tuple(iterators::end(std::forward<Rngs>(ranges))...));
+        requires detail::concepts::zippable_range<Rngs...> and (sizeof...(Rngs) > 1)
+        GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const {
+            return detail::do_zip(std::make_tuple(iterators::begin(ranges)...), std::make_tuple(iterators::end(ranges)...));
         }
 
         template <typename Rng2>
-            requires concepts::can_zip_range<Rng2>
-        constexpr auto operator()(Rng2 &&rng2) const -> auto {
+        requires detail::concepts::zippable_range<Rng2>
+        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
             return std::bind_back(zip_fn{}, std::forward<Rng2>(rng2));
         }
     };
 
-    GENEX_EXPORT_STRUCT(zip);
+    inline constexpr zip_fn zip{};
 }

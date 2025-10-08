@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/transform.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 struct TestStruct {
@@ -9,7 +9,7 @@ struct TestStruct {
     std::uint32_t b;
 
     auto operator==(const TestStruct &other) const -> bool {
-        return a == other.a && b == other.b;
+        return a == other.a and b == other.b;
     }
 };
 
@@ -19,7 +19,7 @@ TEST(GenexViewsTransform, VecInput) {
 
     const auto rng = vec
         | genex::views::transform([](auto x) { return x * 2; })
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{2, 4, 6, 8, 10, 12};
     EXPECT_EQ(rng, exp);
 }
@@ -31,7 +31,7 @@ TEST(GenexViewsTransform, GenInput) {
     const auto rng = vec
         | genex::views::transform([](auto x) { return x * 2; })
         | genex::views::transform([](auto x) { return x + 5; })
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{7, 9, 11, 13, 15, 17};
     EXPECT_EQ(rng, exp);
 }
@@ -45,7 +45,7 @@ TEST(GenexViewsTransform, VecInputStruct) {
 
     const auto rng = vec
         | genex::views::transform([](auto const &x) { return TestStruct{x.a + "!!!", x.b * 2}; })
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{TestStruct{"one!!!", 2}, TestStruct{"two!!!", 4}, TestStruct{"three!!!", 6}, TestStruct{"four!!!", 8}, TestStruct{"five!!!", 10}, TestStruct{"six!!!", 12}};
     EXPECT_EQ(rng, exp);
 }
@@ -61,7 +61,7 @@ TEST(GenexViewsTransform, VecWithProj) {
 
     const auto rng = vec
         | genex::views::transform([](auto x) { return x + 1; }, &TestStruct::b)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector<unsigned int>{2, 3, 4, 5, 6, 7};
     EXPECT_EQ(rng, exp);
 }
@@ -71,7 +71,7 @@ TEST(GenexViewsTransform, EmptyInput) {
     auto vec = std::vector<std::unique_ptr<int>>{};
     const auto rng = vec
         | genex::views::transform([](auto &&x) { return x == nullptr ? 0 : *x + 1; })
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector<int>{};
     EXPECT_EQ(rng, exp);
 }
@@ -81,7 +81,7 @@ TEST(GenexViewsTransform, IterInput) {
     auto vec = std::vector{0, 1, 2, 3, 4, 5, 6};
     const auto it_begin = vec.begin();
     const auto it_end = vec.end();
-    const auto rng = genex::views::transform(it_begin, it_end, [](auto x) { return x + 1; }) | genex::views::to<std::vector>();
+    const auto rng = genex::views::transform(it_begin, it_end, [](auto x) { return x + 1; }) | genex::to<std::vector>();
     const auto exp = std::vector{1, 2, 3, 4, 5, 6, 7};
     EXPECT_EQ(rng, exp);
 }

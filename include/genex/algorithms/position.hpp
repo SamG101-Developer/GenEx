@@ -6,13 +6,13 @@
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::algorithms::concepts {
+namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj, typename Int>
     concept positionable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
         std::indirect_unary_predicate<Pred, std::projected<I, Proj>> and
-        std::integral<Int>;
+        std::weakly_incrementable<Int>;
 
     template <typename Rng, typename Pred, typename Proj, typename Int>
     concept positionable_range =
@@ -24,25 +24,22 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct position_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity, typename Int>
-            requires concepts::positionable_iters<I, S, Pred, Proj, Int>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z, const std::size_t drop = 0z) const -> auto {
+        requires detail::concepts::positionable_iters<I, S, Pred, Proj, Int>
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}, const Int def = -1z, const std::size_t drop = 0z) const -> Int {
             for (Int pos = drop; first != last; ++first, ++pos) {
-                if (std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
-                    return pos;
-                }
+                if (std::invoke(pred, std::invoke(proj, *first))) { return pos; }
             }
             return def;
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity, typename Int = ssize_t>
-            requires concepts::positionable_range<Rng, Pred, Proj, Int>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}, const Int def = -1z, const ssize_t drop = 0z) const -> auto {
+        requires detail::concepts::positionable_range<Rng, Pred, Proj, Int>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}, const Int def = -1z, const ssize_t drop = 0z) const -> Int {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj), def, drop);
+            return (*this)(std::move(first), std::move(last), std::move(pred), std::move(proj), def, drop);
         }
     };
 
 
-    GENEX_EXPORT_STRUCT(position);
+    inline constexpr position_fn position{};
 }

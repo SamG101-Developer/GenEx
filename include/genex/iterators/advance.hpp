@@ -1,10 +1,9 @@
 #pragma once
-#include <iterator>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 
 
-namespace genex::iterators::concepts {
+namespace genex::iterators::detail::concepts {
     template <typename I>
     concept advancable_iters =
         std::input_iterator<I> and
@@ -15,12 +14,12 @@ namespace genex::iterators::concepts {
 namespace genex::iterators {
     struct advance_fn {
         template <typename I>
-            requires concepts::advancable_iters<I>
-        constexpr auto operator()(I &it, const iter_difference_t<I> n = 1) const -> I {
+        requires detail::concepts::advancable_iters<I>
+        GENEX_INLINE constexpr auto operator()(I &it, const iter_difference_t<I> n = 1) const -> I {
             std::advance(it, n);
             return it;
         }
     };
 
-    GENEX_EXPORT_STRUCT(advance);
+    inline constexpr advance_fn advance{};
 }

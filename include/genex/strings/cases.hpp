@@ -1,17 +1,12 @@
 #pragma once
-#include <cctype>
-#include <coroutine>
-#include <cwctype>
-#include <utility>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/iter_pair.hpp>
-#include <genex/strings/_concepts.hpp>
 
 
-namespace genex::strings::concepts {
+namespace genex::strings::detail::concepts {
     template <typename I, typename S>
     concept can_case_iters =
         std::input_iterator<I> and
@@ -25,10 +20,9 @@ namespace genex::strings::concepts {
 }
 
 
-namespace genex::strings::detail {
+namespace genex::strings::detail::coros {
     template <typename I, typename S>
-        requires (concepts::can_case_iters<I, S> and genex::strings::strict_char_like<iter_value_t<I>>)
-    GENEX_NO_ASAN
+    requires (concepts::can_case_iters<I, S> and strict_char_like<iter_value_t<I>>)
     auto do_upper_case(I first, S last) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             co_yield static_cast<iter_value_t<I>>(std::toupper(*first));
@@ -36,8 +30,7 @@ namespace genex::strings::detail {
     }
 
     template <typename I, typename S>
-        requires (concepts::can_case_iters<I, S> and genex::strings::wide_char_like<iter_value_t<I>>)
-    GENEX_NO_ASAN
+    requires (concepts::can_case_iters<I, S> and wide_char_like<iter_value_t<I>>)
     auto do_upper_case(I first, S last) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             co_yield static_cast<iter_value_t<I>>(std::towupper(*first));
@@ -45,8 +38,7 @@ namespace genex::strings::detail {
     }
 
     template <typename I, typename S>
-        requires (concepts::can_case_iters<I, S> and genex::strings::strict_char_like<iter_value_t<I>>)
-    GENEX_NO_ASAN
+    requires (concepts::can_case_iters<I, S> and strict_char_like<iter_value_t<I>>)
     auto do_lower_case(I first, S last) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             co_yield static_cast<iter_value_t<I>>(std::tolower(*first));
@@ -54,8 +46,7 @@ namespace genex::strings::detail {
     }
 
     template <typename I, typename S>
-        requires (concepts::can_case_iters<I, S> and genex::strings::wide_char_like<iter_value_t<I>>)
-    GENEX_NO_ASAN
+    requires (concepts::can_case_iters<I, S> and wide_char_like<iter_value_t<I>>)
     auto do_lower_case(I first, S last) -> generator<iter_value_t<I>> {
         for (; first != last; ++first) {
             co_yield static_cast<iter_value_t<I>>(std::towlower(*first));
@@ -67,42 +58,42 @@ namespace genex::strings::detail {
 namespace genex::strings {
     struct upper_case_fn {
         template <typename I, typename S>
-            requires concepts::can_case_iters<I, S>
-        constexpr auto operator()(I first, S last) const -> auto {
-            return detail::do_upper_case(first, last);
+        requires detail::concepts::can_case_iters<I, S>
+        GENEX_INLINE constexpr auto operator()(I first, S last) const {
+            return detail::coros::do_upper_case(std::move(first), std::move(last));
         }
 
         template <typename Rng>
-            requires concepts::can_case_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        requires detail::concepts::can_case_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last));
+            return detail::coros::do_upper_case(std::move(first), std::move(last));
         }
 
-        constexpr auto operator()() const -> auto {
+        GENEX_INLINE constexpr auto operator()() const {
             return std::bind_back(upper_case_fn{});
         }
     };
 
     struct lower_case_fn {
         template <typename I, typename S>
-            requires concepts::can_case_iters<I, S>
-        constexpr auto operator()(I first, S last) const -> auto {
-            return detail::do_lower_case(first, last);
+        requires detail::concepts::can_case_iters<I, S>
+        GENEX_INLINE constexpr auto operator()(I first, S last) const {
+            return detail::coros::do_lower_case(std::move(first), std::move(last));
         }
 
         template <typename Rng>
-            requires concepts::can_case_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        requires detail::concepts::can_case_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last));
+            return detail::coros::do_lower_case(std::move(first), std::move(last));
         }
 
-        constexpr auto operator()() const -> auto {
+    constexpr auto operator()() const {
             return std::bind_back(lower_case_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(upper_case);
-    GENEX_EXPORT_STRUCT(lower_case);
+    inline constexpr upper_case_fn upper_case{};
+    inline constexpr lower_case_fn lower_case{};
 }

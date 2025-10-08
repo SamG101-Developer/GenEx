@@ -1,5 +1,4 @@
 #pragma once
-#include <coroutine>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
@@ -7,7 +6,7 @@
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept can_view_iters =
         std::input_iterator<I> and
@@ -20,11 +19,11 @@ namespace genex::views::concepts {
 }
 
 
-namespace genex::views::detail {
+namespace genex::views::detail::coros {
     template <typename I, typename S>
-        requires concepts::can_view_iters<I, S>
-    GENEX_NO_ASAN
+    requires concepts::can_view_iters<I, S>
     auto do_view(I first, S last) -> generator<iter_value_t<I>> {
+        GENEX_ITER_GUARD;
         for (auto it = first; it != last; ++it) {
             co_yield static_cast<iter_value_t<I>>(*it);
         }
@@ -35,22 +34,22 @@ namespace genex::views::detail {
 namespace genex::views {
     struct view_fn {
         template <typename I, typename S>
-            requires concepts::can_view_iters<I, S>
-        constexpr auto operator()(I first, S last) const -> auto {
-            return detail::do_view(std::move(first), std::move(last));
+        requires detail::concepts::can_view_iters<I, S>
+        GENEX_INLINE constexpr auto operator()(I first, S last) const {
+            return detail::coros::do_view(std::move(first), std::move(last));
         }
 
         template <typename Rng>
-            requires concepts::can_view_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        requires detail::concepts::can_view_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last));
+            return detail::coros::do_view(std::move(first), std::move(last));
         }
 
-        constexpr auto operator()() const -> auto {
+        GENEX_INLINE constexpr auto operator()() const {
             return std::bind_back(view_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(view);
+    inline constexpr view_fn view{};
 }

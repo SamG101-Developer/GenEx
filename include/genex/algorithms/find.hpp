@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
@@ -7,7 +6,7 @@
 #include <genex/operations/cmp.hpp>
 
 
-namespace genex::algorithms::concepts {
+namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename E, typename Proj>
     concept findable_iters =
         std::input_iterator<I> and
@@ -25,25 +24,22 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct find_fn {
         template <typename I, typename S, typename E, typename Proj = meta::identity>
-            requires concepts::findable_iters<I, S, E, Proj>
-        constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> I {
+        requires detail::concepts::findable_iters<I, S, E, Proj>
+        GENEX_INLINE constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> I {
             for (; first != last; ++first) {
-                if (std::invoke(std::forward<Proj>(proj), *first) == elem) {
-                    break;
-                }
+                if (std::invoke(proj, *first) == elem) { break; }
             }
             return first;
         }
 
         template <typename Rng, typename E, typename Proj = meta::identity>
-            requires concepts::findable_range<Rng, E, Proj>
-        constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> auto {
+        requires detail::concepts::findable_range<Rng, E, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem, Proj proj = {}) const -> iterator_t<Rng> {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last), std::forward<E>(elem), std::forward<Proj>(proj));
+            return (*this)(std::move(first), std::move(last), std::move(elem), std::move(proj));
         }
     };
 
 
-    GENEX_EXPORT_STRUCT(find);
+    inline constexpr find_fn find{};
 }

@@ -6,7 +6,7 @@
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj>
     concept droppable_while_iters =
         std::input_iterator<I> and
@@ -20,15 +20,14 @@ namespace genex::views::concepts {
 }
 
 
-namespace genex::views::detail {
+namespace genex::views::detail::coros {
     template <typename I, typename S, typename Pred, typename Proj>
-        requires concepts::droppable_while_iters<I, S, Pred, Proj>
-    GENEX_NO_ASAN
-    auto do_drop_while(I first, S last, Pred &&pred, Proj &&proj = {}) -> generator<iter_value_t<I>> {
-        if (first == last) { co_return; }
+    requires concepts::droppable_while_iters<I, S, Pred, Proj>
+    auto do_drop_while(I first, S last, Pred pred, Proj proj = {}) -> generator<iter_value_t<I>> {
+        GENEX_ITER_GUARD;
         auto dropping = true;
         for (; first != last; ++first) {
-            if (dropping && std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
+            if (dropping and std::invoke(pred, std::invoke(proj, *first))) {
                 continue;
             }
             dropping = false;
@@ -41,26 +40,24 @@ namespace genex::views::detail {
 namespace genex::views {
     struct drop_while_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-            requires concepts::droppable_while_iters<I, S, Pred, Proj>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
-            return detail::do_drop_while(
-                std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+        requires detail::concepts::droppable_while_iters<I, S, Pred, Proj>
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const {
+            return detail::coros::do_drop_while(std::move(first), std::move(last), std::move(pred), std::move(proj));
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
-            requires concepts::droppable_while_range<Rng, Pred, Proj>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+        requires detail::concepts::droppable_while_range<Rng, Pred, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            return detail::coros::do_drop_while(std::move(first), std::move(last), std::move(pred), std::move(proj));
         }
 
         template <typename Pred, typename Proj = meta::identity>
-            requires (not range<Pred>)
-        constexpr auto operator()(Pred &&pred, Proj &&proj = {}) const -> auto {
-            return std::bind_back(drop_while_fn{}, std::forward<Pred>(pred), std::forward<Proj>(proj));
+        requires (not range<Pred>)
+        GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const {
+            return std::bind_back(drop_while_fn{}, std::move(pred), std::move(proj));
         }
     };
 
-    GENEX_EXPORT_STRUCT(drop_while);
+    inline constexpr drop_while_fn drop_while{};
 }

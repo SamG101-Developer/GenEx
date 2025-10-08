@@ -1,5 +1,4 @@
 #pragma once
-#include <coroutine>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
@@ -8,22 +7,11 @@
 #include <genex/iterators/prev.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept reversible_iters =
         std::bidirectional_iterator<I> and
         std::sentinel_for<S, I>;
-
-    template <typename I, typename S>
-    concept reversible_iters_optimized =
-        std::random_access_iterator<I> and
-        reversible_iters<I, S>;
-
-    template <typename I, typename S>
-    concept reversible_iters_unoptimized =
-        std::input_iterator<I> and
-        not std::random_access_iterator<I> and
-        reversible_iters<I, S>;
 
     template <typename Rng>
     concept reversible_range =
@@ -32,26 +20,13 @@ namespace genex::views::concepts {
 }
 
 
-namespace genex::views::detail {
+namespace genex::views::detail::coros {
     template <typename I, typename S>
-        requires concepts::reversible_iters_optimized<I, S>
-    GENEX_NO_ASAN
+    requires concepts::reversible_iters<I, S>
     auto do_reverse(I first, S last) -> generator<iter_value_t<I>> {
-        if (first == last) { co_return; }
-        while (first < last) {
-            --last;
-            co_yield *last;
-        }
-    }
-
-    template <typename I, typename S>
-        requires concepts::reversible_iters_unoptimized<I, S>
-    GENEX_NO_ASAN
-    auto do_reverse(I first, S last) -> generator<iter_value_t<I>> {
-        if (first == last) { co_return; }
-        while (first != last) {
-            last = iterators::prev(last);
-            co_yield *last;
+        GENEX_ITER_GUARD;
+        for (; first != last; --last) {
+            co_yield static_cast<iter_value_t<I>>(*iterators::prev(last, 1, first));
         }
     }
 }
@@ -60,22 +35,22 @@ namespace genex::views::detail {
 namespace genex::views {
     struct reverse_fn {
         template <typename I, typename S>
-            requires concepts::reversible_iters<I, S>
-        constexpr auto operator()(I first, S last) const -> auto {
-            return detail::do_reverse(std::move(first), std::move(last));
+        requires detail::concepts::reversible_iters<I, S>
+        GENEX_INLINE constexpr auto operator()(I first, S last) const {
+            return detail::coros::do_reverse(std::move(first), std::move(last));
         }
 
         template <typename Rng>
-            requires concepts::reversible_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        requires detail::concepts::reversible_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last));
+            return detail::coros::do_reverse(std::move(first), std::move(last));
         }
 
-        constexpr auto operator()() const -> auto {
+        GENEX_INLINE constexpr auto operator()() const {
             return std::bind_back(reverse_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(reverse);
+    inline constexpr reverse_fn reverse{};
 }

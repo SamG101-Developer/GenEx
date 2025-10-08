@@ -2,7 +2,7 @@
 #include <genex/concepts.hpp>
 
 
-namespace genex::algorithms::concepts {
+namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj>
     concept quantifiable_iters =
         std::input_iterator<I> and

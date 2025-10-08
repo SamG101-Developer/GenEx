@@ -2,7 +2,7 @@
 #include <genex/iterators/access.hpp>
 
 
-namespace genex::iterators::concepts {
+namespace genex::iterators::detail::concepts {
     template <typename Rng>
     concept can_iter_pair_range =
         range<Rng> and
@@ -14,11 +14,11 @@ namespace genex::iterators::concepts {
 namespace genex::iterators {
     struct iter_pair_fn {
         template <typename Rng>
-            requires concepts::can_iter_pair_range<Rng>
-        constexpr auto operator()(Rng &&rng) const -> auto {
+        requires detail::concepts::can_iter_pair_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             return std::make_pair(iterators::begin(rng), iterators::end(rng));
         }
     };
 
-    GENEX_EXPORT_STRUCT(iter_pair);
+    inline constexpr iter_pair_fn iter_pair{};
 }

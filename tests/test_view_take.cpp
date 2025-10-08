@@ -2,9 +2,8 @@
 
 #include <genex/views/take.hpp>
 #include <genex/views/take_last.hpp>
-#include <genex/views/take_until.hpp>
 #include <genex/views/take_while.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 TEST(GenexViewsTake, VecInput) {
@@ -12,7 +11,7 @@ TEST(GenexViewsTake, VecInput) {
 
     const auto rng = vec
         | genex::views::take(4)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{0, 1, 2, 3};
     EXPECT_EQ(rng, exp);
 }
@@ -23,7 +22,7 @@ TEST(GenexViewsTakeLast, VecInput) {
 
     const auto rng = vec
         | genex::views::take_last(4)
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{6, 7, 8, 9};
     EXPECT_EQ(rng, exp);
 }
@@ -34,18 +33,7 @@ TEST(GenexViewsTakeWhile, VecInput) {
 
     const auto rng = vec
         | genex::views::take_while([](auto x) { return x < 5; })
-        | genex::views::to<std::vector>();
-    const auto exp = std::vector{0, 1, 2, 3, 4};
-    EXPECT_EQ(rng, exp);
-}
-
-
-TEST(GenexViewsTakeUntil, VecInput) {
-    auto vec = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-
-    const auto rng = vec
-        | genex::views::take_until([](auto x) { return x >= 5; })
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{0, 1, 2, 3, 4};
     EXPECT_EQ(rng, exp);
 }

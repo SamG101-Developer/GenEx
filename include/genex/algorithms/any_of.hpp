@@ -9,23 +9,20 @@
 namespace genex::algorithms {
     struct any_of_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-            requires concepts::quantifiable_iters<I, S, Pred, Proj>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Check for an iterator that DOES satisfy the predicate; if one exists, an element satisfies it.
-            auto it = algorithms::find_if(
-                std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+        requires detail::concepts::quantifiable_iters<I, S, Pred, Proj>
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const -> bool {
+            auto it = algorithms::find_if(std::move(first), std::move(last), std::move(pred), std::move(proj));
             return it != last;
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
-            requires concepts::quantifiable_range<Rng, Pred, Proj>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
-            // Convert the range into iterators and call the iterator overload.
+        requires detail::concepts::quantifiable_range<Rng, Pred, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> bool {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            auto it = algorithms::find_if(std::move(first), std::move(last), std::move(pred), std::move(proj));
+            return it != last;
         }
     };
 
-    GENEX_EXPORT_STRUCT(any_of);
+    inline constexpr any_of_fn any_of{};
 }

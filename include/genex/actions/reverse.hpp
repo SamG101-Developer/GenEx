@@ -1,34 +1,22 @@
 #pragma once
-#include <utility>
 #include <genex/concepts.hpp>
 #include <genex/pipe.hpp>
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::actions::concepts {
+namespace genex::actions::detail::concepts {
     template <typename Rng>
     concept reversible_range =
         bidirectional_range<Rng> and
         std::permutable<iterator_t<Rng>>;
-
-    template <typename Rng>
-    concept reversible_range_optimized =
-        random_access_range<Rng> and
-        reversible_range<Rng>;
-
-    template <typename Rng>
-    concept reversible_range_unoptimized =
-        input_range<Rng> and
-        not random_access_range<Rng> and
-        reversible_range<Rng>;
 }
 
 
 namespace genex::actions {
     struct reverse_fn {
         template <typename Rng>
-            requires concepts::reversible_range_optimized<Rng>
-        constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+        requires detail::concepts::reversible_range<Rng> and random_access_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
             auto [first, last] = iterators::iter_pair(rng);
             while (first < --last) {
                 std::iter_swap(first++, last);
@@ -37,8 +25,8 @@ namespace genex::actions {
         }
 
         template <typename Rng>
-            requires concepts::reversible_range_unoptimized<Rng>
-        constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+        requires detail::concepts::reversible_range<Rng>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
             auto [first, last] = iterators::iter_pair(rng);
             while (first != last and first != --last) {
                 std::iter_swap(first++, last);
@@ -46,10 +34,10 @@ namespace genex::actions {
             return std::forward<Rng>(rng);
         }
 
-        constexpr auto operator()() const -> auto {
+        GENEX_INLINE constexpr auto operator()() const {
             return std::bind_back(reverse_fn{});
         }
     };
 
-    GENEX_EXPORT_STRUCT(reverse);
+    inline constexpr reverse_fn reverse{};
 }

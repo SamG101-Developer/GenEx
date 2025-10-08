@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/map.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 TEST(GenexViewsKeys, MapInput) {
@@ -14,7 +14,7 @@ TEST(GenexViewsKeys, MapInput) {
 
     const auto keys = map
         | genex::views::keys
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
 
     const auto exp = std::vector{"one", "two", "three", "four", "five", "six"};
     EXPECT_EQ(keys, exp);
@@ -29,7 +29,7 @@ TEST(GenexViewsVals, MapInput) {
 
     const auto vals = map
         | genex::views::vals
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
 
     const auto exp = std::vector{1, 2, 3, 4, 5, 6};
     EXPECT_EQ(vals, exp);

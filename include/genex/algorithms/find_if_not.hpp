@@ -1,12 +1,11 @@
 #pragma once
-#include <functional>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::algorithms::concepts {
+namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj>
     concept findable_if_not_iters =
         std::input_iterator<I> and
@@ -23,24 +22,21 @@ namespace genex::algorithms::concepts {
 namespace genex::algorithms {
     struct find_if_not_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-            requires concepts::findable_if_not_iters<I, S, Pred, Proj>
-        constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
+        requires detail::concepts::findable_if_not_iters<I, S, Pred, Proj>
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const -> I {
             for (; first != last; ++first) {
-                if (not std::invoke(std::forward<Pred>(pred), std::invoke(std::forward<Proj>(proj), *first))) {
-                    break;
-                }
+                if (not std::invoke(pred, std::invoke(proj, *first))) { break; }
             }
             return first;
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
-            requires concepts::findable_if_not_range<Rng, Pred, Proj>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> auto {
+        requires detail::concepts::findable_if_not_range<Rng, Pred, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> iterator_t<Rng> {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            return (*this)(std::move(first), std::move(last), std::move(pred), std::move(proj));
         }
     };
 
-    GENEX_EXPORT_STRUCT(find_if_not);
+    inline constexpr find_if_not_fn find_if_not{};
 }

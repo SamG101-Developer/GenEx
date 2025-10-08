@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <genex/views/duplicates.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 TEST(GenexViewsDuplicates, Duplicates) {
@@ -9,7 +9,7 @@ TEST(GenexViewsDuplicates, Duplicates) {
 
     const auto rng = vec
         | genex::views::duplicates
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{1, 1};
     EXPECT_EQ(rng, exp);
 }
@@ -20,7 +20,7 @@ TEST(GenexViewsDuplicates, NoDuplicates) {
 
     const auto rng = vec
         | genex::views::duplicates
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector<int>{};
     EXPECT_EQ(rng, exp);
 }

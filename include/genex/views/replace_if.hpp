@@ -1,6 +1,4 @@
 #pragma once
-#include <coroutine>
-#include <functional>
 #include <genex/concepts.hpp>
 #include <genex/generator.hpp>
 #include <genex/macros.hpp>
@@ -9,7 +7,7 @@
 #include <genex/iterators/iter_pair.hpp>
 
 
-namespace genex::views::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Pred, typename New, typename Proj>
     concept replaceable_if_iters =
         std::input_iterator<I> and
@@ -24,12 +22,11 @@ namespace genex::views::concepts {
 }
 
 
-namespace genex::views::detail {
+namespace genex::views::detail::coros {
     template <typename I, typename S, typename Pred, typename New, typename Proj>
-        requires concepts::replaceable_if_iters<I, S, Pred, New, Proj>
-    GENEX_NO_ASAN
-    auto do_replace_if(I first, S last, Pred &&pred, New &&new_val, Proj &&proj) -> generator<iter_value_t<I>> {
-        if (first == last) { co_return; }
+    requires concepts::replaceable_if_iters<I, S, Pred, New, Proj>
+    auto do_replace_if(I first, S last, Pred pred, New new_val, Proj proj) -> generator<iter_value_t<I>> {
+        GENEX_ITER_GUARD;
         for (; first != last; ++first) {
             if (std::invoke(pred, std::invoke(proj, *first))) { co_yield new_val; }
             else { co_yield static_cast<iter_value_t<I>>(*first); }
@@ -41,29 +38,24 @@ namespace genex::views::detail {
 namespace genex::views {
     struct replace_if_fn {
         template <typename I, typename S, typename Pred, typename New, typename Proj = meta::identity>
-            requires concepts::replaceable_if_iters<I, S, Pred, New, Proj>
-        constexpr auto operator()(I first, S last, Pred &&pred, New &&new_val, Proj &&proj = {}) const -> auto {
-            return detail::do_replace_if(
-                std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<New>(new_val),
-                std::forward<Proj>(proj));
+        requires detail::concepts::replaceable_if_iters<I, S, Pred, New, Proj>
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, New new_val, Proj proj = {}) const {
+            return detail::coros::do_replace_if(std::move(first), std::move(last), std::move(pred), std::move(new_val), std::move(proj));
         }
 
         template <typename Rng, typename Pred, typename New, typename Proj = meta::identity>
-            requires concepts::replaceable_if_range<Rng, Pred, New, Proj>
-        constexpr auto operator()(Rng &&rng, Pred &&pred, New &&new_val, Proj &&proj = {}) const -> auto {
+        requires detail::concepts::replaceable_if_range<Rng, Pred, New, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, New new_val, Proj proj = {}) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(
-                std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<New>(new_val),
-                std::forward<Proj>(proj));
+            return detail::coros::do_replace_if(std::move(first), std::move(last), std::move(pred), std::move(new_val), std::move(proj));
         }
 
         template <typename Pred, typename New, typename Proj = meta::identity>
-            requires (not range<Pred>)
-        constexpr auto operator()(Pred &&pred, New &&new_val, Proj &&proj = {}) const -> auto {
-            return std::bind_back(
-                replace_if_fn{}, std::forward<Pred>(pred), std::forward<New>(new_val), std::forward<Proj>(proj));
+        requires (not range<Pred>)
+        GENEX_INLINE constexpr auto operator()(Pred pred, New new_val, Proj proj = {}) const {
+            return std::bind_back(replace_if_fn{}, std::move(pred), std::move(new_val), std::move(proj));
         }
     };
 
-    GENEX_EXPORT_STRUCT(replace_if);
+    inline constexpr replace_if_fn replace_if{};
 }

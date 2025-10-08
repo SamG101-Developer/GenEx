@@ -4,7 +4,7 @@
 #include <genex/views/address.hpp>
 #include <genex/views/indirect.hpp>
 #include <genex/views/materialize.hpp>
-#include <genex/views/to.hpp>
+#include <genex/to_container.hpp>
 
 
 struct TestStruct1 {
@@ -26,7 +26,7 @@ TEST(GenexViewsAddress, VecInput) {
     auto vec = std::vector{t1, t2, t3};
     const auto rng = vec
         | genex::views::address
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{&vec[0], &vec[1], &vec[2]};
     EXPECT_EQ(rng, exp);
 }
@@ -40,7 +40,7 @@ TEST(GenexViewsAddress, VecInputTemp) {
     const auto rng = std::vector{t1, t2, t3}
         | genex::views::address
         | genex::views::indirect
-        | genex::views::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector{t1, t2, t3};
     EXPECT_EQ(rng, exp);
 }
