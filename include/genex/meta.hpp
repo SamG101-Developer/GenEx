@@ -19,6 +19,7 @@ namespace genex::meta {
          * f(args...).
          */
         template <typename F, typename... Args>
+        requires std::is_invocable_v<F, Args...> and (not std::is_member_pointer_v<std::remove_reference_t<F>>)
         GENEX_INLINE constexpr auto operator()(F &&f, Args &&... args) const noexcept(
             noexcept(std::forward<F>(f)(std::forward<Args>(args)...))) -> decltype(std::forward<F>(f)(std::forward<Args>(args)...)) {
             return std::forward<F>(f)(std::forward<Args>(args)...);
