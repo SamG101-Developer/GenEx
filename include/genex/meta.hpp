@@ -16,8 +16,8 @@ namespace genex::meta::detail::concepts {
 namespace genex::meta::detail {
     template <typename T>
     requires concepts::dereferenceable<T>
-    GENEX_INLINE auto dereference(T &&) -> decltype(*std::declval<T&>()) {
-        return *std::declval<T&>();
+    GENEX_INLINE auto dereference(T &&t) -> decltype(*std::declval<T&>()) {
+        return *std::forward<T>(t);
     }
 
     template <typename T>
