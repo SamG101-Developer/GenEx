@@ -8,21 +8,21 @@
 
 namespace genex::views::detail::concepts {
     template <typename I, typename S>
-    concept flattenable_iters =
+    concept joinable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
         input_range<iter_value_t<I>>;
 
     template <typename Rng>
-    concept flattenable_range =
+    concept joinable_range =
         input_range<Rng> and
-        flattenable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
+        joinable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
 
 namespace genex::views::detail::coros {
     template <typename I, typename S>
-    requires concepts::flattenable_iters<I, S>
+    requires concepts::joinable_iters<I, S>
     auto do_join(I first, S last) -> generator<range_value_t<iter_value_t<I>>> {
         GENEX_ITER_GUARD;
         for (; first != last; ++first) {
@@ -35,24 +35,24 @@ namespace genex::views::detail::coros {
 
 
 namespace genex::views {
-    struct flatten_fn {
+    struct join_fn {
         template <typename I, typename S>
-        requires detail::concepts::flattenable_iters<I, S>
+        requires detail::concepts::joinable_iters<I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
             return detail::coros::do_join(std::move(first), std::move(last));
         }
 
         template <typename Rng>
-        requires detail::concepts::flattenable_range<Rng>
+        requires detail::concepts::joinable_range<Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
             return detail::coros::do_join(std::move(first), std::move(last));
         }
 
         GENEX_INLINE constexpr auto operator()() const {
-            return std::bind_back(flatten_fn{});
+            return std::bind_back(join_fn{});
         }
     };
 
-    inline constexpr flatten_fn flatten{};
+    inline constexpr join_fn join{};
 }

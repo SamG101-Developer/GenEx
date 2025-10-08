@@ -8,7 +8,7 @@
 TEST(GenexViewsFlatten, VecInput) {
     auto vec = std::vector<std::vector<int>>{{1, 2, 3}, {4, 5}, {6}};
     const auto rng = vec
-        | genex::views::flatten
+        | genex::views::join
         | genex::to<std::vector>();
     const auto exp = std::vector<int>{1, 2, 3, 4, 5, 6};
     EXPECT_EQ(rng, exp);
@@ -18,7 +18,7 @@ TEST(GenexViewsFlatten, VecInput) {
 TEST(GenexViewsFlatten, StrInput) {
     auto vec = std::vector<std::string>{"hello", "world", "!"};
     const auto rng = vec
-        | genex::views::flatten
+        | genex::views::join
         | genex::to<std::vector>();
     const auto exp = std::vector{'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!'};
     EXPECT_EQ(rng, exp);
