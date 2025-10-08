@@ -9,7 +9,7 @@
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename Int>
     concept takeable_range =
-        input_range<Rng> and
+        forward_range<Rng> and
         erasable_range<Rng&, iterator_t<Rng>, sentinel_t<Rng>> and
         std::weakly_incrementable<Int>;
 }

@@ -9,7 +9,7 @@
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename Int>
     concept droppable_range =
-        input_range<Rng> and
+        forward_range<Rng> and
         erasable_range<Rng&, iterator_t<Rng>, iterator_t<Rng>> and
         std::weakly_incrementable<Int>;
 }
