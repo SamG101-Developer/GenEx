@@ -26,7 +26,7 @@ namespace genex::algorithms {
         GENEX_INLINE auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> std::size_t {
             auto count = 0uz;
             for (; first != last; ++first) {
-                if (std::invoke(pred, std::invoke(proj, *first))) { ++count; }
+                if (meta::invoke(pred, meta::invoke(proj, *first))) { ++count; }
             }
             return count;
         }

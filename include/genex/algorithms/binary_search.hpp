@@ -26,7 +26,7 @@ namespace genex::algorithms {
         requires detail::concepts::binary_searchable_iters<I, S, E, Comp, Proj>
         GENEX_INLINE constexpr auto operator()(I first, S last, E&& elem, Comp &&comp = {}, Proj &&proj = {}) const -> bool {
             first = std::lower_bound(std::move(first), std::move(last), elem);
-            return first != last and not std::invoke(comp, std::invoke(proj, *first), std::forward<E>(elem));
+            return first != last and not meta::invoke(comp, meta::invoke(proj, *first), std::forward<E>(elem));
         }
 
         template <typename Rng, typename E, typename Comp = operations::lt, typename Proj = meta::identity>

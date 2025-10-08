@@ -27,7 +27,7 @@ namespace genex::algorithms {
         requires detail::concepts::positionable_iters<I, S, Pred, Proj, Int>
         GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z, const std::size_t drop = 0z) const -> Int {
             for (Int pos = drop; first != last; ++first, ++pos) {
-                if (std::invoke(pred, std::invoke(proj, *first))) { return pos; }
+                if (meta::invoke(pred, meta::invoke(proj, *first))) { return pos; }
             }
             return def;
         }

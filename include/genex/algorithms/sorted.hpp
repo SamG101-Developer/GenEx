@@ -26,7 +26,7 @@ namespace genex::algorithms {
         GENEX_INLINE constexpr auto operator()(I first, S last, Comp &&comp = {}, Proj &&proj = {}) const -> std::vector<iter_value_t<I>> {
             auto vec = std::vector<iter_value_t<I>>(std::make_move_iterator(first), std::make_move_iterator(last));
             std::sort(vec.begin(), vec.end(), [comp, proj]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
-                return std::invoke(comp, std::invoke(proj, std::forward<Lhs>(lhs)), std::invoke(proj, std::forward<Rhs>(rhs)));
+                return meta::invoke(comp, meta::invoke(proj, std::forward<Lhs>(lhs)), meta::invoke(proj, std::forward<Rhs>(rhs)));
             });
             return vec;
         }

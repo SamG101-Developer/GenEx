@@ -1,8 +1,8 @@
 #pragma once
-#include <functional>
 
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/iterators/iter_pair.hpp>
 
 
@@ -29,7 +29,7 @@ namespace genex::algorithms {
         GENEX_INLINE constexpr auto operator()(I first, S last, E &&init, F &&f) const {
             auto &&acc = std::forward<E>(init);
             for (; first != last; ++first) {
-                acc = std::invoke(f, std::move(acc), *first);
+                acc = meta::invoke(f, std::move(acc), *first);
             }
             return acc;
         }

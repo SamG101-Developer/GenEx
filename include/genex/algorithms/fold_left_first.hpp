@@ -1,8 +1,7 @@
 #pragma once
-#include <functional>
-
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
+#include <genex/meta.hpp>
 #include <genex/iterators/iter_pair.hpp>
 
 
@@ -30,7 +29,7 @@ namespace genex::algorithms {
             auto acc = *first;
             ++first;
             for (; first != last; ++first) {
-                acc = std::invoke(f, std::move(acc), *first);
+                acc = meta::invoke(f, std::move(acc), *first);
             }
             return acc;
         }

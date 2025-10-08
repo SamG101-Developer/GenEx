@@ -26,7 +26,7 @@ namespace genex::algorithms {
         GENEX_INLINE constexpr auto operator()(I first, S last, Comp &&comp = {}, Proj &&proj = {}) const -> iter_reference_t<I> {
             if (first == last) { return *first; }
             for (auto next = first; ++next != last;) {
-                if (std::invoke(comp, std::invoke(proj, *next), std::invoke(proj, *first))) { first = next; }
+                if (meta::invoke(comp, meta::invoke(proj, *next), meta::invoke(proj, *first))) { first = next; }
             }
             return *first;
         }

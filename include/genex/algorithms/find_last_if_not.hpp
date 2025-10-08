@@ -28,7 +28,7 @@ namespace genex::algorithms {
         GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
             auto true_last = last;
             for (; last != first; --last) {
-                if (not std::invoke(pred, std::invoke(proj, *iterators::prev(last)))) { return iterators::prev(last); }
+                if (not meta::invoke(pred, meta::invoke(proj, *iterators::prev(last)))) { return iterators::prev(last); }
             }
             return true_last;
         }
@@ -38,7 +38,7 @@ namespace genex::algorithms {
         GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
             auto found_last = last;
             for (; first != last; ++first) {
-                if (not std::invoke(pred, std::invoke(proj, *first))) { found_last = first; }
+                if (not meta::invoke(pred, meta::invoke(proj, *first))) { found_last = first; }
             }
             return found_last;
         }

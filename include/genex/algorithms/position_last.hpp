@@ -30,7 +30,7 @@ namespace genex::algorithms {
             while (first != last) {
                 --last;
                 --pos;
-                if (std::invoke(pred, std::invoke(proj, *last))) { return pos; }
+                if (meta::invoke(pred, meta::invoke(proj, *last))) { return pos; }
             }
             return def;
         }
@@ -40,7 +40,7 @@ namespace genex::algorithms {
         GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z) const -> Int {
             auto pos = def;
             for (Int i = 0; first != last; ++first, ++i) {
-                if (std::invoke(pred, std::invoke(proj, *first))) { pos = i; }
+                if (meta::invoke(pred, meta::invoke(proj, *first))) { pos = i; }
             }
             return pos;
         }

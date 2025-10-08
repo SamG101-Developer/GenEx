@@ -21,7 +21,7 @@ namespace genex::actions {
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> decltype(auto) {
             auto [first, last] = iterators::iter_pair(rng);
             auto sorter = [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
-                return std::invoke(comp, std::invoke(proj, std::forward<Lhs>(lhs)), std::invoke(proj, std::forward<Rhs>(rhs)));
+                return meta::invoke(comp, meta::invoke(proj, std::forward<Lhs>(lhs)), meta::invoke(proj, std::forward<Rhs>(rhs)));
             };
             std::sort(std::move(first), std::move(last), std::move(sorter));
             return std::forward<Rng>(rng);

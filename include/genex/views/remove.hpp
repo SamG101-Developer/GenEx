@@ -28,7 +28,7 @@ namespace genex::views::detail::coros {
     auto do_remove(I first, S last, E elem, Proj proj) -> generator<iter_value_t<I>> {
         GENEX_ITER_GUARD;
         for (; first != last; ++first) {
-            if (std::invoke(proj, *first) == elem) { continue; }
+            if (meta::invoke(proj, *first) == elem) { continue; }
             co_yield static_cast<iter_value_t<I>>(*first);
         }
     }

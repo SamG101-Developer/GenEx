@@ -28,7 +28,7 @@ namespace genex::views::detail::coros {
     auto do_transform(I first, S last, F f, Proj proj) -> generator<std::invoke_result_t<F, std::invoke_result_t<Proj, iter_value_t<I>>>> {
         GENEX_ITER_GUARD;
         for (; first != last; ++first) {
-            co_yield std::invoke(f, std::invoke(proj, *first));
+            co_yield meta::invoke(f, meta::invoke(proj, *first));
         }
     }
 }

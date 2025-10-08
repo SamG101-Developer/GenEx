@@ -49,11 +49,11 @@ namespace genex::views::detail::coros {
                 co_yield *first1;
                 ++first1;
             }
-            else if (std::invoke(comp, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) {
+            else if (meta::invoke(comp, meta::invoke(proj1, *first1), meta::invoke(proj2, *first2))) {
                 co_yield *first1;
                 ++first1;
             }
-            else if (std::invoke(comp, std::invoke(proj2, *first2), std::invoke(proj1, *first1))) {
+            else if (meta::invoke(comp, meta::invoke(proj2, *first2), meta::invoke(proj1, *first1))) {
                 ++first2;
             }
             else {
@@ -68,10 +68,10 @@ namespace genex::views::detail::coros {
     auto do_set_intersection(I1 first1, S1 last1, I2 first2, S2 last2, Comp comp, Proj1 proj1, Proj2 proj2) -> generator<iter_value_t<I1>> {
         if (first1 == last1) { co_return; }
         while (first1 != last1 and first2 != last2) {
-            if (std::invoke(comp, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) {
+            if (meta::invoke(comp, meta::invoke(proj1, *first1), meta::invoke(proj2, *first2))) {
                 ++first1;
             }
-            else if (std::invoke(comp, std::invoke(proj2, *first2), std::invoke(proj1, *first1))) {
+            else if (meta::invoke(comp, meta::invoke(proj2, *first2), meta::invoke(proj1, *first1))) {
                 ++first2;
             }
             else {
@@ -94,11 +94,11 @@ namespace genex::views::detail::coros {
                 co_yield *first1;
                 ++first1;
             }
-            else if (std::invoke(comp, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) {
+            else if (meta::invoke(comp, meta::invoke(proj1, *first1), meta::invoke(proj2, *first2))) {
                 co_yield *first1;
                 ++first1;
             }
-            else if (std::invoke(comp, std::invoke(proj2, *first2), std::invoke(proj1, *first1))) {
+            else if (meta::invoke(comp, meta::invoke(proj2, *first2), meta::invoke(proj1, *first1))) {
                 co_yield *first2;
                 ++first2;
             }
@@ -121,11 +121,11 @@ namespace genex::views::detail::coros {
                 co_yield *first1;
                 ++first1;
             }
-            else if (std::invoke(comp, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) {
+            else if (meta::invoke(comp, meta::invoke(proj1, *first1), meta::invoke(proj2, *first2))) {
                 co_yield *first1;
                 ++first1;
             }
-            else if (std::invoke(comp, std::invoke(proj2, *first2), std::invoke(proj1, *first1))) {
+            else if (meta::invoke(comp, meta::invoke(proj2, *first2), meta::invoke(proj1, *first1))) {
                 co_yield *first2;
                 ++first2;
             }
@@ -141,7 +141,7 @@ namespace genex::views::detail::coros {
     requires concepts::set_algorithmicable_unsorted_iters<I1, S1, I2, S2, Proj1, Proj2>
     auto do_set_difference_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1, Proj2 proj2) -> generator<iter_value_t<I1>> {
         for (; first1 != last1; ++first1) {
-            if (not algorithms::contains(first2, last2, std::invoke(std::move(proj1), *first1), std::move(proj2))) {
+            if (not algorithms::contains(first2, last2, meta::invoke(std::move(proj1), *first1), std::move(proj2))) {
                 co_yield *first1;
             }
         }
@@ -151,7 +151,7 @@ namespace genex::views::detail::coros {
     requires concepts::set_algorithmicable_unsorted_iters<I1, S1, I2, S2, Proj1, Proj2>
     auto do_set_intersection_unsorted(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1, Proj2 proj2) -> generator<iter_value_t<I1>> {
         for (; first1 != last1; ++first1) {
-            if (algorithms::contains(first2, last2, std::invoke(std::move(proj1), *first1), std::move(proj2))) {
+            if (algorithms::contains(first2, last2, meta::invoke(std::move(proj1), *first1), std::move(proj2))) {
                 co_yield *first1;
             }
         }
@@ -181,7 +181,7 @@ namespace genex::views::detail::coros {
         auto f1 = first1;
         for (; first1 != last1; ++first1) { co_yield *first1; }
         for (; first2 != last2; ++first2) {
-            if (not algorithms::contains(f1, last1, std::invoke(std::move(proj2), *first2), std::move(proj1))) {
+            if (not algorithms::contains(f1, last1, meta::invoke(std::move(proj2), *first2), std::move(proj1))) {
                 co_yield *first2;
             }
         }
@@ -196,7 +196,7 @@ namespace genex::views {
         template <typename I1, typename S1, typename I2, typename S2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires detail::concepts::set_algorithmicable_sorted_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
         GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
-            return std::invoke(Func, std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1), std::move(proj2));
+            return meta::invoke(Func, std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1), std::move(proj2));
         }
 
         template <typename Rng1, typename Rng2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
@@ -204,7 +204,7 @@ namespace genex::views {
         GENEX_INLINE auto operator()(Rng1 &&rng1, Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
             auto [first1, last1] = iterators::iter_pair(rng1);
             auto [first2, last2] = iterators::iter_pair(rng2);
-            return std::invoke(Func, std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1), std::move(proj2));
+            return meta::invoke(Func, std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1), std::move(proj2));
         }
 
         template <typename Rng2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
@@ -219,7 +219,7 @@ namespace genex::views {
         template <typename I1, typename S1, typename I2, typename S2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires detail::concepts::set_algorithmicable_unsorted_iters<I1, S1, I2, S2, Proj1, Proj2>
         GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
-            return std::invoke(Func, std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(proj1), std::move(proj2));
+            return meta::invoke(Func, std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(proj1), std::move(proj2));
         }
 
         template <typename Rng1, typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
@@ -227,7 +227,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
             auto [first1, last1] = iterators::iter_pair(rng1);
             auto [first2, last2] = iterators::iter_pair(rng2);
-            return std::invoke(Func, std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(proj1), std::move(proj2));
+            return meta::invoke(Func, std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(proj1), std::move(proj2));
         }
 
         template <typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>

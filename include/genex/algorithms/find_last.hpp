@@ -29,7 +29,7 @@ namespace genex::algorithms {
         GENEX_INLINE constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> I {
             auto result = last;
             for (; last != first; --last) {
-                if (std::invoke(proj, *iterators::prev(last)) == elem) { return iterators::prev(last); }
+                if (meta::invoke(proj, *iterators::prev(last)) == elem) { return iterators::prev(last); }
             }
             return result;
         }
@@ -39,7 +39,7 @@ namespace genex::algorithms {
         GENEX_INLINE constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> I {
             auto result = last;
             for (; first != last; ++first) {
-                if (std::invoke(proj, *first) == elem) { result = first; }
+                if (meta::invoke(proj, *first) == elem) { result = first; }
             }
             return result;
         }

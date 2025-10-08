@@ -26,7 +26,7 @@ namespace genex::views::detail::coros {
     auto do_filter(I first, S last, Pred pred, Proj proj) -> generator<iter_value_t<I>> {
         GENEX_ITER_GUARD;
         for (; first != last; ++first) {
-            if (std::invoke(pred, std::invoke(proj, *first))) {
+            if (meta::invoke(pred, meta::invoke(proj, *first))) {
                 co_yield static_cast<iter_value_t<I>>(*first);
             }
         }

@@ -25,7 +25,7 @@ namespace genex::actions {
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, New new_val, Proj proj = {}) const -> decltype(auto) {
             auto [first, last] = iterators::iter_pair(rng);
             for (;first != last; ++first) {
-                if (std::invoke(pred, std::invoke(proj, *first))) {
+                if (meta::invoke(pred, meta::invoke(proj, *first))) {
                     *first = new_val;
                 }
             }

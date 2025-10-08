@@ -27,7 +27,7 @@ namespace genex::views::detail::coros {
         GENEX_ITER_GUARD;
         auto dropping = true;
         for (; first != last; ++first) {
-            if (dropping and std::invoke(pred, std::invoke(proj, *first))) {
+            if (dropping and meta::invoke(pred, meta::invoke(proj, *first))) {
                 continue;
             }
             dropping = false;

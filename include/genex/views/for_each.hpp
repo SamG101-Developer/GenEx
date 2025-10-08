@@ -25,7 +25,7 @@ namespace genex::views::detail::coros {
     requires concepts::for_eachable_iters<I, S, F>
     auto do_for_each(I first, S last, F f) -> void {
         for (; first != last; ++first) {
-            std::invoke(f, *first);
+            meta::invoke(f, *first);
         }
     }
 }

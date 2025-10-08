@@ -27,7 +27,7 @@ namespace genex::algorithms {
         requires detail::concepts::findable_iters<I, S, E, Proj>
         GENEX_INLINE constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> I {
             for (; first != last; ++first) {
-                if (std::invoke(proj, *first) == elem) { break; }
+                if (meta::invoke(proj, *first) == elem) { break; }
             }
             return first;
         }

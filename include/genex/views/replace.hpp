@@ -29,7 +29,7 @@ namespace genex::views::detail::coros {
     auto do_replace(I first, S last, Old old_val, New new_val, Proj proj) -> generator<iter_value_t<I>> {
         GENEX_ITER_GUARD;
         for (; first != last; ++first) {
-            if (std::invoke(proj, *first) == old_val) { co_yield new_val; }
+            if (meta::invoke(proj, *first) == old_val) { co_yield new_val; }
             else { co_yield *first; }
         }
     }
