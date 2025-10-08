@@ -42,8 +42,7 @@ namespace genex::meta {
          * f(args...).
          */
         template <typename F, typename... Args>
-        GENEX_INLINE constexpr auto operator()(F &&f, Args &&... args) const noexcept(
-            noexcept(std::forward<F>(f)(std::forward<Args>(args)...)))
+        GENEX_INLINE constexpr auto operator()(F &&f, Args &&... args) const
             -> decltype(std::forward<F>(f)(std::forward<Args>(args)...)) {
             return std::forward<F>(f)(std::forward<Args>(args)...);
         }
@@ -53,8 +52,7 @@ namespace genex::meta {
          * obj.*mp(args...) or obj->*mp(args...).
          */
         template <typename T, typename C, typename Obj>
-        GENEX_INLINE constexpr auto operator()(T C::*f, Obj &&obj) const noexcept(
-            noexcept(detail::dereference(std::forward<Obj>(obj)).*f))
+        GENEX_INLINE constexpr auto operator()(T C::*f, Obj &&obj) const
             -> decltype(detail::dereference(std::forward<Obj>(obj)).*f) {
             return detail::dereference(std::forward<Obj>(obj)).*f;
         }
@@ -64,8 +62,7 @@ namespace genex::meta {
          * (obj.*mp)(args...) or (mp->*obj)(args...).
          */
         template <typename R, typename C, typename Obj, typename... Args>
-        GENEX_INLINE constexpr auto operator()(R C::*f, Obj &&obj, Args &&... args) const noexcept(
-            noexcept((detail::dereference(std::forward<Obj>(obj)).*f)(std::forward<Args>(args)...)))
+        GENEX_INLINE constexpr auto operator()(R C::*f, Obj &&obj, Args &&... args) const
             -> decltype((detail::dereference(std::forward<Obj>(obj)).*f)(std::forward<Args>(args)...)) {
             return (detail::dereference(std::forward<Obj>(obj)).*f)(std::forward<Args>(args)...);
         }
@@ -81,8 +78,7 @@ namespace genex::meta::detail {
         std::tuple<F, BoundArgs...> func_and_args;
 
         template <typename... CallArgs>
-        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) && noexcept(
-            noexcept(std::is_nothrow_invocable_v<F, CallArgs..., BoundArgs...>))
+        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) &&
             -> decltype(auto) {
             return std::apply([&](F &&f, BoundArgs &&... bound_args) -> decltype(auto) {
                 return meta::invoke(std::forward<F>(f), std::forward<CallArgs>(call_args)..., std::forward<BoundArgs>(bound_args)...);
@@ -90,8 +86,7 @@ namespace genex::meta::detail {
         }
 
         template <typename... CallArgs>
-        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) & noexcept(
-            noexcept(std::is_nothrow_invocable_v<F&, CallArgs..., BoundArgs&...>))
+        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) &
             -> decltype(auto) {
             return std::apply([&](F &f, BoundArgs &... bound_args) -> decltype(auto) {
                 return meta::invoke(f, std::forward<CallArgs>(call_args)..., bound_args...);
@@ -99,8 +94,7 @@ namespace genex::meta::detail {
         }
 
         template <typename... CallArgs>
-        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) const & noexcept(
-            noexcept(std::is_nothrow_invocable_v<F const&, CallArgs..., BoundArgs const&...>))
+        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) const &
             -> decltype(auto) {
             return std::apply([&](F const &f, BoundArgs const &... bound_args) -> decltype(auto) {
                 return meta::invoke(f, std::forward<CallArgs>(call_args)..., bound_args...);
@@ -117,22 +111,19 @@ namespace genex::meta::detail {
         } func_and_arg;
 
         template <typename... CallArgs>
-        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) && noexcept(
-            noexcept(std::is_nothrow_invocable_v<F, CallArgs..., BoundArg>))
+        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) &&
             -> decltype(auto) {
             return meta::invoke(std::move(func_and_arg.func), std::forward<CallArgs>(call_args)..., std::move(func_and_arg.arg));
         }
 
         template <typename... CallArgs>
-        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) & noexcept(
-            noexcept(std::is_nothrow_invocable_v<F&, CallArgs..., BoundArg&>))
+        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) &
             -> decltype(auto) {
             return meta::invoke(func_and_arg.func, std::forward<CallArgs>(call_args)..., func_and_arg.arg);
         }
 
         template <typename... CallArgs>
-        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) const & noexcept(
-            noexcept(std::is_nothrow_invocable_v<F const&, CallArgs..., BoundArg const&>))
+        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) const &
             -> decltype(auto) {
             return meta::invoke(func_and_arg.func, std::forward<CallArgs>(call_args)..., func_and_arg.arg);
         }
@@ -148,22 +139,19 @@ namespace genex::meta::detail {
         } func_and_args;
 
         template <typename... CallArgs>
-        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) && noexcept(
-            noexcept(std::is_nothrow_invocable_v<F, CallArgs..., BoundArg1, BoundArg2>))
+        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) &&
             -> decltype(auto) {
             return meta::invoke(std::move(func_and_args.func), std::forward<CallArgs>(call_args)..., std::move(func_and_args.arg1), std::move(func_and_args.arg2));
         }
 
         template <typename... CallArgs>
-        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) & noexcept(
-            noexcept(std::is_nothrow_invocable_v<F&, CallArgs..., BoundArg1&, BoundArg2&>))
+        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) &
             -> decltype(auto) {
             return meta::invoke(func_and_args.func, std::forward<CallArgs>(call_args)..., func_and_args.arg1, func_and_args.arg2);
         }
 
         template <typename... CallArgs>
-        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) const & noexcept(
-            noexcept(std::is_nothrow_invocable_v<F const&, CallArgs..., BoundArg1 const&, BoundArg2 const&>))
+        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) const &
             -> decltype(auto) {
             return meta::invoke(func_and_args.func, std::forward<CallArgs>(call_args)..., func_and_args.arg1, func_and_args.arg2);
         }
