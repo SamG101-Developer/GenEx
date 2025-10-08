@@ -31,3 +31,4 @@ add_custom_target(uninstall COMMAND xargs rm -vf < "${CMAKE_CURRENT_BINARY_DIR}/
 # Create the tests.
 enable_testing()
 add_subdirectory(tests)
+add_subdirectory(benchmarks)
