@@ -26,16 +26,16 @@ namespace genex::algorithms {
     struct contains_fn {
         template <typename I, typename S, typename E, typename Proj = meta::identity>
         requires detail::concepts::containable_iters<I, S, E, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, E elem, Proj proj = {}) const -> bool {
-            auto it = algorithms::find(std::move(first), std::move(last), std::move(elem), std::move(proj));
+        GENEX_INLINE constexpr auto operator()(I first, S last, E&& elem, Proj &&proj = {}) const -> bool {
+            auto it = algorithms::find(std::move(first), std::move(last), std::forward<E>(elem), std::forward<Proj>(proj));
             return it != last;
         }
 
         template <typename Rng, typename E, typename Proj = meta::identity>
         requires detail::concepts::containable_range<Rng, E, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem, Proj proj = {}) const -> bool {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E&& elem, Proj &&proj = {}) const -> bool {
             auto [first, last] = iterators::iter_pair(rng);
-            auto it = algorithms::find(std::move(first), std::move(last), std::move(elem), std::move(proj));
+            auto it = algorithms::find(std::move(first), std::move(last), std::forward<E>(elem), std::forward<Proj>(proj));
             return it != last;
         }
     };

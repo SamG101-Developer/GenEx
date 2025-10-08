@@ -24,7 +24,7 @@ namespace genex::algorithms {
     struct count_fn {
         template <typename I, typename S, typename E, typename Proj = meta::identity>
         requires detail::concepts::can_count_iters<I, S, E, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, E elem, Proj proj = {}) const -> std::size_t {
+        GENEX_INLINE constexpr auto operator()(I first, S last, E&& elem, Proj &&proj = {}) const -> std::size_t {
             auto count = 0uz;
             for (; first != last; ++first) {
                 if (std::invoke(proj, *first) == elem) { ++count; }
@@ -34,9 +34,9 @@ namespace genex::algorithms {
 
         template <typename Rng, typename E, std::invocable<E> Proj = meta::identity>
         requires detail::concepts::can_count_range<Rng, E, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem, Proj proj = {}) const -> std::size_t {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E&& elem, Proj &&proj = {}) const -> std::size_t {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last), std::move(elem), std::move(proj));
+            return (*this)(std::move(first), std::move(last), std::forward<E>(elem), std::forward<Proj>(proj));
         }
     };
 

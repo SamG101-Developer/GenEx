@@ -26,7 +26,7 @@ namespace genex::algorithms {
     struct find_last_fn {
         template <typename I, typename S, typename E, typename Proj = meta::identity>
         requires detail::concepts::findable_last_iters<I, S, E, Proj> and std::bidirectional_iterator<I>
-        GENEX_INLINE constexpr auto operator()(I first, S last, E elem, Proj proj = {}) const -> I {
+        GENEX_INLINE constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> I {
             auto result = last;
             for (; last != first; --last) {
                 if (std::invoke(proj, *iterators::prev(last)) == elem) { return iterators::prev(last); }
@@ -36,7 +36,7 @@ namespace genex::algorithms {
 
         template <typename I, typename S, typename E, typename Proj = meta::identity>
         requires detail::concepts::findable_last_iters<I, S, E, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, E elem, Proj proj = {}) const -> I {
+        GENEX_INLINE constexpr auto operator()(I first, S last, E &&elem, Proj &&proj = {}) const -> I {
             auto result = last;
             for (; first != last; ++first) {
                 if (std::invoke(proj, *first) == elem) { result = first; }
@@ -46,9 +46,9 @@ namespace genex::algorithms {
 
         template <typename Rng, typename E, typename Proj = meta::identity>
         requires detail::concepts::findable_last_range<Rng, E, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem, Proj proj = {}) const -> iterator_t<Rng> {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> iterator_t<Rng> {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last), std::move(elem), std::move(proj));
+            return (*this)(std::move(first), std::move(last), std::forward<E>(elem), std::forward<Proj>(proj));
         }
     };
 

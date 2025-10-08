@@ -24,17 +24,16 @@ namespace genex::algorithms {
     struct binary_search_fn {
         template <typename I, typename S, typename E, typename Comp = operations::lt, typename Proj = meta::identity>
         requires detail::concepts::binary_searchable_iters<I, S, E, Comp, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, E elem, Comp comp = {}, Proj proj = {}) const -> bool {
+        GENEX_INLINE constexpr auto operator()(I first, S last, E&& elem, Comp &&comp = {}, Proj &&proj = {}) const -> bool {
             first = std::lower_bound(std::move(first), std::move(last), elem);
-            return first != last and not std::invoke(comp, std::invoke(proj, *first), std::move(elem));
+            return first != last and not std::invoke(comp, std::invoke(proj, *first), std::forward<E>(elem));
         }
 
         template <typename Rng, typename E, typename Comp = operations::lt, typename Proj = meta::identity>
         requires detail::concepts::binary_searchable_range<Rng, E, Comp, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem, Comp comp = {}, Proj proj = {}) const -> bool {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E&& elem, Comp &&comp = {}, Proj &&proj = {}) const -> bool {
             auto [first, last] = iterators::iter_pair(rng);
-            first = std::lower_bound(std::move(first), std::move(last), elem);
-            return first != last and not std::invoke(comp, std::invoke(proj, *first), std::move(elem));
+            return (*this)(std::move(first), std::move(last), std::forward<E>(elem), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
     };
 

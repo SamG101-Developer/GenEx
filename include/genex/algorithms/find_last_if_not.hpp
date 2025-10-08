@@ -25,7 +25,7 @@ namespace genex::algorithms {
     struct find_last_if_not_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::findable_last_if_not_iters<I, S, Pred, Proj> and std::bidirectional_iterator<I>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const -> I {
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
             auto true_last = last;
             for (; last != first; --last) {
                 if (not std::invoke(pred, std::invoke(proj, *iterators::prev(last)))) { return iterators::prev(last); }
@@ -35,7 +35,7 @@ namespace genex::algorithms {
 
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::findable_last_if_not_iters<I, S, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const -> I {
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
             auto found_last = last;
             for (; first != last; ++first) {
                 if (not std::invoke(pred, std::invoke(proj, *first))) { found_last = first; }
@@ -45,9 +45,9 @@ namespace genex::algorithms {
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::findable_last_if_not_range<Rng, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> iterator_t<Rng> {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> iterator_t<Rng> {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last), std::move(pred), std::move(proj));
+            return (*this)(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
     };
 

@@ -25,7 +25,7 @@ namespace genex::algorithms {
     struct position_last_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity, typename Int>
         requires detail::concepts::positionable_last_iters<I, S, Pred, Proj, Int> and std::bidirectional_iterator<I>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}, const Int def = -1z) const -> Int {
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z) const -> Int {
             auto pos = static_cast<Int>(iterators::distance(first, last));
             while (first != last) {
                 --last;
@@ -37,7 +37,7 @@ namespace genex::algorithms {
 
         template <typename I, typename S, typename Pred, typename Proj = meta::identity, typename Int>
         requires detail::concepts::positionable_last_iters<I, S, Pred, Proj, Int>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}, const Int def = -1z) const -> Int {
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z) const -> Int {
             auto pos = def;
             for (Int i = 0; first != last; ++first, ++i) {
                 if (std::invoke(pred, std::invoke(proj, *first))) { pos = i; }
@@ -47,9 +47,9 @@ namespace genex::algorithms {
 
         template <typename Rng, typename Pred, typename Proj = meta::identity, typename Int = ssize_t>
         requires detail::concepts::positionable_last_range<Rng, Pred, Proj, Int>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}, const Int def = -1z) const -> Int {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}, const Int def = -1z) const -> Int {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last), std::move(pred), std::move(proj), def);
+            return (*this)(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj), def);
         }
     };
 

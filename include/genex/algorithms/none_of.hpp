@@ -10,16 +10,16 @@ namespace genex::algorithms {
     struct none_of_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::quantifiable_iters<I, S, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const -> bool {
-            auto it = algorithms::find_if(std::move(first), std::move(last), std::move(pred), std::move(proj));
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> bool {
+            auto it = algorithms::find_if(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
             return it == last;
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::quantifiable_range<Rng, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> bool {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> bool {
             auto [first, last] = iterators::iter_pair(rng);
-            auto it = algorithms::find_if(std::move(first), std::move(last), std::move(pred), std::move(proj));
+            auto it = algorithms::find_if(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
             return it == last;
         }
     };

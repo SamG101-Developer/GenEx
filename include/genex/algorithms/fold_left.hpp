@@ -26,8 +26,8 @@ namespace genex::algorithms {
     struct fold_left_fn {
         template <typename I, typename S, typename E, typename F>
         requires detail::concepts::left_foldable_iters<I, S, E, F>
-        GENEX_INLINE constexpr auto operator()(I first, S last, E init, F f) const {
-            auto acc = init;
+        GENEX_INLINE constexpr auto operator()(I first, S last, E &&init, F &&f) const {
+            auto &&acc = std::forward<E>(init);
             for (; first != last; ++first) {
                 acc = std::invoke(f, std::move(acc), *first);
             }
@@ -36,9 +36,9 @@ namespace genex::algorithms {
 
         template <typename Rng, typename E, typename F>
         requires detail::concepts::can_fold_left_range<Rng, E, F>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, E init, F f) const {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E &&init, F &&f) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last), std::move(init), std::move(f));
+            return (*this)(std::move(first), std::move(last), std::forward<E>(init), std::forward<F>(f));
         }
     };
 
