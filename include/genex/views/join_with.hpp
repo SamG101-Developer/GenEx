@@ -10,14 +10,14 @@
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename New>
     concept joinable_with_iters =
-        std::input_iterator<I> and
+        std::forward_iterator<I> and
         std::sentinel_for<S, I> and
         input_range<iter_value_t<I>> and
         std::convertible_to<New, range_value_t<iter_value_t<I>>>;
 
     template <typename Rng, typename New>
     concept joinable_with_range =
-        input_range<Rng> and
+        forward_range<Rng> and
         joinable_with_iters<iterator_t<Rng>, sentinel_t<Rng>, New>;
 }
 
