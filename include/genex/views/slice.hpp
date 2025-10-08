@@ -76,7 +76,7 @@ namespace genex::views {
         template <typename Int>
         requires integer_like<Int>
         GENEX_INLINE constexpr auto operator()(Int start_index, Int end_index, Int step = 1) const {
-            return std::bind_back(slice_fn{}, start_index, end_index, step);
+            return meta::bind_back(slice_fn{}, start_index, end_index, step);
         }
     };
 

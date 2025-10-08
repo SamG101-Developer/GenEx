@@ -30,7 +30,7 @@ namespace genex::actions {
         template <typename Comp = operations::lt, typename Proj = meta::identity>
         requires (not range<Comp>)
         GENEX_INLINE constexpr auto operator()(Comp comp = {}, Proj proj = {}) const {
-            return std::bind_back(sort_fn{}, std::move(comp), std::move(proj));
+            return meta::bind_back(sort_fn{}, std::move(comp), std::move(proj));
         }
     };
 

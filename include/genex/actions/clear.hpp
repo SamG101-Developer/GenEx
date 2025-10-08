@@ -22,7 +22,7 @@ namespace genex::actions {
         }
 
         GENEX_INLINE constexpr auto operator()() const {
-            return std::bind_back(clear_fn{});
+            return meta::bind_back(clear_fn{});
         }
     };
 

@@ -73,7 +73,7 @@ namespace genex::views {
         template <typename Rng2>
         requires range<Rng2>
         GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, const bool extend = true) const {
-            return std::bind_back(interleave_fn{}, std::forward<Rng2>(rng2), extend);
+            return meta::bind_back(interleave_fn{}, std::forward<Rng2>(rng2), extend);
         }
     };
 

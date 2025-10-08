@@ -29,7 +29,7 @@ namespace genex::actions {
         template <typename Pred>
         requires (not range<Pred>)
         GENEX_INLINE constexpr auto operator()(Pred pred) const {
-            return std::bind_back(drop_while_fn{}, std::move(pred));
+            return meta::bind_back(drop_while_fn{}, std::move(pred));
         }
     };
 

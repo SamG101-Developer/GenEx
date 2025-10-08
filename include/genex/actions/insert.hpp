@@ -60,7 +60,7 @@ namespace genex::actions {
         template <typename I, typename E>
         requires (not range<I>)
         constexpr auto operator()(I it, E elem) const {
-            return std::bind_back(insert_fn{}, std::move(it), std::move(elem));
+            return meta::bind_back(insert_fn{}, std::move(it), std::move(elem));
         }
     };
 

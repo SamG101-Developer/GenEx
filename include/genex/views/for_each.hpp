@@ -49,7 +49,7 @@ namespace genex::views {
         template <typename F>
         requires (not range<F>)
         GENEX_INLINE constexpr auto operator()(F f) const {
-            return std::bind_back(for_each_fn{}, std::move(f));
+            return meta::bind_back(for_each_fn{}, std::move(f));
         }
     };
 

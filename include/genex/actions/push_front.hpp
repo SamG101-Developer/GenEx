@@ -55,7 +55,7 @@ namespace genex::actions {
 
         template <typename E>
         GENEX_INLINE constexpr auto operator()(E elem) const {
-            return std::bind_back(push_front_fn{}, std::move(elem));
+            return meta::bind_back(push_front_fn{}, std::move(elem));
         }
     };
 

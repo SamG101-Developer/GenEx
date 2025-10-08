@@ -100,7 +100,7 @@ namespace genex::views {
         }
 
         GENEX_INLINE constexpr auto operator()() const {
-            return std::bind_back(cast_smart_fn{});
+            return meta::bind_back(cast_smart_fn{});
         }
     };
 

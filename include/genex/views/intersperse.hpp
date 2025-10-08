@@ -54,7 +54,7 @@ namespace genex::views {
 
         template <typename New>
         GENEX_INLINE constexpr auto operator()(New sep) const {
-            return std::bind_back(intersperse_fn{}, std::move(sep));
+            return meta::bind_back(intersperse_fn{}, std::move(sep));
         }
     };
 

@@ -59,7 +59,7 @@ namespace genex::views {
          * Pipe interface for the address view.
          */
         GENEX_INLINE auto operator()() const {
-            return std::bind_back(address_fn{});
+            return meta::bind_back(address_fn{});
         }
     };
 

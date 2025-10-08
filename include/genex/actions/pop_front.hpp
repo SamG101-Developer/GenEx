@@ -40,7 +40,7 @@ namespace genex::actions {
         }
 
         GENEX_INLINE constexpr auto operator()() const {
-            return std::bind_front(pop_front_fn{});
+            return meta::bind_back(pop_front_fn{});
         }
     };
 

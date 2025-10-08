@@ -71,7 +71,7 @@ namespace genex::strings {
         }
 
         GENEX_INLINE constexpr auto operator()() const {
-            return std::bind_back(upper_case_fn{});
+            return meta::bind_back(upper_case_fn{});
         }
     };
 
@@ -90,7 +90,7 @@ namespace genex::strings {
         }
 
     constexpr auto operator()() const {
-            return std::bind_back(lower_case_fn{});
+            return meta::bind_back(lower_case_fn{});
         }
     };
 

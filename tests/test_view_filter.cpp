@@ -44,7 +44,7 @@ TEST(GenexViewsFilter, VecInputStruct) {
     };
 
     const auto rng = vec
-        | genex::views::filter([](auto const &x) { return x.b % 2 == 0; })
+        | genex::views::filter([](const auto &x) { return x.b % 2 == 0; })
         | genex::to<std::vector>();
     const auto exp = std::vector{TestStruct{"two", 2}, TestStruct{"four", 4}, TestStruct{"six", 6}};
     EXPECT_EQ(rng, exp);
@@ -60,7 +60,7 @@ TEST(GenexViewsFilter, VecInputPointer) {
     auto vec = std::vector{&a, &b, &c, &d, &e};
 
     const auto rng = vec
-        | genex::views::filter([](auto const *x) { return x->b % 2 == 0; })
+        | genex::views::filter([](const auto *x) { return x->b % 2 == 0; })
         | genex::to<std::vector>();
     const auto exp = std::vector{&b, &d};
     EXPECT_EQ(rng, exp);

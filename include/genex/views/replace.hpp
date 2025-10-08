@@ -54,7 +54,7 @@ namespace genex::views {
         template <typename Old, typename New, typename Proj = meta::identity>
         requires (not range<Proj>)
         GENEX_INLINE constexpr auto operator()(Old old_val, New new_val, Proj proj = {}) const {
-            return std::bind_back(replace_fn{}, std::move(old_val), std::move(new_val), std::move(proj));
+            return meta::bind_back(replace_fn{}, std::move(old_val), std::move(new_val), std::move(proj));
         }
     };
 

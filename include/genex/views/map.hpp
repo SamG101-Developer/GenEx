@@ -68,7 +68,7 @@ namespace genex::views {
         }
 
         GENEX_INLINE constexpr auto operator()() const {
-            return std::bind_back(keys_fn{});
+            return meta::bind_back(keys_fn{});
         }
     };
 
@@ -87,7 +87,7 @@ namespace genex::views {
         }
 
         GENEX_INLINE constexpr auto operator()() const {
-            return std::bind_back(vals_fn{});
+            return meta::bind_back(vals_fn{});
         }
     };
 

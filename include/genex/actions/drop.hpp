@@ -29,7 +29,7 @@ namespace genex::actions {
         requires std::weakly_incrementable<Int>
         GENEX_INLINE constexpr auto operator()(const Int n) const {
             GENEX_ASSERT(std::out_of_range, n > 0);
-            return std::bind_back(drop_fn{}, n);
+            return meta::bind_back(drop_fn{}, n);
         }
     };
 

@@ -52,7 +52,7 @@ namespace genex::views {
         template <typename F, typename Proj = meta::identity>
         requires (not range<F>)
         GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const {
-            return std::bind_back(transform_fn{}, std::move(f), std::move(proj));
+            return meta::bind_back(transform_fn{}, std::move(f), std::move(proj));
         }
     };
 

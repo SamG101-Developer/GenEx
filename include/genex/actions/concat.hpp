@@ -35,7 +35,7 @@ namespace genex::actions {
         template <typename Rng2>
         requires detail::concepts::concatenatable_range<Rng2>
         GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
-            return std::bind_back(concat_fn{}, std::forward<Rng2>(rng2));
+            return meta::bind_back(concat_fn{}, std::forward<Rng2>(rng2));
         }
     };
 

@@ -56,7 +56,7 @@ namespace genex::views {
          * Pipe interface for the borrow view.
          */
         GENEX_INLINE constexpr auto operator()() const {
-            return std::bind_back(borrow_fn{});
+            return meta::bind_back(borrow_fn{});
         }
     };
 

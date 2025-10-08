@@ -53,7 +53,7 @@ namespace genex::views {
         }
 
         GENEX_INLINE constexpr auto operator()() const {
-            return std::bind_back(materialize_fn{});
+            return meta::bind_back(materialize_fn{});
         }
     };
 

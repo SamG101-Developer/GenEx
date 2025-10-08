@@ -210,7 +210,7 @@ namespace genex::views {
         template <typename Rng2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires (not range<Comp>)
         GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
-            return std::bind_back(set_algorithm_sorted_base_fn{}, std::forward<Rng2>(rng2), std::move(comp), std::move(proj1), std::move(proj2));
+            return meta::bind_back(set_algorithm_sorted_base_fn{}, std::forward<Rng2>(rng2), std::move(comp), std::move(proj1), std::move(proj2));
         }
     };
 
@@ -233,7 +233,7 @@ namespace genex::views {
         template <typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires (not range<Proj1> and not range<Proj2>)
         GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Proj1 proj = {}, Proj2 proj2 = {}) const {
-            return std::bind_back(set_algorithm_unsorted_base_fn{}, std::forward<Rng2>(rng2), std::move(proj), std::move(proj2));
+            return meta::bind_back(set_algorithm_unsorted_base_fn{}, std::forward<Rng2>(rng2), std::move(proj), std::move(proj2));
         }
     };
 

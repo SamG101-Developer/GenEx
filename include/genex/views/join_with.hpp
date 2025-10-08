@@ -52,7 +52,7 @@ namespace genex::views {
 
         template <typename New>
         GENEX_INLINE constexpr auto operator()(New sep) const {
-            return std::bind_back(join_with_fn{}, std::move(sep));
+            return meta::bind_back(join_with_fn{}, std::move(sep));
         }
     };
 

@@ -49,7 +49,7 @@ namespace genex::views {
         }
         
         GENEX_INLINE auto operator()() const {
-            return std::bind_back(tuple_nth_fn{});
+            return meta::bind_back(tuple_nth_fn{});
         }
     };
 

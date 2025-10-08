@@ -55,7 +55,7 @@ namespace genex::views {
 
         template <typename E>
         GENEX_INLINE constexpr auto operator()(E val) const {
-            return std::bind_back(split_fn{}, std::move(val));
+            return meta::bind_back(split_fn{}, std::move(val));
         }
     };
 

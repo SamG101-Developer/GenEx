@@ -61,7 +61,7 @@ namespace genex::views {
         template <typename Int>
         requires std::weakly_incrementable<Int>
         GENEX_INLINE constexpr auto operator()(const Int n) const {
-            return std::bind_back(take_fn{}, std::move(n));
+            return meta::bind_back(take_fn{}, std::move(n));
         }
     };
 

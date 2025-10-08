@@ -51,7 +51,7 @@ namespace genex::views {
         }
 
         GENEX_INLINE constexpr auto operator()(std::size_t n) const {
-            return std::bind_back(chunk_fn{}, n);
+            return meta::bind_back(chunk_fn{}, n);
         }
     };
 

@@ -44,7 +44,7 @@ TEST(GenexViewsTransform, VecInputStruct) {
     };
 
     const auto rng = vec
-        | genex::views::transform([](auto const &x) { return TestStruct{x.a + "!!!", x.b * 2}; })
+        | genex::views::transform([](const auto &x) { return TestStruct{x.a + "!!!", x.b * 2}; })
         | genex::to<std::vector>();
     const auto exp = std::vector{TestStruct{"one!!!", 2}, TestStruct{"two!!!", 4}, TestStruct{"three!!!", 6}, TestStruct{"four!!!", 8}, TestStruct{"five!!!", 10}, TestStruct{"six!!!", 12}};
     EXPECT_EQ(rng, exp);

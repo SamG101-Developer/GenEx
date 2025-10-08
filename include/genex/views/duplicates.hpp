@@ -72,7 +72,7 @@ namespace genex::views {
         template <typename Comp = operations::eq, typename Proj = meta::identity>
         requires (not range<Comp>)
         GENEX_INLINE constexpr auto operator()(Comp comp = {}, Proj proj = {}) const {
-            return std::bind_back(duplicates_fn{}, std::move(comp), std::move(proj));
+            return meta::bind_back(duplicates_fn{}, std::move(comp), std::move(proj));
         }
     };
 

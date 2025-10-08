@@ -38,13 +38,13 @@ namespace genex::actions {
         template <typename Int>
         requires std::weakly_incrementable<Int>
         GENEX_INLINE constexpr auto operator()(const Int from, const Int to) const {
-            return std::bind_back(slice_fn{}, from, to);
+            return meta::bind_back(slice_fn{}, from, to);
         }
 
         template <typename Int>
         requires std::weakly_incrementable<Int>
         GENEX_INLINE constexpr auto operator()(const Int from) const {
-            return std::bind_back(slice_fn{}, from);
+            return meta::bind_back(slice_fn{}, from);
         }
     };
 
