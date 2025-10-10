@@ -32,7 +32,7 @@ namespace genex::views::detail::coros {
         auto dupe_element = std::optional<iter_value_t<I>>{};
 
         for (; first != last; ++first) {
-            auto cur = meta::invoke(proj, *first);
+            decltype(auto) cur = meta::invoke(proj, *first);
             if (dupe_element.has_value()) {
                 if (meta::invoke(comp, cur, meta::invoke(proj, *dupe_element))) {
                     co_yield static_cast<iter_value_t<I>>(*first);
