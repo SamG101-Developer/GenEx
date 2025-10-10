@@ -13,7 +13,7 @@ namespace genex::views::detail::concepts {
     concept duplicate_checkable_iters =
         std::forward_iterator<I> and
         std::sentinel_for<S, I> and
-        std::indirectly_comparable<I, I, Comp, Proj, meta::identity>;
+        std::indirectly_comparable<I, I, Comp, Proj, Proj>;
 
     template <typename Rng, typename Comp, typename Proj>
     concept duplicate_checkable_range =
