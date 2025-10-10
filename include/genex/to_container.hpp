@@ -21,7 +21,7 @@ namespace genex {
     GENEX_INLINE auto to_base_fn(Rng &&rng) -> Out<range_value_t<Rng>> {
         Out<range_value_t<Rng>> out;
         auto [first, last] = iterators::iter_pair(rng);
-        if constexpr (has_member_size<Rng> and has_member_reserve<Rng>) {
+        if constexpr (has_member_size<Rng> and has_member_reserve<Out<range_value_t<Rng>>>) {
             out.reserve(rng.size());
         }
         for (; first != last; ++first) {
@@ -35,7 +35,7 @@ namespace genex {
     GENEX_INLINE auto to_base_fn(Rng &&rng) -> Out {
         Out out;
         auto [first, last] = iterators::iter_pair(rng);
-        if constexpr (has_member_size<Rng> and has_member_reserve<Rng>) {
+        if constexpr (has_member_size<Rng> and has_member_reserve<Out>) {
             out.reserve(rng.size());
         }
         for (; first != last; ++first) {
