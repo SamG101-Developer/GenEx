@@ -42,7 +42,7 @@ namespace genex::views::detail::coros {
 
             for (const auto &s : seen) {
                 if (meta::invoke(comp, cur, meta::invoke(proj, s))) {
-                    dupe_element = cur;
+                    dupe_element = s;
                     co_yield static_cast<iter_value_t<I>>(*dupe_element);
                     co_yield static_cast<iter_value_t<I>>(*first);
                     break;
