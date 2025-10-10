@@ -13,22 +13,23 @@ namespace genex::meta::detail::concepts {
 }
 
 
-namespace genex::meta::detail {
-    template <typename T>
-        requires concepts::dereferenceable<T>
-    GENEX_INLINE auto dereference(T &&t) -> decltype(*std::declval<T&>()) {
-        return *std::forward<T>(t);
-    }
-
-    template <typename T>
-        requires (not concepts::dereferenceable<T>)
-    GENEX_INLINE auto dereference(T &&t) -> T&& {
-        return std::forward<T>(t);
-    }
-}
-
-
 namespace genex::meta {
+    struct deref_fn {
+        template <typename T>
+        requires detail::concepts::dereferenceable<T>
+        GENEX_INLINE constexpr auto operator()(T &&t) const -> decltype(*std::declval<T&>()) {
+            return *std::forward<T>(t);
+        }
+
+        template <typename T>
+        requires (not detail::concepts::dereferenceable<T>)
+        GENEX_INLINE constexpr auto operator()(T &&t) const -> T&& {
+            return std::forward<T>(t);
+        }
+    };
+
+    inline constexpr deref_fn deref{};
+    
     struct identity {
         template <typename T>
         GENEX_INLINE constexpr auto operator()(T &&x) const -> T&& {
@@ -53,8 +54,8 @@ namespace genex::meta {
          */
         template <typename T, typename C, typename Obj>
         GENEX_INLINE constexpr auto operator()(T C::*f, Obj &&obj) const
-            -> decltype(detail::dereference(std::forward<Obj>(obj)).*f) {
-            return detail::dereference(std::forward<Obj>(obj)).*f;
+            -> decltype(deref(std::forward<Obj>(obj)).*f) {
+            return deref(std::forward<Obj>(obj)).*f;
         }
 
         /**
@@ -63,8 +64,8 @@ namespace genex::meta {
          */
         template <typename R, typename C, typename Obj, typename... Args>
         GENEX_INLINE constexpr auto operator()(R C::*f, Obj &&obj, Args &&... args) const
-            -> decltype((detail::dereference(std::forward<Obj>(obj)).*f)(std::forward<Args>(args)...)) {
-            return (detail::dereference(std::forward<Obj>(obj)).*f)(std::forward<Args>(args)...);
+            -> decltype((deref(std::forward<Obj>(obj)).*f)(std::forward<Args>(args)...)) {
+            return (deref(std::forward<Obj>(obj)).*f)(std::forward<Args>(args)...);
         }
     };
 
