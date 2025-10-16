@@ -20,7 +20,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I, typename S>
     requires (concepts::ptr_gettable_iters<I, S> and unique_ptr<iter_value_t<I>>)
     auto do_ptr(I first, S last) -> generator<std::add_pointer_t<typename iter_value_t<I>::element_type>> {
@@ -55,14 +55,14 @@ namespace genex::views {
         template <typename I, typename S>
         requires detail::concepts::ptr_gettable_iters<I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return detail::coros::do_ptr(std::move(first), std::move(last));
+            return detail::impl::do_ptr(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::ptr_gettable_range<Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_ptr(std::move(first), std::move(last));
+            return detail::impl::do_ptr(std::move(first), std::move(last));
         }
 
         GENEX_INLINE constexpr auto operator()() const {

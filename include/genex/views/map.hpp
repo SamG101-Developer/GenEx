@@ -31,7 +31,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I, typename S>
     requires concepts::keyable_iters<I, S>
     auto do_keys(I first, S last) -> generator<typename iter_value_t<I>::first_type> {
@@ -57,14 +57,14 @@ namespace genex::views {
         template <typename I, typename S>
         requires detail::concepts::keyable_iters<I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return detail::coros::do_keys(std::move(first), std::move(last));
+            return detail::impl::do_keys(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::keyable_range<Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_keys(std::move(first), std::move(last));
+            return detail::impl::do_keys(std::move(first), std::move(last));
         }
 
         GENEX_INLINE constexpr auto operator()() const {
@@ -76,14 +76,14 @@ namespace genex::views {
         template <typename I, typename S>
         requires detail::concepts::valable_iters<I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return detail::coros::do_vals(std::move(first), std::move(last));
+            return detail::impl::do_vals(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::valable_range<Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_vals(std::move(first), std::move(last));
+            return detail::impl::do_vals(std::move(first), std::move(last));
         }
 
         GENEX_INLINE constexpr auto operator()() const {

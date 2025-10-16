@@ -22,7 +22,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I, typename S, typename F, typename Proj>
     requires concepts::transformable_iters<I, S, F, Proj>
     auto do_transform(I first, S last, F f, Proj proj) -> generator<std::invoke_result_t<F, std::invoke_result_t<Proj, iter_value_t<I>>>> {
@@ -39,14 +39,14 @@ namespace genex::views {
         template <typename I, typename S, typename F, typename Proj = meta::identity>
         requires detail::concepts::transformable_iters<I, S, F, Proj>
         GENEX_INLINE constexpr auto operator()(I first, S last, F f, Proj proj = {}) const {
-            return detail::coros::do_transform(std::move(first), std::move(last), std::move(f), std::move(proj));
+            return detail::impl::do_transform(std::move(first), std::move(last), std::move(f), std::move(proj));
         }
 
         template <typename Rng, typename F, typename Proj>
         requires detail::concepts::transformable_range<Rng, F, Proj>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_transform(std::move(first), std::move(last), std::move(f), std::move(proj));
+            return detail::impl::do_transform(std::move(first), std::move(last), std::move(f), std::move(proj));
         }
 
         template <typename F, typename Proj = meta::identity>

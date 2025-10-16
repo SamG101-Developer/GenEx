@@ -33,29 +33,23 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
-    template <typename I1, typename S1>
-    requires concepts::concatenatable_iters<std::tuple<I1>, std::tuple<S1>>
-    auto do_concat(I1 first, S1 last) -> generator<iter_value_t<I1>> {
-        GENEX_ITER_GUARD;
-        for (; first != last; ++first) {
-            co_yield static_cast<std::common_type_t<iter_value_t<I1>, iter_value_t<I1>>>(*first);
+namespace genex::views::detail::impl {
+    template <typename Rng>
+    requires concepts::concatenatable_range<Rng>
+    auto do_concat(Rng &&rng) -> generator<range_value_t<Rng>> {
+        for (decltype(auto) x : rng) {
+            co_yield x;
         }
     }
 
-    template <typename I1, typename S1, typename... Is, typename... Ss>
-    requires (concepts::concatenatable_iters<std::tuple<I1, Is...>, std::tuple<S1, Ss...>> and sizeof...(Is) == sizeof...(Ss))
-    auto do_concat(I1 first1, S1 last1, std::tuple<Is...> firsts, std::tuple<Ss...> lasts) -> generator<std::common_type_t<iter_value_t<I1>, iter_value_t<Is>...>> {
-        for (auto gen = do_concat(std::move(first1), std::move(last1)); auto &&x : gen) {
-            co_yield std::forward<decltype(x)>(x);
+    template <typename Rng, typename... Rngs>
+    requires concepts::concatenatable_range<Rng, Rngs...> and (sizeof...(Rngs) > 0)
+    auto do_concat(Rng &&rng, Rngs &&... rngs) -> generator<range_value_t<Rng>> {
+        for (decltype(auto) x : rng) {
+            co_yield x;
         }
-        if constexpr (sizeof...(Is) > 0) {
-            for (auto rest = do_concat(
-                     std::move(std::get<0>(firsts)),
-                     std::move(std::get<0>(lasts)),
-                     tuple_tail(std::move(firsts)),
-                     tuple_tail(std::move(lasts)));
-                 auto &&x : rest) { co_yield std::forward<decltype(x)>(x); }
+        for (decltype(auto) x : do_concat(std::forward<Rngs>(rngs)...)) {
+            co_yield x;
         }
     }
 }
@@ -63,20 +57,10 @@ namespace genex::views::detail::coros {
 
 namespace genex::views {
     struct concat_fn {
-        template <typename... Is, typename... Ss>
-        requires detail::concepts::concatenatable_iters<std::tuple<Is...>, std::tuple<Ss...>>
-        GENEX_INLINE constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const {
-            return detail::coros::do_concat(
-                std::move(std::get<0>(first)), std::move(std::get<0>(last)),
-                tuple_tail(std::move(first)), tuple_tail(std::move(last)));
-        }
-
         template <typename... Rngs>
         requires (detail::concepts::concatenatable_range<Rngs...> and sizeof...(Rngs) > 1)
         GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const {
-            return (*this)( // todo: directly into do_conat
-                std::make_tuple(iterators::begin(std::forward<Rngs>(ranges))...),
-                std::make_tuple(iterators::end(std::forward<Rngs>(ranges))...));
+            return detail::impl::do_concat(std::forward<Rngs>(ranges)...);
         }
 
         template <typename Rng2>

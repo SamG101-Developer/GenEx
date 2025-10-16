@@ -39,7 +39,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
     requires concepts::set_algorithmicable_sorted_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
     auto do_set_difference(I1 first1, S1 last1, I2 first2, S2 last2, Comp comp, Proj1 proj1, Proj2 proj2) -> generator<iter_value_t<I1>> {
@@ -241,7 +241,7 @@ namespace genex::views {
             <typename I1, typename S1, typename I2, typename S2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
             requires detail::concepts::set_algorithmicable_sorted_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
             (I1 first1, S1 last1, I2 first2, S2 last2, Comp comp, Proj1 proj1, Proj2 proj2) {
-                return detail::coros::do_set_difference(
+                return detail::impl::do_set_difference(
                     std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1), std::move(proj2));
             }> {
     };
@@ -250,7 +250,7 @@ namespace genex::views {
             <typename I1, typename S1, typename I2, typename S2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
             requires detail::concepts::set_algorithmicable_sorted_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
             (I1 first1, S1 last1, I2 first2, S2 last2, Comp comp, Proj1 proj1, Proj2 proj2) {
-                return detail::coros::do_set_intersection(
+                return detail::impl::do_set_intersection(
                     std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1), std::move(proj2));
             }> {
     };
@@ -259,7 +259,7 @@ namespace genex::views {
             <typename I1, typename S1, typename I2, typename S2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
             requires detail::concepts::set_algorithmicable_sorted_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
             (I1 first1, S1 last1, I2 first2, S2 last2, Comp comp, Proj1 proj1) {
-                return detail::coros::do_set_symmetric_difference(
+                return detail::impl::do_set_symmetric_difference(
                     std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1));
             }> {
     };
@@ -268,7 +268,7 @@ namespace genex::views {
             <typename I1, typename S1, typename I2, typename S2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
             requires detail::concepts::set_algorithmicable_sorted_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
             (I1 first1, S1 last1, I2 first2, S2 last2, Comp comp, Proj1 proj1, Proj2 proj2) {
-                return detail::coros::do_set_union(
+                return detail::impl::do_set_union(
                     std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1), std::move(proj2));
             }> {
     };
@@ -277,7 +277,7 @@ namespace genex::views {
             <typename I1, typename S1, typename I2, typename S2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
             requires detail::concepts::set_algorithmicable_unsorted_iters<I1, S1, I2, S2, Proj1, Proj2>
             (I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1, Proj2 proj2) {
-                return detail::coros::do_set_difference_unsorted(
+                return detail::impl::do_set_difference_unsorted(
                     std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(proj1), std::move(proj2));
             }> {
     };
@@ -286,7 +286,7 @@ namespace genex::views {
             <typename I1, typename S1, typename I2, typename S2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
             requires detail::concepts::set_algorithmicable_unsorted_iters<I1, S1, I2, S2, Proj1, Proj2>
             (I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1, Proj2 proj2) {
-                return detail::coros::do_set_intersection_unsorted(
+                return detail::impl::do_set_intersection_unsorted(
                     std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(proj1), std::move(proj2));
             }> {
     };
@@ -295,7 +295,7 @@ namespace genex::views {
             <typename I1, typename S1, typename I2, typename S2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
             requires detail::concepts::set_algorithmicable_unsorted_iters<I1, S1, I2, S2, Proj1, Proj2>
             (I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1, Proj2 proj2) {
-                return detail::coros::do_set_symmetric_difference_unsorted(
+                return detail::impl::do_set_symmetric_difference_unsorted(
                     std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(proj1), std::move(proj2));
             }> {
     };
@@ -304,7 +304,7 @@ namespace genex::views {
             <typename I1, typename S1, typename I2, typename S2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
             requires detail::concepts::set_algorithmicable_unsorted_iters<I1, S1, I2, S2, Proj1, Proj2>
             (I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1, Proj2 proj2) {
-                return detail::coros::do_set_union_unsorted(
+                return detail::impl::do_set_union_unsorted(
                     std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(proj1), std::move(proj2));
             }> {
     };

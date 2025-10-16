@@ -19,23 +19,32 @@ namespace genex::algorithms::detail::concepts {
 }
 
 
+namespace genex::algorithms::detail::impl {
+    template <typename I, typename S, typename Comp, typename Proj>
+    requires concepts::minable_iters<I, S, Comp, Proj>
+    GENEX_INLINE constexpr auto do_min_element(I first, S last, Comp &&comp, Proj &&proj) -> iter_reference_t<I> {
+        if (first == last) { return *first; }
+        for (auto next = first; ++next != last;) {
+            if (meta::invoke(comp, meta::invoke(proj, *next), meta::invoke(proj, *first))) { first = next; }
+        }
+        return *first;
+    }
+}
+
+
 namespace genex::algorithms {
     struct min_element_fn {
         template <typename I, typename S, typename Comp = operations::lt, typename Proj = meta::identity>
         requires detail::concepts::minable_iters<I, S, Comp, Proj>
         GENEX_INLINE constexpr auto operator()(I first, S last, Comp &&comp = {}, Proj &&proj = {}) const -> iter_reference_t<I> {
-            if (first == last) { return *first; }
-            for (auto next = first; ++next != last;) {
-                if (meta::invoke(comp, meta::invoke(proj, *next), meta::invoke(proj, *first))) { first = next; }
-            }
-            return *first;
+            return detail::impl::do_min_element(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
 
         template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
         requires detail::concepts::minable_range<Rng, Comp, Proj>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> range_reference_t<Rng> {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
+            return detail::impl::do_min_element(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
     };
 

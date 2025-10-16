@@ -21,33 +21,42 @@ namespace genex::algorithms::detail::concepts {
 }
 
 
+namespace genex::algorithms::detail::impl {
+    template <typename I, typename S, typename Pred, typename Proj>
+    requires concepts::findable_last_if_iters<I, S, Pred, Proj> and std::bidirectional_iterator<I>
+    GENEX_INLINE constexpr auto do_find_last_if(I first, S last, Pred &&pred, Proj &&proj) -> I {
+        auto result = last;
+        for (; last != first; --last) {
+            if (meta::invoke(pred, meta::invoke(proj, *iterators::prev(last)))) { return iterators::prev(last); }
+        }
+        return result;
+    }
+
+    template <typename I, typename S, typename Pred, typename Proj>
+    requires concepts::findable_last_if_iters<I, S, Pred, Proj>
+    GENEX_INLINE constexpr auto do_find_last_if(I first, S last, Pred &&pred, Proj &&proj) -> I {
+        auto result = last;
+        for (; first != last; ++first) {
+            if (meta::invoke(pred, meta::invoke(proj, *first))) { result = first; }
+        }
+        return result;
+    }
+}
+
+
 namespace genex::algorithms {
     struct find_last_if_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-        requires detail::concepts::findable_last_if_iters<I, S, Pred, Proj> and std::bidirectional_iterator<I>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
-            auto result = last;
-            for (; last != first; --last) {
-                if (meta::invoke(pred, meta::invoke(proj, *iterators::prev(last)))) { return iterators::prev(last); }
-            }
-            return result;
-        }
-
-        template <typename I, typename S, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::findable_last_if_iters<I, S, Pred, Proj>
         GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
-            auto result = last;
-            for (; first != last; ++first) {
-                if (meta::invoke(pred, meta::invoke(proj, *first))) { result = first; }
-            }
-            return result;
+            return detail::impl::do_find_last_if(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::findable_last_if_range<Rng, Pred, Proj>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> iterator_t<Rng> {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            return detail::impl::do_find_last_if(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
     };
 

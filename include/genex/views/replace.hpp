@@ -23,7 +23,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I, typename S, typename Old, typename New, typename Proj>
     requires concepts::replaceable_iters<I, S, Old, New, Proj>
     auto do_replace(I first, S last, Old old_val, New new_val, Proj proj) -> generator<iter_value_t<I>> {
@@ -41,14 +41,14 @@ namespace genex::views {
         template <typename I, typename S, typename Old, typename New, typename Proj = meta::identity>
         requires detail::concepts::replaceable_iters<I, S, Old, New, Proj>
         GENEX_INLINE constexpr auto operator()(I first, S last, Old old_val, New new_val, Proj proj = {}) const {
-            return detail::coros::do_replace(std::move(first), std::move(last), std::move(old_val), std::move(new_val), std::move(proj));
+            return detail::impl::do_replace(std::move(first), std::move(last), std::move(old_val), std::move(new_val), std::move(proj));
         }
 
         template <typename Rng, typename Old, typename New, typename Proj = meta::identity>
         requires detail::concepts::replaceable_range<Rng, Old, New, Proj>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Old old_val, New new_val, Proj proj = {}) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_replace(std::move(first), std::move(last), std::move(old_val), std::move(new_val), std::move(proj));
+            return detail::impl::do_replace(std::move(first), std::move(last), std::move(old_val), std::move(new_val), std::move(proj));
         }
 
         template <typename Old, typename New, typename Proj = meta::identity>

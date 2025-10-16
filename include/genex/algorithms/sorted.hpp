@@ -19,23 +19,32 @@ namespace genex::algorithms::detail::concepts {
 }
 
 
+namespace genex::algorithms::detail::impl {
+    template <typename I, typename S, typename Comp, typename Proj>
+    requires concepts::sortabled_iters<I, S, Comp, Proj>
+    GENEX_INLINE constexpr auto do_sorted(I first, S last, Comp &&comp, Proj &&proj) -> std::vector<iter_value_t<I>> {
+        auto vec = std::vector<iter_value_t<I>>(std::make_move_iterator(first), std::make_move_iterator(last));
+        std::sort(vec.begin(), vec.end(), [comp, proj]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
+            return meta::invoke(comp, meta::invoke(proj, std::forward<Lhs>(lhs)), meta::invoke(proj, std::forward<Rhs>(rhs)));
+        });
+        return vec;
+    }
+}
+
+
 namespace genex::algorithms {
     struct sorted_fn {
         template <typename I, typename S, typename Comp = operations::lt, typename Proj = meta::identity>
         requires detail::concepts::sortabled_iters<I, S, Comp, Proj>
         GENEX_INLINE constexpr auto operator()(I first, S last, Comp &&comp = {}, Proj &&proj = {}) const -> std::vector<iter_value_t<I>> {
-            auto vec = std::vector<iter_value_t<I>>(std::make_move_iterator(first), std::make_move_iterator(last));
-            std::sort(vec.begin(), vec.end(), [comp, proj]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
-                return meta::invoke(comp, meta::invoke(proj, std::forward<Lhs>(lhs)), meta::invoke(proj, std::forward<Rhs>(rhs)));
-            });
-            return vec;
+            return detail::impl::do_sorted(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
 
         template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
         requires detail::concepts::sortabled_range<Rng, Comp, Proj>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> std::vector<range_value_t<Rng>> {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
+            return detail::impl::do_sorted(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
     };
 

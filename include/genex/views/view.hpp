@@ -19,7 +19,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I, typename S>
     requires concepts::can_view_iters<I, S>
     auto do_view(I first, S last) -> generator<iter_value_t<I>> {
@@ -36,14 +36,14 @@ namespace genex::views {
         template <typename I, typename S>
         requires detail::concepts::can_view_iters<I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return detail::coros::do_view(std::move(first), std::move(last));
+            return detail::impl::do_view(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::can_view_range<Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_view(std::move(first), std::move(last));
+            return detail::impl::do_view(std::move(first), std::move(last));
         }
 
         GENEX_INLINE constexpr auto operator()() const {

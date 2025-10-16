@@ -20,22 +20,31 @@ namespace genex::algorithms::detail::concepts {
 }
 
 
+namespace genex::algorithms::detail::impl {
+    template <typename I, typename S, typename Pred, typename Proj>
+    requires concepts::findable_if_iters<I, S, Pred, Proj>
+    GENEX_INLINE constexpr auto do_find_if(I first, S last, Pred &&pred, Proj &&proj) -> I {
+        for (; first != last; ++first) {
+            if (meta::invoke(pred, meta::invoke(proj, *first))) { break; }
+        }
+        return first;
+    }
+}
+
+
 namespace genex::algorithms {
     struct find_if_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::findable_if_iters<I, S, Pred, Proj>
         GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
-            for (; first != last; ++first) {
-                if (meta::invoke(pred, meta::invoke(proj, *first))) { break; }
-            }
-            return first;
+            return detail::impl::do_find_if(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::findable_if_range<Rng, Pred, Proj>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> iterator_t<Rng> {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            return detail::impl::do_find_if(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
     };
 

@@ -20,7 +20,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename To, typename I, typename S>
     requires (concepts::smart_ptr_castable_iters<To, I, S> and unique_ptr<iter_value_t<I>>)
     auto do_unique_ptr_cast_iter(I first, S last) -> generator<std::unique_ptr<To>> {
@@ -63,40 +63,40 @@ namespace genex::views {
         template <typename I, typename S>
         requires detail::concepts::smart_ptr_castable_iters<To, I, S> and unique_ptr<iter_value_t<I>> and std::movable<iter_value_t<I>>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return detail::coros::do_unique_ptr_cast_iter<To>(std::move(first), std::move(last));
+            return detail::impl::do_unique_ptr_cast_iter<To>(std::move(first), std::move(last));
         }
 
         template <typename I, typename S>
         requires detail::concepts::smart_ptr_castable_iters<To, I, S> and shared_ptr<iter_value_t<I>>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return detail::coros::do_shared_ptr_cast_iter<To>(std::move(first), std::move(last));
+            return detail::impl::do_shared_ptr_cast_iter<To>(std::move(first), std::move(last));
         }
 
         template <typename I, typename S>
         requires detail::concepts::smart_ptr_castable_iters<To, I, S> and weak_ptr<iter_value_t<I>>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return detail::coros::do_weak_ptr_cast_iter<To>(std::move(first), std::move(last));
+            return detail::impl::do_weak_ptr_cast_iter<To>(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::smart_ptr_castable_range<To, Rng> and unique_ptr<range_value_t<Rng>> and std::movable<range_value_t<Rng>>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_unique_ptr_cast_iter<To>(std::move(first), std::move(last));
+            return detail::impl::do_unique_ptr_cast_iter<To>(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::smart_ptr_castable_range<To, Rng> and shared_ptr<range_value_t<Rng>>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_shared_ptr_cast_iter<To>(std::move(first), std::move(last));
+            return detail::impl::do_shared_ptr_cast_iter<To>(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::smart_ptr_castable_range<To, Rng> and weak_ptr<range_value_t<Rng>>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_weak_ptr_cast_iter<To>(std::move(first), std::move(last));
+            return detail::impl::do_weak_ptr_cast_iter<To>(std::move(first), std::move(last));
         }
 
         GENEX_INLINE constexpr auto operator()() const {

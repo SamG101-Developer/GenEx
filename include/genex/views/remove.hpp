@@ -22,7 +22,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I, typename S, typename E, typename Proj>
     requires concepts::removable_iters<I, S, E, Proj>
     auto do_remove(I first, S last, E elem, Proj proj) -> generator<iter_value_t<I>> {
@@ -40,14 +40,14 @@ namespace genex::views {
         template <typename I, typename S, typename E, typename Proj = meta::identity>
         requires detail::concepts::removable_iters<I, S, E, Proj>
         GENEX_INLINE constexpr auto operator()(I first, S last, E elem, Proj proj = {}) const {
-            return detail::coros::do_remove(std::move(first), std::move(last), std::move(elem), std::move(proj));
+            return detail::impl::do_remove(std::move(first), std::move(last), std::move(elem), std::move(proj));
         }
 
         template <typename Rng, typename E, typename Proj = meta::identity>
         requires detail::concepts::removable_range<Rng, E, Proj>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem, Proj proj = {}) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_remove(std::move(first), std::move(last), std::move(elem), std::move(proj));
+            return detail::impl::do_remove(std::move(first), std::move(last), std::move(elem), std::move(proj));
         }
 
         template <typename E, typename Proj = meta::identity>

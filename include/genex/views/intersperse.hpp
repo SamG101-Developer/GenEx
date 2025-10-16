@@ -22,7 +22,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I, typename S, typename New>
     requires concepts::interspersable_iters<I, S, New>
     auto do_intersperse(I first, S last, New sep) -> generator<iter_value_t<I>> {
@@ -42,14 +42,14 @@ namespace genex::views {
         template <typename I, typename S, typename New>
         requires detail::concepts::interspersable_iters<I, S, New>
         GENEX_INLINE constexpr auto operator()(I first, S last, New sep) const {
-            return detail::coros::do_intersperse(std::move(first), std::move(last), std::move(sep));
+            return detail::impl::do_intersperse(std::move(first), std::move(last), std::move(sep));
         }
 
         template <typename Rng, typename New>
         requires detail::concepts::interspersable_range<Rng, New>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, New sep) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_intersperse(std::move(first), std::move(last), std::move(sep));
+            return detail::impl::do_intersperse(std::move(first), std::move(last), std::move(sep));
         }
 
         template <typename New>

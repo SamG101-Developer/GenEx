@@ -22,7 +22,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I, typename S, typename Comp, typename Proj>
     requires concepts::duplicate_checkable_iters<I, S, Comp, Proj>
     auto do_duplicates(I first, S last, Comp comp, Proj proj) -> generator<iter_value_t<I>> {
@@ -59,14 +59,14 @@ namespace genex::views {
         template <typename I, typename S, typename Comp = operations::eq, typename Proj = meta::identity>
         requires detail::concepts::duplicate_checkable_iters<I, S, Comp, Proj>
         GENEX_INLINE constexpr auto operator()(I first, S last, Comp comp = {}, Proj proj = {}) const {
-            return detail::coros::do_duplicates(std::move(first), std::move(last), std::move(comp), std::move(proj));
+            return detail::impl::do_duplicates(std::move(first), std::move(last), std::move(comp), std::move(proj));
         }
 
         template <typename Rng, typename Comp = operations::eq, typename Proj = meta::identity>
         requires detail::concepts::duplicate_checkable_range<Rng, Comp, Proj>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_duplicates(std::move(first), std::move(last), std::move(comp), std::move(proj));
+            return detail::impl::do_duplicates(std::move(first), std::move(last), std::move(comp), std::move(proj));
         }
 
         template <typename Comp = operations::eq, typename Proj = meta::identity>

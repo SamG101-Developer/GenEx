@@ -23,7 +23,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I, typename S, typename Int>
     requires concepts::can_slice_iters<I, S, Int> and std::random_access_iterator<I>
     auto do_slice(I first, S last, const Int start_index, const Int end_index, const Int step = 1) -> generator<iter_value_t<I>> {
@@ -63,14 +63,14 @@ namespace genex::views {
         template <typename I, typename S, typename Int>
         requires detail::concepts::can_slice_iters<I, S, Int>
         GENEX_INLINE constexpr auto operator()(I first, S last, Int start_index, Int end_index, Int step = static_cast<Int>(1)) const {
-            return detail::coros::do_slice(std::move(first), std::move(last), std::move(start_index), std::move(end_index), std::move(step));
+            return detail::impl::do_slice(std::move(first), std::move(last), std::move(start_index), std::move(end_index), std::move(step));
         }
 
         template <typename Rng, typename Int>
         requires detail::concepts::can_slice_range<Rng, Int>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Int start_index, Int end_index, Int step = static_cast<Int>(1)) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_slice(std::move(first), std::move(last), std::move(start_index), std::move(end_index), std::move(step));
+            return detail::impl::do_slice(std::move(first), std::move(last), std::move(start_index), std::move(end_index), std::move(step));
         }
 
         template <typename Int>

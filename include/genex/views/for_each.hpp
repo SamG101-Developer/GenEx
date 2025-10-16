@@ -20,7 +20,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I, typename S, typename F>
     requires concepts::for_eachable_iters<I, S, F>
     auto do_for_each(I first, S last, F f) -> void {
@@ -36,14 +36,14 @@ namespace genex::views {
         template <typename I, typename S, typename F>
         requires detail::concepts::for_eachable_iters<I, S, F>
         GENEX_INLINE constexpr auto operator()(I first, S last, F f) const {
-            detail::coros::do_for_each(std::move(first), std::move(last), std::move(f));
+            detail::impl::do_for_each(std::move(first), std::move(last), std::move(f));
         }
 
         template <typename Rng, typename F>
         requires detail::concepts::for_eachable_range<Rng, F>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, F f) const {
             auto [first, last] = iterators::iter_pair(rng);
-            detail::coros::do_for_each(std::move(first), std::move(last), std::move(f));
+            detail::impl::do_for_each(std::move(first), std::move(last), std::move(f));
         }
 
         template <typename F>

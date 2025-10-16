@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 #include <genex/concepts.hpp>
 #include <genex/macros.hpp>
 #include <genex/meta.hpp>
@@ -21,22 +20,31 @@ namespace genex::algorithms::detail::concepts {
 }
 
 
+namespace genex::algorithms::detail::impl {
+    template <typename I, typename S, typename Pred, typename Proj, typename Int>
+    requires concepts::positionable_iters<I, S, Pred, Proj, Int>
+    GENEX_INLINE constexpr auto do_position(I first, S last, Pred &&pred, Proj &&proj, const Int def, const std::size_t drop) -> Int {
+        for (Int pos = drop; first != last; ++first, ++pos) {
+            if (meta::invoke(pred, meta::invoke(proj, *first))) { return pos; }
+        }
+        return def;
+    }
+}
+
+
 namespace genex::algorithms {
     struct position_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity, typename Int>
         requires detail::concepts::positionable_iters<I, S, Pred, Proj, Int>
         GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z, const std::size_t drop = 0z) const -> Int {
-            for (Int pos = drop; first != last; ++first, ++pos) {
-                if (meta::invoke(pred, meta::invoke(proj, *first))) { return pos; }
-            }
-            return def;
+            return detail::impl::do_position(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj), def, drop);
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity, typename Int = ssize_t>
         requires detail::concepts::positionable_range<Rng, Pred, Proj, Int>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}, const Int def = -1z, const ssize_t drop = 0z) const -> Int {
             auto [first, last] = iterators::iter_pair(rng);
-            return (*this)(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj), def, drop);
+            return detail::impl::do_position(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj), def, drop);
         }
     };
 

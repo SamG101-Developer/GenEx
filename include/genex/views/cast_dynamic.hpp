@@ -21,7 +21,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename To, typename I, typename S>
     requires concepts::dynamic_castable_iters<To, I, S>
     auto do_dynamic_cast_iter(I first, S last) -> generator<To> {
@@ -41,14 +41,14 @@ namespace genex::views {
         template <typename I, typename S>
         requires detail::concepts::dynamic_castable_iters<To, I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return detail::coros::do_dynamic_cast_iter<To>(std::move(first), std::move(last));
+            return detail::impl::do_dynamic_cast_iter<To>(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::dynamic_castable_range<To, Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_dynamic_cast_iter<To>(std::move(first), std::move(last));
+            return detail::impl::do_dynamic_cast_iter<To>(std::move(first), std::move(last));
         }
 
         GENEX_INLINE constexpr auto operator()() const {

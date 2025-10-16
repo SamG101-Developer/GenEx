@@ -21,7 +21,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I, typename S, typename E>
     requires concepts::splittable_iters<I, S, E>
     auto do_split(I first, S last, E val) -> generator<std::vector<iter_value_t<I>>> {
@@ -43,14 +43,14 @@ namespace genex::views {
         template <typename I, typename S, typename E>
         requires detail::concepts::splittable_iters<I, S, E>
         GENEX_INLINE constexpr auto operator()(I first, S last, E val) const {
-            return detail::coros::do_split(std::move(first), std::move(last), std::move(val));
+            return detail::impl::do_split(std::move(first), std::move(last), std::move(val));
         }
 
         template <typename Rng, typename E>
         requires detail::concepts::splittable_range<Rng, E>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, E val) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_split(std::move(first), std::move(last), std::move(val));
+            return detail::impl::do_split(std::move(first), std::move(last), std::move(val));
         }
 
         template <typename E>

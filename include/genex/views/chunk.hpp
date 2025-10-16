@@ -19,7 +19,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <typename I, typename S>
     requires concepts::chunkable_iters<I, S>
     auto do_chunk_n(I first, S last, const std::size_t size) -> generator<std::vector<iter_value_t<I>>> {
@@ -40,14 +40,14 @@ namespace genex::views {
         template <typename I, typename S>
         requires detail::concepts::chunkable_iters<I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last, size_t size) const {
-            return detail::coros::do_chunk_n(std::move(first), std::move(last), size);
+            return detail::impl::do_chunk_n(std::move(first), std::move(last), size);
         }
 
         template <typename Rng>
         requires detail::concepts::chunkable_range<Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, size_t size) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_chunk_n(std::move(first), std::move(last), size);
+            return detail::impl::do_chunk_n(std::move(first), std::move(last), size);
         }
 
         GENEX_INLINE constexpr auto operator()(std::size_t n) const {

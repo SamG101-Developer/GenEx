@@ -21,7 +21,7 @@ namespace genex::views::detail::concepts {
 }
 
 
-namespace genex::views::detail::coros {
+namespace genex::views::detail::impl {
     template <std::size_t N, typename I, typename S>
     requires concepts::tuple_indexable_iters<N, I, S>
     auto do_tuple_nth(I first, S last) -> generator<std::tuple_element_t<N, iter_value_t<I>>> {
@@ -38,14 +38,14 @@ namespace genex::views {
         template <typename I, typename S>
         requires detail::concepts::tuple_indexable_iters<N, I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return detail::coros::do_tuple_nth<N>(std::move(first), std::move(last));
+            return detail::impl::do_tuple_nth<N>(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::tuple_indexable_range<N, Rng>
         GENEX_INLINE auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::coros::do_tuple_nth<N>(std::move(first), std::move(last));
+            return detail::impl::do_tuple_nth<N>(std::move(first), std::move(last));
         }
         
         GENEX_INLINE auto operator()() const {
