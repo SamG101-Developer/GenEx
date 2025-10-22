@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <genex/views/transform.hpp>
 #include <genex/to_container.hpp>
+#include <genex/views/transform.hpp>
 
 
 struct TestStruct {
