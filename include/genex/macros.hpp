@@ -14,6 +14,7 @@
 
 #define GENEX_INLINE [[gnu::always_inline]] inline __attribute__((always_inline))
 
+#define GENEX_NODISCARD [[nodiscard]]
 
 #define GENEX_ITER_GUARD \
     if (first == last) { co_return; }
