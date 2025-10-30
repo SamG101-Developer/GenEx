@@ -11,11 +11,6 @@ namespace genex::actions::detail::concepts {
         random_access_range<Rng> and
         std::permutable<iterator_t<Rng>> and
         std::uniform_random_bit_generator<std::remove_reference_t<Shuffler>>;
-
-    template <typename Rng>
-    concept random_shufflable_range =
-        random_access_range<Rng> and
-        std::permutable<iterator_t<Rng>>;
 }
 
 
@@ -36,7 +31,7 @@ namespace genex::actions {
 
         template <typename Shuffler> requires
         std::uniform_random_bit_generator<std::remove_reference_t<Shuffler>>
-        GENEX_INLINE auto operator()(Shuffler shuffler) const -> auto {
+        GENEX_INLINE auto operator()(Shuffler shuffler = detail::default_random) const -> auto {
             return meta::bind_back(shuffle_fn{}, std::move(shuffler));
         }
     };
