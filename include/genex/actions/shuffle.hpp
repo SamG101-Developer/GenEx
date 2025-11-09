@@ -21,7 +21,7 @@ namespace genex::actions::detail {
 
 namespace genex::actions {
     struct shuffle_fn {
-        template <typename Rng, typename Shuffler>
+        template <typename Rng, typename Shuffler = decltype(detail::default_random)>
         requires detail::concepts::shufflable_range<Rng, Shuffler>
         GENEX_INLINE auto operator()(Rng &&rng, Shuffler shuffler = detail::default_random) const -> decltype(auto) {
             auto [first, last] = iterators::iter_pair(rng);
@@ -29,8 +29,8 @@ namespace genex::actions {
             return std::forward<Rng>(rng);
         }
 
-        template <typename Shuffler> requires
-        std::uniform_random_bit_generator<std::remove_reference_t<Shuffler>>
+        template <typename Shuffler = decltype(detail::default_random)>
+        requires std::uniform_random_bit_generator<std::remove_reference_t<Shuffler>>
         GENEX_INLINE auto operator()(Shuffler shuffler = detail::default_random) const -> auto {
             return meta::bind_back(shuffle_fn{}, std::move(shuffler));
         }
