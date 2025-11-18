@@ -16,5 +16,44 @@
 
 #define GENEX_NODISCARD [[nodiscard]]
 
+#define GENEX_FORWARD_ITERATOR_OPERATIONS \
+    using view_iterator_base::operator++; \
+    using view_iterator_base::operator+;\
+    using view_iterator_base::operator+=;\
+    using view_iterator_base::operator--;\
+    using view_iterator_base::operator-;\
+    using view_iterator_base::operator-=;\
+    using view_iterator_base::operator==;\
+    using view_iterator_base::operator!=;\
+    using view_iterator_base::operator*
+
 #define GENEX_ITER_GUARD \
     if (first == last) { co_return; }
+
+#define GENEX_VIEW_CUSTOM_DEREF \
+    GENEX_INLINE constexpr auto deref(this Self &&self) -> decltype(auto)
+
+#define GENEX_VIEW_CUSTOM_NEXT \
+    GENEX_INLINE constexpr auto next(this Self &&self) -> Self&
+
+#define GENEX_VIEW_CUSTOM_PREV                 \
+    requires std::bidirectional_iterator<Self> \
+    GENEX_INLINE constexpr auto prev(this Self &&self) -> Self&
+
+#define GENEX_VIEW_CUSTOM_EQ_SENTINEL(SentType) \
+    GENEX_INLINE constexpr auto operator==(this Self&& self, const SentType&) -> bool
+
+#define GENEX_ITER_CUSTOM_BEGIN \
+    GENEX_NODISCARD GENEX_INLINE constexpr auto begin(this Self&& self) noexcept -> auto
+
+#define GENEX_ITER_CUSTOM_END \
+    GENEX_NODISCARD GENEX_INLINE constexpr auto end(this Self&& self) noexcept -> auto
+
+#define GENEX_ITER_CUSTOM_SIZE                                        \
+    requires requires (Self &&s) { iterators::distance(s.it, s.st); } \
+    GENEX_NODISCARD GENEX_INLINE constexpr auto size(this Self &&self)
+
+#define GENEX_ITER_CUSTOM_EMPTY                                         \
+    requires requires (Self &&s) { s.it == s.st; }                      \
+    GENEX_NODISCARD GENEX_INLINE constexpr auto empty(this Self &&self) \
+        -> bool
