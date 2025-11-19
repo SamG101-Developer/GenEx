@@ -40,7 +40,7 @@ namespace genex::views2::detail::impl {
         }
 
         template <typename Self>
-        GENEX_VIEW_CUSTOM_EQ_SENTINEL(drop_last_sentinel) {
+        GENEX_VIEW_ITER_EQ(drop_last_sentinel) {
             return self.it == self.st;
         }
 
@@ -67,17 +67,17 @@ namespace genex::views2::detail::impl {
         }
 
         template <typename Self>
-        GENEX_ITER_CUSTOM_BEGIN {
+        GENEX_ITER_BEGIN {
             return drop_last_iterator{self.it, self.st, self.n};
         }
 
         template <typename Self>
-        GENEX_ITER_CUSTOM_END {
+        GENEX_ITER_END {
             return drop_last_sentinel{};
         }
 
         template <typename Self>
-        GENEX_ITER_CUSTOM_SIZE {
+        GENEX_ITER_SIZE {
             return iterators::distance(self.it, self.st) - self.n;
         }
     };
@@ -89,7 +89,7 @@ namespace genex::views2 {
         template <typename I, typename S, typename Int>
         requires detail::concepts::droppable_last_iters<I, S, Int> and std::random_access_iterator<I>
         GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const {
-            return std::ranges::subrange(first, last - n);
+            return genex::span<iter_value_t<I>>(first, last - n);
         }
 
         template <typename I, typename S, typename Int>
@@ -102,7 +102,7 @@ namespace genex::views2 {
         requires detail::concepts::droppable_last_range<Rng, Int> and std::random_access_iterator<iterator_t<Rng>>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return std::ranges::subrange(first, last - n);
+            return genex::span<range_value_t<Rng>>(first, last - n);
         }
 
         template <typename Rng, typename Int>

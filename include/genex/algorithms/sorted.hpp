@@ -32,19 +32,19 @@ namespace genex::algorithms::detail::impl {
 }
 
 
-namespace genex::algorithms {
+namespace genex {
     struct sorted_fn {
         template <typename I, typename S, typename Comp = operations::lt, typename Proj = meta::identity>
-        requires detail::concepts::sortabled_iters<I, S, Comp, Proj>
+        requires algorithms::detail::concepts::sortabled_iters<I, S, Comp, Proj>
         GENEX_INLINE constexpr auto operator()(I first, S last, Comp &&comp = {}, Proj &&proj = {}) const -> std::vector<iter_value_t<I>> {
-            return detail::impl::do_sorted(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
+            return algorithms::detail::impl::do_sorted(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
 
         template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
-        requires detail::concepts::sortabled_range<Rng, Comp, Proj>
+        requires algorithms::detail::concepts::sortabled_range<Rng, Comp, Proj>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp &&comp = {}, Proj &&proj = {}) const -> std::vector<range_value_t<Rng>> {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::impl::do_sorted(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
+            return algorithms::detail::impl::do_sorted(std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
         }
     };
 

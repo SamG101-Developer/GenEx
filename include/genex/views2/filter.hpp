@@ -36,7 +36,8 @@ namespace genex::views2::detail::impl {
         GENEX_INLINE constexpr filter_iterator() = default;
 
         GENEX_INLINE constexpr filter_iterator(I first, S last, Pred p, Proj proj) :
-            it(std::move(first)), st(std::move(last)), pred(std::move(p)), proj(std::move(proj)) {
+            it(std::move(first)), st(std::move(last)),
+            pred(std::move(p)), proj(std::move(proj)) {
             fwd_to_valid();
         }
 
@@ -55,7 +56,7 @@ namespace genex::views2::detail::impl {
         }
 
         template <typename Self>
-        GENEX_VIEW_CUSTOM_EQ_SENTINEL(filter_sentinel) {
+        GENEX_VIEW_ITER_EQ(filter_sentinel) {
             return self.it == self.st;
         }
 
@@ -83,12 +84,12 @@ namespace genex::views2::detail::impl {
         }
 
         template <typename Self>
-        GENEX_ITER_CUSTOM_BEGIN {
+        GENEX_ITER_BEGIN {
             return filter_iterator{self.it, self.st, self.pred, self.proj};
         }
 
         template <typename Self>
-        GENEX_ITER_CUSTOM_END {
+        GENEX_ITER_END {
             return filter_sentinel{};
         }
     };

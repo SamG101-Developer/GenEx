@@ -32,19 +32,19 @@ namespace genex::algorithms::detail::impl {
 }
 
 
-namespace genex::algorithms {
+namespace genex {
     struct count_if_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-        requires detail::concepts::can_count_if_iters<I, S, Pred, Proj>
+        requires algorithms::detail::concepts::can_count_if_iters<I, S, Pred, Proj>
         GENEX_INLINE auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> std::size_t {
-            return detail::impl::do_count_if(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            return algorithms::detail::impl::do_count_if(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
-        requires detail::concepts::can_count_if_range<Rng, Pred, Proj>
+        requires algorithms::detail::concepts::can_count_if_range<Rng, Pred, Proj>
         GENEX_INLINE auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> std::size_t {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::impl::do_count_if(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+            return algorithms::detail::impl::do_count_if(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
         }
     };
 

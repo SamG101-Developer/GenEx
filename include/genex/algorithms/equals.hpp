@@ -35,20 +35,20 @@ namespace genex::algorithms::detail::impl {
 }
 
 
-namespace genex::algorithms {
+namespace genex {
     struct equals_fn {
         template <typename I1, typename S1, typename I2, typename S2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
-        requires detail::concepts::equatable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
+        requires algorithms::detail::concepts::equatable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
         GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Comp &&comp = {}, Proj1 &&proj1 = {}, Proj2 &&proj2 = {}) const -> bool {
-            return detail::impl::do_equals(std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::forward<Comp>(comp), std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
+            return algorithms::detail::impl::do_equals(std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::forward<Comp>(comp), std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
         }
 
         template <typename Rng1, typename Rng2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
-        requires detail::concepts::equatable_ranges<Rng1, Rng2, Comp, Proj1, Proj2>
+        requires algorithms::detail::concepts::equatable_ranges<Rng1, Rng2, Comp, Proj1, Proj2>
         GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Comp &&comp = {}, Proj1 &&proj1 = {}, Proj2 &&proj2 = {}) const -> bool {
             auto [first1, last1] = iterators::iter_pair(rng1);
             auto [first2, last2] = iterators::iter_pair(rng2);
-            return detail::impl::do_equals(std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::forward<Comp>(comp), std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
+            return algorithms::detail::impl::do_equals(std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::forward<Comp>(comp), std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
         }
     };
 

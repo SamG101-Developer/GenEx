@@ -1,19 +1,26 @@
 #pragma once
 #include <genex/macros.hpp>
 #include <genex/pipe.hpp>
+#include <genex/span.hpp>
 #include <genex/iterators/distance.hpp>
 
 
 namespace genex::views2::detail::impl {
     struct view_base {
         template <typename Self>
-        GENEX_ITER_CUSTOM_SIZE
+        GENEX_ITER_SIZE
             -> std::iterator_traits<iterator_t<Self>>::difference_type {
             return iterators::distance(self.it, self.st);
         }
 
         template <typename Self>
-        GENEX_ITER_CUSTOM_EMPTY {
+        requires std::random_access_iterator<decltype(std::declval<Self>().it)>
+        GENEX_NODISCARD GENEX_INLINE constexpr auto size(this Self &&self) {
+            return self.st - self.it;
+        }
+
+        template <typename Self>
+        GENEX_ITER_EMPTY {
             return self.it == self.st;
         }
     };

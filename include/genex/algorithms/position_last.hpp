@@ -45,19 +45,19 @@ namespace genex::algorithms::detail::impl {
 }
 
 
-namespace genex::algorithms {
+namespace genex {
     struct position_last_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity, typename Int>
-        requires detail::concepts::positionable_last_iters<I, S, Pred, Proj, Int>
+        requires algorithms::detail::concepts::positionable_last_iters<I, S, Pred, Proj, Int>
         GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z) const -> Int {
-            return detail::impl::do_position_last(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj), def);
+            return algorithms::detail::impl::do_position_last(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj), def);
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity, typename Int = ssize_t>
-        requires detail::concepts::positionable_last_range<Rng, Pred, Proj, Int>
+        requires algorithms::detail::concepts::positionable_last_range<Rng, Pred, Proj, Int>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}, const Int def = -1z) const -> Int {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::impl::do_position_last(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj), def);
+            return algorithms::detail::impl::do_position_last(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj), def);
         }
     };
 

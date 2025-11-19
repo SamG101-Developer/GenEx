@@ -49,7 +49,7 @@ namespace genex::views2::detail::impl {
         }
 
         template <typename Self>
-        GENEX_VIEW_CUSTOM_EQ_SENTINEL(transform_sentinel) {
+        GENEX_VIEW_ITER_EQ(transform_sentinel) {
             return self.it == self.st;
         }
     };
@@ -66,13 +66,18 @@ namespace genex::views2::detail::impl {
         }
 
         template <typename Self>
-        GENEX_ITER_CUSTOM_BEGIN {
+        GENEX_ITER_BEGIN {
             return transform_iterator{self.it, self.st, self.f, self.proj};
         }
 
         template <typename Self>
-        GENEX_ITER_CUSTOM_END {
+        GENEX_ITER_END {
             return transform_sentinel{};
+        }
+
+        template <typename Self>
+        GENEX_ITER_SIZE {
+            return iterators::distance(self.it, self.st);
         }
     };
 }

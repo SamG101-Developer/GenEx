@@ -16,6 +16,8 @@
 
 #define GENEX_NODISCARD [[nodiscard]]
 
+#define GENEX_LIKELY [[likely]]
+
 #define GENEX_FORWARD_ITERATOR_OPERATIONS \
     using view_iterator_base::operator++; \
     using view_iterator_base::operator+;\
@@ -40,20 +42,20 @@
     requires std::bidirectional_iterator<Self> \
     GENEX_INLINE constexpr auto prev(this Self &&self) -> Self&
 
-#define GENEX_VIEW_CUSTOM_EQ_SENTINEL(SentType) \
+#define GENEX_VIEW_ITER_EQ(SentType) \
     GENEX_INLINE constexpr auto operator==(this Self&& self, const SentType&) -> bool
 
-#define GENEX_ITER_CUSTOM_BEGIN \
+#define GENEX_ITER_BEGIN \
     GENEX_NODISCARD GENEX_INLINE constexpr auto begin(this Self&& self) noexcept -> auto
 
-#define GENEX_ITER_CUSTOM_END \
+#define GENEX_ITER_END \
     GENEX_NODISCARD GENEX_INLINE constexpr auto end(this Self&& self) noexcept -> auto
 
-#define GENEX_ITER_CUSTOM_SIZE                                        \
+#define GENEX_ITER_SIZE                                        \
     requires requires (Self &&s) { iterators::distance(s.it, s.st); } \
     GENEX_NODISCARD GENEX_INLINE constexpr auto size(this Self &&self)
 
-#define GENEX_ITER_CUSTOM_EMPTY                                         \
+#define GENEX_ITER_EMPTY                                         \
     requires requires (Self &&s) { s.it == s.st; }                      \
     GENEX_NODISCARD GENEX_INLINE constexpr auto empty(this Self &&self) \
         -> bool
