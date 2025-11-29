@@ -22,7 +22,7 @@ namespace genex::iterators {
 
         template <typename I>
         requires detail::concepts::prevable_iters<I> and std::copyable<I>
-        GENEX_INLINE auto operator()(I it, const std::ptrdiff_t n, I begin_it) const -> I {
+        GENEX_INLINE auto operator()(I it, const std::ptrdiff_t n, I) const -> I {
             auto res = std::prev(std::move(it), n); // todo: use bound
             return res;
         }
