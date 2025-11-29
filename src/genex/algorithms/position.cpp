@@ -28,7 +28,7 @@ namespace genex::algorithms::detail::impl {
     requires concepts::positionable_iters<I, S, Pred, Proj, Int>
     GENEX_INLINE constexpr auto do_position(I first, S last, Pred &&pred, Proj &&proj, const Int def, const std::ptrdiff_t drop) -> Int {
         for (auto i = drop; first != last; ++first, ++i) {
-            if (meta::invoke(pred, meta::invoke(proj, *first))) { return i; }
+            if (meta::invoke(pred, meta::invoke(proj, *first))) { return static_cast<Int>(i); }
         }
         return def;
     }

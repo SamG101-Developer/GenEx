@@ -28,10 +28,10 @@ namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename Pred, typename Proj, typename Int>
     requires concepts::positionable_last_iters<I, S, Pred, Proj, Int> and std::bidirectional_iterator<I>
     GENEX_INLINE constexpr auto do_position_last(I first, S last, Pred &&pred, Proj &&proj, const Int def) -> Int {
-        auto pos = static_cast<Int>(iterators::distance(first, last));
+        auto pos = iterators::distance(first, last);
         while (first != last) {
             --last; --pos;
-            if (meta::invoke(pred, meta::invoke(proj, *last))) { return pos; }
+            if (meta::invoke(pred, meta::invoke(proj, *last))) { return static_cast<Int>(pos); }
         }
         return def;
     }
