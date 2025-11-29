@@ -9,10 +9,12 @@ set(CMAKE_CXX_MODULE_STD ON)
 
 # Collect source files.
 file(GLOB_RECURSE MODULE_SOURCES CONFIGURE_DEPENDS src/*.cpp)
+file(GLOB_RECURSE PUBLIC_HEADERS CONFIGURE_DEPENDS include/*.hpp)
 add_library(${PROJECT_NAME} STATIC ${MODULE_SOURCES})
 
-target_sources(
-        ${PROJECT_NAME} PUBLIC FILE_SET CXX_MODULES FILES ${MODULE_SOURCES})
+target_sources(${PROJECT_NAME} PUBLIC
+        FILE_SET CXX_MODULES BASE_DIRS src include FILES ${MODULE_SOURCES}
+        FILE_SET HEADERS BASE_DIRS include FILES ${PUBLIC_HEADERS})
 
 target_compile_options(
         ${PROJECT_NAME} PRIVATE -fmodules-ts)
@@ -30,7 +32,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 install(
         TARGETS ${PROJECT_NAME}
         EXPORT ${PROJECT_NAME}Targets
-        FILE_SET CXX_MODULES DESTINATION lib/cmake/${PROJECT_NAME}/modules)
+        FILE_SET CXX_MODULES DESTINATION lib/cmake/${PROJECT_NAME}/modules
+        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 install(
         EXPORT ${PROJECT_NAME}Targets
