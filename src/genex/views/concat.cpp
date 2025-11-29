@@ -76,7 +76,9 @@ namespace genex::views {
         template <typename... Rngs>
         requires (detail::concepts::concatenatable_range<Rngs...> and sizeof...(Rngs) > 1)
         GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const {
-            return (*this)(std::make_tuple(iterators::begin(ranges)...), std::make_tuple(iterators::end(ranges)...));
+            return (*this)(
+                std::make_tuple(iterators::begin(std::forward<Rngs>(ranges))...),
+                std::make_tuple(iterators::end(std::forward<Rngs>(ranges))...));
         }
 
         template <typename Rng2>
