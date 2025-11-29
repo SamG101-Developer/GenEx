@@ -13,7 +13,7 @@ export namespace genex::meta::detail::concepts {
 }
 
 
-export namespace genex::meta {
+namespace genex::meta {
     struct deref_fn {
         template <typename T>
         requires detail::concepts::dereferenceable<T>
@@ -28,9 +28,9 @@ export namespace genex::meta {
         }
     };
 
-    inline constexpr deref_fn deref{};
+    export inline constexpr deref_fn deref{};
 
-    struct identity {
+    export struct identity {
         template <typename T>
         GENEX_INLINE constexpr auto operator()(T &&x) const -> T&& {
             return std::forward<T>(x);
@@ -69,7 +69,7 @@ export namespace genex::meta {
         }
     };
 
-    inline constexpr invoke_fn invoke{};
+    export inline constexpr invoke_fn invoke{};
 }
 
 
@@ -157,8 +157,8 @@ namespace genex::meta::detail {
 }
 
 
-export namespace genex::meta {
-    struct bind_back {
+namespace genex::meta {
+    struct bind_back_fn {
         template <typename F, typename... BoundArgs>
         GENEX_INLINE constexpr auto operator()(F &&f, BoundArgs &&... bound_args) const
             -> detail::bind_back_impl_fn<std::decay_t<F>, std::decay_t<BoundArgs>...> {
@@ -166,5 +166,5 @@ export namespace genex::meta {
         }
     };
 
-    inline constexpr bind_back bind_back{};
+    export inline constexpr bind_back_fn bind_back{};
 }
