@@ -25,7 +25,7 @@ namespace genex::iterators {
 
         template <typename I, typename S>
         requires detail::concepts::nextable_iters<I, S> and std::copyable<I>
-        GENEX_INLINE auto operator()(I it, const iter_difference_t<I> n, const S end_it) const -> I {
+        GENEX_INLINE auto operator()(I it, const iter_difference_t<I> n, const S) const -> I {
             auto res = std::next(std::move(it), n); // todo: use bound
             return res;
         }
