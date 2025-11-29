@@ -27,8 +27,8 @@ namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename Pred, typename Proj, typename Int>
     requires concepts::positionable_iters<I, S, Pred, Proj, Int>
     GENEX_INLINE constexpr auto do_position(I first, S last, Pred &&pred, Proj &&proj, const Int def, const std::ptrdiff_t drop) -> Int {
-        for (Int pos = drop; first != last; ++first, ++pos) {
-            if (meta::invoke(pred, meta::invoke(proj, *first))) { return pos; }
+        for (auto i = drop; first != last; ++first, ++i) {
+            if (meta::invoke(pred, meta::invoke(proj, *first))) { return i; }
         }
         return def;
     }

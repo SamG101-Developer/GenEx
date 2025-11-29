@@ -40,7 +40,7 @@ namespace genex::algorithms::detail::impl {
     requires concepts::positionable_last_iters<I, S, Pred, Proj, Int>
     GENEX_INLINE constexpr auto do_position_last(I first, S last, Pred &&pred, Proj &&proj, const Int def) -> Int {
         auto pos = def;
-        for (Int i = 0; first != last; ++first, ++i) {
+        for (auto i = 0; first != last; ++first, ++i) {
             if (meta::invoke(pred, meta::invoke(proj, *first))) { pos = i; }
         }
         return pos;
