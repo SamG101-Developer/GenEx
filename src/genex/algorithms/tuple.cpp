@@ -51,7 +51,7 @@ namespace genex {
 
         template <typename ... Ts>
         requires (sizeof...(Ts) > 1)
-        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> const &&tpl) const -> decltype(auto) {
+        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> &&tpl) const -> decltype(auto) {
             return std::apply([]<typename... T0>(auto &&, T0 &&... rest) {
                 return std::make_tuple(std::forward<T0>(rest)...);
             }, std::move(tpl));
@@ -86,7 +86,7 @@ namespace genex {
 
         template <typename... Ts>
         requires (N < sizeof...(Ts))
-        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> const &&tpl) const -> decltype(auto) {
+        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> &&tpl) const -> decltype(auto) {
             return std::get<N>(std::move(tpl));
         }
 
