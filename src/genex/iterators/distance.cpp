@@ -23,13 +23,13 @@ namespace genex::iterators {
     struct distance_fn {
         template <typename I, typename S>
         requires detail::concepts::distancable_iters<I, S>
-        GENEX_INLINE auto operator()(I first, S last) const -> std::size_t {
+        GENEX_INLINE auto operator()(I first, S last) const -> std::ptrdiff_t {
             return std::distance(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::distancable_range<Rng>
-        GENEX_INLINE auto operator()(Rng &&rng) const -> std::size_t {
+        GENEX_INLINE auto operator()(Rng &&rng) const -> std::ptrdiff_t {
             auto [first, last] = iter_pair(rng);
             return std::distance(std::move(first), std::move(last));
         }

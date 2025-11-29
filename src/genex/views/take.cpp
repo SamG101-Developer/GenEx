@@ -31,7 +31,7 @@ namespace genex::views::detail::impl {
     requires concepts::takeable_iters<I, S, Int> and std::random_access_iterator<I>
     auto do_take(I first, S last, const Int n) -> generator<iter_value_t<I>> {
         GENEX_ITER_GUARD;
-        auto true_last = first + std::min(static_cast<std::size_t>(n), iterators::distance(first, last));
+        auto true_last = first + std::min(static_cast<std::ptrdiff_t>(n), iterators::distance(first, last));
         for (; first != true_last; ++first) {
             co_yield *first;
         }
