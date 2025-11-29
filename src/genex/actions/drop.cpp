@@ -25,7 +25,7 @@ namespace genex::actions {
         requires detail::concepts::droppable_range<Rng, Int>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const -> decltype(auto) {
             GENEX_ASSERT(std::out_of_range, n > 0);
-            actions::erase(rng, iterators::begin(rng), iterators::next(iterators::begin(rng), n, iterators::end(rng)));
+            actions::erase(rng, iterators::begin(rng), iterators::next(iterators::begin(rng), static_cast<range_difference_t<Rng>>(n), iterators::end(rng)));
             return std::forward<Rng>(rng);
         }
 
