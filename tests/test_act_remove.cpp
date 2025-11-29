@@ -1,8 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/actions/remove.hpp>
-#include <genex/actions/remove_if.hpp>
-#include <genex/views/ptr.hpp>
+import genex.actions.remove;
+import genex.actions.remove_if;
 
 
 TEST(GenexActionsRemove, VecInput) {

@@ -1,7 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/strings/cases.hpp>
-#include <genex/to_container.hpp>
+import genex.strings.cases;
+import genex.to_container;
 
 using namespace std::string_literals;
 

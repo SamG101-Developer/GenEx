@@ -1,8 +1,9 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/views/replace.hpp>
-#include <genex/views/replace_if.hpp>
-#include <genex/to_container.hpp>
+import genex.to_container;
+import genex.views.replace;
+import genex.views.replace_if;
 
 
 TEST(GenexViewsReplace, VecInput) {

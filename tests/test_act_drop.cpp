@@ -1,6 +1,7 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/actions/drop.hpp>
+import genex.actions.drop;
 
 
 TEST(GenexActionsDrop, VecInput) {

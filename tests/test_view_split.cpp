@@ -1,7 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/to_container.hpp>
-#include <genex/views/split.hpp>
+import genex.to_container;
+import genex.views.split;
 
 
 TEST(GenexViewsChunk, VecInput) {

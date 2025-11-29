@@ -1,9 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/views/cycle.hpp>
-#include <genex/views/take.hpp>
-#include <genex/to_container.hpp>
-#include <genex/views/view.hpp>
+import genex.to_container;
+import genex.views.view;
 
 
 TEST(GenexViewsView, VecInput) {

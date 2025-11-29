@@ -1,8 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/actions/replace.hpp>
-#include <genex/actions/replace_if.hpp>
-#include <genex/views/ptr.hpp>
+import genex.actions.replace;
+import genex.actions.replace_if;
 
 
 TEST(GenexActionsReplace, VecInput) {

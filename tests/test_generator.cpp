@@ -1,6 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/generator.hpp>
+import genex.generator;
+import std;
 
 
 TEST(GenexGenerator, BasicTest) {
@@ -9,4 +11,10 @@ TEST(GenexGenerator, BasicTest) {
             co_yield x;
         }
     };
+    auto gen = generator_closure();
+    auto expected = 0;
+    for (auto value : gen) {
+        EXPECT_EQ(value, expected);
+        ++expected;
+    }
 }

@@ -1,6 +1,7 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/actions/concat.hpp>
+import genex.actions.concat;
 
 
 TEST(GenexActionsConcat, VecTwo) {

@@ -1,14 +1,10 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <deque>
-#include <list>
-#include <vector>
-
-#include <genex/views/filter.hpp>
-#include <genex/views/transform.hpp>
-#include <genex/views/materialize.hpp>
-#include <genex/to_container.hpp>
-#include <genex/views/zip.hpp>
+import genex.to_container;
+import genex.views.filter;
+import genex.views.materialize;
+import genex.views.zip;
 
 
 TEST(GenexViewsMaterialize, ZipAsVec) {

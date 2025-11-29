@@ -1,6 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/actions/sort.hpp>
+import genex.actions.sort;
+import genex.operations.cmp;
 
 
 TEST(GenexActionsSort, VecInput) {

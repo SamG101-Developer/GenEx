@@ -1,8 +1,9 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/to_container.hpp>
-#include <genex/views/move_reverse.hpp>
-#include <genex/views/transform.hpp>
+import genex.to_container;
+import genex.views.move_reverse;
+import genex.views.transform;
 
 
 struct TestStruct {

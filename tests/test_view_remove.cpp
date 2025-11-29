@@ -1,8 +1,9 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/to_container.hpp>
-#include <genex/views/remove.hpp>
-#include <genex/views/remove_if.hpp>
+import genex.to_container;
+import genex.views.remove;
+import genex.views.remove_if;
 
 
 TEST(GenexViewsRemove, VecInput) {

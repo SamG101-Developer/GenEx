@@ -7,7 +7,7 @@ set(BUILD_GMOCK OFF)
 # Build the test executable.
 file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 add_executable(GenExTests ${TEST_SOURCES})
-target_link_libraries(GenExTests PRIVATE GTest::gtest_main GenExLib)
+target_link_libraries(GenExTests PRIVATE GTest::gtest_main GenEx)
 
 # Register the tests.
 include(GoogleTest)
