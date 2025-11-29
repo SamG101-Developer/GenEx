@@ -26,7 +26,7 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename Pred, typename Proj, typename Int>
     requires concepts::positionable_iters<I, S, Pred, Proj, Int>
-    GENEX_INLINE constexpr auto do_position(I first, S last, Pred &&pred, Proj &&proj, const Int def, const std::size_t drop) -> Int {
+    GENEX_INLINE constexpr auto do_position(I first, S last, Pred &&pred, Proj &&proj, const Int def, const std::ptrdiff_t drop) -> Int {
         for (Int pos = drop; first != last; ++first, ++pos) {
             if (meta::invoke(pred, meta::invoke(proj, *first))) { return pos; }
         }
@@ -39,7 +39,7 @@ namespace genex {
     struct position_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity, typename Int>
         requires algorithms::detail::concepts::positionable_iters<I, S, Pred, Proj, Int>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z, const std::size_t drop = 0z) const -> Int {
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}, const Int def = -1z, const std::ptrdiff_t drop = 0z) const -> Int {
             return algorithms::detail::impl::do_position(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj), def, drop);
         }
 

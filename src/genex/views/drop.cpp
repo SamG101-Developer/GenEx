@@ -31,7 +31,7 @@ namespace genex::views::detail::impl {
     requires concepts::droppable_iters<I, S, Int> and std::random_access_iterator<I>
     auto do_drop(I first, S last, const Int n) -> generator<iter_value_t<I>> {
         GENEX_ITER_GUARD;
-        auto true_first = first + std::min<Int>(n, iterators::distance(first, last));
+        auto true_first = first + std::min<Int>(n, static_cast<Int>(iterators::distance(first, last)));
         for (; true_first != last; ++true_first) {
             co_yield *true_first;
         }
