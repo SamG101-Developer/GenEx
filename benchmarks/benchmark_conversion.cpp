@@ -1,11 +1,9 @@
-#include <vector>
-#include <numeric>
-
 #include <benchmark/benchmark.h>
 
-#include <genex/to_container.hpp>
-
 #include <range/v3/to_container.hpp>
+
+import genex.to_container;
+import std;
 
 
 static void BM_StdRanges_ToVector(benchmark::State &state) {

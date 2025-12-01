@@ -1,7 +1,13 @@
-#pragma once
-#include <genex/concepts.hpp>
-#include <genex/meta.hpp>
-#include <genex/iterators/distance.hpp>
+module;
+#include <genex/macros.hpp>
+
+export module genex.views2.transform;
+export import genex.pipe;
+import genex.concepts;
+import genex.meta;
+import genex.iterators.distance;
+import genex.iterators.iter_pair;
+import std;
 
 
 namespace genex::views2::detail::concepts {
@@ -48,8 +54,8 @@ namespace genex::views2::detail::impl {
 
         GENEX_INLINE constexpr transform_iterator() = default;
 
-        GENEX_INLINE constexpr transform_iterator(I first, F f, Proj proj = {}) :
-            it(std::move(first)), f(std::move(f)), proj(std::move(proj)) {
+        GENEX_INLINE constexpr transform_iterator(I it, F f, Proj proj = {}) :
+            it(std::move(it)), f(std::move(f)), proj(std::move(proj)) {
         }
 
         template <typename Self>
@@ -131,5 +137,5 @@ namespace genex::views2 {
         }
     };
 
-    inline constexpr transform_fn transform{};
+    export inline constexpr transform_fn transform{};
 }

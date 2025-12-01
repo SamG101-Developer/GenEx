@@ -1,8 +1,14 @@
-#pragma once
-#include <genex/concepts.hpp>
-#include <genex/meta.hpp>
-#include <genex/iterators/advance.hpp>
-#include <genex/iterators/distance.hpp>
+module;
+#include <genex/macros.hpp>
+
+export module genex.views2.chunk;
+export import genex.pipe;
+import genex.concepts;
+import genex.meta;
+import genex.iterators.advance;
+import genex.iterators.distance;
+import genex.iterators.iter_pair;
+import std;
 
 
 namespace genex::views2::detail::concepts {
@@ -59,9 +65,7 @@ namespace genex::views2::detail::impl {
         template <typename Self>
         GENEX_VIEW_CUSTOM_DEREF {
             auto end_it = self.it;
-            for (Int i = 0; i < self.chunk_size and end_it != self.st; ++i) {
-                ++end_it;
-            }
+            for (Int i = 0; i < self.chunk_size and end_it != self.st; ++i) { ++end_it; }
             return std::ranges::subrange(self.it, end_it);
         }
 
@@ -129,5 +133,5 @@ namespace genex::views2 {
         }
     };
 
-    inline constexpr chunk_fn chunk{};
+    export inline constexpr chunk_fn chunk{};
 }

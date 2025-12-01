@@ -1,8 +1,12 @@
-#pragma once
-#include <genex/concepts.hpp>
+module;
 #include <genex/macros.hpp>
-#include <genex/meta.hpp>
-#include <genex/iterators/iter_pair.hpp>
+
+export module genex.views2.cast_smart;
+export import genex.pipe;
+import genex.concepts;
+import genex.meta;
+import genex.iterators.iter_pair;
+import std;
 
 
 namespace genex::views2::detail::concepts {
@@ -166,7 +170,7 @@ namespace genex::views2 {
         }
     };
 
-    template <typename To>
+    export template <typename To>
     inline constexpr cast_smart_fn<To> cast_smart{};
 }
 

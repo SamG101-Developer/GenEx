@@ -1,7 +1,13 @@
-#pragma once
-#include <genex/concepts.hpp>
-#include <genex/meta.hpp>
-#include <genex/iterators/distance.hpp>
+module;
+#include <genex/macros.hpp>
+
+export module genex.views2.move;
+export import genex.pipe;
+import genex.concepts;
+import genex.meta;
+import genex.iterators.distance;
+import genex.iterators.iter_pair;
+import std;
 
 
 namespace genex::views2::detail::concepts {
@@ -107,5 +113,5 @@ namespace genex::views2 {
         }
     };
 
-    inline constexpr move_fn move{};
+    export inline constexpr move_fn move{};
 }

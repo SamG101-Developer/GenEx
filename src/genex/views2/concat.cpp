@@ -1,9 +1,14 @@
-#pragma once
-#include <genex/concepts.hpp>
+module;
 #include <genex/macros.hpp>
-#include <genex/meta.hpp>
-#include <genex/algorithms/tuple.hpp>
-#include <genex/iterators/distance.hpp>
+
+export module genex.views2.concat;
+export import genex.pipe;
+import genex.concepts;
+import genex.meta;
+import genex.algorithms.tuple;
+import genex.iterators.access;
+import genex.iterators.distance;
+import std;
 
 
 namespace genex::views2::detail::concepts {
@@ -338,5 +343,5 @@ namespace genex::views2 {
         }
     };
 
-    inline constexpr concat_fn concat{};
+    export inline constexpr concat_fn concat{};
 }

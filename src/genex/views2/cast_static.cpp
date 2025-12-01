@@ -1,8 +1,13 @@
-#pragma once
-#include <genex/concepts.hpp>
-#include <genex/meta.hpp>
-#include <genex/iterators/distance.hpp>
-#include <genex/iterators/iter_pair.hpp>
+module;
+#include <genex/macros.hpp>
+
+export module genex.views2.cast_static;
+export import genex.pipe;
+import genex.concepts;
+import genex.meta;
+import genex.iterators.distance;
+import genex.iterators.iter_pair;
+import std;
 
 
 namespace genex::views2::detail::concepts {
@@ -10,7 +15,7 @@ namespace genex::views2::detail::concepts {
     concept static_castable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
-        requires (iter_value_t<I> &&from) { static_cast<To>(from); };
+        requires(iter_value_t<I> &&from) { static_cast<To>(from); };
 
     template <typename To, typename Rng>
     concept static_castable_range =
@@ -64,7 +69,8 @@ namespace genex::views2::detail::impl {
     template <typename To, typename I, typename S>
     requires concepts::static_castable_iters<To, I, S>
     struct cast_static_view {
-        I it; S st;
+        I it;
+        S st;
 
         GENEX_INLINE constexpr cast_static_view(I first, S last) :
             it(std::move(first)), st(std::move(last)) {
@@ -109,7 +115,6 @@ namespace genex::views2 {
         }
     };
 
-    template <typename To>
+    export template <typename To>
     inline constexpr cast_static_fn<To> cast_static{};
 }
-

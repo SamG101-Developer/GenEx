@@ -1,6 +1,12 @@
-#pragma once
-#include <genex/concepts.hpp>
+module;
 #include <genex/macros.hpp>
+
+export module genex.views2.cast_dynamic;
+export import genex.pipe;
+import genex.concepts;
+import genex.meta;
+import genex.iterators.iter_pair;
+import std;
 
 
 namespace genex::views2::detail::concepts {
@@ -134,7 +140,7 @@ namespace genex::views2 {
         }
     };
 
-    template <typename To>
+    export template <typename To>
     inline constexpr cast_dynamic_fn<To> cast_dynamic{};
 }
 

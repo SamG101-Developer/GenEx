@@ -6,9 +6,8 @@ import std;
 
 
 namespace genex {
-    template <typename T>
+    export template <typename T>
     class span {
-    private:
         T *m_ptr = nullptr;
         std::size_t m_size = 0;
 

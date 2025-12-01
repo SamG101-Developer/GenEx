@@ -1,13 +1,11 @@
-#include <deque>
-#include <numeric>
-
 #include <benchmark/benchmark.h>
-
-#include <genex/to_container.hpp>
-#include <genex/views2/address_of.hpp>
 
 #include <range/v3/to_container.hpp>
 #include <range/v3/view/addressof.hpp>
+
+import genex.to_container;
+import genex.views2.address_of;
+import std;
 
 
 static void BM_StdRanges_AddressOf_Contiguous(benchmark::State &state) {

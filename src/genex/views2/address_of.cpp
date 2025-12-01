@@ -1,7 +1,14 @@
-#pragma once
-#include <genex/meta.hpp>
-#include <genex/span.hpp>
-#include <genex/iterators/distance.hpp>
+module;
+#include <genex/macros.hpp>
+
+export module genex.views2.address_of;
+export import genex.pipe;
+import genex.concepts;
+import genex.iterators.distance;
+import genex.iterators.iter_pair;
+import genex.meta;
+import genex.span;
+import std;
 
 
 namespace genex::views2::detail::concepts {
@@ -109,7 +116,7 @@ namespace genex::views2 {
             std::is_nothrow_constructible_v<span<std::add_pointer_t<iter_value_t<I>>>, std::add_pointer_t<iter_value_t<I>>, std::size_t>) {
             using ptr_t = std::add_pointer_t<iter_value_t<I>>;
             auto ptr_begin = std::addressof(*first);
-            return genex::span<ptr_t>(ptr_begin, last - first);
+            return genex::span<ptr_t>(&ptr_begin, last - first);
         }
 
         template <typename I, typename S>
@@ -125,7 +132,7 @@ namespace genex::views2 {
             using ptr_t = std::add_pointer_t<iter_value_t<iterator_t<Rng>>>;
             auto [first, last] = iterators::iter_pair(rng);
             auto ptr_begin = std::addressof(*first);
-            return genex::span<ptr_t>(ptr_begin, last - first);
+            return genex::span<ptr_t>(&ptr_begin, last - first);
         }
 
         template <typename Rng>
@@ -141,5 +148,5 @@ namespace genex::views2 {
         }
     };
 
-    inline constexpr address_of_fn address_of{};
+    export inline constexpr address_of_fn address_of{};
 }

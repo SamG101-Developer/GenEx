@@ -1,12 +1,11 @@
-#include <numeric>
-
 #include <benchmark/benchmark.h>
-
-#include <genex/to_container.hpp>
-#include <genex/views2/transform.hpp>
 
 #include <range/v3/to_container.hpp>
 #include <range/v3/view/transform.hpp>
+
+import genex.to_container;
+import genex.views2.transform;
+import std;
 
 
 static void BM_StdRanges_Transform(benchmark::State &state) {

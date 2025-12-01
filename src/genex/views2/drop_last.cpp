@@ -1,8 +1,16 @@
-#pragma once
-#include <genex/span.hpp>
-#include <genex/iterators/distance.hpp>
-#include <genex/iterators/next.hpp>
-#include <genex/iterators/prev.hpp>
+module;
+#include <genex/macros.hpp>
+
+export module genex.views2.drop_last;
+export import genex.pipe;
+import genex.concepts;
+import genex.meta;
+import genex.span;
+import genex.iterators.distance;
+import genex.iterators.iter_pair;
+import genex.iterators.next;
+import genex.iterators.prev;
+import std;
 
 
 namespace genex::views2::detail::concepts {
@@ -69,5 +77,5 @@ namespace genex::views2 {
         }
     };
 
-    inline constexpr drop_last_fn drop_last{};
+    export inline constexpr drop_last_fn drop_last{};
 }

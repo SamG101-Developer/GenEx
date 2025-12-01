@@ -1,8 +1,13 @@
-#pragma once
-#include <genex/concepts.hpp>
+module;
 #include <genex/macros.hpp>
-#include <genex/iterators/distance.hpp>
-#include <genex/iterators/iter_pair.hpp>
+
+export module genex.views2.cycle;
+export import genex.pipe;
+import genex.concepts;
+import genex.meta;
+import genex.iterators.distance;
+import genex.iterators.iter_pair;
+import std;
 
 
 namespace genex::views2::detail::concepts {
@@ -82,7 +87,7 @@ namespace genex::views2::detail::impl {
 
         template <typename Self>
         GENEX_ITER_BEGIN {
-            return cycle_iterator<I, S>(self.it, self.begin, self.st);
+            return cycle_iterator<I, S>(self.it, self.it_cpy, self.st);
         }
 
         template <typename Self>
@@ -92,6 +97,11 @@ namespace genex::views2::detail::impl {
 
         template <typename Self>
         GENEX_ITER_SIZE = delete;
+
+        template <typename Self>
+        GENEX_ITER_EMPTY {
+            return self.it == self.st;
+        }
     };
 }
 
@@ -110,7 +120,11 @@ namespace genex::views2 {
             auto [first, last] = iterators::iter_pair(rng);
             return detail::impl::cycle_view(std::move(first), std::move(last));
         }
+
+        GENEX_INLINE constexpr auto operator()() const {
+            return meta::bind_back(cycle_fn{});
+        }
     };
 
-    inline constexpr cycle_fn cycle{};
+    export inline constexpr cycle_fn cycle{};
 }

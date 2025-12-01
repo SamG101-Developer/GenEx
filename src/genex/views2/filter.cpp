@@ -1,7 +1,12 @@
-#pragma once
-#include <genex/concepts.hpp>
-#include <genex/meta.hpp>
-#include <genex/iterators/access.hpp>
+module;
+#include <genex/macros.hpp>
+
+export module genex.views2.filter;
+export import genex.pipe;
+import genex.concepts;
+import genex.meta;
+import genex.iterators.iter_pair;
+import std;
 
 
 namespace genex::views2::detail::concepts {
@@ -125,5 +130,5 @@ namespace genex::views2 {
         }
     };
 
-    inline constexpr filter_fn filter{};
+    export inline constexpr filter_fn filter{};
 }

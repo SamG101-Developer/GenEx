@@ -1,14 +1,12 @@
-#include <deque>
-#include <numeric>
-
 #include <benchmark/benchmark.h>
-
-#include <genex/to_container.hpp>
-#include <genex/views2/cast_smart.hpp>
 
 #include <range/v3/to_container.hpp>
 #include <range/v3/view/filter.hpp>
 #include <range/v3/view/transform.hpp>
+
+import genex.to_container;
+import genex.views2.cast_smart;
+import std;
 
 
 static void BM_StdRanges_CastShared(benchmark::State &state) {

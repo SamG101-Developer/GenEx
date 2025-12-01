@@ -1,13 +1,11 @@
-#include <list>
-#include <numeric>
-
 #include <benchmark/benchmark.h>
-
-#include <genex/to_container.hpp>
-#include <genex/views2/drop.hpp>
 
 #include <range/v3/to_container.hpp>
 #include <range/v3/view/drop.hpp>
+
+import genex.to_container;
+import genex.views2.drop;
+import std;
 
 
 static void BM_StdRanges_Drop_RandomAccess(benchmark::State &state) {

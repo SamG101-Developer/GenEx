@@ -1,15 +1,11 @@
-#include <deque>
-#include <list>
-#include <numeric>
-#include <vector>
-
 #include <benchmark/benchmark.h>
-
-#include <genex/to_container.hpp>
-#include <genex/views2/concat.hpp>
 
 #include <range/v3/to_container.hpp>
 #include <range/v3/view/concat.hpp>
+
+import genex.to_container;
+import genex.views2.concat;
+import std;
 
 
 static void BM_StdRanges_Concat(benchmark::State &state) {

@@ -1,14 +1,11 @@
-#include <forward_list>
-#include <list>
-#include <numeric>
-
 #include <benchmark/benchmark.h>
-
-#include <genex/to_container.hpp>
-#include <genex/views2/drop_last.hpp>
 
 #include <range/v3/to_container.hpp>
 #include <range/v3/view/drop_last.hpp>
+
+import genex.to_container;
+import genex.views2.drop_last;
+import std;
 
 
 static void BM_StdRanges_DropLast_RandomAccess(benchmark::State &state) {

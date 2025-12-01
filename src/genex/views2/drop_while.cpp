@@ -1,8 +1,12 @@
-#pragma once
-#include <genex/concepts.hpp>
-#include <genex/meta.hpp>
-#include <genex/iterators/distance.hpp>
-#include <genex/iterators/next.hpp>
+module;
+#include <genex/macros.hpp>
+
+export module genex.views2.drop_while;
+export import genex.pipe;
+import genex.concepts;
+import genex.meta;
+import genex.iterators.iter_pair;
+import std;
 
 
 namespace genex::views2::detail::concepts {
@@ -20,12 +24,10 @@ namespace genex::views2::detail::concepts {
 
 
 namespace genex::views2::detail::impl {
-    struct drop_while_sentinel {};
-
     template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::droppable_while_iters<I, S, Pred, Proj>
     struct drop_while_iterator {
-        I it; S st;
+        I it;
         GENEX_NO_UNIQUE_ADDRESS Pred pred;
         GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
@@ -38,9 +40,8 @@ namespace genex::views2::detail::impl {
 
         GENEX_INLINE constexpr drop_while_iterator() = default;
 
-        GENEX_INLINE constexpr drop_while_iterator(I it, S st, Pred pred, Proj proj) :
-            it(std::move(it)), st(std::move(st)),
-            pred(std::move(pred)), proj(std::move(proj)) {
+        GENEX_INLINE constexpr drop_while_iterator(I it, Pred pred, Proj proj) :
+            it(std::move(it)), pred(std::move(pred)), proj(std::move(proj)) {
             fwd_to_valid();
         }
 
@@ -62,14 +63,14 @@ namespace genex::views2::detail::impl {
         }
 
         template <typename Self>
-        GENEX_VIEW_ITER_EQ(drop_while_sentinel) {
-            return self.it == self.st;
+        GENEX_VIEW_ITER_EQ(drop_while_iterator) {
+            return self.it == that.it;
         }
 
     private:
         template <typename Self>
         GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
-            while (self.it != self.st and meta::invoke(self.pred, meta::invoke(self.proj, *self.it))) { ++self.it; }
+            while (meta::invoke(self.pred, meta::invoke(self.proj, *self.it))) { ++self.it; }
         }
     };
 
@@ -87,12 +88,12 @@ namespace genex::views2::detail::impl {
 
         template <typename Self>
         GENEX_ITER_BEGIN {
-            return drop_while_iterator(self.it, self.st, self.pred, self.proj);
+            return drop_while_iterator<I, S, Pred, Proj>(self.it, self.pred, self.proj);
         }
 
         template <typename Self>
         GENEX_ITER_END {
-            return drop_while_sentinel();
+            return drop_while_iterator<I, S, Pred, Proj>(self.st, self.pred, self.proj);
         }
     };
 }
@@ -119,5 +120,5 @@ namespace genex::views2 {
         }
     };
 
-    inline constexpr drop_while_fn drop_while{};
+    export inline constexpr drop_while_fn drop_while{};
 }
