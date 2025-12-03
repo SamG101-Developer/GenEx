@@ -1,6 +1,7 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/actions/clear.hpp>
+import genex.actions.clear;
 
 
 TEST(GenexActionsClear, VecInput) {

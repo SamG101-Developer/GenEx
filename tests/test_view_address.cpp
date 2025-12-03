@@ -1,10 +1,10 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/algorithms/all_of.hpp>
-#include <genex/views/address.hpp>
-#include <genex/views/indirect.hpp>
-#include <genex/views/materialize.hpp>
-#include <genex/to_container.hpp>
+import genex.to_container;
+import genex.algorithms.all_of;
+import genex.views.address;
+import genex.views.indirect;
 
 
 struct TestStruct1 {
@@ -59,7 +59,7 @@ TEST(GenexViewsDeref, VecInput) {
     auto ptrs_iter = ptrs.begin();
 
     const auto vec = std::vector{p1, p2, p3};
-    const auto res = genex::algorithms::all_of(
+    const auto res = genex::all_of(
         vec | genex::views::indirect,
         [ptrs_iter](const auto &x) mutable { return &x == *ptrs_iter++; });
 

@@ -1,9 +1,10 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/views/drop.hpp>
-#include <genex/views/drop_last.hpp>
-#include <genex/views/drop_while.hpp>
-#include <genex/to_container.hpp>
+import genex.to_container;
+import genex.views.drop;
+import genex.views.drop_last;
+import genex.views.drop_while;
 
 
 TEST(GenexViewsDrop, VecInput) {

@@ -1,8 +1,9 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/actions/insert.hpp>
-#include <genex/actions/push_back.hpp>
-#include <genex/actions/push_front.hpp>
+import genex.actions.push_back;
+import genex.actions.push_front;
+import genex.actions.insert;
 
 
 TEST(GenexActionsPushBack, VecInput) {

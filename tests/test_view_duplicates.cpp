@@ -1,7 +1,9 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/views/duplicates.hpp>
-#include <genex/to_container.hpp>
+import genex.meta;
+import genex.to_container;
+import genex.views.duplicates;
 
 
 TEST(GenexViewsDuplicates, Duplicates) {

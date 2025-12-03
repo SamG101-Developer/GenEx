@@ -1,7 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/actions/pop_back.hpp>
-#include <genex/actions/pop_front.hpp>
+import genex.actions.pop_back;
+import genex.actions.pop_front;
 
 
 TEST(GenexActionsPopBack, VecInput) {

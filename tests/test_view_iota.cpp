@@ -1,7 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/views/iota.hpp>
-#include <genex/to_container.hpp>
+import genex.to_container;
+import genex.views.iota;
 
 
 TEST(GenexViewsIota, StandardRange) {

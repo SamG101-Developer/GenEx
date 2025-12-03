@@ -1,9 +1,8 @@
-#include <map>
-
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/views/map.hpp>
-#include <genex/to_container.hpp>
+import genex.to_container;
+import genex.views.map;
 
 
 TEST(GenexViewsKeys, MapInput) {

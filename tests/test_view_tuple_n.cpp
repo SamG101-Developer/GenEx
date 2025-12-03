@@ -1,8 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
-#include <tuple>
 
-#include <genex/views/tuple_nth.hpp>
-#include <genex/to_container.hpp>
+import genex.to_container;
+import genex.views.tuple_nth;
 
 
 TEST(GenexViewsTupleN, VecInput) {

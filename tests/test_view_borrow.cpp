@@ -1,7 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/views/borrow.hpp>
-#include <genex/views/for_each.hpp>
+import genex.views.borrow;
+import genex.views.for_each;
 
 
 struct TestStruct {

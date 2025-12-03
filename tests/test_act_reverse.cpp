@@ -1,6 +1,7 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/actions/reverse.hpp>
+import genex.actions.reverse;
 
 
 TEST(GenexActionsReverse, VecInput) {

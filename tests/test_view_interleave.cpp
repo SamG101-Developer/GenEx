@@ -1,7 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/views/interleave.hpp>
-#include <genex/to_container.hpp>
+import genex.to_container;
+import genex.views.interleave;
 
 
 struct TestStruct {

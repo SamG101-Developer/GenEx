@@ -1,7 +1,8 @@
+#include <coroutine>
 #include <gtest/gtest.h>
 
-#include <genex/views/for_each.hpp>
-#include <genex/to_container.hpp>
+import genex.to_container;
+import genex.views.for_each;
 
 
 TEST(GenexViewsForEach, VecInput) {
