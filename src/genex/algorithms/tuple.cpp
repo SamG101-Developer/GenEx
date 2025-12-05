@@ -84,6 +84,24 @@ namespace genex {
             return std::get<N>(std::move(tpl));
         }
 
+        template <typename T, typename U>
+        requires (N == 0 or N == 1)
+        GENEX_INLINE constexpr auto operator()(std::pair<T, U> &p) const -> decltype(auto) {
+            if constexpr (N == 0) { return p.first; } else { return p.second; }
+        }
+
+        template <typename T, typename U>
+        requires (N == 0 or N == 1)
+        GENEX_INLINE constexpr auto operator()(std::pair<T, U> const &p) const -> decltype(auto) {
+            if constexpr (N == 0) { return p.first; } else { return p.second; }
+        }
+
+        template <typename T, typename U>
+        requires (N == 0 or N == 1)
+        GENEX_INLINE constexpr auto operator()(std::pair<T, U> &&p) const -> decltype(auto) {
+            if constexpr (N == 0) { return std::move(p.first); } else { return std::move(p.second); }
+        }
+
         template <typename... Ts>
         requires (N < sizeof...(Ts)) and (sizeof...(Ts) > 1)
         GENEX_INLINE constexpr auto operator()(Ts &&... args) const -> decltype(auto) {
