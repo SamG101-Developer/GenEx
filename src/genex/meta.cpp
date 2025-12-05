@@ -100,6 +100,27 @@ namespace genex::meta::detail {
         }
     };
 
+    // 0-arg optimization
+    template <typename F>
+    struct bind_back_impl_fn<F> {
+        F func;
+
+        template <typename... CallArgs>
+        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) && -> decltype(auto) {
+            return meta::invoke(std::move(func), std::forward<CallArgs>(call_args)...);
+        }
+
+        template <typename... CallArgs>
+        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) & -> decltype(auto) {
+            return meta::invoke(func, std::forward<CallArgs>(call_args)...);
+        }
+
+        template <typename... CallArgs>
+        GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) const & -> decltype(auto) {
+            return meta::invoke(func, std::forward<CallArgs>(call_args)...);
+        }
+    };
+
     // 1-arg optimization
     template <typename F, typename BoundArg>
     struct bind_back_impl_fn<F, BoundArg> {
