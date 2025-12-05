@@ -98,11 +98,6 @@ namespace genex::views2::detail::impl {
         GENEX_ITER_SIZE {
             return iterators::distance(self.it, self.st);
         }
-
-        template <typename Self>
-        GENEX_ITER_EMPTY {
-            return self.it == self.st;
-        }
     };
 }
 
