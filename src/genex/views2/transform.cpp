@@ -88,7 +88,7 @@ namespace genex::views2::detail::impl {
         GENEX_NO_UNIQUE_ADDRESS F f;
         GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
-        GENEX_INLINE constexpr transform_view(I first, S last, F f, Proj proj = {}) :
+        GENEX_INLINE constexpr transform_view(I first, S last, F f, Proj proj) :
             it(std::move(first)), st(std::move(last)), f(std::move(f)), proj(std::move(proj)) {
         }
 
@@ -105,11 +105,6 @@ namespace genex::views2::detail::impl {
         template <typename Self>
         GENEX_ITER_SIZE {
             return iterators::distance(self.it, self.st);
-        }
-
-        template <typename Self>
-        GENEX_ITER_EMPTY {
-            return self.it == self.st;
         }
     };
 }

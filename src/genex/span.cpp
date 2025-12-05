@@ -47,7 +47,7 @@ namespace genex {
         }
 
         template <typename Self>
-        GENEX_ITER_EMPTY {
+        GENEX_NODISCARD GENEX_INLINE constexpr auto empty(this Self &&self) noexcept -> bool {
             return self.m_size == 0;
         }
 

@@ -97,11 +97,6 @@ namespace genex::views2::detail::impl {
 
         template <typename Self>
         GENEX_ITER_SIZE = delete;
-
-        template <typename Self>
-        GENEX_ITER_EMPTY {
-            return self.it == self.st;
-        }
     };
 }
 

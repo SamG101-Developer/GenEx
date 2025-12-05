@@ -46,11 +46,6 @@
     requires requires (Self &&s) { iterators::distance(s.it, s.st); } \
     GENEX_NODISCARD GENEX_INLINE constexpr auto size(this Self &&self)
 
-#define GENEX_ITER_EMPTY                                                \
-    requires requires (Self &&s) { s.it == s.st; }                      \
-    GENEX_NODISCARD GENEX_INLINE constexpr auto empty(this Self &&self) \
-        -> bool
-
 #define GENEX_ITER_OPS(Type)                                                                                   \
     GENEX_INLINE friend constexpr auto operator==(Type const &self, Type const &that) -> bool {                \
         return self.it == that.it;                                                                             \
