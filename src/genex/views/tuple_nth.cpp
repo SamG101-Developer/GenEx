@@ -7,6 +7,7 @@ export import genex.pipe;
 import genex.concepts;
 import genex.generator;
 import genex.meta;
+import genex.algorithms.tuple;
 import genex.iterators.iter_pair;
 import std;
 
@@ -31,7 +32,7 @@ namespace genex::views::detail::impl {
     requires concepts::tuple_indexable_iters<N, I, S>
     auto do_tuple_nth(I first, S last) -> generator<std::tuple_element_t<N, iter_value_t<I>>> {
         for (; first != last; ++first) {
-            co_yield std::get<N>(*first);
+            co_yield genex::get<N>(*first);
         }
     }
 }
