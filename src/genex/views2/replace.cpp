@@ -25,13 +25,14 @@ namespace genex::views2::detail::concepts {
         replaceable_iters<iterator_t<Rng>, sentinel_t<Rng>, Old, New, Proj>;
 }
 
+
 namespace genex::views2::detail {
     template <typename I, typename S, typename Old, typename New, typename Proj>
     requires concepts::replaceable_iters<I, S, Old, New, Proj>
     struct replace_iterator {
         I it; S st;
-        GENEX_NO_UNIQUE_ADDRESS std::reference_wrapper<Old> old_value;
-        GENEX_NO_UNIQUE_ADDRESS std::reference_wrapper<New> new_value;
+        GENEX_NO_UNIQUE_ADDRESS Old old_value;
+        GENEX_NO_UNIQUE_ADDRESS New new_value;
         GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
         using value_type = iter_value_t<I>;
@@ -45,7 +46,7 @@ namespace genex::views2::detail {
 
         GENEX_INLINE constexpr replace_iterator(I first, S last, Old old_val, New new_val, Proj proj) :
             it(std::move(first)), st(std::move(last)),
-            old_value(std::ref(old_val)), new_value(std::ref(new_val)),
+            old_value(std::move(old_val)), new_value(std::move(new_val)),
             proj(std::move(proj)) {
         }
 
@@ -63,10 +64,7 @@ namespace genex::views2::detail {
 
         template <typename Self>
         GENEX_VIEW_CUSTOM_DEREF {
-            if (operations::eq{}(meta::invoke(self.proj, *self.it), self.old_value.get())) {
-                return self.new_value.get();
-            }
-            return *self.it;
+            return operations::eq{}(meta::invoke(self.proj, *self.it), self.old_value) ? *&self.new_value : *self.it;
         }
 
         template <typename Self>
