@@ -65,6 +65,11 @@ namespace genex::views2::detail::impl {
         }
 
         template <typename Self>
+        GENEX_INLINE constexpr auto operator==(this Self &&self, zip_iterator const &that) -> bool {
+            return self.its == that.its;
+        }
+
+        template <typename Self>
         GENEX_INLINE constexpr auto operator!=(this Self &&self, zip_sentinel const& that) -> bool {
             return not (self == that);
         }
