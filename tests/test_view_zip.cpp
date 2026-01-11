@@ -1,8 +1,7 @@
-#include <coroutine>
 #include <gtest/gtest.h>
 
 import genex.to_container;
-import genex.views.zip;
+import genex.views2.zip;
 
 
 TEST(GenexViewsZip, VecInput) {
@@ -10,7 +9,7 @@ TEST(GenexViewsZip, VecInput) {
     auto vec2 = std::vector{5, 6, 7, 8, 9};
 
     const auto rng = vec1
-        | genex::views::zip(vec2)
+        | genex::views2::zip(vec2)
         | genex::to<std::vector>();
     const auto exp = std::vector<std::tuple<int, int>>{{0, 5}, {1, 6}, {2, 7}, {3, 8}, {4, 9}};
 
@@ -26,7 +25,7 @@ TEST(GenexViewsZip, VecInputDiffTypes) {
     auto vec2 = std::vector<std::string>{"a", "b", "c"};
 
     const auto rng = vec1
-        | genex::views::zip(vec2)
+        | genex::views2::zip(vec2)
         | genex::to<std::vector>();
     const auto exp = std::vector<std::tuple<int, std::string>>{{0, "a"}, {1, "b"}, {2, "c"}};
 
@@ -41,7 +40,7 @@ TEST(GenexViewsZip, VecNoPipe) {
     auto vec1 = std::vector{0, 1, 2};
     auto vec2 = std::vector{3, 4, 5};
 
-    const auto rng = genex::views::zip(vec1, vec2)
+    const auto rng = genex::views2::zip(vec1, vec2)
         | genex::to<std::vector>();
     const auto exp = std::vector<std::tuple<int, int>>{{0, 3}, {1, 4}, {2, 5}};
 
@@ -57,7 +56,7 @@ TEST(GenexViewsZip, VecInputMulti) {
     auto vec2 = std::vector{3, 4, 5};
     auto vec3 = std::vector{6, 7, 8};
 
-    const auto rng = genex::views::zip(vec1, vec2, vec3)
+    const auto rng = genex::views2::zip(vec1, vec2, vec3)
         | genex::to<std::vector>();
     const auto exp = std::vector<std::tuple<int, int, int>>{{0, 3, 6}, {1, 4, 7}, {2, 5, 8}};
 

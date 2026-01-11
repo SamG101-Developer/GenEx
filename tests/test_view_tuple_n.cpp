@@ -1,8 +1,7 @@
-#include <coroutine>
 #include <gtest/gtest.h>
 
 import genex.to_container;
-import genex.views.tuple_nth;
+import genex.views2.tuple_nth;
 
 
 TEST(GenexViewsTupleN, VecInput) {
@@ -15,7 +14,7 @@ TEST(GenexViewsTupleN, VecInput) {
     };
 
     const auto rng = vec
-        | genex::views::tuple_nth<2>()
+        | genex::views2::tuple_nth<2>()
         | genex::to<std::vector>();
     const auto exp = std::vector{20, 21, 22, 23, 24};
     EXPECT_EQ(rng, exp);

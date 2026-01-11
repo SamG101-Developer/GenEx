@@ -1,15 +1,14 @@
-#include <coroutine>
 #include <gtest/gtest.h>
 
 import genex.to_container;
-import genex.views.enumerate;
+import genex.views2.enumerate;
 
 
 TEST(GenexViewsEnumerate, VecInput) {
     auto vec1 = std::vector{8, 9};
 
     const auto rng = vec1
-        | genex::views::enumerate
+        | genex::views2::enumerate
         | genex::to<std::vector>();
     EXPECT_EQ(rng[0].first, 0);
     EXPECT_EQ(rng[0].second, 8);

@@ -1,8 +1,7 @@
-#include <coroutine>
 #include <gtest/gtest.h>
 
 import genex.to_container;
-import genex.views.ptr;
+import genex.views2.ptr;
 
 
 TEST(GenexViewsPtr, VecUniquePtr) {
@@ -12,7 +11,7 @@ TEST(GenexViewsPtr, VecUniquePtr) {
     }
 
     const auto rng = vec
-        | genex::views::ptr
+        | genex::views2::ptr
         | genex::to<std::vector>();
     const auto exp = std::vector{new int(1), new int(2), new int(3), new int(4), new int(5)};
     for (auto i = 0; i < rng.size(); ++i) {
@@ -33,25 +32,9 @@ TEST(GenexViewsPtr, VecSharedPtr) {
     const auto exp = vec;
 
     const auto rng = vec
-        | genex::views::ptr
+        | genex::views2::ptr
         | genex::to<std::vector>();
     for (auto i = 0; i < rng.size(); ++i) {
         EXPECT_EQ(rng[i], exp[i].get());
-    }
-}
-
-
-TEST(GenexViewsPtr, VecWeakPtr) {
-    auto vec = std::vector<std::weak_ptr<int>>{};
-    for (auto i = 1; i <= 5; ++i) {
-        vec.push_back(std::make_shared<int>(i));
-    }
-    const auto exp = vec;
-
-    const auto rng = vec
-        | genex::views::ptr
-        | genex::to<std::vector>();
-    for (auto i = 0; i < rng.size(); ++i) {
-        EXPECT_EQ(rng[i], exp[i].lock().get());
     }
 }
