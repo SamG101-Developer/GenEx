@@ -52,7 +52,7 @@ static void BM_Genex_V2_AddressOf_Contiguous(benchmark::State &state) {
 // }
 
 
-BENCHMARK(BM_StdRanges_AddressOf_Contiguous);
-BENCHMARK(BM_Genex_V2_AddressOf_Contiguous);
+// BENCHMARK(BM_StdRanges_AddressOf_Contiguous);
+// BENCHMARK(BM_Genex_V2_AddressOf_Contiguous);
 // BENCHMARK(BM_StdRanges_AddressOf_Forward);
 // BENCHMARK(BM_Genex_V2_AddressOf_Forward);
