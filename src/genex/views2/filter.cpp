@@ -42,9 +42,9 @@ namespace genex::views2::detail::impl {
 
         GENEX_INLINE constexpr filter_iterator() = default;
 
-        GENEX_INLINE constexpr filter_iterator(I first, S last, Pred p, Proj proj) :
+        GENEX_INLINE constexpr filter_iterator(I first, S last, Pred pred, Proj proj) :
             it(std::move(first)), st(std::move(last)),
-            pred(std::move(p)), proj(std::move(proj)) {
+            pred(std::move(pred)), proj(std::move(proj)) {
             fwd_to_valid();
         }
 

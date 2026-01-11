@@ -107,7 +107,6 @@ export import genex.views.remove_if;
 export import genex.views.replace;
 export import genex.views.replace_if;
 export import genex.views.reverse;
-export import genex.views.sample;
 export import genex.views.set_algorithms;
 export import genex.views.slice;
 export import genex.views.split;
@@ -118,5 +117,3 @@ export import genex.views.transform;
 export import genex.views.tuple_nth;
 export import genex.views.view;
 export import genex.views.zip;
-
-

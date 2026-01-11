@@ -14,9 +14,9 @@ import std;
 namespace genex::views2::detail::concepts {
     template <typename I, typename S>
     concept joinable_iters =
-    std::input_iterator<I> and
-    std::sentinel_for<S, I> and
-    input_range<iter_value_t<I>>;
+        std::input_iterator<I> and
+        std::sentinel_for<S, I> and
+        input_range<iter_value_t<I>>;
 
     template <typename Rng>
     concept joinable_range =
@@ -25,19 +25,24 @@ namespace genex::views2::detail::concepts {
 }
 
 
-
 namespace genex::views2::detail::impl {
+    struct join_sentinel {};
+
     template <typename I, typename S>
     requires concepts::joinable_iters<I, S>
     struct join_iterator {
-        I it; S st;
+        I it;
+        S st;
         iterator_t<iter_value_t<I>> inner_it;
         sentinel_t<iter_value_t<I>> inner_st;
 
         using value_type = range_value_t<iter_value_t<I>>;
         using reference_type = range_reference_t<iter_value_t<I>>;
         using difference_type = iter_difference_t<I>;
-        using iterator_category = std::input_iterator_tag;
+        using iterator_category = std::conditional_t<
+            std::forward_iterator<I>,
+            std::forward_iterator_tag,
+            std::input_iterator_tag>;
         using iterator_concept = iterator_category;
         GENEX_ITER_OPS(join_iterator)
 
@@ -50,6 +55,7 @@ namespace genex::views2::detail::impl {
 
         template <typename Self>
         GENEX_VIEW_CUSTOM_NEXT {
+            if (self.it == self.st) { return self; }
             ++self.inner_it;
             if (self.inner_it == self.inner_st) {
                 ++self.it;
@@ -64,24 +70,22 @@ namespace genex::views2::detail::impl {
         template <typename Self>
         GENEX_VIEW_CUSTOM_DEREF {
             GENEX_ASSERT(std::runtime_error, self.it != self.st);
-            GENEX_ASSERT(std::runtime_error, self.inner_it != iterator_t<iter_value_t<I>>{});
+            GENEX_ASSERT(std::runtime_error, self.inner_it != self.inner_st);
             return *self.inner_it;
         }
 
         template <typename Self>
-        GENEX_VIEW_ITER_EQ(join_iterator) {
-            if (self.it != that.it) return false;
-            if (self.it == self.st) return true;
-            return self.inner_it == that.inner_it;
+        GENEX_VIEW_ITER_EQ(join_sentinel) {
+            return self.it == self.st;
         }
 
     private:
         template <typename Self>
-        GENEX_INLINE constexpr auto fwd_to_valid(this Self&& self) -> void {
+        GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
             while (self.it != self.st) {
                 self.inner_it = iterators::begin(*self.it);
                 self.inner_st = iterators::end(*self.it);
-                if (self.inner_it != self.inner_st) { break; }
+                if (self.inner_it != self.inner_st) { return; }
                 ++self.it;
             }
             self.inner_it = iterator_t<iter_value_t<I>>{};
@@ -92,7 +96,8 @@ namespace genex::views2::detail::impl {
     template <typename I, typename S>
     requires concepts::joinable_iters<I, S>
     struct join_view {
-        I it; S st;
+        I it;
+        S st;
 
         GENEX_INLINE constexpr join_view(I first, S last) :
             it(std::move(first)), st(std::move(last)) {
@@ -105,12 +110,12 @@ namespace genex::views2::detail::impl {
 
         template <typename Self>
         GENEX_ITER_END {
-            return join_iterator(self.st, self.st);
+            return join_sentinel();
         }
 
         template <typename Self>
         GENEX_ITER_SIZE requires std::forward_iterator<I> {
-            std::size_t total_size = 0;
+            auto total_size = 0uz;
             for (auto it = self.it; it != self.st; ++it) {
                 total_size += iterators::distance(iterators::begin(*it), iterators::end(*it));
             }
