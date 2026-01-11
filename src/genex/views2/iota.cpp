@@ -10,7 +10,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     template <typename Int>
     requires std::weakly_incrementable<Int>
     struct iota_iterator {
@@ -84,7 +84,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct iota_fn {
         template <typename Int>
         requires std::weakly_incrementable<Int>

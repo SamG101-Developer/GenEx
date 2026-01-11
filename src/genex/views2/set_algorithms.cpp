@@ -11,7 +11,7 @@ import genex.operations.cmp;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
     concept set_algorithmicable_sorted_iters =
         std::input_iterator<I1> and
@@ -42,7 +42,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     enum class set_op { difference, intersection, symmetric_difference, union_ };
     struct set_algorithm_sentinel {};
 
@@ -387,7 +387,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     template <detail::impl::set_op Op>
     struct set_algorithms_sorted_base_fn {
         template <typename I1, typename S1, typename I2, typename S2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>

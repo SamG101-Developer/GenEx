@@ -24,11 +24,11 @@ static void BM_Genex_V2_Reverse(benchmark::State &state) {
     for (size_t i = 0; i < data.size(); ++i) { data[i] = i % 2; }
 
     for (auto _ : state) {
-        auto result = data | genex::views2::reverse | genex::to<std::vector>();
+        auto result = data | genex::views::reverse | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }
 
 
-// BENCHMARK(BM_StdRanges_Reverse);
-// BENCHMARK(BM_Genex_V2_Reverse);
+BENCHMARK(BM_StdRanges_Reverse);
+BENCHMARK(BM_Genex_V2_Reverse);

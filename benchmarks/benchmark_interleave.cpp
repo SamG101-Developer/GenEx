@@ -29,7 +29,7 @@ static void BM_Genex_V2_Interleave(benchmark::State &state) {
     std::iota(data2.begin(), data2.end(), 0);
 
     for (auto _ : state) {
-        auto result = data1 | genex::views2::interleave(data2) | genex::to<std::vector>();
+        auto result = data1 | genex::views::interleave(data2) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

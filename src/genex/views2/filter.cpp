@@ -9,7 +9,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj = meta::identity>
     concept filterable_iters =
         std::input_iterator<I> and
@@ -23,7 +23,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     struct filter_sentinel {};
 
     template <typename I, typename S, typename Pred, typename Proj>
@@ -109,7 +109,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct filter_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::filterable_iters<I, S, Pred, Proj>

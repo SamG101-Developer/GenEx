@@ -10,7 +10,7 @@ import genex.operations.tuples;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename T1, typename T2>
     struct zippable_iters_helper : std::false_type {
     };
@@ -35,7 +35,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     struct zip_sentinel {};
 
     template <typename ...Rngs>
@@ -190,7 +190,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct zip_fn {
         template <typename... Is, typename... Ss>
         requires detail::concepts::zippable_iters<std::tuple<Is...>, std::tuple<Ss...>>

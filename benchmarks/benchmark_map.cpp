@@ -28,7 +28,7 @@ static void BM_Genex_V2_Keys(benchmark::State &state) {
     }
 
     for (auto _ : state) {
-        auto result = data | genex::views2::keys | genex::to<std::vector>();
+        auto result = data | genex::views::keys | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }
@@ -54,7 +54,7 @@ static void BM_Genex_V2_Vals(benchmark::State &state) {
     }
 
     for (auto _ : state) {
-        auto result = data | genex::views2::vals | genex::to<std::vector>();
+        auto result = data | genex::views::vals | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

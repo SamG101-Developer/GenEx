@@ -10,7 +10,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename To, typename I, typename S>
     concept static_castable_iters =
         std::input_iterator<I> and
@@ -24,7 +24,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     template <typename To, typename I, typename S>
     requires concepts::static_castable_iters<To, I, S>
     struct cast_static_iterator {
@@ -94,7 +94,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     template <typename To>
     struct cast_static_fn {
         template <typename I, typename S>

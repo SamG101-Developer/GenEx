@@ -31,7 +31,7 @@ static void BM_Genex_V2_CastStatic(benchmark::State &state) {
 
     for (auto _ : state) {
         auto result = data
-            | genex::views2::cast_static<double>()
+            | genex::views::cast_static<double>()
             | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }

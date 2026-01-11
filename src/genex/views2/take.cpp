@@ -11,7 +11,7 @@ import genex.iterators.next;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Int>
     concept takeable_iters =
         std::input_iterator<I> and
@@ -26,7 +26,7 @@ namespace genex::views2::detail::concepts {
 
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct take_fn {
         template <typename I, typename S, typename Int>
         requires detail::concepts::takeable_iters<I, S, Int> and std::random_access_iterator<I>

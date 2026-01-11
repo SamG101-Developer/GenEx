@@ -30,7 +30,7 @@ static void BM_Genex_V2_Join(benchmark::State &state) {
     }
 
     for (auto _ : state) {
-        auto result = data | genex::views2::join | genex::to<std::vector>();
+        auto result = data | genex::views::join | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

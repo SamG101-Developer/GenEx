@@ -43,7 +43,7 @@ static void BM_Genex_V2_CastShared(benchmark::State &state) {
 
     for (auto _ : state) {
         auto result = data
-            | genex::views2::cast_smart<Derived>()
+            | genex::views::cast_smart<Derived>()
             | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
@@ -84,7 +84,7 @@ static void BM_Genex_V2_CastUnique(benchmark::State &state) {
 
     for (auto _ : state) {
         auto result = data
-            | genex::views2::cast_smart<Derived>()
+            | genex::views::cast_smart<Derived>()
             | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }

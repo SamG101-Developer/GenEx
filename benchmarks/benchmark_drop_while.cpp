@@ -26,7 +26,7 @@ static void BM_Genex_V2_DropWhile(benchmark::State &state) {
     auto func = [](const int x) { return x < 500; };
 
     for (auto _ : state) {
-        auto result = data | genex::views2::drop_while(func) | genex::to<std::vector>();
+        auto result = data | genex::views::drop_while(func) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

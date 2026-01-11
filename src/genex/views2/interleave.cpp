@@ -10,7 +10,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename T1, typename T2>
     using interleave_common_t = std::common_type_t<
         std::remove_cvref_t<iter_value_t<T1>>,
@@ -33,7 +33,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     template <typename I1, typename S1, typename I2, typename S2>
     requires concepts::interleavable_iters<I1, S1, I2, S2>
     struct interleave_iterator {
@@ -136,7 +136,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct interleave_fn {
         template <typename I1, typename S1, typename I2, typename S2>
         requires detail::concepts::interleavable_iters<I1, S1, I2, S2>

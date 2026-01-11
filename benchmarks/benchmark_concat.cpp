@@ -28,7 +28,7 @@ static void BM_Genex_V2_Concat(benchmark::State &state) {
     std::iota(data2.begin(), data2.end(), 500);
 
     for (auto _ : state) {
-        auto result = genex::views2::concat(data1, data2) | genex::to<std::vector>();
+        auto result = genex::views::concat(data1, data2) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

@@ -9,7 +9,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename Ptr, typename New>
     struct rebind_smart_ptr {
         using type = Ptr;
@@ -30,7 +30,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename To, typename I, typename S>
     concept smart_castable_iters =
         std::input_iterator<I> and
@@ -45,7 +45,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     struct cast_smart_sentinel {};
 
     template <typename To, typename I, typename S>
@@ -149,7 +149,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     template <typename To>
     struct cast_smart_fn {
         template <typename I, typename S>

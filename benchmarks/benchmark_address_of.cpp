@@ -24,7 +24,7 @@ static void BM_Genex_V2_AddressOf_Contiguous(benchmark::State &state) {
     std::iota(data.begin(), data.end(), 0);
 
     for (auto _ : state) {
-        auto result = data | genex::views2::address_of | genex::to<std::vector>();
+        auto result = data | genex::views::address_of | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }
@@ -46,7 +46,7 @@ static void BM_Genex_V2_AddressOf_Contiguous(benchmark::State &state) {
 //     std::iota(data.begin(), data.end(), 0);
 //
 //     for (auto _ : state) {
-//         auto result = data | genex::views2::address_of | genex::to<std::vector>();
+//         auto result = data | genex::views::address_of | genex::to<std::vector>();
 //         benchmark::DoNotOptimize(result);
 //     }
 // }

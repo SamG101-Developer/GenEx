@@ -10,7 +10,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept cyclable_iters =
         std::forward_iterator<I> and
@@ -23,7 +23,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     struct cycle_sentinel {};
 
     template <typename I, typename S>
@@ -96,7 +96,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct cycle_fn {
         template <typename I, typename S>
         requires detail::concepts::cyclable_iters<I, S>

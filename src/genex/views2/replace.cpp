@@ -11,7 +11,7 @@ import genex.operations.cmp;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Old, typename New, typename Proj>
     concept replaceable_iters =
         std::input_iterator<I> and
@@ -26,7 +26,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail {
+namespace genex::views::detail {
     template <typename I, typename S, typename Old, typename New, typename Proj>
     requires concepts::replaceable_iters<I, S, Old, New, Proj>
     struct replace_iterator {
@@ -106,7 +106,7 @@ namespace genex::views2::detail {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct replace_fn {
         template <typename I, typename S, typename Old, typename New, typename Proj = meta::identity>
         requires detail::concepts::replaceable_iters<I, S, Old, New, Proj>

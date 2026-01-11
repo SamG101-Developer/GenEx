@@ -11,7 +11,7 @@ import genex.operations.cmp;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename New>
     concept interspersable_iters =
         std::forward_iterator<I> and
@@ -28,7 +28,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     struct intersperse_sentinel {};
 
     template <typename I, typename S, typename New>
@@ -124,7 +124,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct intersperse_fn {
         template <typename I, typename S, typename New>
         requires detail::concepts::interspersable_iters<I, S, New>

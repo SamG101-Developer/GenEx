@@ -47,7 +47,7 @@ static void BM_Genex_V2_CastDynamic(benchmark::State &state) {
 
     for (auto _ : state) {
         auto result = data
-            | genex::views2::cast_dynamic<Derived*>()
+            | genex::views::cast_dynamic<Derived*>()
             | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }

@@ -10,7 +10,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename F>
     concept for_eachable_iters =
         std::input_iterator<I> and
@@ -24,7 +24,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct for_each_fn {
         template <typename I, typename S, typename F>
         requires detail::concepts::for_eachable_iters<I, S, F>

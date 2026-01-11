@@ -12,7 +12,7 @@ import genex.views2.transform;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <std::size_t N, typename I, typename S>
     concept tuple_indexable_iters =
         std::input_iterator<I> and
@@ -27,7 +27,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     template <std::size_t N>
     struct tuple_nth_fn {
         template <typename I, typename S>

@@ -18,7 +18,7 @@ static void BM_StdRanges_Iota_StartEnd(benchmark::State &state) {
 
 static void BM_Genex_V2_Iota_StartEnd(benchmark::State &state) {
     for (auto _ : state) {
-        auto result = genex::views2::iota(0, 1000) | genex::to<std::vector>();
+        auto result = genex::views::iota(0, 1000) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

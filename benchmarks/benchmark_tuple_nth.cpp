@@ -28,7 +28,7 @@ static void BM_Genex_V2_TupleNth(benchmark::State &state) {
     }
 
     for (auto _ : state) {
-        auto result = data | genex::views2::tuple_nth<1> | genex::to<std::vector>();
+        auto result = data | genex::views::tuple_nth<1> | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

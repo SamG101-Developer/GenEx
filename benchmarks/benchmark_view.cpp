@@ -24,7 +24,7 @@ static void BM_Genex_V2_TupleNth(benchmark::State &state) {
     std::iota(data.begin(), data.end(), 0);
 
     for (auto _ : state) {
-        auto result = data | genex::views2::view | genex::to<std::vector>();
+        auto result = data | genex::views::view | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

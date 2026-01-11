@@ -24,7 +24,7 @@ static void BM_Genex_V2_TakeLast_RandomAccess(benchmark::State &state) {
     std::iota(data.begin(), data.end(), 0);
 
     for (auto _ : state) {
-        auto result = data | genex::views2::take_last(500) | genex::to<std::vector>();
+        auto result = data | genex::views::take_last(500) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }
@@ -35,7 +35,7 @@ static void BM_Genex_V2_TakeLast_RandomAccess(benchmark::State &state) {
 //     std::iota(data.begin(), data.end(), 0);
 //
 //     for (auto _ : state) {
-//         auto result = data | genex::views2::take_last(500) | genex::to<std::vector>();
+//         auto result = data | genex::views::take_last(500) | genex::to<std::vector>();
 //         benchmark::DoNotOptimize(result);
 //     }
 // }

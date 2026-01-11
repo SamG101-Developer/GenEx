@@ -10,7 +10,7 @@ import genex.operations.cmp;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Comp, typename Proj>
     concept duplicate_checkable_iters =
         std::forward_iterator<I> and
@@ -24,7 +24,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     struct duplicate_sentinel {};
 
     template <typename I, typename S, typename Comp, typename Proj>
@@ -141,7 +141,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct duplicates_fn {
         template <typename I, typename S, typename Comp = operations::eq, typename Proj = meta::identity>
         requires detail::concepts::duplicate_checkable_iters<I, S, Comp, Proj>

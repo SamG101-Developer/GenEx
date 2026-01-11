@@ -11,7 +11,7 @@ import genex.operations.cmp;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename E, typename Proj>
     concept removable_iters =
         std::input_iterator<I> and
@@ -25,7 +25,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail {
+namespace genex::views::detail {
     struct remove_sentinel;
 
     template <typename I, typename S, typename E, typename Proj>
@@ -112,7 +112,7 @@ namespace genex::views2::detail {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct remove_fn {
         template <typename I, typename S, typename E, typename Proj = meta::identity>
         requires detail::concepts::removable_iters<I, S, E, Proj>

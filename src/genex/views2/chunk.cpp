@@ -11,7 +11,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Int>
     concept chunkable_iters =
         std::forward_iterator<I> and
@@ -25,7 +25,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     struct chunk_sentinel {};
 
     template <typename I, typename S, typename Int>
@@ -113,7 +113,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct chunk_fn {
         template <typename I, typename S, typename Int>
         requires detail::concepts::chunkable_iters<I, S, Int>

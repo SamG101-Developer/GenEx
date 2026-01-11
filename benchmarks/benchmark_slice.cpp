@@ -24,7 +24,7 @@ static void BM_Genex_V2_Slice_RandomAccess(benchmark::State &state) {
     std::iota(data.begin(), data.end(), 0);
 
     for (auto _ : state) {
-        auto result = data | genex::views2::slice(200, 800) | genex::to<std::vector>();
+        auto result = data | genex::views::slice(200, 800) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }
@@ -46,7 +46,7 @@ static void BM_Genex_V2_Slice_Forward(benchmark::State &state) {
     std::iota(data.begin(), data.end(), 0);
 
     for (auto _ : state) {
-        auto result = data | genex::views2::slice(200, 800) | genex::to<std::vector>();
+        auto result = data | genex::views::slice(200, 800) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

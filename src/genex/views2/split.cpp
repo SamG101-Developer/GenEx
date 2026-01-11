@@ -12,7 +12,7 @@ import genex.operations.cmp;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename E>
     concept splittable_iters =
         std::forward_iterator<I> and
@@ -26,7 +26,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct split_sentinel {};
 
     template <typename I, typename S, typename E>
@@ -109,7 +109,7 @@ namespace genex::views2 {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct split_fn {
         template <typename I, typename S, typename E>
         requires detail::concepts::splittable_iters<I, S, E>

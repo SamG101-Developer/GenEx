@@ -9,7 +9,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj>
     concept droppable_while_iters =
         std::input_iterator<I> and
@@ -23,7 +23,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::droppable_while_iters<I, S, Pred, Proj>
     struct drop_while_iterator {
@@ -100,7 +100,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct drop_while_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::droppable_while_iters<I, S, Pred, Proj>

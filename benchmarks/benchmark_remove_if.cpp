@@ -24,7 +24,7 @@ static void BM_Genex_V2_RemoveIf(benchmark::State &state) {
     std::iota(data.begin(), data.end(), 0);
 
     for (auto _ : state) {
-        auto result = data | genex::views2::remove_if([](const int x) { return x % 2 == 0; }) | genex::to<std::vector>();
+        auto result = data | genex::views::remove_if([](const int x) { return x % 2 == 0; }) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

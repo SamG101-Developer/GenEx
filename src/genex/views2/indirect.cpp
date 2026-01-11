@@ -11,7 +11,7 @@ import genex.views2.transform;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept indirectable_iters =
         std::input_iterator<I> and
@@ -27,7 +27,7 @@ namespace genex::views2::detail::concepts {
 
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct indirect_fn {
         template <typename I, typename S>
         requires detail::concepts::indirectable_iters<I, S>

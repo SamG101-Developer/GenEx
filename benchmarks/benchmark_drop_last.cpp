@@ -24,7 +24,7 @@ static void BM_Genex_V2_DropLast_RandomAccess(benchmark::State &state) {
     std::iota(data.begin(), data.end(), 0);
 
     for (auto _ : state) {
-        auto result = data | genex::views2::drop_last(500) | genex::to<std::vector>();
+        auto result = data | genex::views::drop_last(500) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }
@@ -46,7 +46,7 @@ static void BM_Genex_V2_DropLast_Bidirectional(benchmark::State &state) {
     std::iota(data.begin(), data.end(), 0);
 
     for (auto _ : state) {
-        auto result = data | genex::views2::drop_last(500) | genex::to<std::vector>();
+        auto result = data | genex::views::drop_last(500) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }
@@ -57,7 +57,7 @@ static void BM_Genex_V2_DropLast_Forward(benchmark::State &state) {
     std::iota(data.begin(), data.end(), 0);
 
     for (auto _ : state) {
-        auto result = data | genex::views2::drop_last(500) | genex::to<std::vector>();
+        auto result = data | genex::views::drop_last(500) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

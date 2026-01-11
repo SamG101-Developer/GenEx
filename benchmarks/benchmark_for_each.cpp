@@ -24,7 +24,7 @@ static void BM_Genex_V2_ForEach(benchmark::State& state) {
     std::iota(vec.begin(), vec.end(), 0);
 
     for (auto _ : state) {
-        vec | genex::views2::for_each([&](auto &x) { return x += 100; });
+        vec | genex::views::for_each([&](auto &x) { return x += 100; });
         benchmark::DoNotOptimize(vec);
     }
 }

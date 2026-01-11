@@ -13,7 +13,7 @@ import genex.iterators.prev;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Int>
     concept droppable_last_iters =
         std::input_iterator<I> and
@@ -27,7 +27,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct drop_last_fn {
         template <typename I, typename S, typename Int>
         requires detail::concepts::droppable_last_iters<I, S, Int> and std::random_access_iterator<I>

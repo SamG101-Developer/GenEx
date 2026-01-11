@@ -31,7 +31,7 @@ static void BM_Genex_V2_Chunk(benchmark::State &state) {
 
     for (auto _ : state) {
         auto result = data
-            | genex::views2::chunk(chunk_size)
+            | genex::views::chunk(chunk_size)
             | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }

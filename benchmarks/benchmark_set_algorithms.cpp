@@ -32,7 +32,7 @@ static void BM_Genex_V2_SetSortedDifference(benchmark::State &state) {
     }
 
     for (auto _ : state) {
-        auto result = data1 | genex::views2::set_difference_sorted(data2) | genex::to<std::vector>();
+        auto result = data1 | genex::views::set_difference_sorted(data2) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }
@@ -62,7 +62,7 @@ static void BM_Genex_V2_SetSortedUnion(benchmark::State &state) {
     }
 
     for (auto _ : state) {
-        auto result = data1 | genex::views2::set_union_sorted(data2);
+        auto result = data1 | genex::views::set_union_sorted(data2);
         auto v = genex::to<std::vector>()(result);
         benchmark::DoNotOptimize(result);
     }
@@ -93,7 +93,7 @@ static void BM_Genex_V2_SetSortedIntersection(benchmark::State &state) {
     }
 
     for (auto _ : state) {
-        auto result = data1 | genex::views2::set_intersection_sorted(data2) | genex::to<std::vector>();
+        auto result = data1 | genex::views::set_intersection_sorted(data2) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }
@@ -123,7 +123,7 @@ static void BM_Genex_V2_SetSortedSymmetricDifference(benchmark::State &state) {
     }
 
     for (auto _ : state) {
-        auto result = data1 | genex::views2::set_symmetric_difference_sorted(data2) | genex::to<std::vector>();
+        auto result = data1 | genex::views::set_symmetric_difference_sorted(data2) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

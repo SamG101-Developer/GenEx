@@ -30,7 +30,7 @@ static void BM_Genex_V2_Split(benchmark::State &state) {
     }
 
     for (auto _ : state) {
-        auto result = data | genex::views2::split(1) | genex::to<std::vector>();
+        auto result = data | genex::views::split(1) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

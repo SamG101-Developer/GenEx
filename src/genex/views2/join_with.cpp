@@ -11,7 +11,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename New>
     concept joinable_with_iters =
         std::forward_iterator<I> and
@@ -26,7 +26,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     struct join_sentinel {};
 
     template <typename I, typename S, typename New>
@@ -144,7 +144,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct join_with_fn {
         template <typename I, typename S, typename New>
         requires detail::concepts::joinable_with_iters<I, S, New>

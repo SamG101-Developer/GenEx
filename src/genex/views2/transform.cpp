@@ -10,7 +10,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S, typename F, typename Proj = meta::identity>
     concept transformable_iters =
         std::input_iterator<I> and
@@ -25,7 +25,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     /**
      * The @c transform_iterator applies a transformation function to the elements of the underlying iterator. Note that
      * there is no special "sentinel" type for the @c transform_iterator, because the end is always known from the
@@ -110,7 +110,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct transform_fn {
         template <typename I, typename S, typename F, typename Proj = meta::identity>
         requires detail::concepts::transformable_iters<I, S, F, Proj>

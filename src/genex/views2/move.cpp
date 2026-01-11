@@ -10,7 +10,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept movable_iters =
         std::input_iterator<I> and
@@ -24,7 +24,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     template <typename I, typename S>
     requires concepts::movable_iters<I, S>
     struct move_iterator {
@@ -90,7 +90,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct move_fn {
         template <typename I, typename S>
         requires detail::concepts::movable_iters<I, S>

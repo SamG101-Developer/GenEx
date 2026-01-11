@@ -10,7 +10,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept viewable_iters =
         std::input_iterator<I> and
@@ -23,7 +23,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct view_fn {
         template <typename I, typename S>
         requires detail::concepts::viewable_iters<I, S> and std::random_access_iterator<I>

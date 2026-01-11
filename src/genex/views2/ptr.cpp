@@ -11,7 +11,7 @@ import genex.views2.transform;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept ptr_gettable_iters =
         std::input_iterator<I> and
@@ -25,7 +25,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct ptr_fn {
         template <typename I, typename S>
         requires detail::concepts::ptr_gettable_iters<I, S>

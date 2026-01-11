@@ -24,7 +24,7 @@ static void BM_Genex_V2_ReplaceIf(benchmark::State &state) {
     for (size_t i = 0; i < data.size(); ++i) { data[i] = i % 2; }
 
     for (auto _ : state) {
-        auto result = data | genex::views2::replace_if([](const int x) { return x < 500; }, 5) | genex::to<std::vector>();
+        auto result = data | genex::views::replace_if([](const int x) { return x < 500; }, 5) | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

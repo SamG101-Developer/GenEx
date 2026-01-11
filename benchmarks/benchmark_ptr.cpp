@@ -28,7 +28,7 @@ static void BM_Genex_V2_Ptr_UniquePtr(benchmark::State &state) {
     }
 
     for (auto _ : state) {
-        auto result = data | genex::views2::ptr | genex::to<std::vector>();
+        auto result = data | genex::views::ptr | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }
@@ -54,7 +54,7 @@ static void BM_Genex_V2_Ptr_SharedPtr(benchmark::State &state) {
     }
 
     for (auto _ : state) {
-        auto result = data | genex::views2::ptr | genex::to<std::vector>();
+        auto result = data | genex::views::ptr | genex::to<std::vector>();
         benchmark::DoNotOptimize(result);
     }
 }

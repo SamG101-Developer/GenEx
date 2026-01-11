@@ -11,7 +11,7 @@ import genex.iterators.distance;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename T1, typename T2>
     struct concatable_iters_helper : std::false_type {
     };
@@ -37,7 +37,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     struct concat_sentinel {};
 
     template <typename... Rngs>
@@ -320,7 +320,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct concat_fn {
         template <typename... Is, typename... Ss>
         requires detail::concepts::concatable_iters<std::tuple<Is...>, std::tuple<Ss...>>

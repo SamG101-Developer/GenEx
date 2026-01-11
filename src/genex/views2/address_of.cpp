@@ -11,7 +11,7 @@ import genex.span;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept addressable_iters =
         std::input_iterator<I> and
@@ -26,7 +26,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     /**
      * The @c address_of_iterator yields the addresses of the elements pointed to by the underlying iterator. Note that
      * there is no special "sentinel" type for the @c address_of_iterator, because the end is always known from the
@@ -108,7 +108,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct address_of_fn {
         // template <typename I, typename S>
         // requires detail::concepts::addressable_iters<I, S> and std::contiguous_iterator<I>

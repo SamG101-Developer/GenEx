@@ -10,7 +10,7 @@ import genex.iterators.iter_pair;
 import std;
 
 
-namespace genex::views2::detail::concepts {
+namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept enumerable_iters =
         std::input_iterator<I> and
@@ -23,7 +23,7 @@ namespace genex::views2::detail::concepts {
 }
 
 
-namespace genex::views2::detail::impl {
+namespace genex::views::detail::impl {
     /**
      * The @c enumerate_iterator type is an iterator that provides a pair, consisting of the index and the value from
      * the underlying iterable. The index type can be any type that satisfies the @c std::weakly_incrementable concept,
@@ -102,7 +102,7 @@ namespace genex::views2::detail::impl {
 }
 
 
-namespace genex::views2 {
+namespace genex::views {
     struct enumerate_fn {
         template <typename I, typename S>
         requires detail::concepts::enumerable_iters<I, S>

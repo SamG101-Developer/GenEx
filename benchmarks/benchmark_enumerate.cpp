@@ -26,7 +26,7 @@ static void BM_Genex_V2_Enumerate(benchmark::State& state) {
     std::iota(vec.begin(), vec.end(), 0);
 
     for (auto _ : state) {
-        for (auto [i, val] : vec | genex::views2::enumerate | genex::to<std::vector>()) {
+        for (auto [i, val] : vec | genex::views::enumerate | genex::to<std::vector>()) {
             benchmark::DoNotOptimize(i);
             benchmark::DoNotOptimize(val);
         }
