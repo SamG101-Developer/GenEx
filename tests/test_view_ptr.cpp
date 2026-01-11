@@ -11,7 +11,7 @@ TEST(GenexViewsPtr, VecUniquePtr) {
     }
 
     const auto rng = vec
-        | genex::views2::ptr
+        | genex::views::ptr
         | genex::to<std::vector>();
     const auto exp = std::vector{new int(1), new int(2), new int(3), new int(4), new int(5)};
     for (auto i = 0; i < rng.size(); ++i) {
@@ -32,7 +32,7 @@ TEST(GenexViewsPtr, VecSharedPtr) {
     const auto exp = vec;
 
     const auto rng = vec
-        | genex::views2::ptr
+        | genex::views::ptr
         | genex::to<std::vector>();
     for (auto i = 0; i < rng.size(); ++i) {
         EXPECT_EQ(rng[i], exp[i].get());

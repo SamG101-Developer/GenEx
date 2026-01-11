@@ -7,7 +7,7 @@ import genex.views2.split;
 TEST(GenexViewsChunk, VecInput) {
     auto vec = std::vector{1, 2, 3, 4, 2, 5};
     const auto rng = vec
-        | genex::views2::split(2)
+        | genex::views::split(2)
         | genex::to<std::vector>();
     const auto exp = std::vector<std::vector<int>>{{1}, {3, 4}, {5}};
     for (auto i = 0; i < rng.size(); ++i) {
@@ -19,7 +19,7 @@ TEST(GenexViewsChunk, VecInput) {
 TEST(GenexViewsChunk, StrInput) {
     auto str = std::string("aaa/bb/ccc/d");
     const auto rng = str
-        | genex::views2::split('/')
+        | genex::views::split('/')
         | genex::to<std::vector>();
     const auto exp = std::vector<std::string>{"aaa", "bb", "ccc", "d"};
     for (auto i = 0; i < rng.size(); ++i) {

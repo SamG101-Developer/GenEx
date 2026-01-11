@@ -9,7 +9,7 @@ TEST(GenexViewsCycle, VecInput) {
     auto vec = std::vector{0, 1, 2};
 
     const auto it = vec
-        | genex::views2::cycle
+        | genex::views::cycle
         | genex::to_n<std::vector>(9);
     const auto exp = std::vector{0, 1, 2, 0, 1, 2, 0, 1, 2};
     EXPECT_EQ(it, exp);

@@ -21,8 +21,8 @@ TEST(GenexViewsMove, VecInput) {
     vec.emplace_back(std::make_unique<TestStruct>(TestStruct{"two", 2}));
 
     const auto rng = vec
-        | genex::views2::move
-        | genex::views2::transform([](auto &&x) { return x->b; })
+        | genex::views::move
+        | genex::views::transform([](auto &&x) { return x->b; })
         | genex::to<std::vector>();
     const auto exp = std::vector<unsigned int>{1, 2};
     EXPECT_EQ(rng, exp);

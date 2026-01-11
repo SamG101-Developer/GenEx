@@ -7,7 +7,7 @@ import genex.views2.chunk;
 TEST(GenexViewsChunkN, VecInput) {
     auto vec = std::vector{1, 2, 3, 4, 5, 6};
     const auto rng = vec
-        | genex::views2::chunk(2)
+        | genex::views::chunk(2)
         | genex::to<std::vector>();
     const auto exp = std::vector<std::vector<int>>{{1, 2}, {3, 4}, {5, 6}};
     for (auto i = 0; i < rng.size(); ++i) {
@@ -19,7 +19,7 @@ TEST(GenexViewsChunkN, VecInput) {
 TEST(GenexViewsChunkN, StrInput) {
     auto str = std::string("Hello, world!");
     const auto rng = str
-        | genex::views2::chunk(5)
+        | genex::views::chunk(5)
         | genex::to<std::vector>();
     const auto exp = std::vector<std::string>{"Hello", ", wor", "ld!"};
     for (auto i = 0; i < rng.size(); ++i) {

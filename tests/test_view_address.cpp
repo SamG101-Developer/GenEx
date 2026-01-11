@@ -24,7 +24,7 @@ TEST(GenexViewsAddress, VecInput) {
 
     auto vec = std::vector{t1, t2, t3};
     const auto rng = vec
-        | genex::views2::address_of
+        | genex::views::address_of
         | genex::to<std::vector>();
     const auto exp = std::vector{&vec[0], &vec[1], &vec[2]};
     EXPECT_EQ(rng, exp);
@@ -37,8 +37,8 @@ TEST(GenexViewsAddress, VecInputTemp) {
     const auto t3 = TestStruct1{3};
 
     const auto rng = std::vector{t1, t2, t3}
-        | genex::views2::address_of
-        | genex::views2::indirect
+        | genex::views::address_of
+        | genex::views::indirect
         | genex::to<std::vector>();
     const auto exp = std::vector{t1, t2, t3};
     EXPECT_EQ(rng, exp);
@@ -59,7 +59,7 @@ TEST(GenexViewsDeref, VecInput) {
 
     const auto vec = std::vector{p1, p2, p3};
     const auto res = genex::all_of(
-        vec | genex::views2::indirect,
+        vec | genex::views::indirect,
         [ptrs_iter](const auto &x) mutable { return &x == *ptrs_iter++; });
 
     EXPECT_TRUE(res);

@@ -11,7 +11,7 @@ TEST(GenexViewsKeys, MapInput) {
     };
 
     const auto keys = map
-        | genex::views2::keys
+        | genex::views::keys
         | genex::to<std::vector>();
 
     const auto exp = std::vector{"one", "two", "three", "four", "five", "six"};
@@ -26,7 +26,7 @@ TEST(GenexViewsVals, MapInput) {
     };
 
     const auto vals = map
-        | genex::views2::vals
+        | genex::views::vals
         | genex::to<std::vector>();
 
     const auto exp = std::vector{1, 2, 3, 4, 5, 6};

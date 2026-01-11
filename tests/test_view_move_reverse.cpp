@@ -21,8 +21,8 @@ TEST(GenexViewsMoveReverse, VecInput) {
     vec.emplace_back(std::make_unique<TestStruct>(TestStruct{"two", 2}));
 
     const auto rng = vec
-        | genex::views2::move_reverse
-        | genex::views2::transform([](auto &&x) { return x->b; })
+        | genex::views::move_reverse
+        | genex::views::transform([](auto &&x) { return x->b; })
         | genex::to<std::vector>();
     const auto exp = std::vector<unsigned int>{2, 1};
     EXPECT_EQ(rng, exp);

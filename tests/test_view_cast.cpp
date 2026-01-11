@@ -31,7 +31,7 @@ TEST(GenexViewsStaticCast, VecSimple) {
     auto vec = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
     const auto rng = vec
-        | genex::views2::cast_static<double>()
+        | genex::views::cast_static<double>()
         | genex::to<std::vector>();
     const auto exp = std::vector{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0};
     EXPECT_EQ(rng, exp);
@@ -42,8 +42,8 @@ TEST(GenexViewsStaticCast, VecSimpleAndBack) {
     auto vec = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
     const auto rng = vec
-        | genex::views2::cast_static<double>()
-        | genex::views2::cast_static<int>()
+        | genex::views::cast_static<double>()
+        | genex::views::cast_static<int>()
         | genex::to<std::vector>();
     const auto exp = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     EXPECT_EQ(rng, exp);
@@ -58,7 +58,7 @@ TEST(GenexViewsDynamicCast, VecPolymorphic) {
     auto vec = std::vector<Base*>{&a1, &b1, &a2, &b2};
 
     const auto rng = vec
-        | genex::views2::cast_dynamic<DerivedA*>()
+        | genex::views::cast_dynamic<DerivedA*>()
         | genex::to<std::vector>();
     const auto exp = std::vector<DerivedA*>{&a1, &a2};
     EXPECT_EQ(rng, exp);
@@ -73,7 +73,7 @@ TEST(GenexViewsSharedCast, VecPolymorphicSmartPtr) {
     auto vec = std::vector<std::shared_ptr<Base>>{a1, b1, a2, b2};
 
     const auto rng = vec
-        | genex::views2::cast_smart<DerivedA>()
+        | genex::views::cast_smart<DerivedA>()
         | genex::to<std::vector>();
     const auto exp = std::vector{a1, a2};
     EXPECT_EQ(rng, exp);
@@ -88,7 +88,7 @@ TEST(GenexViewsUniqueCast, VecPolymorphicSmartPtr) {
     vec.push_back(std::make_unique<DerivedB>("four"));
 
     const auto rng = vec
-        | genex::views2::cast_smart<DerivedA>()
+        | genex::views::cast_smart<DerivedA>()
         | genex::to<std::vector>();
     auto exp = std::vector<std::unique_ptr<DerivedA>>{};
     exp.emplace_back(std::make_unique<DerivedA>(1));
