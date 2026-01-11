@@ -42,7 +42,6 @@ namespace genex::views2::detail::impl {
         GENEX_ITER_OPS(cycle_iterator);
 
         GENEX_INLINE constexpr cycle_iterator() = default;
-
         GENEX_INLINE constexpr cycle_iterator(I first, I begin, S last) :
             it(std::move(first)), begin(std::move(begin)), st(std::move(last)) {
         }
@@ -50,17 +49,13 @@ namespace genex::views2::detail::impl {
         template <typename Self>
         GENEX_VIEW_CUSTOM_NEXT {
             ++self.it;
-            if (self.it == self.st) {
-                self.it = self.begin;
-            }
+            if (self.it == self.st) { self.it = self.begin; }
             return self;
         }
 
         template <typename Self>
         GENEX_VIEW_CUSTOM_PREV {
-            if (self.it == self.begin) {
-                self.it = self.st;
-            }
+            if (self.it == self.begin) { self.it = self.st; }
             --self.it;
             return self;
         }
@@ -71,8 +66,8 @@ namespace genex::views2::detail::impl {
         }
 
         template <typename Self>
-        GENEX_VIEW_ITER_EQ(cycle_iterator) {
-            return self.it == that.it;
+        GENEX_VIEW_ITER_EQ(cycle_sentinel) {
+            return false;
         }
     };
 

@@ -78,12 +78,12 @@ namespace genex::views2::detail::impl {
 
         template <typename Self>
         GENEX_ITER_BEGIN {
-            return cast_static_iterator(self.it);
+            return cast_static_iterator<To, I, S>(self.it);
         }
 
         template <typename Self>
         GENEX_ITER_END {
-            return cast_static_iterator(self.st);
+            return cast_static_iterator<To, I, S>(self.st);
         }
 
         template <typename Self>
@@ -100,14 +100,14 @@ namespace genex::views2 {
         template <typename I, typename S>
         requires detail::concepts::static_castable_iters<To, I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return detail::impl::cast_static_view(first, last);
+            return detail::impl::cast_static_view<To, I, S>(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::static_castable_range<To, Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::impl::cast_static_view(std::move(first), std::move(last));
+            return detail::impl::cast_static_view<To, iterator_t<Rng>, sentinel_t<Rng>>(std::move(first), std::move(last));
         }
 
         GENEX_INLINE constexpr auto operator()() const {

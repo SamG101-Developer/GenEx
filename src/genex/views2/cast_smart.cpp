@@ -155,7 +155,7 @@ namespace genex::views2 {
         template <typename I, typename S>
         requires detail::concepts::smart_castable_iters<To, I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return detail::impl::cast_smart_view<To, I, S>(first, last);
+            return detail::impl::cast_smart_view<To, I, S>(std::move(first), std::move(last));
         }
 
         template <typename Rng>

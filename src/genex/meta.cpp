@@ -74,6 +74,7 @@ namespace genex::meta {
 
 
 namespace genex::meta::detail {
+    // N-arg general implementation
     template <typename F, typename... BoundArgs>
     struct bind_back_impl_fn {
         std::tuple<F, BoundArgs...> func_and_args;

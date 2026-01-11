@@ -1,7 +1,7 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.filter;
+export module genex.views2.set_algorithms;
 export import genex.pipe;
 import genex.algorithms.contains;
 import genex.concepts;
@@ -54,13 +54,15 @@ namespace genex::views2::detail::impl {
         GENEX_NO_UNIQUE_ADDRESS Comp comp;
         GENEX_NO_UNIQUE_ADDRESS Proj1 proj1;
         GENEX_NO_UNIQUE_ADDRESS Proj2 proj2;
-        std::optional<iter_value_t<I1>> cur_elem = std::nullopt;
 
         using value_type = std::common_type_t<iter_value_t<I1>, iter_value_t<I2>>;
         using reference_type = std::common_reference_t<iter_reference_t<I1>, iter_reference_t<I2>>;
         using difference_type = std::common_type_t<iter_difference_t<I1>, iter_difference_t<I2>>;
         using iterator_category = std::input_iterator_tag;
         using iterator_concept = iterator_category;
+
+        std::optional<value_type> cur_elem = std::nullopt;
+        GENEX_ITER_OPS_MINIMAL(set_sorted_iterator)
 
         GENEX_INLINE constexpr set_sorted_iterator() = default;
 
@@ -197,12 +199,10 @@ namespace genex::views2::detail::impl {
     struct set_unsorted_iterator {
         I1 it1; S1 st1;
         I2 it2; S2 st2;
-        I1 f1; S1 f2;
+        I1 f1; I2 f2;
         GENEX_NO_UNIQUE_ADDRESS Proj1 proj1;
         GENEX_NO_UNIQUE_ADDRESS Proj2 proj2;
-
-        auto second_pass = false;;
-        std::optional<iter_value_t<I1>> cur_elem = std::nullopt;
+        bool second_pass = false;;
 
         using value_type = std::common_type_t<iter_value_t<I1>, iter_value_t<I2>>;
         using reference_type = std::common_reference_t<iter_reference_t<I1>, iter_reference_t<I2>>;
@@ -210,12 +210,15 @@ namespace genex::views2::detail::impl {
         using iterator_category = std::input_iterator_tag;
         using iterator_concept = iterator_category;
 
+        std::optional<value_type> cur_elem = std::nullopt;
+        GENEX_ITER_OPS_MINIMAL(set_unsorted_iterator)
+
         GENEX_INLINE constexpr set_unsorted_iterator() = default;
 
         GENEX_INLINE constexpr set_unsorted_iterator(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1, Proj2 proj2) :
             it1(std::move(first1)), st1(std::move(last1)),
             it2(std::move(first2)), st2(std::move(last2)),
-            f1(it1), f2(st1),
+            f1(it1), f2(it2),
             proj1(std::move(proj1)), proj2(std::move(proj2)) {
             fwd_to_valid();
         }
@@ -379,46 +382,46 @@ namespace genex::views2::detail::impl {
 namespace genex::views2 {
     template <detail::impl::set_op Op>
     struct set_algorithms_sorted_base_fn {
-        template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
+        template <typename I1, typename S1, typename I2, typename S2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires detail::concepts::set_algorithmicable_sorted_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
-        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Comp comp, Proj1 proj1, Proj2 proj2) const {
+        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
             return detail::impl::set_algorithm_sorted_view<Op, I1, S1, I2, S2, Comp, Proj1, Proj2>(std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1), std::move(proj2));
         }
 
-        template <typename Rng1, typename Rng2, typename Comp, typename Proj1, typename Proj2>
+        template <typename Rng1, typename Rng2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires detail::concepts::set_algorithmicable_sorted_range<Rng1, Rng2, Comp, Proj1, Proj2>
-        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Comp comp, Proj1 proj1, Proj2 proj2) const {
+        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
             auto [first1, last1] = iterators::iter_pair(rng1);
             auto [first2, last2] = iterators::iter_pair(rng2);
             return detail::impl::set_algorithm_sorted_view<Op, iterator_t<Rng1>, sentinel_t<Rng1>, iterator_t<Rng2>, sentinel_t<Rng2>, Comp, Proj1, Proj2>(std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1), std::move(proj2));
         }
 
-        template <typename Rng2, typename Comp, typename Proj1, typename Proj2>
-        requires (not range<Comp> and not range<Proj1> and not range<Proj2>)
-        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Comp comp, Proj1 proj1, Proj2 proj2) const {
+        template <typename Rng2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+        requires (range<Rng2> and not range<Comp>)
+        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
             return meta::bind_back(set_algorithms_sorted_base_fn{}, std::forward<Rng2>(rng2), std::move(comp), std::move(proj1), std::move(proj2));
         }
     };
 
     template <detail::impl::set_op Op>
     struct set_algorithms_unsorted_base_fn {
-        template <typename I1, typename S1, typename I2, typename S2, typename Proj1, typename Proj2>
+        template <typename I1, typename S1, typename I2, typename S2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires detail::concepts::set_algorithmicable_unsorted_iters<I1, S1, I2, S2, Proj1, Proj2>
-        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1, Proj2 proj2) const {
+        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
             return detail::impl::set_algorithm_unsorted_view<Op, I1, S1, I2, S2, Proj1, Proj2>(std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(proj1), std::move(proj2));
         }
 
-        template <typename Rng1, typename Rng2, typename Proj1, typename Proj2>
+        template <typename Rng1, typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires detail::concepts::set_algorithmicable_unsorted_range<Rng1, Rng2, Proj1, Proj2>
-        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj1 proj1, Proj2 proj2) const {
+        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
             auto [first1, last1] = iterators::iter_pair(rng1);
             auto [first2, last2] = iterators::iter_pair(rng2);
             return detail::impl::set_algorithm_unsorted_view<Op, iterator_t<Rng1>, sentinel_t<Rng1>, iterator_t<Rng2>, sentinel_t<Rng2>, Proj1, Proj2>(std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(proj1), std::move(proj2));
         }
 
-        template <typename Rng2, typename Proj1, typename Proj2>
-        requires (not range<Proj1> and not range<Proj2>)
-        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Proj1 proj1, Proj2 proj2) const {
+        template <typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
+        requires (range<Rng2> and not range<Proj1>)
+        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
             return meta::bind_back(set_algorithms_unsorted_base_fn{}, std::forward<Rng2>(rng2), std::move(proj1), std::move(proj2));
         }
     };
@@ -432,4 +435,14 @@ namespace genex::views2 {
     using set_intersection_unsorted_fn = set_algorithms_unsorted_base_fn<detail::impl::set_op::intersection>;
     using set_symmetric_difference_unsorted_fn = set_algorithms_unsorted_base_fn<detail::impl::set_op::symmetric_difference>;
     using set_union_unsorted_fn = set_algorithms_unsorted_base_fn<detail::impl::set_op::union_>;
+
+    export inline constexpr set_difference_sorted_fn set_difference_sorted{};
+    export inline constexpr set_intersection_sorted_fn set_intersection_sorted{};
+    export inline constexpr set_symmetric_difference_sorted_fn set_symmetric_difference_sorted{};
+    export inline constexpr set_union_sorted_fn set_union_sorted{};
+
+    export inline constexpr set_difference_unsorted_fn set_difference_unsorted{};
+    export inline constexpr set_intersection_unsorted_fn set_intersection_unsorted{};
+    export inline constexpr set_symmetric_difference_unsorted_fn set_symmetric_difference_unsorted{};
+    export inline constexpr set_union_unsorted_fn set_union_unsorted{};
 }

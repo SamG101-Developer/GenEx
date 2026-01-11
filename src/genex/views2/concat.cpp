@@ -339,7 +339,9 @@ namespace genex::views2 {
         template <typename Rng2>
         requires detail::concepts::concatable_range<Rng2>
         GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
-            return meta::bind_back(concat_fn{}, std::forward<Rng2>(rng2));
+            return [rng2=std::forward<Rng2>(rng2)]<typename Rng1>(Rng1 &&rng1) mutable {
+                return concat_fn{}(std::forward<Rng1>(rng1), std::move(rng2));
+            };
         }
     };
 

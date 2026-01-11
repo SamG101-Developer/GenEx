@@ -30,10 +30,10 @@ namespace genex::views2::detail::impl {
     struct move_iterator {
         I it;
 
-        using value_type = iter_value_t<I>&&;
+        using value_type = iter_value_t<I>;
         using reference_type = iter_value_t<I>&&;
         using difference_type = iter_difference_t<I>;
-        using iterator_category = std::iterator_traits<I>::iterator_category;
+        using iterator_category = std::input_iterator_tag; // Can't move the same element twice.
         using iterator_concept = iterator_category;
         GENEX_ITER_OPS(move_iterator);
 
@@ -50,10 +50,7 @@ namespace genex::views2::detail::impl {
         }
 
         template <typename Self>
-        GENEX_VIEW_CUSTOM_PREV {
-            --self.it;
-            return self;
-        }
+        GENEX_VIEW_CUSTOM_PREV = delete;
 
         template <typename Self>
         GENEX_VIEW_CUSTOM_DEREF {
@@ -77,12 +74,12 @@ namespace genex::views2::detail::impl {
 
         template <typename Self>
         GENEX_ITER_BEGIN {
-            return move_iterator(self.it);
+            return move_iterator<I, S>(self.it);
         }
 
         template <typename Self>
         GENEX_ITER_END {
-            return move_iterator(self.st);
+            return move_iterator<I, S>(self.st);
         }
 
         template <typename Self>

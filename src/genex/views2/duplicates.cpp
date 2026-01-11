@@ -1,11 +1,12 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.filter;
+export module genex.views2.duplicates;
 export import genex.pipe;
 import genex.concepts;
 import genex.meta;
 import genex.iterators.iter_pair;
+import genex.operations.cmp;
 import std;
 
 
@@ -89,7 +90,7 @@ namespace genex::views2::detail::impl {
                 decltype(auto) cur_proj = meta::invoke(self.proj, *self.it);
 
                 if (self.dupe_elem.has_value()) {
-                    if (meta::invoke(self.comp, cur_proj, meta::invoke(self.prok, *self.dupe_elem))) {
+                    if (meta::invoke(self.comp, cur_proj, meta::invoke(self.proj, *self.dupe_elem))) {
                         self.cur_elem = std::move(*self.it);
                         ++self.it;
                         return;
@@ -140,26 +141,26 @@ namespace genex::views2::detail::impl {
 
 
 namespace genex::views2 {
-    struct duplicate_fn {
-        template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-        requires detail::concepts::duplicate_checkable_iters<I, S, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const {
-            return detail::impl::duplicate_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
+    struct duplicates_fn {
+        template <typename I, typename S, typename Comp = operations::eq, typename Proj = meta::identity>
+        requires detail::concepts::duplicate_checkable_iters<I, S, Comp, Proj>
+        GENEX_INLINE constexpr auto operator()(I first, S last, Comp comp = {}, Proj proj = {}) const {
+            return detail::impl::duplicate_view(std::move(first), std::move(last), std::move(comp), std::move(proj));
         }
 
-        template <typename Rng, typename Pred, typename Proj = meta::identity>
-        requires detail::concepts::duplicate_checkable_range<Rng, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const {
+        template <typename Rng, typename Comp = operations::eq, typename Proj = meta::identity>
+        requires detail::concepts::duplicate_checkable_range<Rng, Comp, Proj>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::impl::duplicate_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
+            return detail::impl::duplicate_view(std::move(first), std::move(last), std::move(comp), std::move(proj));
         }
 
-        template <typename Pred, typename Proj = meta::identity>
-        requires (not range<Pred>)
-        GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const {
-            return meta::bind_back(duplicate_fn{}, std::move(pred), std::move(proj));
+        template <typename Comp = operations::eq, typename Proj = meta::identity>
+        requires (not range<Comp>)
+        GENEX_INLINE constexpr auto operator()(Comp comp = {}, Proj proj = {}) const {
+            return meta::bind_back(duplicates_fn{}, std::move(comp), std::move(proj));
         }
     };
 
-    export inline constexpr duplicate_fn duplicate{};
+    export inline constexpr duplicates_fn duplicates{};
 }

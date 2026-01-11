@@ -37,10 +37,8 @@ namespace genex::views2::detail::impl {
     template <typename I1, typename S1, typename I2, typename S2>
     requires concepts::interleavable_iters<I1, S1, I2, S2>
     struct interleave_iterator {
-        I1 it1;
-        S1 st1;
-        I2 it2;
-        S2 st2;
+        I1 it1; S1 st1;
+        I2 it2; S2 st2;
         bool use_first = true;
 
         using value_type = concepts::interleave_common_t<I1, I2>;
@@ -50,74 +48,7 @@ namespace genex::views2::detail::impl {
             typename std::iterator_traits<I1>::iterator_category,
             typename std::iterator_traits<I2>::iterator_category>;
         using iterator_concept = iterator_category;
-
-        GENEX_INLINE friend constexpr auto operator==(
-            interleave_iterator const &self,
-            interleave_iterator const &that)
-            -> bool {
-            return self.it1 == that.it1 and self.it2 == that.it2;
-        }
-
-        GENEX_INLINE friend constexpr auto operator!=(
-            interleave_iterator const &self,
-            interleave_iterator const &that)
-            -> bool {
-            return !(self == that);
-        }
-
-        GENEX_INLINE friend constexpr auto operator*(
-            interleave_iterator const &self)
-            -> decltype(auto) {
-            return self.deref();
-        }
-
-        GENEX_INLINE friend constexpr auto operator++(
-            interleave_iterator &self)
-            -> interleave_iterator& {
-            self.next();
-            return self;
-        }
-
-        GENEX_INLINE friend constexpr auto operator++(
-            interleave_iterator &self, int)
-            -> interleave_iterator {
-            auto temp = self;
-            ++self;
-            return temp;
-        }
-
-        GENEX_INLINE friend constexpr auto operator--(
-            interleave_iterator &self)
-            -> interleave_iterator& requires std::bidirectional_iterator<decltype(std::declval<interleave_iterator>().it)> {
-            self.prev();
-            return self;
-        }
-
-        GENEX_INLINE friend constexpr auto operator--(
-            interleave_iterator &self, int)
-            -> interleave_iterator requires std::bidirectional_iterator<decltype(std::declval<interleave_iterator>().it)> {
-            auto temp = self;
-            --self;
-            return temp;
-        }
-
-        GENEX_INLINE friend constexpr auto operator+(
-            interleave_iterator const &self,
-            difference_type m)
-            -> interleave_iterator requires std::random_access_iterator<decltype(std::declval<interleave_iterator>().it)> {
-            auto temp = *self;
-            temp += m;
-            return temp;
-        }
-
-        GENEX_INLINE friend constexpr auto operator-(
-            interleave_iterator const &self,
-            difference_type m)
-            -> interleave_iterator requires std::random_access_iterator<decltype(std::declval<interleave_iterator>().it)> {
-            auto temp = *self;
-            temp -= m;
-            return temp;
-        }
+        GENEX_ITER_OPS_MINIMAL(interleave_iterator)
 
         GENEX_INLINE constexpr interleave_iterator() = default;
 
