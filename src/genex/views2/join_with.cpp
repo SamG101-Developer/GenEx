@@ -26,14 +26,14 @@ namespace genex::views2::detail::concepts {
 }
 
 
-
 namespace genex::views2::detail::impl {
     struct join_sentinel {};
 
     template <typename I, typename S, typename New>
     requires concepts::joinable_with_iters<I, S, New>
     struct join_iterator {
-        I it; S st;
+        I it;
+        S st;
         New new_value;
         bool use_new = false;
         iterator_t<iter_value_t<I>> inner_it;
@@ -59,27 +59,17 @@ namespace genex::views2::detail::impl {
         template <typename Self>
         GENEX_VIEW_CUSTOM_NEXT {
             if (self.it == self.st) { return self; }
-
-            // If the separator has just been yielded, move to the next inner range.
+            ++self.inner_it;
             if (self.use_new) {
                 self.use_new = false;
                 ++self.it;
                 self.fwd_to_valid();
                 return self;
             }
-
-            ++self.inner_it;
             if (self.inner_it == self.inner_st) {
-                // If we are at the end of an inner range, yield the joining element.
-                if (self.it != self.st) {
-                    self.use_new = true;
-                    return self;
-                }
-
-                // Otherwise, move to the next inner range.
-                ++self.it;
-                self.fwd_to_valid();
+                self.use_new = true;
             }
+            return self;
         }
 
         template <typename Self>
@@ -95,13 +85,20 @@ namespace genex::views2::detail::impl {
 
         template <typename Self>
         GENEX_VIEW_ITER_EQ(join_sentinel) {
-            return self.it == self.st;
+            if (self.it == self.st) { return true; }
+
+            if (self.use_new) {
+                auto next_it = self.it;
+                ++next_it;
+                return next_it == self.st;
+            }
+
+            return false;
         }
 
     private:
         template <typename Self>
-        GENEX_INLINE constexpr auto fwd_to_valid(this Self&& self) -> void {
-            self.use_new = false;
+        GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
             while (self.it != self.st) {
                 self.inner_it = iterators::begin(*self.it);
                 self.inner_st = iterators::end(*self.it);
@@ -116,7 +113,8 @@ namespace genex::views2::detail::impl {
     template <typename I, typename S, typename New>
     requires concepts::joinable_with_iters<I, S, New>
     struct join_view {
-        I it; S st;
+        I it;
+        S st;
         New new_value;
 
         GENEX_INLINE constexpr join_view(I first, S last, New new_val) :

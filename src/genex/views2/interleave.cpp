@@ -40,6 +40,7 @@ namespace genex::views2::detail::impl {
         I1 it1; S1 st1;
         I2 it2; S2 st2;
         bool use_first = true;
+        bool extend;
 
         using value_type = concepts::interleave_common_t<I1, I2>;
         using reference_type = value_type;
@@ -52,46 +53,55 @@ namespace genex::views2::detail::impl {
 
         GENEX_INLINE constexpr interleave_iterator() = default;
 
-        GENEX_INLINE constexpr interleave_iterator(I1 first1, S1 last1, I2 first2, S2 last2) :
+        GENEX_INLINE constexpr interleave_iterator(I1 first1, S1 last1, I2 first2, S2 last2, const bool extend) :
             it1(std::move(first1)), st1(std::move(last1)),
-            it2(std::move(first2)), st2(std::move(last2)) {
+            it2(std::move(first2)), st2(std::move(last2)),
+            extend(extend) {
         }
 
         template <typename Self>
         GENEX_VIEW_CUSTOM_NEXT {
+            if (self.done()) { return self; }
             if (self.use_first) {
                 if (self.it1 != self.st1) { ++self.it1; }
+                else if (self.extend and self.it2 != self.st2) { ++self.it2; }
             }
             else {
                 if (self.it2 != self.st2) { ++self.it2; }
+                else if (self.extend and self.it1 != self.st1) { ++self.it1; }
             }
             self.use_first = not self.use_first;
+            if (self.it1 == self.st1 and self.it2 != self.st2) { self.use_first = false; }
+            if (self.it2 == self.st2 and self.it1 != self.st1) { self.use_first = true; }
             return self;
         }
 
         template <typename Self>
-        GENEX_VIEW_CUSTOM_PREV {
-            if (self.use_first) {
-                if (self.it2 != self.st2) { --self.it2; }
-            }
-            else {
-                if (self.it1 != self.st1) { --self.it1; }
-            }
-            self.use_first = not self.use_first;
-            return self;
-        }
+        GENEX_VIEW_CUSTOM_PREV = delete;  // for now
 
         template <typename Self>
         GENEX_VIEW_CUSTOM_DEREF {
             if (self.use_first) {
-                return static_cast<value_type>(*self.it1);
+                if (self.it1 != self.st1) { return *self.it1; }
+                return *self.it2;
             }
-            return static_cast<value_type>(*self.it2);
+            else {
+                if (self.it2 != self.st2) { return *self.it2; }
+                return *self.it1;
+            }
         }
 
         template <typename Self>
         GENEX_VIEW_ITER_EQ(interleave_iterator) {
-            return self.it1 == that.it1 and self.it2 == that.it2;
+            return self.done();
+        }
+
+    private:
+        template <typename Self>
+        auto done(this Self &&self) -> bool {
+            const auto end1 = self.it1 == self.st1;
+            const auto end2 = self.it2 == self.st2;
+            return self.extend ? (end1 and end2) : (end1 or end2);
         }
     };
 
@@ -100,20 +110,22 @@ namespace genex::views2::detail::impl {
     struct interleave_view {
         I1 it1; S1 st1;
         I2 it2; S2 st2;
+        bool extend;
 
-        GENEX_INLINE constexpr interleave_view(I1 first1, S1 last1, I2 first2, S2 last2) :
+        GENEX_INLINE constexpr interleave_view(I1 first1, S1 last1, I2 first2, S2 last2, const bool extend) :
             it1(std::move(first1)), st1(std::move(last1)),
-            it2(std::move(first2)), st2(std::move(last2)) {
+            it2(std::move(first2)), st2(std::move(last2)),
+            extend(extend) {
         }
 
         template <typename Self>
         GENEX_ITER_BEGIN {
-            return interleave_iterator(self.it1, self.st1, self.it2, self.st2);
+            return interleave_iterator(self.it1, self.st1, self.it2, self.st2, self.extend);
         }
 
         template <typename Self>
         GENEX_ITER_END {
-            return interleave_iterator(self.st1, self.st1, self.st2, self.st2);
+            return interleave_iterator(self.st1, self.st1, self.st2, self.st2, self.extend);
         }
 
         template <typename Self>
@@ -128,21 +140,22 @@ namespace genex::views2 {
     struct interleave_fn {
         template <typename I1, typename S1, typename I2, typename S2>
         requires detail::concepts::interleavable_iters<I1, S1, I2, S2>
-        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2) const {
-            return detail::impl::interleave_view(std::move(first1), std::move(last1), std::move(first2), std::move(last2));
+        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, bool extend = true) const {
+            return detail::impl::interleave_view(std::move(first1), std::move(last1), std::move(first2), std::move(last2), extend);
         }
 
         template <typename Rng1, typename Rng2>
         requires detail::concepts::interleavable_range<Rng1, Rng2>
-        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const {
+        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, bool extend = true) const {
             auto [first1, last1] = iterators::iter_pair(rng1);
             auto [first2, last2] = iterators::iter_pair(rng2);
-            return detail::impl::interleave_view(std::move(first1), std::move(last1), std::move(first2), std::move(last2));
+            return detail::impl::interleave_view(std::move(first1), std::move(last1), std::move(first2), std::move(last2), extend);
         }
 
         template <typename Rng2>
-        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
-            return meta::bind_back(interleave_fn{}, std::forward<Rng2>(rng2));
+        requires range<Rng2>
+        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, bool extend = true) const {
+            return meta::bind_back(interleave_fn{}, std::forward<Rng2>(rng2), extend);
         }
     };
 

@@ -335,14 +335,6 @@ namespace genex::views2 {
                 std::make_tuple(iterators::begin(std::forward<Rngs>(ranges))...),
                 std::make_tuple(iterators::end(std::forward<Rngs>(ranges))...));
         }
-
-        template <typename Rng2>
-        requires detail::concepts::concatable_range<Rng2>
-        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
-            return [rng2=std::forward<Rng2>(rng2)]<typename Rng1>(Rng1 &&rng1) mutable {
-                return concat_fn{}(std::forward<Rng1>(rng1), std::move(rng2));
-            };
-        }
     };
 
     export inline constexpr concat_fn concat{};

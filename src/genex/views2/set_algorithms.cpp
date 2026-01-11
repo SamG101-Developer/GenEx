@@ -306,20 +306,28 @@ namespace genex::views2::detail::impl {
             if constexpr (Op == set_op::union_) {
                 if (not self.second_pass) {
                     while (self.it1 != self.st1) {
-                        if (not contains2(*self.it1)) {
+                        if (not genex::contains(self.f1, self.it1, meta::invoke(self.proj1, *self.it1), self.proj1)) {
                             self.cur_elem = *self.it1;
                             ++self.it1;
                             return;
                         }
+                        ++self.it1;
                     }
                     self.second_pass = true;
+                    self.it2 = std::move(self.f2);
                 }
+
                 while (self.it2 != self.st2) {
-                    if (not contains1(*self.it2)) {
+                    const bool already_in_1 = contains1(*self.it2);
+                    const bool already_emitted_in_2 =
+                        genex::contains(self.f2, self.it2, meta::invoke(self.proj2, *self.it2), self.proj2);
+
+                    if (not already_in_1 and not already_emitted_in_2) {
                         self.cur_elem = *self.it2;
                         ++self.it2;
                         return;
                     }
+                    ++self.it2;
                 }
                 return;
             }

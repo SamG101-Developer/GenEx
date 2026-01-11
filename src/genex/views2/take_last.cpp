@@ -6,6 +6,7 @@ export import genex.pipe;
 import genex.concepts;
 import genex.meta;
 import genex.span;
+import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
 import std;
@@ -30,21 +31,22 @@ namespace genex::views2 {
         template <typename I, typename S, typename Int>
         requires detail::concepts::takeable_last_iters<I, S, Int> and std::random_access_iterator<I>
         GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const {
-            return genex::span<iter_value_t<I>>(std::move(first) + n, std::move(last));
+            return genex::span<iter_value_t<I>>(std::move(last) - n, std::move(last));
         }
 
         template <typename I, typename S, typename Int>
         requires detail::concepts::takeable_last_iters<I, S, Int>
         GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const {
             // todo: slow
-            return std::ranges::subrange(iterators::next(std::move(first), n), std::move(last));
+            auto dist = iterators::distance(first, last);
+            return std::ranges::subrange(iterators::next(std::move(first), dist - n), std::move(last));
         }
 
         template <typename Rng, typename Int>
         requires detail::concepts::takeable_last_range<Rng, Int> and std::random_access_iterator<iterator_t<Rng>>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return genex::span<range_value_t<Rng>>(std::move(first) + n, std::move(last));
+            return genex::span<range_value_t<Rng>>(std::move(last) - n, std::move(last));
         }
 
         template <typename Rng, typename Int>
@@ -52,7 +54,8 @@ namespace genex::views2 {
         GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const {
             // todo: slow
             auto [first, last] = iterators::iter_pair(rng);
-            return std::ranges::subrange(iterators::next(std::move(first), n), std::move(last));
+            auto dist = iterators::distance(first, last);
+            return std::ranges::subrange(iterators::next(std::move(first), dist - n), std::move(last));
         }
 
         template <typename Int>

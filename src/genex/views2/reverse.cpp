@@ -29,7 +29,7 @@ namespace genex::views2::detail::impl {
     template <typename I, typename S>
     requires concepts::reversible_iters<I, S>
     struct reverse_iterator {
-        I it; S st;
+        I it;
 
         using value_type = iter_value_t<I>;
         using reference_type = iter_reference_t<I>;
@@ -40,8 +40,8 @@ namespace genex::views2::detail::impl {
 
         GENEX_INLINE constexpr reverse_iterator() = default;
 
-        GENEX_INLINE constexpr reverse_iterator(I first, S last) :
-            it(std::move(first)), st(std::move(last)) {
+        GENEX_INLINE constexpr explicit reverse_iterator(I first) :
+            it(std::move(first)) {
         }
 
         template <typename Self>
@@ -78,12 +78,12 @@ namespace genex::views2::detail::impl {
 
         template <typename Self>
         GENEX_ITER_BEGIN {
-            return reverse_iterator(self.st, self.it);
+            return reverse_iterator<I, S>(self.st);
         }
 
         template <typename Self>
         GENEX_ITER_END {
-            return reverse_iterator(self.it, self.it);
+            return reverse_iterator<I, S>(self.it);
         }
 
         template <typename Self>

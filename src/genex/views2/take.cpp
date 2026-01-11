@@ -38,8 +38,11 @@ namespace genex::views2 {
         template <typename I, typename S, typename Int>
         requires detail::concepts::takeable_iters<I, S, Int>
         GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const {
-            // todo: slow
-            return std::ranges::subrange(std::move(first), iterators::next(std::move(first), n));
+            auto it = std::move(first);
+            for (Int i = 0; i < n and it != last; ++i) {
+                it = iterators::next(std::move(it));
+            }
+            return std::ranges::subrange(std::move(first), std::move(it));
         }
 
         template <typename Rng, typename Int>
@@ -53,9 +56,12 @@ namespace genex::views2 {
         template <typename Rng, typename Int>
         requires detail::concepts::takeable_range<Rng, Int>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const {
-            // todo: slow
             auto [first, last] = iterators::iter_pair(rng);
-            return std::ranges::subrange(std::move(first), iterators::next(std::move(first), n));
+            auto it = std::move(first);
+            for (Int i = 0; i < n and it != last; ++i) {
+                it = iterators::next(std::move(it));
+            }
+            return std::ranges::subrange(std::move(first), std::move(it));
         }
 
         template <typename Int>

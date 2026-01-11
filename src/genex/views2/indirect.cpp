@@ -32,14 +32,14 @@ namespace genex::views2 {
         template <typename I, typename S>
         requires detail::concepts::indirectable_iters<I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return transform(std::move(first), std::move(last), [](auto &&ptr) { return *ptr; });
+            return transform(std::move(first), std::move(last), [](auto &&ptr) -> decltype(auto) { return *ptr; });
         }
 
         template <typename Rng>
         requires detail::concepts::indirectable_range<Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return transform(std::move(first), std::move(last), [](auto &&ptr) { return *ptr; });
+            return transform(std::move(first), std::move(last), [](auto &&ptr) -> decltype(auto) { return *ptr; });
         }
 
         GENEX_INLINE constexpr auto operator()() const {

@@ -88,7 +88,7 @@
     GENEX_INLINE friend constexpr auto operator+=(Type &self, Type::difference_type m) -> Type&               \
     requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
         self.it += m;                                                                                         \
-        return self;                                                                                         \
+        return self;                                                                                          \
     }                                                                                                         \
                                                                                                               \
     GENEX_INLINE friend constexpr auto operator+(Type const &self, Type::difference_type m) -> Type           \
@@ -98,15 +98,10 @@
         return temp;                                                                                          \
     }                                                                                                         \
                                                                                                               \
-    GENEX_INLINE friend constexpr auto operator+(Type const &self, Type const &that) -> Type::difference_type \
-    requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
-        return self.it + that.it;                                                                             \
-    }                                                                                                         \
-                                                                                                              \
     GENEX_INLINE friend constexpr auto operator-=(Type &self, Type::difference_type m) -> Type&               \
     requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
         self.it -= m;                                                                                         \
-        return self;                                                                                         \
+        return self;                                                                                          \
     }                                                                                                         \
                                                                                                               \
     GENEX_INLINE friend constexpr auto operator-(Type const &self, Type::difference_type m) -> Type           \
@@ -114,9 +109,4 @@
         auto temp = *self;                                                                                    \
         temp -= m;                                                                                            \
         return temp;                                                                                          \
-    }                                                                                                         \
-                                                                                                              \
-    GENEX_INLINE friend constexpr auto operator-(Type const &self, Type const &that) -> Type::difference_type \
-    requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
-        return self.it - that.it;                                                                             \
     }

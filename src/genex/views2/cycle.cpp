@@ -101,6 +101,7 @@ namespace genex::views2 {
         template <typename I, typename S>
         requires detail::concepts::cyclable_iters<I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
+            GENEX_ASSERT(std::invalid_argument, genex::iterators::distance(first, last) > 0);
             return detail::impl::cycle_view(std::move(first), std::move(last));
         }
 
@@ -108,6 +109,7 @@ namespace genex::views2 {
         requires detail::concepts::cyclable_range<Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
+            GENEX_ASSERT(std::invalid_argument, genex::iterators::distance(first, last) > 0);
             return detail::impl::cycle_view(std::move(first), std::move(last));
         }
 

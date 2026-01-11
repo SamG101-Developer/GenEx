@@ -90,13 +90,13 @@ namespace genex::views2::detail::impl {
         template <typename Self>
         GENEX_NODISCARD GENEX_INLINE constexpr auto begin(this Self&& self) noexcept(
             std::is_nothrow_constructible_v<address_of_view, I>) -> auto {
-            return address_of_iterator(self.it);
+            return address_of_iterator<I, S>(self.it);
         }
 
         template <typename Self>
         GENEX_NODISCARD GENEX_INLINE constexpr auto end(this Self&& self) noexcept(
             std::is_nothrow_constructible_v<address_of_view, S>) -> auto {
-            return address_of_iterator(self.st);
+            return address_of_iterator<I, S>(self.st);
         }
 
         template <typename Self>
@@ -110,14 +110,14 @@ namespace genex::views2::detail::impl {
 
 namespace genex::views2 {
     struct address_of_fn {
-        template <typename I, typename S>
-        requires detail::concepts::addressable_iters<I, S> and std::contiguous_iterator<I>
-        GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
-            std::is_nothrow_constructible_v<span<std::add_pointer_t<iter_value_t<I>>>, std::add_pointer_t<iter_value_t<I>>, std::size_t>) {
-            using ptr_t = std::add_pointer_t<iter_value_t<I>>;
-            auto ptr_begin = std::addressof(*first);
-            return genex::span<ptr_t>(&ptr_begin, last - first);
-        }
+        // template <typename I, typename S>
+        // requires detail::concepts::addressable_iters<I, S> and std::contiguous_iterator<I>
+        // GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
+        //     std::is_nothrow_constructible_v<span<std::add_pointer_t<iter_value_t<I>>>, std::add_pointer_t<iter_value_t<I>>, std::size_t>) {
+        //     using ptr_t = std::add_pointer_t<iter_value_t<I>>;
+        //     auto ptr_begin = std::addressof(*first);
+        //     return genex::span<ptr_t>(&ptr_begin, last - first);
+        // }
 
         template <typename I, typename S>
         requires detail::concepts::addressable_iters<I, S>
@@ -126,14 +126,14 @@ namespace genex::views2 {
             return detail::impl::address_of_view(std::move(first), std::move(last));
         }
 
-        template <typename Rng>
-        requires detail::concepts::addressable_range<Rng> and std::contiguous_iterator<iterator_t<Rng>>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept {
-            using ptr_t = std::add_pointer_t<iter_value_t<iterator_t<Rng>>>;
-            auto [first, last] = iterators::iter_pair(rng);
-            auto ptr_begin = std::addressof(*first);
-            return genex::span<ptr_t>(&ptr_begin, last - first);
-        }
+        // template <typename Rng>
+        // requires detail::concepts::addressable_range<Rng> and std::contiguous_iterator<iterator_t<Rng>>
+        // GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept {
+        //     using ptr_t = std::add_pointer_t<iter_value_t<iterator_t<Rng>>>;
+        //     auto [first, last] = iterators::iter_pair(rng);
+        //     auto ptr_begin = std::addressof(*first);
+        //     return genex::span<ptr_t>(&ptr_begin, last - first);
+        // }
 
         template <typename Rng>
         requires detail::concepts::addressable_range<Rng>

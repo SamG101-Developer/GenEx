@@ -91,11 +91,12 @@ namespace genex::views2::detail::impl {
 
                 if (self.dupe_elem.has_value()) {
                     if (meta::invoke(self.comp, cur_proj, meta::invoke(self.proj, *self.dupe_elem))) {
-                        self.cur_elem = std::move(*self.it);
+                        self.cur_elem = *self.it;
                         ++self.it;
                         return;
                     }
                     ++self.it;
+                    continue;
                 }
 
                 // Search for the duplicate
@@ -103,13 +104,13 @@ namespace genex::views2::detail::impl {
                     if (meta::invoke(self.comp, cur_proj, meta::invoke(self.proj, s))) {
                         self.dupe_elem = s;
                         self.cur_elem = s;
-                        self.pending = std::move(*self.it);
+                        self.pending = *self.it;
                         ++self.it;
                         return;
                     }
                 }
 
-                self.seen.push_back(std::move(*self.it));
+                self.seen.push_back(*self.it);
                 ++self.it;
             }
         }

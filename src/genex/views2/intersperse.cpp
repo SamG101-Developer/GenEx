@@ -29,6 +29,8 @@ namespace genex::views2::detail::concepts {
 
 
 namespace genex::views2::detail::impl {
+    struct intersperse_sentinel {};
+
     template <typename I, typename S, typename New>
     requires concepts::interspersable_iters<I, S, New>
     struct intersperse_iterator {
@@ -54,16 +56,22 @@ namespace genex::views2::detail::impl {
         template <typename Self>
         GENEX_VIEW_CUSTOM_NEXT {
             if (self.it == self.st) { return self; }
-            if (self.yield_new) { ++self.it; }
-            self.yield_new = not self.yield_new and (self.it++ != self.st);
+            if (not self.yield_new) { self.yield_new = true; }
+            else {
+                self.yield_new = false;
+                ++self.it;
+            }
             return self;
         }
 
         template <typename Self>
         GENEX_VIEW_CUSTOM_PREV {
             if (self.it == self.base_it) { return self; }
-            if (not self.yield_new) { --self.it; }
-            self.yield_new = not self.yield_new and (self.it-- != self.base_it);
+            if (self.yield_new) { self.yield_new = false; }
+            else {
+                self.yield_new = true;
+                --self.it;
+            }
             return self;
         }
 
@@ -73,8 +81,16 @@ namespace genex::views2::detail::impl {
         }
 
         template <typename Self>
-        GENEX_VIEW_ITER_EQ(intersperse_iterator) {
-            return self.it == that.it;
+        GENEX_VIEW_ITER_EQ(intersperse_sentinel) {
+            if (self.it == self.st) { return true; }
+
+            if (self.yield_new) {
+                auto next_it = self.it;
+                ++next_it;
+                return next_it == self.st;
+            }
+
+            return false;
         }
     };
 
@@ -97,12 +113,12 @@ namespace genex::views2::detail::impl {
 
         template <typename Self>
         GENEX_ITER_END {
-            return intersperse_iterator(self.it, self.st, self.st, self.new_value);
+            return intersperse_sentinel();
         }
 
         template <typename Self>
         GENEX_ITER_SIZE {
-            return std::max(0, iterators::distance(self.it, self.st) * 2 - 1);
+            return std::max(0z, iterators::distance(self.it, self.st) * 2 - 1);
         }
     };
 }

@@ -75,12 +75,12 @@ namespace genex::views2::detail::impl {
     private:
         template <typename Self>
         GENEX_INLINE constexpr auto fwd_to_valid(this Self&& self) -> void {
-            while (self.it != self.st and not meta::invoke(self.pred, meta::invoke(self.proj, *self.it))) { ++self.it; }
+            while (self.it != self.st and meta::invoke(self.pred, meta::invoke(self.proj, *self.it))) { ++self.it; }
         }
 
         template <typename Self> requires std::bidirectional_iterator<I>
         GENEX_INLINE constexpr auto bwd_to_valid(this Self&& self) -> void {
-            while (self.it != self.st and not meta::invoke(self.pred, meta::invoke(self.proj, *self.it))) { --self.it; }
+            while (self.it != self.st and meta::invoke(self.pred, meta::invoke(self.proj, *self.it))) { --self.it; }
         }
     };
 
