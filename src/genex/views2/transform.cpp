@@ -26,6 +26,11 @@ namespace genex::views::detail::concepts {
 
 
 namespace genex::views::detail::impl {
+    template <typename S>
+    struct transform_sentinel {
+        S st;
+    };
+
     /**
      * The @c transform_iterator applies a transformation function to the elements of the underlying iterator. Note that
      * there is no special "sentinel" type for the @c transform_iterator, because the end is always known from the
@@ -79,6 +84,11 @@ namespace genex::views::detail::impl {
         GENEX_VIEW_ITER_EQ(transform_iterator) {
             return self.it == that.it;
         }
+
+        template <typename Self>
+        GENEX_VIEW_ITER_EQ(transform_sentinel<S>) {
+            return self.it == that.st;
+        }
     };
 
     template <typename I, typename S, typename F, typename Proj>
@@ -98,8 +108,14 @@ namespace genex::views::detail::impl {
         }
 
         template <typename Self>
+        requires std::convertible_to<S, I>
         GENEX_ITER_END {
             return transform_iterator<I, S, F, Proj>{self.st, self.f, self.proj};
+        }
+
+        template <typename Self>
+        GENEX_ITER_END {
+            return transform_sentinel(self.st);
         }
 
         template <typename Self>

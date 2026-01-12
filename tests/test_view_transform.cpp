@@ -1,7 +1,10 @@
 #include <gtest/gtest.h>
 
 import genex.to_container;
+import genex.algorithms.tuple;
+import genex.views2.filter;
 import genex.views2.transform;
+import genex.views2.zip;
 import genex.meta;
 
 
@@ -95,5 +98,19 @@ TEST(GenexViewsTransform, StrInput) {
         | genex::views::transform([](auto c) { return toupper(c); })
         | genex::to<std::string>();
     const auto exp = std::string("ABCDEF");
+    EXPECT_EQ(rng, exp);
+}
+
+
+TEST(GenexViewsTransform, Stacked) {
+    auto x = std::vector{0, 1, 2, 3, 4};
+    auto y = std::vector{5, 6, 7, 8, 9};
+
+    const auto rng = genex::views::zip(x, y)
+        | genex::to<std::vector>()
+        | genex::views::filter([](const auto &pair) { return (genex::get<0>(pair) + genex::get<1>(pair)) % 3 != 0; })
+        | genex::views::transform([](const auto &pair) { return std::make_tuple(genex::get<0>(pair) * 2, genex::get<1>(pair) * 2); })
+        | genex::to<std::vector>();
+    const auto exp = std::vector<std::tuple<int, int>>{{0, 10}, {2, 12}, {6, 16}, {8, 18}};
     EXPECT_EQ(rng, exp);
 }
