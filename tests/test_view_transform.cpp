@@ -2,6 +2,7 @@
 
 import genex.to_container;
 import genex.views2.transform;
+import genex.meta;
 
 
 struct TestStruct {
@@ -83,5 +84,16 @@ TEST(GenexViewsTransform, IterInput) {
     const auto it_end = vec.end();
     const auto rng = genex::views::transform(it_begin, it_end, [](auto x) { return x + 1; }) | genex::to<std::vector>();
     const auto exp = std::vector{1, 2, 3, 4, 5, 6, 7};
+    EXPECT_EQ(rng, exp);
+}
+
+
+TEST(GenexViewsTransform, StrInput) {
+    auto str = std::string("abcdef");
+
+    const auto rng = str
+        | genex::views::transform([](auto c) { return toupper(c); })
+        | genex::to<std::string>();
+    const auto exp = std::string("ABCDEF");
     EXPECT_EQ(rng, exp);
 }

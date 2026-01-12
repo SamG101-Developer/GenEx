@@ -35,7 +35,7 @@ namespace genex::views::detail::impl {
      * @tparam F The type of the transformation function.
      * @tparam Proj The type of the projection function.
      */
-    template <typename I, typename S, typename F, typename Proj>
+    export template <typename I, typename S, typename F, typename Proj>
     requires concepts::transformable_iters<I, S, F, Proj>
     struct transform_iterator {
         I it;
