@@ -28,7 +28,7 @@ namespace genex {
         Out<range_value_t<Rng>> out;
         auto [first, last] = iterators::iter_pair(rng);
         if constexpr (has_member_size<Rng> and has_member_reserve<Out<range_value_t<Rng>>>) {
-            out.reserve(rng.size());
+            out.reserve(std::bit_cast<std::size_t>(rng.size()));
         }
         for (; first != last; ++first) {
             out.push_back(std::move(*first));
@@ -42,7 +42,7 @@ namespace genex {
         Out out;
         auto [first, last] = iterators::iter_pair(rng);
         if constexpr (has_member_size<Rng> and has_member_reserve<Out>) {
-            out.reserve(rng.size());
+            out.reserve(std::bit_cast<std::size_t>(rng.size()));
         }
         for (; first != last; ++first) {
             out.push_back(std::move(*first));
@@ -56,7 +56,7 @@ namespace genex {
         Out<range_value_t<Rng>> out;
         auto [first, last] = iterators::iter_pair(rng);
         if constexpr (has_member_size<Rng> and has_member_reserve<Out<range_value_t<Rng>>>) {
-            out.reserve(rng.size());
+            out.reserve(std::min(std::bit_cast<std::size_t>(rng.size()), n));
         }
         for (auto x = 0uz; first != last and x < n; ++first, ++x) {
             out.push_back(std::move(*first));
@@ -70,7 +70,7 @@ namespace genex {
         Out out;
         auto [first, last] = iterators::iter_pair(rng);
         if constexpr (has_member_size<Rng> and has_member_reserve<Out>) {
-            out.reserve(rng.size());
+            out.reserve(std::min(std::bit_cast<std::size_t>(rng.size()), n));
         }
         for (auto x = 0uz; first != last and x < n; ++first, ++x) {
             out.push_back(std::move(*first));

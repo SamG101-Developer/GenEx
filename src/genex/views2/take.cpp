@@ -32,7 +32,7 @@ namespace genex::views {
         requires detail::concepts::takeable_iters<I, S, Int> and std::random_access_iterator<I>
         GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const {
             // todo: min
-            return genex::span<iter_value_t<I>>(std::move(first), std::move(first) + n);
+            return genex::span<iter_value_t<I>>(std::move(first), std::move(first) + static_cast<std::ptrdiff_t>(n));
         }
 
         template <typename I, typename S, typename Int>
@@ -50,7 +50,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const {
             // todo: min
             auto [first, last] = iterators::iter_pair(rng);
-            return genex::span<range_value_t<Rng>>(std::move(first), std::move(first) + n);
+            return genex::span<range_value_t<Rng>>(std::move(first), std::move(first) + static_cast<std::ptrdiff_t>(n));
         }
 
         template <typename Rng, typename Int>
