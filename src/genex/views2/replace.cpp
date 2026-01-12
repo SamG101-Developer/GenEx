@@ -67,8 +67,7 @@ namespace genex::views::detail {
             return operations::eq{}(meta::invoke(self.proj, *self.it), self.old_value) ? *&self.new_value : *self.it;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(replace_iterator) {
+        GENEX_VIEW_ITER_EQ(replace_iterator, replace_iterator) {
             return self.it == that.it;
         }
     };

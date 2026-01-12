@@ -70,8 +70,7 @@ namespace genex::views::detail::impl {
             return std::addressof(*self.it);
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(address_of_iterator) {
+        GENEX_VIEW_ITER_EQ(address_of_iterator, address_of_iterator) {
             return self.it == that.it;
         }
     };

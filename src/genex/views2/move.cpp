@@ -57,8 +57,7 @@ namespace genex::views::detail::impl {
             return std::move(*self.it);
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(move_iterator) {
+        GENEX_VIEW_ITER_EQ(move_iterator, move_iterator) {
             return self.it == that.it;
         }
     };

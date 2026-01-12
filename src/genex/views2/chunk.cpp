@@ -79,8 +79,11 @@ namespace genex::views::detail::impl {
             return std::ranges::subrange(self.it, end_it);
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(chunk_sentinel) {
+        GENEX_VIEW_ITER_EQ(chunk_iterator, chunk_iterator) {
+            return self.it == that.it;
+        }
+
+        GENEX_VIEW_ITER_EQ(chunk_iterator, chunk_sentinel) {
             return self.it == self.st;
         }
     };

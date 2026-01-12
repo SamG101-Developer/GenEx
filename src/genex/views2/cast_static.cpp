@@ -60,8 +60,7 @@ namespace genex::views::detail::impl {
             return static_cast<To>(*self.it);
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(cast_static_iterator) {
+        GENEX_VIEW_ITER_EQ(cast_static_iterator, cast_static_iterator) {
             return self.it == that.it;
         }
     };

@@ -67,8 +67,11 @@ namespace genex::views::detail::impl {
             return *self.it;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(remove_if_sentinel) {
+        GENEX_VIEW_ITER_EQ(remove_if_iterator, remove_if_iterator) {
+            return self.it == that.it;
+        }
+
+        GENEX_VIEW_ITER_EQ(remove_if_iterator, remove_if_sentinel) {
             return self.it == self.st;
         }
 
@@ -98,12 +101,12 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_ITER_BEGIN {
-            return remove_if_iterator{self.it, self.st, self.pred, self.proj};
+            return remove_if_iterator(self.it, self.st, self.pred, self.proj);
         }
 
         template <typename Self>
         GENEX_ITER_END {
-            return remove_if_sentinel{};
+            return remove_if_sentinel();
         }
     };
 }

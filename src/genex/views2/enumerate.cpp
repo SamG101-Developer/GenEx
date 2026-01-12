@@ -69,8 +69,7 @@ namespace genex::views::detail::impl {
             return std::make_pair(self.index, *self.it);
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(enumerate_iterator) {
+        GENEX_VIEW_ITER_EQ(enumerate_iterator, enumerate_iterator) {
             return self.it == that.it;
         }
     };

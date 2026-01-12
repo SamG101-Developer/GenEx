@@ -67,8 +67,11 @@ namespace genex::views::detail::impl {
             return *self.it;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(take_while_sentinel) {
+        GENEX_VIEW_ITER_EQ(take_while_iterator, take_while_iterator) {
+            return self.it == that.it;
+        }
+
+        GENEX_VIEW_ITER_EQ(take_while_iterator, take_while_sentinel) {
             return self.it == self.st;
         }
     };

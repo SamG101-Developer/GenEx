@@ -87,8 +87,11 @@ namespace genex::views::detail::impl {
             return std::move(self.cached);
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(cast_smart_sentinel) {
+        GENEX_VIEW_ITER_EQ(cast_smart_iterator, cast_smart_iterator) {
+            return self.it == that.it;
+        }
+
+        GENEX_VIEW_ITER_EQ(cast_smart_iterator, cast_smart_sentinel) {
             return self.it == self.st;
         }
 

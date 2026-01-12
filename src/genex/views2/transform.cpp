@@ -80,13 +80,12 @@ namespace genex::views::detail::impl {
             return meta::invoke(self.f, meta::invoke(self.proj, *self.it));
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(transform_iterator) {
+        GENEX_VIEW_ITER_EQ(transform_iterator, transform_iterator) {
             return self.it == that.it;
         }
 
-        template <typename Self, typename S2>
-        GENEX_VIEW_ITER_EQ(transform_sentinel<S2>) {
+        template <typename S2>
+        GENEX_VIEW_ITER_EQ(transform_iterator, transform_sentinel<S2>) {
             return self.recursive_eq(self.it, that.st);
         }
 

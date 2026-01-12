@@ -91,8 +91,7 @@ namespace genex::views::detail::impl {
             }
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(interleave_iterator) {
+        GENEX_VIEW_ITER_EQ(interleave_iterator, interleave_iterator) {
             return self.done();
         }
 

@@ -87,8 +87,11 @@ namespace genex::views::detail::impl {
             return *self.cur_elem;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(set_algorithm_sentinel) {
+        GENEX_VIEW_ITER_EQ(set_sorted_iterator, set_sorted_iterator) {
+            return self.it1 == that.it1 and self.it2 == that.it2 and self.cur_elem == that.cur_elem;
+        }
+
+        GENEX_VIEW_ITER_EQ(set_sorted_iterator, set_algorithm_sentinel) {
             return not self.cur_elem.has_value();
         }
 
@@ -237,8 +240,11 @@ namespace genex::views::detail::impl {
             return *self.cur_elem;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(set_algorithm_sentinel) {
+        GENEX_VIEW_ITER_EQ(set_unsorted_iterator, set_unsorted_iterator) {
+            return self.it1 == that.it1 and self.it2 == that.it2 and self.second_pass == that.second_pass and self.cur_elem == that.cur_elem;
+        }
+
+        GENEX_VIEW_ITER_EQ(set_unsorted_iterator, set_algorithm_sentinel) {
             return not self.cur_elem.has_value();
         }
 

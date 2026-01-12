@@ -32,8 +32,8 @@
     requires std::bidirectional_iterator<decltype(std::declval<Self>().it)> \
     GENEX_INLINE constexpr auto prev(this Self &&self) -> Self&
 
-#define GENEX_VIEW_ITER_EQ(SentType) \
-    GENEX_INLINE constexpr auto operator==(this Self&& self, const SentType& that) -> bool
+#define GENEX_VIEW_ITER_EQ(IterType, SentType) \
+    GENEX_INLINE friend constexpr auto operator==(const IterType& self, const SentType& that) -> bool
 
 #define GENEX_ITER_BEGIN \
     GENEX_NODISCARD GENEX_INLINE constexpr auto begin(this Self&& self) noexcept -> auto
@@ -45,20 +45,24 @@
     requires requires (Self &&s) { iterators::distance(s.it, s.st); } \
     GENEX_NODISCARD GENEX_INLINE constexpr auto size(this Self &&self)
 
-#define GENEX_ITER_OPS_MINIMAL(Type)                                                   \
-    GENEX_INLINE friend constexpr auto operator*(Type const &self) -> decltype(auto) { \
-        return self.deref();                                                           \
-    }                                                                                  \
-                                                                                       \
-    GENEX_INLINE friend constexpr auto operator++(Type &self) -> Type& {               \
-        self.next();                                                                   \
-        return self;                                                                   \
-    }                                                                                  \
-                                                                                       \
-    GENEX_INLINE friend constexpr auto operator++(Type &self, int) -> Type {           \
-        auto temp = self;                                                              \
-        ++self;                                                                        \
-        return temp;                                                                   \
+#define GENEX_ITER_OPS_MINIMAL(Type)                                                            \
+    GENEX_INLINE friend constexpr auto operator*(Type const &self) -> decltype(auto) {          \
+        return self.deref();                                                                    \
+    }                                                                                           \
+                                                                                                \
+    GENEX_INLINE friend constexpr auto operator++(Type &self) -> Type& {                        \
+        self.next();                                                                            \
+        return self;                                                                            \
+    }                                                                                           \
+                                                                                                \
+    GENEX_INLINE friend constexpr auto operator++(Type &self, int) -> Type {                    \
+        auto temp = self;                                                                       \
+        ++self;                                                                                 \
+        return temp;                                                                            \
+    }                                                                                           \
+                                                                                                \
+    GENEX_INLINE friend constexpr auto operator!=(Type const& self, const auto& that) -> bool { \
+        return not (self == that);                                                              \
     }
 
 #define GENEX_ITER_OPS(Type)                                                                                   \
@@ -75,11 +79,7 @@
         auto temp = self;                                                                                      \
         --self;                                                                                                \
         return temp;                                                                                           \
-    }                                                                                                          \
-                                                                                                               \
-    GENEX_INLINE friend constexpr auto operator==(Type const &self, Type const &that) -> bool {                \
-        return self.it == that.it;                                                                             \
-    }                                                                                                          \
+    }                                                                                                         \
                                                                                                                \
     GENEX_INLINE friend constexpr auto operator!=(Type const &self, Type const &that) -> bool {                \
         return not(self == that);                                                                              \

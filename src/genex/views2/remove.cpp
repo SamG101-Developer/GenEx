@@ -26,7 +26,7 @@ namespace genex::views::detail::concepts {
 
 
 namespace genex::views::detail {
-    struct remove_sentinel;
+    struct remove_sentinel{};
 
     template <typename I, typename S, typename E, typename Proj>
     requires concepts::removable_iters<I, S, E, Proj>
@@ -69,9 +69,12 @@ namespace genex::views::detail {
             return *self.it;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(remove_iterator) {
+        GENEX_VIEW_ITER_EQ(remove_iterator, remove_iterator) {
             return self.it == that.it;
+        }
+
+        GENEX_VIEW_ITER_EQ(remove_iterator, remove_sentinel) {
+            return self.it == self.st;
         }
 
     private:
@@ -106,7 +109,7 @@ namespace genex::views::detail {
 
         template <typename Self>
         GENEX_ITER_END {
-            return remove_iterator{self.st, self.st, self.value, self.proj};
+            return remove_sentinel();
         }
     };
 }

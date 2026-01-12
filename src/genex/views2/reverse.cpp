@@ -59,8 +59,7 @@ namespace genex::views::detail::impl {
             return *iterators::prev(self.it);
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(reverse_iterator) {
+        GENEX_VIEW_ITER_EQ(reverse_iterator, reverse_iterator) {
             return self.it == that.it;
         }
 

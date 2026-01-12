@@ -113,7 +113,7 @@ TEST(GenexViewsTransform, Stacked) {
     const auto rng = genex::views::zip(x, y)
         | genex::to<std::vector>()
         | genex::views::filter([](const auto &pair) { return (genex::get<0>(pair) + genex::get<1>(pair)) % 3 != 0; })
-        // | genex::views::transform([](const auto &pair) { return std::make_tuple(genex::get<0>(pair) * 2, genex::get<1>(pair) * 2); })
+        | genex::views::transform([](const auto &pair) { return std::make_tuple(genex::get<0>(pair) * 2, genex::get<1>(pair) * 2); })
         | genex::views::transform([](const auto &pair) { return std::make_tuple(genex::get<0>(pair) * 2, genex::get<1>(pair) * 2); })
         | ranges::to<std::vector>();
     const auto exp = std::vector<std::tuple<int, int>>{{0, 20}, {4, 24}, {12, 32}, {16, 36}};

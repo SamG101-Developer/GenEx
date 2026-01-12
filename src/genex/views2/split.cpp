@@ -74,8 +74,11 @@ namespace genex::views {
             return std::ranges::subrange(self.it, end_it);
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(split_sentinel) {
+        GENEX_VIEW_ITER_EQ(split_iterator, split_iterator) {
+            return self.it == that.it;
+        }
+
+        GENEX_VIEW_ITER_EQ(split_iterator, split_sentinel) {
             return self.it == self.st;
         }
     };
@@ -125,7 +128,6 @@ namespace genex::views {
         }
 
         template <typename E>
-        requires (not range<E>)
         GENEX_INLINE constexpr auto operator()(E elem) const -> auto {
             return meta::bind_back(split_fn{}, std::move(elem));
         }

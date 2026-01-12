@@ -63,8 +63,7 @@ namespace genex::views::detail::impl {
             return *self.it;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(drop_while_iterator) {
+        GENEX_VIEW_ITER_EQ(drop_while_iterator, drop_while_iterator) {
             return self.it == that.it;
         }
 

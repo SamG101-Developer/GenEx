@@ -80,8 +80,11 @@ namespace genex::views::detail::impl {
             return self.yield_new ? *&self.new_value : *self.it;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(intersperse_sentinel) {
+        GENEX_VIEW_ITER_EQ(intersperse_iterator, intersperse_iterator) {
+            return self.it == that.it;
+        }
+
+        GENEX_VIEW_ITER_EQ(intersperse_iterator, intersperse_sentinel) {
             if (self.it == self.st) { return true; }
 
             if (self.yield_new) {

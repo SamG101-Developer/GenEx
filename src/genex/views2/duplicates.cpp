@@ -75,8 +75,11 @@ namespace genex::views::detail::impl {
             return *self.cur_elem;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(duplicate_sentinel) {
+        GENEX_VIEW_ITER_EQ(duplicate_iterator, duplicate_iterator) {
+            return self.it == that.it;
+        }
+
+        GENEX_VIEW_ITER_EQ(duplicate_iterator, duplicate_sentinel) {
             return self.it == self.st and not self.pending.has_value() and not self.cur_elem.has_value();
         }
 

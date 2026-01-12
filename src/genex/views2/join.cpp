@@ -74,8 +74,11 @@ namespace genex::views::detail::impl {
             return *self.inner_it;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(join_sentinel) {
+        GENEX_VIEW_ITER_EQ(join_iterator, join_iterator) {
+            return self.it == that.it;
+        }
+
+        GENEX_VIEW_ITER_EQ(join_iterator, join_sentinel) {
             return self.it == self.st;
         }
 

@@ -66,15 +66,18 @@ namespace genex::views::detail::impl {
             return self.cached;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(cast_dynamic_sentinel) {
+        GENEX_VIEW_ITER_EQ(cast_dynamic_iterator, cast_dynamic_iterator) {
+            return self.it == that.it;
+        }
+
+        GENEX_VIEW_ITER_EQ(cast_dynamic_iterator, cast_dynamic_sentinel) {
             return self.it == self.st;
         }
 
     private:
         template <typename Self>
         GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
-            while (not(self.it == self.st)) {
+            while (self.it != self.st) {
                 self.update_cache();
                 if (self.cached != nullptr) { break; }
                 ++self.it;
@@ -83,7 +86,7 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_INLINE constexpr auto bwd_to_valid(this Self &&self) -> void {
-            while (not(self.it == self.st)) {
+            while (self.it != self.st) {
                 self.update_cache();
                 if (self.cached != nullptr) { break; }
                 --self.it;
@@ -92,7 +95,7 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_INLINE constexpr auto update_cache(this Self &&self) -> void {
-            if (not(self.it == self.st)) { self.cached = dynamic_cast<To>(*self.it); }
+            if (self.it != self.st) { self.cached = dynamic_cast<To>(*self.it); }
             else { self.cached = nullptr; }
         }
     };

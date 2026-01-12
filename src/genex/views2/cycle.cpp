@@ -65,8 +65,11 @@ namespace genex::views::detail::impl {
             return *self.it;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(cycle_sentinel) {
+        GENEX_VIEW_ITER_EQ(cycle_iterator, cycle_iterator) {
+            return self.it == that.it;
+        }
+
+        GENEX_VIEW_ITER_EQ(cycle_iterator, cycle_sentinel) {
             return false;
         }
     };

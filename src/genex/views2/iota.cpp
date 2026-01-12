@@ -49,8 +49,7 @@ namespace genex::views::detail::impl {
             return self.it;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(iota_iterator) {
+        GENEX_VIEW_ITER_EQ(iota_iterator, iota_iterator) {
             return self.it >= self.hi;
         }
     };
