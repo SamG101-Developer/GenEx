@@ -74,7 +74,7 @@ namespace genex::views::detail::impl {
     private:
         template <typename Self>
         GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
-            while (self.it != self.st) {
+            while (not(self.it == self.st)) {
                 self.update_cache();
                 if (self.cached != nullptr) { break; }
                 ++self.it;
@@ -83,7 +83,7 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_INLINE constexpr auto bwd_to_valid(this Self &&self) -> void {
-            while (self.it != self.st) {
+            while (not(self.it == self.st)) {
                 self.update_cache();
                 if (self.cached != nullptr) { break; }
                 --self.it;
@@ -92,7 +92,7 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_INLINE constexpr auto update_cache(this Self &&self) -> void {
-            if (self.it != self.st) { self.cached = dynamic_cast<To>(*self.it); }
+            if (not(self.it == self.st)) { self.cached = dynamic_cast<To>(*self.it); }
             else { self.cached = nullptr; }
         }
     };

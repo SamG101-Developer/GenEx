@@ -140,7 +140,6 @@ namespace genex::views {
         }
 
         template <typename New>
-        requires (not range<New>)
         GENEX_INLINE constexpr auto operator()(New sep) const {
             return meta::bind_back(intersperse_fn{}, std::move(sep));
         }
