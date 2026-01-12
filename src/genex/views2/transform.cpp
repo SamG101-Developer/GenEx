@@ -85,9 +85,16 @@ namespace genex::views::detail::impl {
             return self.it == that.it;
         }
 
-        template <typename Self>
-        GENEX_VIEW_ITER_EQ(transform_sentinel<S>) {
-            return self.it == that.st;
+        template <typename Self, typename S2>
+        GENEX_VIEW_ITER_EQ(transform_sentinel<S2>) {
+            return self.recursive_eq(self.it, that.st);
+        }
+
+    private:
+        template <typename Self, typename I2, typename S2>
+        auto recursive_eq(this Self &&self, I2 i, S2 s) -> bool {
+            if constexpr (requires { i == s; }) { return i == s; }
+            else { return self.recursive_eq(i.it, s); }
         }
     };
 
