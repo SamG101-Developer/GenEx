@@ -20,7 +20,7 @@
 
 #define GENEX_NO_UNIQUE_ADDRESS [[no_unique_address]]
 
-#define GENEX_ITER_GUARD
+#define GENEX_ITER_GUARD if (first == last) { co_return; }
 
 #define GENEX_VIEW_CUSTOM_DEREF \
     GENEX_INLINE constexpr auto deref(this Self &&self) -> decltype(auto)

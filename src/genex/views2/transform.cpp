@@ -58,7 +58,6 @@ namespace genex::views::detail::impl {
         GENEX_ITER_OPS(transform_iterator)
 
         GENEX_INLINE constexpr transform_iterator() = default;
-
         GENEX_INLINE constexpr transform_iterator(I it, F f, Proj proj = {}) :
             it(std::move(it)), f(std::move(f)), proj(std::move(proj)) {
         }

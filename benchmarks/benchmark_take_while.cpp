@@ -4,7 +4,7 @@
 #include <range/v3/view/take_while.hpp>
 
 import genex.to_container;
-import genex.views2.take_while;
+import genex.views.take_while;
 import std;
 
 

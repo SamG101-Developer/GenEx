@@ -4,7 +4,7 @@
 #include <range/v3/view/split.hpp>
 
 import genex.to_container;
-import genex.views2.split;
+import genex.views.split;
 import std;
 
 

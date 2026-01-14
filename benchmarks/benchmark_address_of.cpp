@@ -4,7 +4,7 @@
 #include <range/v3/view/addressof.hpp>
 
 import genex.to_container;
-import genex.views2.address_of;
+import genex.views.address_of;
 import std;
 
 

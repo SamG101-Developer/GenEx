@@ -4,7 +4,7 @@
 #include <range/v3/view/map.hpp>
 
 import genex.to_container;
-import genex.views2.map;
+import genex.views.map;
 import std;
 
 

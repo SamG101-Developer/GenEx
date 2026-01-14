@@ -4,7 +4,7 @@
 #include <range/v3/view/transform.hpp>
 
 import genex.to_container;
-import genex.views2.ptr;
+import genex.views.ptr;
 import std;
 
 

@@ -4,7 +4,7 @@
 #include <range/v3/view/take_last.hpp>
 
 import genex.to_container;
-import genex.views2.take_last;
+import genex.views.take_last;
 import std;
 
 

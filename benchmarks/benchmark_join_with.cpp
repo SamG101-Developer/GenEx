@@ -4,7 +4,7 @@
 #include <range/v3/view/join.hpp>
 
 import genex.to_container;
-import genex.views2.join_with;
+import genex.views.join_with;
 import std;
 
 

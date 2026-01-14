@@ -4,7 +4,7 @@
 #include <range/v3/view/remove.hpp>
 
 import genex.to_container;
-import genex.views2.remove;
+import genex.views.remove;
 import std;
 
 

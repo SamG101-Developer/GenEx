@@ -123,7 +123,7 @@ namespace genex::views::detail::impl {
         template <typename Self> requires unique_ptr<iter_value_t<I>>
         GENEX_INLINE constexpr auto update_cache(this Self &&self) -> void {
             if (self.it != self.st) {
-                auto raw_ptr = dynamic_cast<To*>(self.it->release());
+                auto raw_ptr = dynamic_cast<To*>(*self.it->release());
                 self.cached = std::unique_ptr<To>(raw_ptr);
             }
             else { self.cached = nullptr; }

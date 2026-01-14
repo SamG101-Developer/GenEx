@@ -4,7 +4,7 @@
 #include <range/v3/view/drop.hpp>
 
 import genex.to_container;
-import genex.views2.drop;
+import genex.views.drop;
 import std;
 
 

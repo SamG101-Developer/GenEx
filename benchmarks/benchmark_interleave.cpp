@@ -3,7 +3,7 @@
 #include <range/v3/to_container.hpp>
 
 import genex.to_container;
-import genex.views2.interleave;
+import genex.views.interleave;
 import std;
 
 

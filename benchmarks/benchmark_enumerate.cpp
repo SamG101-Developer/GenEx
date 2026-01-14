@@ -4,7 +4,7 @@
 #include <range/v3/view/enumerate.hpp>
 
 import genex.to_container;
-import genex.views2.enumerate;
+import genex.views.enumerate;
 import std;
 
 

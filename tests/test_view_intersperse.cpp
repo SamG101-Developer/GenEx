@@ -2,6 +2,7 @@
 
 import genex.to_container;
 import genex.views2.intersperse;
+import genex.views2.join;
 import genex.views2.transform;
 
 
@@ -31,8 +32,9 @@ TEST(GenexViewsIntersperse, VecInputTransformString) {
     const auto rng = vec
         | genex::views::transform([](auto x) { return x + "1"; })
         | genex::views::intersperse(std::string("0"))
-        | genex::to<std::vector>();
-    const auto exp = std::vector<std::string>{"a1", "0", "b1", "0", "c1"};
+        | genex::views::join
+        | genex::to<std::string>();
+    const auto exp = std::string("a10b10c1");
     EXPECT_EQ(rng, exp);
 }
 

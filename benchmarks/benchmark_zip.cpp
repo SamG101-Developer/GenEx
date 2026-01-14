@@ -4,7 +4,7 @@
 #include <range/v3/view/zip.hpp>
 
 import genex.to_container;
-import genex.views2.zip;
+import genex.views.zip;
 import std;
 
 

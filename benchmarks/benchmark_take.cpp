@@ -4,7 +4,7 @@
 #include <range/v3/view/take.hpp>
 
 import genex.to_container;
-import genex.views2.take;
+import genex.views.take;
 import std;
 
 

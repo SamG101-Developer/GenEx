@@ -43,8 +43,8 @@ namespace genex::views::detail::impl {
     requires concepts::can_slice_iters<I, S, Int> and std::bidirectional_iterator<I>
     auto do_slice(I first, S last, const Int start_index, const Int end_index, const Int step = 1) -> generator<iter_value_t<I>> {
         GENEX_ITER_GUARD;
-        auto it = iterators::prev(iterators::distance(first, last), end_index, first);
-        for (auto i = start_index; i < end_index and (first + i) != last; i += step) {
+        auto it = iterators::prev(last, end_index, first);
+        for (auto i = start_index; i < end_index and iterators::next(first, i) != last; i += step) {
             co_yield *it;
             it = iterators::next(it, step, last);
         }

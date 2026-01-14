@@ -4,7 +4,7 @@
 #include <range/v3/view/intersperse.hpp>
 
 import genex.to_container;
-import genex.views2.intersperse;
+import genex.views.intersperse;
 import std;
 
 

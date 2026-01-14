@@ -4,7 +4,7 @@
 #include <range/v3/view/drop_while.hpp>
 
 import genex.to_container;
-import genex.views2.drop_while;
+import genex.views.drop_while;
 import std;
 
 

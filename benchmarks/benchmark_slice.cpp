@@ -4,7 +4,7 @@
 #include <range/v3/view/slice.hpp>
 
 import genex.to_container;
-import genex.views2.slice;
+import genex.views.slice;
 import std;
 
 

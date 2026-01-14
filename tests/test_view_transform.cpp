@@ -106,6 +106,33 @@ TEST(GenexViewsTransform, StrInput) {
 }
 
 
+TEST(GenexViewsTransform, WithLambdaCapture) {
+    auto vec = std::vector{1, 2, 3, 4, 5, 6};
+    const auto add_val = 5;
+
+    const auto rng = vec
+        | genex::views::transform([add_val](auto x) { return x + add_val; })
+        | genex::to<std::vector>();
+    const auto exp = std::vector{6, 7, 8, 9, 10, 11};
+    EXPECT_EQ(rng, exp);
+}
+
+
+TEST(GenexViewsTransform, UniquePtr) {
+    auto vec = std::vector<std::unique_ptr<int>>{};
+    vec.emplace_back(std::make_unique<int>(1));
+    vec.emplace_back(std::make_unique<int>(2));
+    vec.emplace_back(std::make_unique<int>(3));
+
+    const auto rng = vec
+        | genex::views::transform([](auto &&ptr) { return std::make_unique<int>(*ptr + 10); })
+        | genex::views::transform([](auto &&ptr) { return *ptr + 1; })
+        | genex::to<std::vector>();
+    const auto exp = std::vector<int>{12, 13, 14};
+    EXPECT_EQ(rng, exp);
+}
+
+
 TEST(GenexViewsTransform, Stacked) {
     auto x = std::vector{0, 1, 2, 3, 4};
     auto y = std::vector{5, 6, 7, 8, 9};
