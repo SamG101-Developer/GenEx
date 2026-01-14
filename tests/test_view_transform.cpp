@@ -1,14 +1,11 @@
 #include <gtest/gtest.h>
-#include <range/v3/view/filter.hpp>
-#include <range/v3/view/transform.hpp>
-#include <range/v3/view/zip.hpp>
-#include <range/v3/to_container.hpp>
+#include <coroutine>
 
 import genex.to_container;
 import genex.algorithms.tuple;
-import genex.views2.filter;
-import genex.views2.transform;
-import genex.views2.zip;
+import genex.views.filter;
+import genex.views.transform;
+import genex.views.zip;
 import genex.meta;
 
 
@@ -142,7 +139,7 @@ TEST(GenexViewsTransform, Stacked) {
         | genex::views::filter([](const auto &pair) { return (genex::get<0>(pair) + genex::get<1>(pair)) % 3 != 0; })
         | genex::views::transform([](const auto &pair) { return std::make_tuple(genex::get<0>(pair) * 2, genex::get<1>(pair) * 2); })
         | genex::views::transform([](const auto &pair) { return std::make_tuple(genex::get<0>(pair) * 2, genex::get<1>(pair) * 2); })
-        | ranges::to<std::vector>();
+        | genex::to<std::vector>();
     const auto exp = std::vector<std::tuple<int, int>>{{0, 20}, {4, 24}, {12, 32}, {16, 36}};
     EXPECT_EQ(rng, exp);
 }

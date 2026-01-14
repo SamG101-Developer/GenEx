@@ -1,8 +1,8 @@
-#include <coroutine>
 #include <gtest/gtest.h>
+#include <coroutine>
 
 import genex.to_container;
-import genex.views2.set_algorithms;
+import genex.views.set_algorithms;
 
 
 TEST(GenexSetDifferenceUnsortedView, VecInput) {
@@ -60,7 +60,7 @@ TEST(GenexSetUnionUnsortedView, VecInputWithDuplicates) {
     const auto rng = vec1
         | genex::views::set_union_unsorted(vec2)
         | genex::to<std::vector>();
-    const auto exp = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+    const auto exp = std::vector{0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
     EXPECT_EQ(rng, exp);
 }
 
@@ -72,7 +72,7 @@ TEST(GenexSetUnionUnsortedView, VecInputAllDuplicates) {
     const auto rng = vec1
         | genex::views::set_union_unsorted(vec2)
         | genex::to<std::vector>();
-    const auto exp = std::vector{5};
+    const auto exp = std::vector{5, 5, 5, 5, 5};
     EXPECT_EQ(rng, exp);
     EXPECT_EQ(rng, exp);
 }

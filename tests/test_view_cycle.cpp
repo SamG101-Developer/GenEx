@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
+#include <coroutine>
 
 import genex.to_container;
-import genex.views2.cycle;
-import genex.views2.take;
+import genex.views.cycle;
+import genex.views.take;
 
 
 TEST(GenexViewsCycle, VecInput) {
@@ -10,7 +11,8 @@ TEST(GenexViewsCycle, VecInput) {
 
     const auto it = vec
         | genex::views::cycle
-        | genex::to_n<std::vector>(9);
+        | genex::views::take(9)
+        | genex::to<std::vector>();
     const auto exp = std::vector{0, 1, 2, 0, 1, 2, 0, 1, 2};
     EXPECT_EQ(it, exp);
 }

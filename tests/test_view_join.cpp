@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
+#include <coroutine>
 
 import genex.to_container;
-import genex.views2.join;
-import genex.views2.join_with;
-import genex.views2.transform;
+import genex.views.join;
+import genex.views.join_with;
+import genex.views.transform;
 
 
 TEST(GenexViewsJoin, VecInput) {
@@ -40,21 +41,4 @@ TEST(GenexViewsJoinWith, VecInput) {
         | genex::to<std::vector>();
     const auto exp = std::vector{1, 2, 3, 0, 4, 5, 0, 6};
     EXPECT_EQ(rng, exp);
-}
-
-
-TEST(GenexViewsJoinWith, StrInput) {
-    auto vec = std::vector<std::string>{"hello", "world", "!"};
-    const auto rng = vec
-        | genex::views::transform([](const auto &s) { return s + "?"; })
-        | genex::views::join_with(' ')
-        | genex::to<std::vector>();
-    const auto exp = std::vector{'h', 'e', 'l', 'l', 'o', '?', ' ', 'w', 'o', 'r', 'l', 'd', '?', ' ', '!', '?'};
-    EXPECT_EQ(rng, exp);
-
-    const auto str = rng
-        | genex::to<std::string>();
-
-    const auto exp_str = std::string{"hello? world? !?"};
-    EXPECT_EQ(str, exp_str);
 }

@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
+#include <coroutine>
 
 import genex.to_container;
-import genex.views2.tuple_nth;
+import genex.views.tuple_nth;
 
 
 TEST(GenexViewsTupleN, VecInput) {

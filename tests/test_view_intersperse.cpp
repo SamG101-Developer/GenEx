@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
+#include <coroutine>
 
 import genex.to_container;
-import genex.views2.intersperse;
-import genex.views2.join;
-import genex.views2.transform;
+import genex.views.intersperse;
+import genex.views.join;
+import genex.views.transform;
 
 
 TEST(GenexViewsIntersperse, VecInput) {

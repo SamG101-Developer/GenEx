@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
+#include <coroutine>
 
 import genex.to_container;
-import genex.views2.take;
-import genex.views2.take_last;
-import genex.views2.take_while;
+import genex.views.take;
+import genex.views.take_last;
+import genex.views.take_while;
 
 
 TEST(GenexViewsTake, VecInput) {

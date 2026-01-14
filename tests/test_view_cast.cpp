@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
+#include <coroutine>
 
 import genex.to_container;
-import genex.views2.cast_dynamic;
-import genex.views2.cast_smart;
-import genex.views2.cast_static;
+import genex.views.cast_dynamic;
+import genex.views.cast_smart;
+import genex.views.cast_static;
 
 
 struct Base {

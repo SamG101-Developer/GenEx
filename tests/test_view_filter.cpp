@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
+#include <coroutine>
 
 import genex.to_container;
-import genex.views2.filter;
+import genex.views.filter;
 
 
 struct TestStruct {
