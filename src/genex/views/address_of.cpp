@@ -2,7 +2,7 @@ module;
 #include <coroutine>
 #include <genex/macros.hpp>
 
-export module genex.views.address;
+export module genex.views.address_of;
 export import genex.pipe;
 import genex.concepts;
 import genex.generator;
@@ -30,7 +30,7 @@ namespace genex::views::detail::concepts {
 namespace genex::views::detail::impl {
     template <typename I, typename S>
     requires concepts::addressable_iters<I, S>
-    auto do_address(I first, S last) -> generator<std::add_pointer_t<iter_value_t<I>>> {
+    auto do_address_of(I first, S last) -> generator<std::add_pointer_t<iter_value_t<I>>> {
         GENEX_ITER_GUARD;
         for (; first != last; ++first) {
             co_yield std::addressof(*first);
@@ -40,33 +40,24 @@ namespace genex::views::detail::impl {
 
 
 namespace genex::views {
-    struct address_fn {
-        /**
-         * Iterator interface for the address view.
-         */
+    struct address_of_fn {
         template <typename I, typename S>
         requires detail::concepts::addressable_iters<I, S>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
-            return detail::impl::do_address(std::move(first), std::move(last));
+            return detail::impl::do_address_of(std::move(first), std::move(last));
         }
 
-        /**
-         * Range interface for the address view.
-         */
         template <typename Rng>
         requires detail::concepts::addressable_range<Rng>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::impl::do_address(std::move(first), std::move(last));
+            return detail::impl::do_address_of(std::move(first), std::move(last));
         }
 
-        /**
-         * Pipe interface for the address view.
-         */
         GENEX_INLINE auto operator()() const {
-            return meta::bind_back(address_fn{});
+            return meta::bind_back(address_of_fn{});
         }
     };
 
-    export inline constexpr address_fn address{};
+    export inline constexpr address_of_fn address_of{};
 }
