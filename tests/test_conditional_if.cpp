@@ -15,7 +15,7 @@ TEST(GenexConditionalIf, BasicIf) {
 
     const auto vec1 = std::vector{1, 2, 3, 4, 5};
     const auto vec2 = vec1
-        | genex::views::transform([](auto x) { return x * 2; })
+        | genex::views::transform([](const auto x) { return x * 2; })
         | genex::to<std::vector>()
         | genex::if_not(&std::vector<int>::empty, printer);
 
