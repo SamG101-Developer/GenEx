@@ -5,6 +5,7 @@ export module genex.conditional.if_;
 export import genex.pipe;
 import genex.concepts;
 import genex.meta;
+import genex.operations.empty;
 import std;
 
 
@@ -32,6 +33,22 @@ namespace genex::conditional::detail::impl {
     requires concepts::conditionally_range<Rng, Pred, Then>
     GENEX_INLINE constexpr auto do_if_not(Rng &&rng, Pred &&pred, Then &&then) -> decltype(auto) {
         if (not meta::invoke(std::forward<Pred>(pred), std::forward<Rng>(rng))) {
+            meta::invoke(std::forward<Then>(then));
+        }
+        return std::forward<Rng>(rng);
+    }
+
+    template <typename Rng, typename Then>
+    GENEX_INLINE constexpr auto do_if_empty(Rng &&rng, Then &&then) -> decltype(auto) {
+        if (operations::empty(std::forward<Rng>(rng))) {
+            meta::invoke(std::forward<Then>(then));
+        }
+        return std::forward<Rng>(rng);
+    }
+
+    template <typename Rng, typename Then>
+    GENEX_INLINE constexpr auto do_if_not_empty(Rng &&rng, Then &&then) -> decltype(auto) {
+        if (not operations::empty(std::forward<Rng>(rng))) {
             meta::invoke(std::forward<Then>(then));
         }
         return std::forward<Rng>(rng);
@@ -68,6 +85,32 @@ namespace genex {
         }
     };
 
+    struct if_empty_fn {
+        template <typename Rng, typename Then>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Then &&then) const -> decltype(auto) {
+            return conditional::detail::impl::do_if_empty(std::forward<Rng>(rng), std::forward<Then>(then));
+        }
+
+        template <typename Then>
+        GENEX_INLINE constexpr auto operator()(Then &&then) const -> auto {
+            return meta::bind_back(if_empty_fn{}, std::forward<Then>(then));
+        }
+    };
+
+    struct if_not_empty_fn {
+        template <typename Rng, typename Then>
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Then &&then) const -> decltype(auto) {
+            return conditional::detail::impl::do_if_not_empty(std::forward<Rng>(rng), std::forward<Then>(then));
+        }
+
+        template <typename Then>
+        GENEX_INLINE constexpr auto operator()(Then &&then) const -> auto {
+            return meta::bind_back(if_not_empty_fn{}, std::forward<Then>(then));
+        }
+    };
+
     export inline constexpr if_fn if_{};
     export inline constexpr if_not_fn if_not{};
+    export inline constexpr if_empty_fn if_empty{};
+    export inline constexpr if_not_empty_fn if_not_empty{};
 }
