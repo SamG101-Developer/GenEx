@@ -193,42 +193,22 @@ namespace genex::meta {
 
 
 namespace genex::meta {
-    export template <typename T>
-    struct semiregular_box {
-        std::optional<T> val;
+    template <typename F>
+    struct not_impl_fn {
+        F func;
 
-        GENEX_INLINE constexpr explicit semiregular_box() requires std::default_initializable<T> : val(std::in_place) {}
-        GENEX_INLINE constexpr explicit semiregular_box() = default;
-        GENEX_INLINE constexpr explicit semiregular_box(T v) : val(std::move(v)) {}
-
-        GENEX_INLINE constexpr T& get() & { return *val; }
-        GENEX_INLINE constexpr T const& get() const & { return *val; }
-        GENEX_INLINE constexpr T&& get() && { return std::move(*val); }
-
-        explicit constexpr operator bool() const noexcept { return val.has_value(); }
+        template <typename... Args>
+        GENEX_INLINE constexpr auto operator()(Args &&... args) -> bool {
+            return not meta::invoke(func, std::forward<Args>(args)...);
+        }
     };
 
-    export template <typename T>
-    using semiregular_box_t = std::conditional_t<std::semiregular<T>, T, semiregular_box<T>>;
+    struct not_fn {
+        template <typename F>
+        GENEX_INLINE constexpr auto operator()(F &&f) const -> not_impl_fn<std::decay_t<F>> {
+            return {std::forward<F>(f)};
+        }
+    };
 
-    export template <typename T>
-    GENEX_INLINE constexpr auto semi_get(semiregular_box<T> &b) noexcept -> decltype(auto) {
-        return b.get();
-    }
-
-    export template <typename T>
-    GENEX_INLINE constexpr auto semi_get(semiregular_box<T> const &b) noexcept -> decltype(auto) {
-        return b.get();
-    }
-
-    export template <typename T>
-    GENEX_INLINE constexpr auto semi_get(semiregular_box<T> &&b) noexcept -> decltype(auto) {
-        return std::move(b).get();
-    }
-
-    export template <typename T>
-    requires (not std::same_as<std::remove_cvref_t<T>, semiregular_box<std::remove_cvref_t<T>>>)
-    GENEX_INLINE constexpr auto semi_get(T &&v) noexcept -> decltype(auto) {
-        return std::forward<T>(v);
-    }
+    export inline constexpr not_fn not_{};
 }

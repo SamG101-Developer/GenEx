@@ -58,6 +58,9 @@ export import genex.algorithms.position_last;
 export import genex.algorithms.sorted;
 export import genex.algorithms.tuple;
 
+// Conditionals
+export import genex.conditional.if_;
+
 // Iterators
 export import genex.iterators.access;
 export import genex.iterators.advance;
