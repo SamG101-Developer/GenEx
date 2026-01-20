@@ -93,7 +93,7 @@ export import genex.views.drop_while;
 export import genex.views.duplicates;
 export import genex.views.enumerate;
 export import genex.views.filter;
-// export import genex.views.for_each;
+export import genex.views.in;
 export import genex.views.indirect;
 export import genex.views.interleave;
 export import genex.views.intersperse;
