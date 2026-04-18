@@ -27,7 +27,7 @@ static void BM_Genex_V2_Cycle(benchmark::State& state) {
     std::iota(vec.begin(), vec.end(), 0);
 
     for (auto _ : state) {
-        for (auto val : vec | genex::views::cycle | genex::to_n<std::vector>(2500)) {
+        for (auto val : vec | genex::views::cycle | genex::views::take(2500) | genex::to<std::vector>()) {
             benchmark::DoNotOptimize(val);
         }
     }

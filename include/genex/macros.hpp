@@ -16,7 +16,9 @@
 
 #define GENEX_NODISCARD [[nodiscard]]
 
-#define GENEX_LIKELY [[likely]]#
+#define GENEX_NORETURN [[noreturn]]
+
+#define GENEX_LIKELY [[likely]]
 
 #define GENEX_NO_UNIQUE_ADDRESS [[no_unique_address]]
 
