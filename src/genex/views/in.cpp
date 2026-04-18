@@ -16,7 +16,7 @@ namespace genex::views::detail::concepts {
     template <typename I1, typename S1, typename I2, typename S2, typename Proj1, typename Proj2>
     concept inable_iters =
         std::input_iterator<I1> and
-        std::input_iterator<I2> and
+        std::forward_iterator<I2> and
         std::sentinel_for<S1, I1> and
         std::sentinel_for<S2, I2> and
         std::indirectly_comparable<I1, I2, operations::eq, Proj1, Proj2>;
@@ -24,7 +24,7 @@ namespace genex::views::detail::concepts {
     template <typename Rng1, typename Rng2, typename Proj1, typename Proj2>
     concept inable_range =
         input_range<Rng1> and
-        input_range<Rng2> and
+        forward_range<Rng2> and
         inable_iters<iterator_t<Rng1>, sentinel_t<Rng1>, iterator_t<Rng2>, sentinel_t<Rng2>, Proj1, Proj2>;
 }
 
@@ -91,7 +91,7 @@ namespace genex::views {
         }
 
         template <typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
-        requires input_range<Rng2>
+        requires forward_range<Rng2>
         GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
             return meta::bind_back(*this, std::move(rng2), std::move(proj1), std::move(proj2));
         }
