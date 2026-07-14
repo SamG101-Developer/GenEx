@@ -2,7 +2,7 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.chunk;
+import genex.views2.chunk;
 
 
 TEST(GenexViewsChunkN, VecInput) {

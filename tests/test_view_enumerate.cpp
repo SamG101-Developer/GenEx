@@ -2,7 +2,7 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.enumerate;
+import genex.views2.enumerate;
 
 
 TEST(GenexViewsEnumerate, VecInput) {

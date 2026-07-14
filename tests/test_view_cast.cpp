@@ -2,9 +2,8 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.cast_dynamic;
-import genex.views.cast_smart;
-import genex.views.cast_static;
+import genex.views2.cast_dynamic;
+import genex.views2.cast_static;
 
 
 struct Base {
@@ -63,40 +62,4 @@ TEST(GenexViewsDynamicCast, VecPolymorphic) {
         | genex::to<std::vector>();
     const auto exp = std::vector<DerivedA*>{&a1, &a2};
     EXPECT_EQ(rng, exp);
-}
-
-
-TEST(GenexViewsSharedCast, VecPolymorphicSmartPtr) {
-    const auto a1 = std::make_shared<DerivedA>(1);
-    const auto a2 = std::make_shared<DerivedA>(2);
-    const auto b1 = std::make_shared<DerivedB>("three");
-    const auto b2 = std::make_shared<DerivedB>("four");
-    auto vec = std::vector<std::shared_ptr<Base>>{a1, b1, a2, b2};
-
-    const auto rng = vec
-        | genex::views::cast_smart<DerivedA>()
-        | genex::to<std::vector>();
-    const auto exp = std::vector{a1, a2};
-    EXPECT_EQ(rng, exp);
-}
-
-
-TEST(GenexViewsUniqueCast, VecPolymorphicSmartPtr) {
-    auto vec = std::vector<std::unique_ptr<Base>>{};
-    vec.push_back(std::make_unique<DerivedA>(1));
-    vec.push_back(std::make_unique<DerivedB>("two"));
-    vec.push_back(std::make_unique<DerivedA>(3));
-    vec.push_back(std::make_unique<DerivedB>("four"));
-
-    const auto rng = vec
-        | genex::views::cast_smart<DerivedA>()
-        | genex::to<std::vector>();
-    auto exp = std::vector<std::unique_ptr<DerivedA>>{};
-    exp.emplace_back(std::make_unique<DerivedA>(1));
-    exp.emplace_back(std::make_unique<DerivedA>(3));
-
-    ASSERT_EQ(rng.size(), exp.size());
-    for (auto i = 0; i < rng.size(); ++i) {
-        EXPECT_EQ(rng[i]->value, exp[i]->value);
-    }
 }

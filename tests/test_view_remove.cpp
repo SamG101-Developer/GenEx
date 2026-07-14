@@ -2,8 +2,8 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.remove;
-import genex.views.remove_if;
+import genex.views2.remove;
+import genex.views2.remove_if;
 
 
 TEST(GenexViewsRemove, VecInput) {

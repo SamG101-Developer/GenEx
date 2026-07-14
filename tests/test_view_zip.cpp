@@ -2,7 +2,7 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.zip;
+import genex.views2.zip;
 
 
 TEST(GenexViewsZip, VecInput) {

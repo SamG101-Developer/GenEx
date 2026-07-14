@@ -2,7 +2,7 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.ptr;
+import genex.views2.ptr;
 
 
 TEST(GenexViewsPtr, VecUniquePtr) {

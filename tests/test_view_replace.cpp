@@ -2,8 +2,8 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.replace;
-import genex.views.replace_if;
+import genex.views2.replace;
+import genex.views2.replace_if;
 
 
 TEST(GenexViewsReplace, VecInput) {

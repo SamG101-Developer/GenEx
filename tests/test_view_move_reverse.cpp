@@ -2,8 +2,8 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.move_reverse;
-import genex.views.transform;
+import genex.views2.move_reverse;
+import genex.views2.transform;
 
 
 struct TestStruct {

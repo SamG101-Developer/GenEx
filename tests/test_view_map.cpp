@@ -2,7 +2,7 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.map;
+import genex.views2.map;
 
 
 TEST(GenexViewsKeys, MapInput) {

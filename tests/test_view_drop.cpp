@@ -2,9 +2,9 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.drop;
-import genex.views.drop_last;
-import genex.views.drop_while;
+import genex.views2.drop;
+import genex.views2.drop_last;
+import genex.views2.drop_while;
 
 
 TEST(GenexViewsDrop, VecInput) {

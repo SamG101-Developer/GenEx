@@ -3,8 +3,8 @@
 
 import genex.to_container;
 import genex.algorithms.all_of;
-import genex.views.address_of;
-import genex.views.indirect;
+import genex.views2.address_of;
+import genex.views2.indirect;
 
 
 struct TestStruct1 {

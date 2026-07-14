@@ -8,8 +8,8 @@ import genex.algorithms.find_last_if;
 import genex.algorithms.find_if_not;
 import genex.algorithms.find_last_if_not;
 import genex.iterators.distance;
-import genex.views.view;
-import genex.views.materialize;
+import genex.views2.view;
+import genex.views2.materialize;
 
 
 TEST(GenexAlgosFind, FindElementExists) {

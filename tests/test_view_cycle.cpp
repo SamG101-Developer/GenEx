@@ -2,8 +2,8 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.cycle;
-import genex.views.take;
+import genex.views2.cycle;
+import genex.views2.take;
 
 
 TEST(GenexViewsCycle, VecInput) {

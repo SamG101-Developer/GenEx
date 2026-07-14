@@ -2,7 +2,7 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.slice;
+import genex.views2.slice;
 
 
 TEST(GenexViewsSlice, VecInput) {

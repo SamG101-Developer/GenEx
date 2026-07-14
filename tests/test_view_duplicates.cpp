@@ -3,7 +3,7 @@
 
 import genex.meta;
 import genex.to_container;
-import genex.views.duplicates;
+import genex.views2.duplicates;
 
 
 TEST(GenexViewsDuplicates, Duplicates) {

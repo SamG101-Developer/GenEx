@@ -1,7 +1,7 @@
 // #include <gtest/gtest.h>
 //
 // import genex.to_container;
-// import genex.views.for_each;
+// import genex.views2.for_each;
 //
 //
 // TEST(GenexViewsForEach, VecInput) {

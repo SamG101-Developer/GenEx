@@ -2,7 +2,7 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.iota;
+import genex.views2.iota;
 
 
 TEST(GenexViewsIota, StandardRange) {

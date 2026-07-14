@@ -2,7 +2,7 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.interleave;
+import genex.views2.interleave;
 
 
 struct TestStruct {

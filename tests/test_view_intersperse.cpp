@@ -2,9 +2,9 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.intersperse;
-import genex.views.join;
-import genex.views.transform;
+import genex.views2.intersperse;
+import genex.views2.join;
+import genex.views2.transform;
 
 
 TEST(GenexViewsIntersperse, VecInput) {

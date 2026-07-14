@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views.in;
+import genex.views2.in;
 
 
 TEST(GenexViewsIn, BasicIn) {

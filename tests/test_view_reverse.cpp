@@ -2,9 +2,9 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.filter;
-import genex.views.reverse;
-import genex.views.transform;
+import genex.views2.filter;
+import genex.views2.reverse;
+import genex.views2.transform;
 
 
 TEST(GenexViewsReverse, VecInput) {

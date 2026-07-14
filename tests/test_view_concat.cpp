@@ -2,7 +2,7 @@
 #include <coroutine>
 
 import genex.to_container;
-import genex.views.concat;
+import genex.views2.concat;
 
 
 TEST(GenexViewsConcat, VecInput) {
