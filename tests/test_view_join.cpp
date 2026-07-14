@@ -46,6 +46,6 @@ TEST(GenexViewsJoinWith, VecStrInput) {
     const auto rng = vec
         | genex::views::join_with(' ')
         | genex::to<std::string>();
-    constexpr auto exp = std::string{"hello world !"};
+    const auto exp = std::string{"hello world !"};
     EXPECT_EQ(rng, exp);
 }

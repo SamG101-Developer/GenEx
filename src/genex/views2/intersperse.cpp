@@ -32,9 +32,9 @@ namespace genex::views::detail::impl {
     template <typename I, typename S, typename New>
     requires concepts::interspersable_iters<I, S, New>
     struct intersperse_iterator {
+        GENEX_NO_UNIQUE_ADDRESS I base_it;
         I it;
         S st;
-        GENEX_NO_UNIQUE_ADDRESS I base_it;
         GENEX_NO_UNIQUE_ADDRESS New new_value;
         bool yield_new = false;
 

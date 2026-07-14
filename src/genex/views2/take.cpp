@@ -23,6 +23,22 @@ namespace genex::views::detail::concepts {
         takeable_iters<iterator_t<Rng>, sentinel_t<Rng>, Int>;
 }
 
+namespace genex::views::detail::impl {
+    // A sentinel for a counted range that stops at whichever comes first: the count running out,
+    // or the underlying range reaching its end. Unlike a two-iterator subrange, this does not rely
+    // on the base iterator's equality reflecting distance travelled, so it works for ranges whose
+    // iterators wrap (e.g. cycle) where advancing can revisit an earlier base position.
+    template <typename S>
+    struct take_sentinel {
+        GENEX_NO_UNIQUE_ADDRESS S st;
+
+        template <typename I>
+        GENEX_INLINE friend constexpr auto operator==(const std::counted_iterator<I> &it, const take_sentinel &self) -> bool {
+            return it.count() == 0 or it.base() == self.st;
+        }
+    };
+}
+
 namespace genex::views {
     struct take_fn {
         template <typename I, typename S, typename Int>
@@ -35,10 +51,10 @@ namespace genex::views {
         template <typename I, typename S, typename Int>
         requires detail::concepts::takeable_iters<I, S, Int>
         GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const noexcept(
-            SAFE_CTOR(std::ranges::subrange<I>, I, I) and SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
-            auto it = std::move(first);
-            for (Int i = 0; i < n and it != last; ++i) { it = iterators::next(std::move(it)); }
-            return std::ranges::subrange(std::move(first), std::move(it));
+            SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
+            return std::ranges::subrange(
+                std::counted_iterator(std::move(first), static_cast<iter_difference_t<I>>(n)),
+                detail::impl::take_sentinel<S>{std::move(last)});
         }
 
         template <typename Rng, typename Int>
@@ -52,11 +68,11 @@ namespace genex::views {
         template <typename Rng, typename Int>
         requires detail::concepts::takeable_range<Rng, Int>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const noexcept(
-            SAFE_CTOR(std::ranges::subrange<iterator_t<Rng>>, iterator_t<Rng>, iterator_t<Rng>) and SAFE_MOVE(Int)) {
+            SAFE_MOVE(iterator_t<Rng>) and SAFE_MOVE(sentinel_t<Rng>) and SAFE_MOVE(Int)) {
             auto [first, last] = iterators::iter_pair(rng);
-            auto it = std::move(first);
-            for (Int i = 0; i < n and it != last; ++i) { it = iterators::next(std::move(it)); }
-            return std::ranges::subrange(std::move(first), std::move(it));
+            return std::ranges::subrange(
+                std::counted_iterator(std::move(first), static_cast<iter_difference_t<iterator_t<Rng>>>(n)),
+                detail::impl::take_sentinel<sentinel_t<Rng>>{std::move(last)});
         }
 
         template <typename Int>

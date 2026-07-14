@@ -29,8 +29,16 @@ namespace genex::views::detail::impl {
     template <typename I, typename S>
     requires concepts::joinable_iters<I, S>
     struct join_iterator {
+        // When the outer iterator dereferences to a prvalue range (e.g. transform/intersperse
+        // that yield elements by value), the inner range is a temporary and its iterators would
+        // dangle. In that case we cache the current inner range inside the iterator itself.
+        static constexpr bool ref_is_glvalue = std::is_reference_v<iter_reference_t<I>>;
+        using inner_cache_t = std::conditional_t<
+            ref_is_glvalue, std::monostate, std::optional<iter_value_t<I>>>;
+
         I it;
         S st;
+        GENEX_NO_UNIQUE_ADDRESS inner_cache_t inner_cache;
         iterator_t<iter_value_t<I>> inner_it;
         sentinel_t<iter_value_t<I>> inner_st;
 
@@ -38,7 +46,7 @@ namespace genex::views::detail::impl {
         using reference_type = range_reference_t<iter_value_t<I>>;
         using difference_type = iter_difference_t<I>;
         using iterator_category = std::conditional_t<
-            std::forward_iterator<I>,
+            ref_is_glvalue and std::forward_iterator<I>,
             std::forward_iterator_tag,
             std::input_iterator_tag>;
         using iterator_concept = iterator_category;
@@ -82,10 +90,22 @@ namespace genex::views::detail::impl {
 
     private:
         template <typename Self>
+        GENEX_INLINE constexpr auto satisfy_inner(this Self &&self) -> decltype(auto) {
+            if constexpr (ref_is_glvalue) {
+                return (*self.it);
+            }
+            else {
+                self.inner_cache.emplace(*self.it);
+                return (*self.inner_cache);
+            }
+        }
+
+        template <typename Self>
         GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
             while (self.it != self.st) {
-                self.inner_it = iterators::begin(*self.it);
-                self.inner_st = iterators::end(*self.it);
+                auto &&inner = self.satisfy_inner();
+                self.inner_it = iterators::begin(inner);
+                self.inner_st = iterators::end(inner);
                 if (self.inner_it != self.inner_st) { return; }
                 ++self.it;
             }
@@ -118,7 +138,8 @@ namespace genex::views::detail::impl {
         GENEX_ITER_SIZE requires std::forward_iterator<I> {
             auto total_size = static_cast<iter_difference_t<I>>(0);
             for (auto it = self.it; it != self.st; ++it) {
-                total_size += iterators::distance(iterators::begin(*it), iterators::end(*it));
+                auto &&inner = *it;
+                total_size += iterators::distance(iterators::begin(inner), iterators::end(inner));
             }
             return total_size;
         }

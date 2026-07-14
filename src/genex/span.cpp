@@ -7,7 +7,7 @@ import std;
 namespace genex {
     export template <typename T>
     class span {
-        T *m_ptr = nullptr;
+        T const *m_ptr = nullptr;
         std::size_t m_size = 0;
 
     public:
@@ -24,12 +24,12 @@ namespace genex {
 
         GENEX_INLINE constexpr span() = default;
 
-        GENEX_INLINE constexpr span(T *begin, const std::size_t size) noexcept :
+        GENEX_INLINE constexpr span(T const *begin, const std::size_t size) noexcept :
             m_ptr(begin), m_size(size) {
         }
 
         template <typename It, typename St>
-            requires std::contiguous_iterator<It> and std::sized_sentinel_for<St, It>
+        requires std::contiguous_iterator<It> and std::sized_sentinel_for<St, It>
         GENEX_INLINE constexpr span(It begin, St end) noexcept :
             m_ptr(std::addressof(*begin)),
             m_size(static_cast<std::size_t>(end - begin)) {

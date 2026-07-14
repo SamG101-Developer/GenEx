@@ -4,7 +4,6 @@
 import genex.to_container;
 import genex.views2.zip;
 
-
 TEST(GenexViewsZip, VecInput) {
     auto vec1 = std::vector{0, 1, 2, 3, 4};
     auto vec2 = std::vector{5, 6, 7, 8, 9};
@@ -19,7 +18,6 @@ TEST(GenexViewsZip, VecInput) {
         EXPECT_EQ(std::get<1>(rng[i]), std::get<1>(exp[i]));
     }
 }
-
 
 TEST(GenexViewsZip, VecInputDiffTypes) {
     auto vec1 = std::vector{0, 1, 2};
@@ -36,7 +34,6 @@ TEST(GenexViewsZip, VecInputDiffTypes) {
     }
 }
 
-
 TEST(GenexViewsZip, VecNoPipe) {
     auto vec1 = std::vector{0, 1, 2};
     auto vec2 = std::vector{3, 4, 5};
@@ -50,7 +47,6 @@ TEST(GenexViewsZip, VecNoPipe) {
         EXPECT_EQ(std::get<1>(rng[i]), std::get<1>(exp[i]));
     }
 }
-
 
 TEST(GenexViewsZip, VecInputMulti) {
     auto vec1 = std::vector{0, 1, 2};
