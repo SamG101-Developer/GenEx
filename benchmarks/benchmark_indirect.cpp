@@ -4,7 +4,7 @@
 #include <range/v3/view/indirect.hpp>
 
 import genex.to_container;
-import genex.views.indirect;
+import genex.views2.indirect;
 import std;
 
 

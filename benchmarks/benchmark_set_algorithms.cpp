@@ -4,7 +4,7 @@
 #include <range/v3/view/set_algorithm.hpp>
 
 import genex.to_container;
-import genex.views.set_algorithms;
+import genex.views2.set_algorithms;
 import std;
 
 

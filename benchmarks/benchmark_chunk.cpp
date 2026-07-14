@@ -4,7 +4,7 @@
 #include <range/v3/view/chunk.hpp>
 
 import genex.to_container;
-import genex.views.chunk;
+import genex.views2.chunk;
 import std;
 
 

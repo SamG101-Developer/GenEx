@@ -6,7 +6,7 @@
 #include <range/v3/view/transform.hpp>
 
 import genex.to_container;
-import genex.views.cast_static;
+import genex.views2.cast_static;
 
 
 static void BM_StdRanges_CastStatic(benchmark::State &state) {
