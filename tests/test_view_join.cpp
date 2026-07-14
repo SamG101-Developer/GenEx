@@ -6,7 +6,6 @@ import genex.views2.join;
 import genex.views2.join_with;
 import genex.views2.transform;
 
-
 TEST(GenexViewsJoin, VecInput) {
     auto vec = std::vector<std::vector<int>>{{1, 2, 3}, {4, 5}, {6}};
     const auto rng = vec
@@ -15,7 +14,6 @@ TEST(GenexViewsJoin, VecInput) {
     const auto exp = std::vector<int>{1, 2, 3, 4, 5, 6};
     EXPECT_EQ(rng, exp);
 }
-
 
 TEST(GenexViewsJoin, StrInput) {
     auto vec = std::vector<std::string>{"hello", "world", "!"};
@@ -32,7 +30,6 @@ TEST(GenexViewsJoin, StrInput) {
     EXPECT_EQ(str, exp_str);
 }
 
-
 TEST(GenexViewsJoinWith, VecInput) {
     auto vec = std::vector<std::vector<int>>{{1, 2, 3}, {4, 5}, {6}};
 
@@ -40,5 +37,15 @@ TEST(GenexViewsJoinWith, VecInput) {
         | genex::views::join_with(0)
         | genex::to<std::vector>();
     const auto exp = std::vector{1, 2, 3, 0, 4, 5, 0, 6};
+    EXPECT_EQ(rng, exp);
+}
+
+TEST(GenexViewsJoinWith, VecStrInput) {
+    auto vec = std::vector<std::string>{"hello", "world", "!"};
+
+    const auto rng = vec
+        | genex::views::join_with(' ')
+        | genex::to<std::string>();
+    constexpr auto exp = std::string{"hello world !"};
     EXPECT_EQ(rng, exp);
 }

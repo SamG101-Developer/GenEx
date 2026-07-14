@@ -29,8 +29,8 @@ namespace genex::views::detail::impl {
     struct remove_if_iterator {
         I it;
         S st;
-        GENEX_NO_UNIQUE_ADDRESS Pred pred;
-        GENEX_NO_UNIQUE_ADDRESS Proj proj;
+        GENEX_NO_UNIQUE_ADDRESS meta::box<Pred> pred;
+        GENEX_NO_UNIQUE_ADDRESS meta::box<Proj> proj;
 
         using value_type = iter_value_t<I>;
         using reference_type = iter_reference_t<I>;
@@ -77,12 +77,12 @@ namespace genex::views::detail::impl {
     private:
         template <typename Self>
         GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
-            while (self.it != self.st and meta::invoke(self.pred, meta::invoke(self.proj, *self.it))) { ++self.it; }
+            while (self.it != self.st and meta::invoke(*self.pred, meta::invoke(*self.proj, *self.it))) { ++self.it; }
         }
 
         template <typename Self> requires std::bidirectional_iterator<I>
         GENEX_INLINE constexpr auto bwd_to_valid(this Self &&self) -> void {
-            while (self.it != self.st and meta::invoke(self.pred, meta::invoke(self.proj, *self.it))) { --self.it; }
+            while (self.it != self.st and meta::invoke(*self.pred, meta::invoke(*self.proj, *self.it))) { --self.it; }
         }
     };
 

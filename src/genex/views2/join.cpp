@@ -116,7 +116,7 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_ITER_SIZE requires std::forward_iterator<I> {
-            auto total_size = 0uz;
+            auto total_size = static_cast<iter_difference_t<I>>(0);
             for (auto it = self.it; it != self.st; ++it) {
                 total_size += iterators::distance(iterators::begin(*it), iterators::end(*it));
             }
