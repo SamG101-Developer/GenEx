@@ -2,6 +2,7 @@
 #include <coroutine>
 
 import genex.to_container;
+import genex.views2.transform;
 import genex.views2.zip;
 
 TEST(GenexViewsZip, VecInput) {
@@ -56,6 +57,23 @@ TEST(GenexViewsZip, VecInputMulti) {
     const auto rng = genex::views::zip(vec1, vec2, vec3)
         | genex::to<std::vector>();
     const auto exp = std::vector<std::tuple<int, int, int>>{{0, 3, 6}, {1, 4, 7}, {2, 5, 8}};
+
+    for (auto i = 0; i < rng.size(); ++i) {
+        EXPECT_EQ(std::get<0>(rng[i]), std::get<0>(exp[i]));
+        EXPECT_EQ(std::get<1>(rng[i]), std::get<1>(exp[i]));
+        EXPECT_EQ(std::get<2>(rng[i]), std::get<2>(exp[i]));
+    }
+}
+
+TEST(GenexViewsZip, VecInputTransform) {
+    auto vec1 = std::vector{0, 1, 2, 3, 4};
+    auto vec2 = std::vector{5, 6, 7, 8, 9};
+    auto vec3 = std::vector{10, 11, 12, 13, 14};
+
+    const auto transform = [](const int x) { return x * 2; };
+    const auto rng = genex::views::zip(vec1 | genex::views::transform(transform), vec2 | genex::views::transform(transform), vec3)
+        | genex::to<std::vector>();
+    const auto exp = std::vector<std::tuple<int, int, int>>{{0, 10, 10}, {2, 12, 11}, {4, 14, 12}, {6, 16, 13}, {8, 18, 14}};
 
     for (auto i = 0; i < rng.size(); ++i) {
         EXPECT_EQ(std::get<0>(rng[i]), std::get<0>(exp[i]));

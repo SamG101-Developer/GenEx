@@ -38,7 +38,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const noexcept(
             SAFE_CTOR(std::ranges::subrange<I, S>, I, S) and
             SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
-            return std::ranges::subrange(iterators::next(std::move(first), n), std::move(last));
+            return std::ranges::subrange(iterators::next(std::move(first), static_cast<iter_difference_t<I>>(n)), std::move(last));
         }
 
         template <typename Rng, typename Int>
@@ -56,7 +56,7 @@ namespace genex::views {
             SAFE_CTOR(std::ranges::subrange<iterator_t<Rng>, sentinel_t<Rng>>, iterator_t<Rng>, sentinel_t<Rng>) and
             SAFE_MOVE(Int)) {
             auto [first, last] = iterators::iter_pair(rng);
-            return std::ranges::subrange(iterators::next(std::move(first), n), std::move(last));
+            return std::ranges::subrange(iterators::next(std::move(first), static_cast<iter_difference_t<iterator_t<Rng>>>(n)), std::move(last));
         }
 
         template <typename Int>

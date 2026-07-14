@@ -23,6 +23,17 @@ namespace genex::views::detail::concepts {
 
 namespace genex::views::detail::impl {
     /**
+     * The @c enumerate_sentinel wraps the underlying range's sentinel @c S. It is used as the end of the
+     * @c enumerate_view whenever the source range is not common (i.e. its sentinel type differs from its iterator
+     * type), because @c enumerate_iterator can only be constructed from an iterator @c I, never from @c S.
+     * @tparam S The sentinel type of the underlying iterable.
+     */
+    template <typename S>
+    struct enumerate_sentinel {
+        S st;
+    };
+
+    /**
      * The @c enumerate_iterator type is an iterator that provides a pair, consisting of the index and the value from
      * the underlying iterable. The index type can be any type that satisfies the @c std::weakly_incrementable concept,
      * such as @c std::size_t or @c int.
@@ -75,6 +86,10 @@ namespace genex::views::detail::impl {
         GENEX_VIEW_ITER_EQ(enumerate_iterator, enumerate_iterator) {
             return self.it == that.it;
         }
+
+        GENEX_VIEW_ITER_EQ(enumerate_iterator, enumerate_sentinel<S>) {
+            return self.it == that.st;
+        }
     };
 
     template <typename I, typename S>
@@ -94,7 +109,12 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_ITER_END {
-            return enumerate_iterator<I, S>{self.st};
+            if constexpr (std::same_as<I, S>) {
+                return enumerate_iterator<I, S>{self.st};
+            }
+            else {
+                return enumerate_sentinel<S>{self.st};
+            }
         }
 
         template <typename Self>

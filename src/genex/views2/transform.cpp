@@ -117,7 +117,7 @@ namespace genex::views::detail::impl {
         }
 
         template <typename Self>
-            requires std::convertible_to<S, I>
+        requires std::convertible_to<S, I> and std::semiregular<transform_iterator<I, S, F, Proj>>
         GENEX_ITER_END {
             return transform_iterator<I, S, F, Proj>{self.st, self.f, self.proj};
         }

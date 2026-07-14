@@ -46,7 +46,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(I first, S last, const Int n, const Int m) const noexcept(
             SAFE_CTOR(genex::span<iter_value_t<I>>, I, I) and
             SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
-            return genex::span<iter_value_t<I>>(std::move(first) + n, std::move(first) + static_cast<std::ptrdiff_t>(m));
+            return genex::span<iter_value_t<I>>(std::move(first) + static_cast<std::ptrdiff_t>(n), std::move(first) + static_cast<std::ptrdiff_t>(m));
         }
 
         template <typename I, typename S, typename Int>
@@ -54,7 +54,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(I first, S last, const Int n, const Int m) const noexcept(
             SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
             return std::ranges::subrange(
-                std::counted_iterator(iterators::next(std::move(first), n), static_cast<iter_difference_t<I>>(m - n)),
+                std::counted_iterator(iterators::next(std::move(first), static_cast<iter_difference_t<I>>(n)), static_cast<iter_difference_t<I>>(m - n)),
                 detail::impl::slice_sentinel<S>{std::move(last)});
         }
 
@@ -64,7 +64,7 @@ namespace genex::views {
             SAFE_CTOR(genex::span<range_value_t<Rng>>, iterator_t<Rng>, iterator_t<Rng>) and
             SAFE_MOVE(Int)) {
             auto [first, last] = iterators::iter_pair(rng);
-            return genex::span<range_value_t<Rng>>(std::move(first) + n, std::move(first) + static_cast<std::ptrdiff_t>(m));
+            return genex::span<range_value_t<Rng>>(std::move(first) + static_cast<std::ptrdiff_t>(n), std::move(first) + static_cast<std::ptrdiff_t>(m));
         }
 
         template <typename Rng, typename Int>
@@ -73,7 +73,7 @@ namespace genex::views {
             SAFE_MOVE(iterator_t<Rng>) and SAFE_MOVE(sentinel_t<Rng>) and SAFE_MOVE(Int)) {
             auto [first, last] = iterators::iter_pair(rng);
             return std::ranges::subrange(
-                std::counted_iterator(iterators::next(std::move(first), n), static_cast<iter_difference_t<iterator_t<Rng>>>(m - n)),
+                std::counted_iterator(iterators::next(std::move(first), static_cast<iter_difference_t<iterator_t<Rng>>>(n)), static_cast<iter_difference_t<iterator_t<Rng>>>(m - n)),
                 detail::impl::slice_sentinel<sentinel_t<Rng>>{std::move(last)});
         }
 

@@ -71,18 +71,29 @@ namespace genex::meta {
     export inline constexpr invoke_fn invoke{};
 
     /**
-     * A minimal movable-box: wraps a value so it can be stored as a member while keeping the enclosing type assignable,
-     * even when @c T is only (copy/move)-constructible but not assignable. This is the case for a capturing lambda,
-     * whose assignment operators are deleted; storing it directly would delete the enclosing iterator's assignment and
-     * stop it modelling @c std::movable / @c std::input_iterator. Assignment is emulated via destroy-then-reconstruct
-     * (mirrors @c std::ranges' movable-box). Access the value with @c operator*.
+     * A minimal movable-box: wraps a value so it can be stored as a member while keeping the enclosing type assignable
+     * and default-constructible, even when @c T is neither. Two problems it solves for a capturing lambda (whose
+     * assignment operators are deleted and which has no default constructor):
+     *
+     *  - Assignability: storing @c T directly would delete the enclosing iterator's assignment and stop it modelling
+     *    @c std::movable / @c std::input_iterator. Assignment is emulated via destroy-then-reconstruct of the whole
+     *    storage object (mirrors @c std::ranges' movable-box), which only needs @c T (copy/move)-constructible.
+     *  - Default-constructibility: when @c T is not default-constructible we store it in an @c std::optional so the box
+     *    stays default-constructible (defaulting to an empty/singular state). Without this the iterator is not
+     *    @c std::semiregular, which cascades into it failing @c forward_iterator / @c sentinel_for and makes views such
+     *    as @c intersperse, @c zip and @c enumerate reject any capturing-lambda @c transform. When @c T is already
+     *    default-constructible we store it directly, keeping the box trivial and @c operator* always valid.
+     *
+     * Access the value with @c operator* (undefined on an empty box, exactly as dereferencing a singular iterator is).
      */
     export template <typename T>
     class box {
-        GENEX_NO_UNIQUE_ADDRESS T m_value;
+        static constexpr bool store_direct = std::default_initializable<T>;
+        using storage_t = std::conditional_t<store_direct, T, std::optional<T>>;
+        GENEX_NO_UNIQUE_ADDRESS storage_t m_value;
 
     public:
-        box() requires std::default_initializable<T> = default;
+        box() = default;
 
         GENEX_INLINE constexpr box(T value) noexcept(std::is_nothrow_move_constructible_v<T>) :
             m_value(std::move(value)) {
@@ -110,7 +121,8 @@ namespace genex::meta {
 
         template <typename Self>
         GENEX_NODISCARD GENEX_INLINE constexpr auto operator*(this Self &&self) noexcept -> decltype(auto) {
-            return (std::forward<Self>(self).m_value);
+            if constexpr (store_direct) { return (std::forward<Self>(self).m_value); }
+            else { return (*std::forward<Self>(self).m_value); }
         }
     };
 }
