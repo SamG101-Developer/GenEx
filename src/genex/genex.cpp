@@ -98,6 +98,7 @@ export import genex.views2.iota;
 export import genex.views2.join;
 export import genex.views2.join_with;
 export import genex.views2.map;
+export import genex.views2.materialize;
 export import genex.views2.move;
 export import genex.views2.move_reverse;
 export import genex.views2.ptr;
