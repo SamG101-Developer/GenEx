@@ -2,7 +2,6 @@ export module genex.algorithms.concepts;
 import genex.concepts;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     export template <typename I, typename S, typename Pred, typename Proj>
     concept quantifiable_iters =

@@ -8,7 +8,6 @@ import genex.meta;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj = meta::identity>
     concept filterable_iters =
@@ -22,16 +21,16 @@ namespace genex::views::detail::concepts {
         filterable_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj>;
 }
 
-
 namespace genex::views::detail::impl {
     struct filter_sentinel {};
 
     template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::filterable_iters<I, S, Pred, Proj>
     struct filter_iterator {
-        I it; S st;
-        GENEX_NO_UNIQUE_ADDRESS Pred pred;
-        GENEX_NO_UNIQUE_ADDRESS Proj proj;
+        I it;
+        S st;
+        GENEX_NO_UNIQUE_ADDRESS meta::box<Pred> pred;
+        GENEX_NO_UNIQUE_ADDRESS meta::box<Proj> proj;
 
         using value_type = iter_value_t<I>;
         using reference_type = iter_reference_t<I>;
@@ -77,20 +76,21 @@ namespace genex::views::detail::impl {
 
     private:
         template <typename Self>
-        GENEX_INLINE constexpr auto fwd_to_valid(this Self&& self) -> void {
-            while (self.it != self.st and not meta::invoke(self.pred, meta::invoke(self.proj, *self.it))) { ++self.it; }
+        GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
+            while (self.it != self.st and not meta::invoke(*self.pred, meta::invoke(*self.proj, *self.it))) { ++self.it; }
         }
 
         template <typename Self> requires std::bidirectional_iterator<I>
-        GENEX_INLINE constexpr auto bwd_to_valid(this Self&& self) -> void {
-            while (self.it != self.st and not meta::invoke(self.pred, meta::invoke(self.proj, *self.it))) { --self.it; }
+        GENEX_INLINE constexpr auto bwd_to_valid(this Self &&self) -> void {
+            while (self.it != self.st and not meta::invoke(*self.pred, meta::invoke(*self.proj, *self.it))) { --self.it; }
         }
     };
 
     template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::filterable_iters<I, S, Pred, Proj>
     struct filter_view {
-        I it; S st;
+        I it;
+        S st;
         GENEX_NO_UNIQUE_ADDRESS Pred pred;
         GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
@@ -110,7 +110,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct filter_fn {

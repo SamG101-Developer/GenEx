@@ -9,14 +9,12 @@ import genex.meta;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename Comp, typename Proj>
     concept can_sorted_range =
         random_access_range<Rng> and
         std::sortable<iterator_t<Rng>, Comp, Proj>;
 }
-
 
 namespace genex::actions {
     struct sort_fn {

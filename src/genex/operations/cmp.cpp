@@ -5,7 +5,6 @@ export module genex.operations.cmp;
 import genex.meta;
 import std;
 
-
 namespace genex::operations::detail::concepts {
     template <typename T, typename U, typename Proj = meta::identity>
     concept comparable_with =
@@ -19,7 +18,6 @@ namespace genex::operations::detail::concepts {
         std::invocable<Proj, U> and
         std::totally_ordered_with<std::invoke_result_t<Proj, T>, std::invoke_result_t<Proj, U>>;
 }
-
 
 namespace genex::operations {
     export struct eq {
@@ -208,4 +206,3 @@ namespace genex::operations {
         }
     };
 }
-

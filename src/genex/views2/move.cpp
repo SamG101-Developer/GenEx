@@ -9,7 +9,6 @@ import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept movable_iters =
@@ -22,7 +21,6 @@ namespace genex::views::detail::concepts {
         input_range<Rng> and
         movable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
-
 
 namespace genex::views::detail::impl {
     template <typename I, typename S>
@@ -65,7 +63,8 @@ namespace genex::views::detail::impl {
     template <typename I, typename S>
     requires concepts::movable_iters<I, S>
     struct move_view {
-        I it; S st;
+        I it;
+        S st;
 
         GENEX_INLINE constexpr move_view(I first, S last) :
             it(std::move(first)), st(std::move(last)) {
@@ -87,7 +86,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct move_fn {

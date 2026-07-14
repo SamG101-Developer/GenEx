@@ -11,7 +11,6 @@ import genex.iterators.iter_pair;
 import genex.views2.transform;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <std::size_t N, typename I, typename S>
     concept tuple_indexable_iters =
@@ -25,7 +24,6 @@ namespace genex::views::detail::concepts {
         std::ranges::input_range<Rng> and
         tuple_indexable_iters<N, iterator_t<Rng>, sentinel_t<Rng>>;
 }
-
 
 namespace genex::views {
     template <std::size_t N>

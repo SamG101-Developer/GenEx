@@ -8,7 +8,6 @@ import genex.actions.insert;
 import genex.iterators.access;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     export template <typename Rng, typename E>
     concept back_insertable_range =
@@ -33,7 +32,6 @@ namespace genex::actions::detail::concepts {
         not has_member_push_back<Rng> and
         not has_member_emplace_back<Rng>;
 }
-
 
 namespace genex::actions {
     struct push_back_fn {

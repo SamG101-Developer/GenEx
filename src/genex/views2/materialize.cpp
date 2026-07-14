@@ -1,23 +1,19 @@
 module;
-#include <coroutine>
 #include <genex/macros.hpp>
 
-export module genex.views.materialize;
+export module genex.views2.materialize;
 export import genex.pipe;
 import genex.concepts;
-import genex.generator;
 import genex.meta;
 import genex.actions.push_back;
 import genex.iterators.iter_pair;
 import std;
-
 
 namespace genex::views::detail::concepts {
     template <template <typename> typename Cache, typename I, typename S>
     concept materializable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
-        // std::is_lvalue_reference_v<iter_reference_t<I>> and
         actions::detail::concepts::back_insertable_range<Cache<iter_value_t<I>>, iter_value_t<I>> and
         std::is_constructible_v<Cache<iter_value_t<I>>>;
 
@@ -27,20 +23,20 @@ namespace genex::views::detail::concepts {
         materializable_iters<Cache, iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
-
 namespace genex::views::detail::impl {
     template <template <typename> typename Cache, typename I, typename S>
     requires concepts::materializable_iters<Cache, I, S>
-    auto do_materialize(I first, S last) -> Cache<iter_value_t<I>> {
-        auto vec = Cache<iter_value_t<I>>();
-        if (first == last) { return vec; }
-        for (; first != last; ++first) {
-            vec |= actions::push_back(*first);
+    GENEX_INLINE constexpr auto do_materialize(I first, S last) -> Cache<iter_value_t<I>> {
+        auto out = Cache<iter_value_t<I>>();
+        if constexpr (std::sized_sentinel_for<S, I> and requires { out.reserve(std::size_t{}); }) {
+            out.reserve(static_cast<std::size_t>(last - first));
         }
-        return vec;
+        for (; first != last; ++first) {
+            out |= actions::push_back(*first);
+        }
+        return out;
     }
 }
-
 
 namespace genex::views {
     template <template <typename> typename Cache>
@@ -65,4 +61,3 @@ namespace genex::views {
 
     export inline constexpr materialize_fn<std::vector> materialize{};
 }
-

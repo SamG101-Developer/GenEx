@@ -8,14 +8,12 @@ import genex.iterators.iter_pair;
 import genex.meta;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng>
     concept reversible_range =
         bidirectional_range<Rng> and
         std::permutable<iterator_t<Rng>>;
 }
-
 
 namespace genex::actions {
     struct reverse_fn {

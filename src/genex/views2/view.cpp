@@ -9,7 +9,6 @@ import genex.span;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept viewable_iters =
@@ -22,11 +21,10 @@ namespace genex::views::detail::concepts {
         viewable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
-
 namespace genex::views {
     struct view_fn {
         template <typename I, typename S>
-        requires detail::concepts::viewable_iters<I, S> and std::random_access_iterator<I>
+        requires detail::concepts::viewable_iters<I, S> and std::contiguous_iterator<I>
         GENEX_INLINE constexpr auto operator()(I first, S last) const {
             return genex::span<iter_value_t<I>>(std::move(first), std::move(last));
         }
@@ -38,7 +36,7 @@ namespace genex::views {
         }
 
         template <typename Rng>
-        requires detail::concepts::viewable_range<Rng> and std::random_access_iterator<iterator_t<Rng>>
+        requires detail::concepts::viewable_range<Rng> and std::contiguous_iterator<iterator_t<Rng>>
         GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
             auto [first, last] = iterators::iter_pair(rng);
             return genex::span<range_value_t<Rng>>(std::move(first), std::move(last));

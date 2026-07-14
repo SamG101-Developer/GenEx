@@ -10,14 +10,12 @@ import genex.iterators.next;
 import genex.meta;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename Int>
     concept takeable_range =
         forward_range<Rng> and
         std::weakly_incrementable<Int>;
 }
-
 
 namespace genex::actions {
     struct take_fn {

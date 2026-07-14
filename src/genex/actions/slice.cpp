@@ -10,9 +10,7 @@ import genex.iterators.access;
 import genex.iterators.next;
 import std;
 
-
 // Todo: random_access_iterator versions with optimizations.
-
 
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename Int>
@@ -20,7 +18,6 @@ namespace genex::actions::detail::concepts {
         forward_range<Rng> and
         std::weakly_incrementable<Int>;
 }
-
 
 namespace genex::actions {
     struct slice_fn {

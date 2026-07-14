@@ -10,7 +10,6 @@ import genex.iterators.access;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename Old, typename New, typename Proj>
     concept replaceable_range =
@@ -19,7 +18,6 @@ namespace genex::actions::detail::concepts {
         std::indirect_equivalence_relation<operations::eq, std::projected<iterator_t<Rng>, Proj>, std::remove_cvref_t<Old> const*> and
         std::convertible_to<New, range_value_t<Rng>>;
 }
-
 
 namespace genex::actions {
     struct replace_fn {

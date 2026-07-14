@@ -1,7 +1,6 @@
 export module genex.concepts;
 import std;
 
-
 export namespace genex {
     template <typename Rng>
     struct iterator;
@@ -40,7 +39,6 @@ export namespace genex {
     using range_difference_t = iter_difference_t<iterator_t<T>>;
 }
 
-
 export namespace genex {
     template <typename Rng>
     concept has_std_begin = requires(Rng &rng) { { std::begin(std::forward<Rng>(rng)) } -> std::input_or_output_iterator; };
@@ -57,7 +55,6 @@ export namespace genex {
     template <typename Rng>
     concept has_std_size = requires(Rng &rng) { std::size(rng); };
 
-
     template <typename Rng>
     concept has_member_begin = requires(Rng &rng) { { rng.begin() }; };
 
@@ -69,7 +66,6 @@ export namespace genex {
 
     template <typename Rng>
     concept has_member_rend = requires(Rng &rng) { { rng.rend() }; };
-
 
     template <typename Rng>
     concept has_member_size = requires(Rng &rng) { rng.size(); };
@@ -117,7 +113,6 @@ export namespace genex {
     concept has_member_clear = requires(Rng &rng) { rng.clear(); };
 }
 
-
 export namespace genex {
     template <typename Rng>
     concept range =
@@ -125,12 +120,10 @@ export namespace genex {
         (has_std_end<Rng> or has_member_end<Rng>);
 }
 
-
 export namespace genex::views::detail {
     template <typename Rng> requires range<Rng>
     struct view_base;
 }
-
 
 export namespace genex {
     template <typename Rng>
@@ -151,7 +144,6 @@ export namespace genex {
     template <typename Rng>
     concept sized_range = input_range<Rng> and std::sized_sentinel_for<sentinel_t<Rng>, iterator_t<Rng>>;
 }
-
 
 export namespace genex {
     template <std::size_t I = 0, typename... Ts, typename... Us> requires (I <= sizeof...(Ts) and sizeof...(Ts) == sizeof...(Us))
@@ -184,7 +176,6 @@ export namespace genex {
         advance_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
     }
 }
-
 
 export namespace genex {
     template <typename T>
@@ -270,30 +261,25 @@ export namespace genex {
     concept pair_like = is_pair_like<std::remove_cvref_t<T>>::value;
 }
 
-
 template <typename Rng> requires genex::has_std_begin<Rng>
 struct genex::iterator<Rng> {
     using type = decltype(std::begin(std::declval<Rng>()));
 };
-
 
 template <typename Rng> requires (not genex::has_std_begin<Rng> and genex::has_member_begin<Rng>)
 struct genex::iterator<Rng> {
     using type = decltype(std::declval<Rng>().begin());
 };
 
-
 template <typename Rng> requires genex::has_std_end<Rng>
 struct genex::sentinel<Rng> {
     using type = decltype(std::end(std::declval<Rng>()));
 };
 
-
 template <typename Rng> requires (not genex::has_std_end<Rng> and genex::has_member_end<Rng>)
 struct genex::sentinel<Rng> {
     using type = decltype(std::declval<Rng>().end());
 };
-
 
 template <typename T> requires requires(T &&t) { *std::declval<T>(); }
 struct genex::deref_value<T> {

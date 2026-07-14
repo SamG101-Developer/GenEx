@@ -8,7 +8,6 @@ import genex.meta;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename Pred, typename New, typename Proj>
     concept replaceable_if_range =
@@ -18,14 +17,13 @@ namespace genex::actions::detail::concepts {
         std::convertible_to<New, range_value_t<Rng>>;
 }
 
-
 namespace genex::actions {
     struct replace_if_fn {
         template <typename Rng, typename Pred, typename New, typename Proj = meta::identity>
         requires detail::concepts::replaceable_if_range<Rng, Pred, New, Proj>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, New new_val, Proj proj = {}) const -> decltype(auto) {
             auto [first, last] = iterators::iter_pair(rng);
-            for (;first != last; ++first) {
+            for (; first != last; ++first) {
                 if (meta::invoke(pred, meta::invoke(proj, *first))) {
                     *first = new_val;
                 }

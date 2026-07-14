@@ -7,7 +7,6 @@ import genex.meta;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename F>
     concept right_foldable_first_iters =
@@ -23,7 +22,6 @@ namespace genex::algorithms::detail::concepts {
         right_foldable_first_iters<iterator_t<Rng>, sentinel_t<Rng>, F>;
 }
 
-
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename F>
     requires concepts::right_foldable_first_iters<I, S, F>
@@ -36,7 +34,6 @@ namespace genex::algorithms::detail::impl {
         return acc;
     }
 }
-
 
 namespace genex {
     struct fold_right_first_fn {

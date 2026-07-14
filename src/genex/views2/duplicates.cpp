@@ -9,7 +9,6 @@ import genex.iterators.iter_pair;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Comp, typename Proj>
     concept duplicate_checkable_iters =
@@ -23,14 +22,14 @@ namespace genex::views::detail::concepts {
         duplicate_checkable_iters<iterator_t<Rng>, sentinel_t<Rng>, Comp, Proj>;
 }
 
-
 namespace genex::views::detail::impl {
     struct duplicate_sentinel {};
 
     template <typename I, typename S, typename Comp, typename Proj>
     requires concepts::duplicate_checkable_iters<I, S, Comp, Proj>
     struct duplicate_iterator {
-        I it; S st;
+        I it;
+        S st;
         GENEX_NO_UNIQUE_ADDRESS Comp comp;
         GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
@@ -103,7 +102,7 @@ namespace genex::views::detail::impl {
                 }
 
                 // Search for the duplicate
-                for (const auto &s: self.seen) {
+                for (const auto &s : self.seen) {
                     if (meta::invoke(self.comp, cur_proj, meta::invoke(self.proj, s))) {
                         self.dupe_elem = s;
                         self.cur_elem = s;
@@ -122,7 +121,8 @@ namespace genex::views::detail::impl {
     template <typename I, typename S, typename Comp, typename Proj>
     requires concepts::duplicate_checkable_iters<I, S, Comp, Proj>
     struct duplicate_view {
-        I it; S st;
+        I it;
+        S st;
         GENEX_NO_UNIQUE_ADDRESS Comp comp;
         GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
@@ -142,7 +142,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct duplicates_fn {

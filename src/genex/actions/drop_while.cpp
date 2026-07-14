@@ -10,14 +10,12 @@ import genex.algorithms.find_if_not;
 import genex.iterators.access;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename Pred>
     concept droppable_while_range =
         forward_range<Rng> and
         std::indirect_unary_predicate<Pred, iterator_t<Rng>>;
 }
-
 
 namespace genex::actions {
     struct drop_while_fn {

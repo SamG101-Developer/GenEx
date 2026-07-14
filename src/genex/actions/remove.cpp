@@ -11,7 +11,6 @@ import genex.algorithms.find;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename E, typename Proj>
     concept removable_range =
@@ -19,7 +18,6 @@ namespace genex::actions::detail::concepts {
         std::permutable<iterator_t<Rng>> and
         std::indirect_equivalence_relation<operations::eq, std::projected<iterator_t<Rng>, Proj>, std::remove_cvref_t<E> const*>;
 }
-
 
 namespace genex::actions {
     struct remove_fn {

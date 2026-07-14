@@ -10,7 +10,6 @@ import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Int>
     concept chunkable_iters =
@@ -24,22 +23,23 @@ namespace genex::views::detail::concepts {
         chunkable_iters<iterator_t<Rng>, sentinel_t<Rng>, Int>;
 }
 
-
 namespace genex::views::detail::impl {
     struct chunk_sentinel {};
 
     template <typename I, typename S, typename Int>
     requires concepts::chunkable_iters<I, S, Int>
     struct chunk_iterator {
-        I it; S st;
+        I it;
+        S st;
         Int chunk_size;
 
         using value_type = std::ranges::subrange<I>;
         using reference_type = std::ranges::subrange<I>;
         using difference_type = iter_difference_t<I>;
         using iterator_category =
-            std::conditional_t<std::random_access_iterator<I>, std::random_access_iterator_tag,
-            std::conditional_t<std::bidirectional_iterator<I>, std::bidirectional_iterator_tag,
+        std::conditional_t<
+            std::random_access_iterator<I>, std::random_access_iterator_tag, std::conditional_t<
+            std::bidirectional_iterator<I>, std::bidirectional_iterator_tag,
             std::forward_iterator_tag>>;
         using iterator_concept = iterator_category;
         GENEX_ITER_OPS(chunk_iterator);
@@ -91,7 +91,8 @@ namespace genex::views::detail::impl {
     template <typename I, typename S, typename Int>
     requires concepts::chunkable_iters<I, S, Int>
     struct chunk_view {
-        I it; S st;
+        I it;
+        S st;
         Int chunk_size;
 
         GENEX_INLINE constexpr chunk_view(I first, S last, Int size) :
@@ -114,7 +115,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct chunk_fn {

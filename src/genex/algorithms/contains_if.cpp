@@ -8,7 +8,6 @@ import genex.algorithms.find_if;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj>
     concept containable_if_iters =
@@ -23,7 +22,6 @@ namespace genex::algorithms::detail::concepts {
         containable_if_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj>;
 }
 
-
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::containable_if_iters<I, S, Pred, Proj>
@@ -32,7 +30,6 @@ namespace genex::algorithms::detail::impl {
         return it != last;
     }
 }
-
 
 namespace genex {
     struct contains_if_fn {

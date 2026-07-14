@@ -8,7 +8,6 @@ import genex.iterators.iter_pair;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
     concept equatable_iters =
@@ -25,7 +24,6 @@ namespace genex::algorithms::detail::concepts {
         equatable_iters<iterator_t<Rng1>, sentinel_t<Rng1>, iterator_t<Rng2>, sentinel_t<Rng2>, Comp, Proj1, Proj2>;
 }
 
-
 namespace genex::algorithms::detail::impl {
     template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
     requires concepts::equatable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
@@ -36,7 +34,6 @@ namespace genex::algorithms::detail::impl {
         return first1 == last1 and first2 == last2;
     }
 }
-
 
 namespace genex {
     struct equals_fn {

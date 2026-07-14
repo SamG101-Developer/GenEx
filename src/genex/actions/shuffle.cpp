@@ -8,7 +8,6 @@ import genex.meta;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename Shuffler>
     concept shufflable_range =
@@ -17,11 +16,9 @@ namespace genex::actions::detail::concepts {
         std::uniform_random_bit_generator<std::remove_reference_t<Shuffler>>;
 }
 
-
 namespace genex::actions::detail {
     thread_local std::mt19937_64 default_random{std::random_device{}()};
 }
-
 
 namespace genex::actions {
     struct shuffle_fn {

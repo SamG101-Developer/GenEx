@@ -8,7 +8,6 @@ import genex.meta;
 import genex.actions.erase;
 import genex.iterators.access;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng>
     concept front_poppable_range =
@@ -25,7 +24,6 @@ namespace genex::actions::detail::concepts {
         has_member_erase<Rng> and
         not front_poppable_select_pop_front<Rng>;
 }
-
 
 namespace genex::actions {
     struct pop_front_fn {

@@ -10,7 +10,6 @@ import genex.iterators.iter_pair;
 import genex.iterators.prev;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept reversible_iters =
@@ -23,12 +22,12 @@ namespace genex::views::detail::concepts {
         reversible_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
-
 namespace genex::views::detail::impl {
     template <typename I, typename S>
     requires concepts::reversible_iters<I, S>
     struct reverse_iterator {
-        I it; S st;
+        I it;
+        S st;
 
         using value_type = iter_value_t<I>;
         using reference_type = iter_reference_t<I>;
@@ -63,8 +62,7 @@ namespace genex::views::detail::impl {
             return self.it == that.it;
         }
 
-        GENEX_INLINE friend constexpr auto operator-(reverse_iterator const &self, reverse_iterator const &that) -> difference_type
-        requires std::random_access_iterator<I> {
+        GENEX_INLINE friend constexpr auto operator-(reverse_iterator const &self, reverse_iterator const &that) -> difference_type requires std::random_access_iterator<I> {
             return self.it - that.it;
         }
     };
@@ -72,7 +70,8 @@ namespace genex::views::detail::impl {
     template <typename I, typename S>
     requires concepts::reversible_iters<I, S>
     struct reverse_view {
-        I it; S st;
+        I it;
+        S st;
 
         GENEX_INLINE constexpr reverse_view(I first, S last) :
             it(std::move(first)), st(std::move(last)) {
@@ -94,7 +93,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct reverse_fn {

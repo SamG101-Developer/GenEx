@@ -7,7 +7,6 @@ import genex.meta;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj, typename Int>
     concept positionable_iters =
@@ -22,7 +21,6 @@ namespace genex::algorithms::detail::concepts {
         positionable_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj, Int>;
 }
 
-
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename Pred, typename Proj, typename Int>
     requires concepts::positionable_iters<I, S, Pred, Proj, Int>
@@ -33,7 +31,6 @@ namespace genex::algorithms::detail::impl {
         return def;
     }
 }
-
 
 namespace genex {
     struct position_fn {
@@ -50,7 +47,6 @@ namespace genex {
             return algorithms::detail::impl::do_position(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj), def, drop);
         }
     };
-
 
     export inline constexpr position_fn position{};
 }

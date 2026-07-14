@@ -9,7 +9,6 @@ import genex.actions.erase;
 import genex.iterators.access;
 import genex.iterators.prev;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng>
     concept back_poppable_range =
@@ -27,7 +26,6 @@ namespace genex::actions::detail::concepts {
         has_member_erase<Rng> and
         not back_poppable_select_pop_back<Rng>;
 }
-
 
 namespace genex::actions {
     struct pop_back_fn {

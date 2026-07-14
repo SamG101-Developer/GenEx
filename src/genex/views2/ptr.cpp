@@ -10,7 +10,6 @@ import genex.iterators.iter_pair;
 import genex.views2.transform;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept ptr_gettable_iters =
@@ -23,7 +22,6 @@ namespace genex::views::detail::concepts {
         input_range<Rng> and
         ptr_gettable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
-
 
 namespace genex::views {
     struct ptr_fn {

@@ -8,7 +8,6 @@ import genex.meta;
 import genex.operations.empty;
 import std;
 
-
 namespace genex::conditional::detail::concepts {
     template <typename Rng, typename Pred, typename Then>
     concept conditionally_range =
@@ -17,7 +16,6 @@ namespace genex::conditional::detail::concepts {
         std::invocable<Then> and
         std::same_as<std::invoke_result_t<Pred, Rng>, bool>;
 }
-
 
 namespace genex::conditional::detail::impl {
     template <typename Rng, typename Pred, typename Then>
@@ -54,7 +52,6 @@ namespace genex::conditional::detail::impl {
         return std::forward<Rng>(rng);
     }
 }
-
 
 namespace genex {
     struct if_fn {

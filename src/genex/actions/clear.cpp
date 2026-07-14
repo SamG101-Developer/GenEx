@@ -7,14 +7,12 @@ import genex.meta;
 import genex.concepts;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng>
     concept clearable_range =
         input_range<Rng> and
         has_member_clear<Rng>;
 }
-
 
 namespace genex::actions {
     struct clear_fn {

@@ -5,7 +5,6 @@ export module genex.operations.empty;
 import genex.concepts;
 import genex.operations.size;
 
-
 namespace genex::operations::detail::concepts {
     template <typename Rng>
     concept emptyable_range =
@@ -21,7 +20,6 @@ namespace genex::operations::detail::concepts {
         emptyable_range<Rng> and
         not has_member_empty<Rng>;
 }
-
 
 namespace genex::operations {
     struct empty_fn {

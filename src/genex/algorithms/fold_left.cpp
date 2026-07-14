@@ -7,7 +7,6 @@ import genex.meta;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename E, typename F>
     concept left_foldable_iters =
@@ -23,7 +22,6 @@ namespace genex::algorithms::detail::concepts {
         left_foldable_iters<iterator_t<Rng>, sentinel_t<Rng>, E, F>;
 }
 
-
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename E, typename F>
     requires concepts::left_foldable_iters<I, S, E, F>
@@ -35,7 +33,6 @@ namespace genex::algorithms::detail::impl {
         return acc;
     }
 }
-
 
 namespace genex {
     struct fold_left_fn {
@@ -52,7 +49,6 @@ namespace genex {
             return algorithms::detail::impl::do_fold_left(std::move(first), std::move(last), std::forward<E>(init), std::forward<F>(f));
         }
     };
-
 
     export inline constexpr fold_left_fn fold_left{};
 }

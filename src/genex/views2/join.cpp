@@ -10,7 +10,6 @@ import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept joinable_iters =
@@ -23,7 +22,6 @@ namespace genex::views::detail::concepts {
         input_range<Rng> and
         joinable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
-
 
 namespace genex::views::detail::impl {
     struct join_sentinel {};
@@ -126,7 +124,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct join_fn {

@@ -6,13 +6,11 @@ import genex.concepts;
 import genex.iterators.access;
 import std;
 
-
 namespace genex::iterators::detail::concepts {
     template <typename Rng>
     concept can_iter_pair_range =
         input_range<Rng>;
 }
-
 
 namespace genex::iterators {
     struct iter_pair_fn {

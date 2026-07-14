@@ -9,7 +9,6 @@ import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename F, typename Proj = meta::identity>
     concept transformable_iters =
@@ -23,7 +22,6 @@ namespace genex::views::detail::concepts {
         input_range<Rng> and
         transformable_iters<iterator_t<Rng>, sentinel_t<Rng>, F, Proj>;
 }
-
 
 namespace genex::views::detail::impl {
     template <typename S>
@@ -44,14 +42,19 @@ namespace genex::views::detail::impl {
     requires concepts::transformable_iters<I, S, F, Proj>
     struct transform_iterator {
         I it;
-        GENEX_NO_UNIQUE_ADDRESS F f;
-        GENEX_NO_UNIQUE_ADDRESS Proj proj;
+        GENEX_NO_UNIQUE_ADDRESS meta::box<F> f;
+        GENEX_NO_UNIQUE_ADDRESS meta::box<Proj> proj;
 
         using projected_reference_type = std::invoke_result_t<Proj&, iter_reference_t<I>>;
         using transformed_reference_type = std::invoke_result_t<F&, projected_reference_type>;
 
         using value_type = std::remove_cvref_t<transformed_reference_type>;
         using reference_type = transformed_reference_type;
+        // Legacy nested typedefs so std::iterator_traits honours the explicit `iterator_category`; without `reference`
+        // a by-value transform result (prvalue operator*) makes it derive an input category, defeating the
+        // reserve-and-copy fast path in `std::vector(first, last)`.
+        using reference = reference_type;
+        using pointer = void;
         using difference_type = iter_difference_t<I>;
         using iterator_category = std::iterator_traits<I>::iterator_category;
         using iterator_concept = iterator_category;
@@ -76,7 +79,7 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_VIEW_CUSTOM_DEREF {
-            return meta::invoke(self.f, meta::invoke(self.proj, *self.it));
+            return meta::invoke(*self.f, meta::invoke(*self.proj, *self.it));
         }
 
         GENEX_VIEW_ITER_EQ(transform_iterator, transform_iterator) {
@@ -99,7 +102,8 @@ namespace genex::views::detail::impl {
     template <typename I, typename S, typename F, typename Proj>
     requires concepts::transformable_iters<I, S, F, Proj>
     struct transform_view {
-        I it; S st;
+        I it;
+        S st;
         GENEX_NO_UNIQUE_ADDRESS F f;
         GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
@@ -113,7 +117,7 @@ namespace genex::views::detail::impl {
         }
 
         template <typename Self>
-        requires std::convertible_to<S, I>
+            requires std::convertible_to<S, I>
         GENEX_ITER_END {
             return transform_iterator<I, S, F, Proj>{self.st, self.f, self.proj};
         }
@@ -129,7 +133,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct transform_fn {

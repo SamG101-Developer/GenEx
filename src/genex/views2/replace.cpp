@@ -10,7 +10,6 @@ import genex.iterators.iter_pair;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Old, typename New, typename Proj>
     concept replaceable_iters =
@@ -25,12 +24,12 @@ namespace genex::views::detail::concepts {
         replaceable_iters<iterator_t<Rng>, sentinel_t<Rng>, Old, New, Proj>;
 }
 
-
 namespace genex::views::detail {
     template <typename I, typename S, typename Old, typename New, typename Proj>
     requires concepts::replaceable_iters<I, S, Old, New, Proj>
     struct replace_iterator {
-        I it; S st;
+        I it;
+        S st;
         GENEX_NO_UNIQUE_ADDRESS Old old_value;
         GENEX_NO_UNIQUE_ADDRESS New new_value;
         GENEX_NO_UNIQUE_ADDRESS Proj proj;
@@ -72,7 +71,6 @@ namespace genex::views::detail {
         }
     };
 
-
     template <typename I, typename S, typename Old, typename New, typename Proj>
     requires concepts::replaceable_iters<I, S, Old, New, Proj>
     struct replace_view {
@@ -103,7 +101,6 @@ namespace genex::views::detail {
         }
     };
 }
-
 
 namespace genex::views {
     struct replace_fn {

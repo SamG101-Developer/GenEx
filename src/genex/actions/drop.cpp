@@ -10,14 +10,12 @@ import genex.iterators.access;
 import genex.iterators.next;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename Int>
     concept droppable_range =
         forward_range<Rng> and
         std::weakly_incrementable<Int>;
 }
-
 
 namespace genex::actions {
     struct drop_fn {

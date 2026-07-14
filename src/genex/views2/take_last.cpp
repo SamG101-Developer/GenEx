@@ -11,7 +11,6 @@ import genex.iterators.iter_pair;
 import genex.iterators.next;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Int>
     concept takeable_last_iters =
@@ -25,11 +24,10 @@ namespace genex::views::detail::concepts {
         takeable_last_iters<iterator_t<Rng>, sentinel_t<Rng>, Int>;
 }
 
-
 namespace genex::views {
     struct take_last_fn {
         template <typename I, typename S, typename Int>
-        requires detail::concepts::takeable_last_iters<I, S, Int> and std::random_access_iterator<I>
+        requires detail::concepts::takeable_last_iters<I, S, Int> and std::contiguous_iterator<I>
         GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const {
             return genex::span<iter_value_t<I>>(std::move(last) - n, std::move(last));
         }
@@ -43,7 +41,7 @@ namespace genex::views {
         }
 
         template <typename Rng, typename Int>
-        requires detail::concepts::takeable_last_range<Rng, Int> and std::random_access_iterator<iterator_t<Rng>>
+        requires detail::concepts::takeable_last_range<Rng, Int> and std::contiguous_iterator<iterator_t<Rng>>
         GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const {
             auto [first, last] = iterators::iter_pair(rng);
             return genex::span<range_value_t<Rng>>(std::move(last) - n, std::move(last));

@@ -5,14 +5,12 @@ export module genex.iterators.next;
 import genex.concepts;
 import std;
 
-
 namespace genex::iterators::detail::concepts {
     template <typename I, typename S = I>
     concept nextable_iters =
         std::input_or_output_iterator<I> and
         std::sentinel_for<S, I>;
 }
-
 
 namespace genex::iterators {
     struct next_fn {

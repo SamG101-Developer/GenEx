@@ -8,7 +8,6 @@ import genex.iterators.iter_pair;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename E, typename Proj>
     concept can_count_iters =
@@ -22,11 +21,10 @@ namespace genex::algorithms::detail::concepts {
         can_count_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
 }
 
-
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename E, typename Proj>
     requires concepts::can_count_iters<I, S, E, Proj>
-    GENEX_INLINE constexpr auto do_count(I first, S last, E&& elem, Proj &&proj) -> std::size_t {
+    GENEX_INLINE constexpr auto do_count(I first, S last, E &&elem, Proj &&proj) -> std::size_t {
         auto count = 0uz;
         for (; first != last; ++first) {
             if (meta::invoke(proj, *first) == elem) { ++count; }
@@ -34,7 +32,6 @@ namespace genex::algorithms::detail::impl {
         return count;
     }
 }
-
 
 namespace genex {
     struct count_fn {

@@ -7,7 +7,6 @@ import genex.iterators.access;
 import genex.iterators.prev;
 import std;
 
-
 namespace genex::operations::detail::concepts {
     template <typename Rng>
     concept randomly_access_range =
@@ -21,7 +20,6 @@ namespace genex::operations::detail::concepts {
     concept backable_range =
         bidirectional_range<Rng>;
 }
-
 
 namespace genex::operations {
     struct at_fn {

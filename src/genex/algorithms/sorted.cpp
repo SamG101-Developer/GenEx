@@ -8,7 +8,6 @@ import genex.iterators.iter_pair;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename Comp, typename Proj>
     concept sortabled_iters =
@@ -22,7 +21,6 @@ namespace genex::algorithms::detail::concepts {
         sortabled_iters<iterator_t<Rng>, sentinel_t<Rng>, Comp, Proj>;
 }
 
-
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename Comp, typename Proj>
     requires concepts::sortabled_iters<I, S, Comp, Proj>
@@ -34,7 +32,6 @@ namespace genex::algorithms::detail::impl {
         return vec;
     }
 }
-
 
 namespace genex {
     struct sorted_fn {

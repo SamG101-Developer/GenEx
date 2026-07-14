@@ -5,7 +5,6 @@ export module genex.iterators.distance;
 import genex.concepts;
 import std;
 
-
 namespace genex::iterators::detail::concepts {
     template <typename I, typename S>
     concept distancable_iters =
@@ -37,7 +36,6 @@ namespace genex::iterators {
 
     export inline constexpr distance_fn distance{};
 }
-
 
 /*
     struct distance_fn {

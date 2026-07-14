@@ -5,7 +5,6 @@ export module genex.iterators.access;
 import genex.concepts;
 import std;
 
-
 namespace genex::iterators::detail::concepts {
     template <typename Rng>
     concept beginable_range =
@@ -68,7 +67,6 @@ namespace genex::iterators::detail::concepts {
         not has_member_rend<Rng>;
 }
 
-
 namespace genex::iterators {
     struct begin_fn {
         template <typename Rng>
@@ -125,7 +123,6 @@ namespace genex::iterators {
             return std::rend(std::forward<Rng>(rng));
         }
     };
-
 
     export inline constexpr begin_fn begin{};
     export inline constexpr end_fn end{};

@@ -8,7 +8,6 @@ import genex.meta;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj>
     concept takeable_while_iters =
@@ -22,14 +21,14 @@ namespace genex::views::detail::concepts {
         takeable_while_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj>;
 }
 
-
 namespace genex::views::detail::impl {
     struct take_while_sentinel {};
 
     template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::takeable_while_iters<I, S, Pred, Proj>
     struct take_while_iterator {
-        I it; S st;
+        I it;
+        S st;
         GENEX_NO_UNIQUE_ADDRESS Pred pred;
         GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
@@ -79,7 +78,8 @@ namespace genex::views::detail::impl {
     template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::takeable_while_iters<I, S, Pred, Proj>
     struct take_while_view {
-        I it; S st;
+        I it;
+        S st;
         GENEX_NO_UNIQUE_ADDRESS Pred pred;
         GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
@@ -99,7 +99,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct take_while_fn {

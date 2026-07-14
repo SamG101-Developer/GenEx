@@ -8,7 +8,6 @@ import genex.iterators.iter_pair;
 import genex.iterators.prev;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj>
     concept findable_last_if_not_iters =
@@ -22,7 +21,6 @@ namespace genex::algorithms::detail::concepts {
         input_range<Rng> and
         findable_last_if_not_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
 }
-
 
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename Pred, typename Proj>
@@ -45,7 +43,6 @@ namespace genex::algorithms::detail::impl {
         return result;
     }
 }
-
 
 namespace genex {
     struct find_last_if_not_fn {

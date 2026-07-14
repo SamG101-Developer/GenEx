@@ -11,7 +11,6 @@ import genex.iterators.iter_pair;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename E>
     concept splittable_iters =
@@ -25,23 +24,23 @@ namespace genex::views::detail::concepts {
         splittable_iters<iterator_t<Rng>, sentinel_t<Rng>, E>;
 }
 
-
 namespace genex::views {
     struct split_sentinel {};
 
     template <typename I, typename S, typename E>
     requires detail::concepts::splittable_iters<I, S, E>
     struct split_iterator {
-        I it; S st;
+        I it;
+        S st;
         E elem;
 
         using value_type = std::ranges::subrange<I>;
         using reference_type = std::ranges::subrange<I>;
         using difference_type = iter_difference_t<I>;
         using iterator_category =
-            std::conditional_t<std::random_access_iterator<I>, std::random_access_iterator_tag,
-            std::conditional_t<std::bidirectional_iterator<I>, std::bidirectional_iterator_tag,
-            std::forward_iterator_tag>>;
+        std::conditional_t<
+            std::random_access_iterator<I>, std::random_access_iterator_tag, std::conditional_t<
+            std::bidirectional_iterator<I>, std::bidirectional_iterator_tag, std::forward_iterator_tag>>;
         using iterator_concept = iterator_category;
         GENEX_ITER_OPS(split_iterator);
 
@@ -62,7 +61,10 @@ namespace genex::views {
         GENEX_VIEW_CUSTOM_PREV {
             while (self.it != self.st) {
                 --self.it;
-                if (operations::eq{}(*self.it, self.elem)) { ++self.it; break; }
+                if (operations::eq{}(*self.it, self.elem)) {
+                    ++self.it;
+                    break;
+                }
             }
             return self;
         }
@@ -86,7 +88,8 @@ namespace genex::views {
     template <typename I, typename S, typename E>
     requires detail::concepts::splittable_iters<I, S, E>
     struct split_view {
-        I it; S st;
+        I it;
+        S st;
         E elem;
 
         GENEX_INLINE constexpr split_view(I first, S last, E e) :
@@ -111,7 +114,6 @@ namespace genex::views {
     };
 }
 
-
 namespace genex::views {
     struct split_fn {
         template <typename I, typename S, typename E>
@@ -122,7 +124,7 @@ namespace genex::views {
 
         template <typename Rng, typename E>
         requires detail::concepts::splittable_range<Rng, E>
-        GENEX_INLINE constexpr auto operator()(Rng&& rng, E elem) const -> split_view<iterator_t<Rng>, sentinel_t<Rng>, E> {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> split_view<iterator_t<Rng>, sentinel_t<Rng>, E> {
             auto [first, last] = iterators::iter_pair(rng);
             return split_view(std::move(first), std::move(last), std::move(elem));
         }

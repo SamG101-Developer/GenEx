@@ -8,14 +8,13 @@ import genex.meta;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename To, typename I, typename S>
     concept dynamic_castable_iters =
         std::input_iterator<I> and
         std::sentinel_for<S, I> and
         (std::is_pointer_v<To> or std::is_lvalue_reference_v<To>) and
-        requires (iter_value_t<I> &&from) { dynamic_cast<To>(from); };
+        requires(iter_value_t<I> &&from) { dynamic_cast<To>(from); };
 
     template <typename To, typename Rng>
     concept dynamic_castable_range =
@@ -23,14 +22,14 @@ namespace genex::views::detail::concepts {
         dynamic_castable_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
-
 namespace genex::views::detail::impl {
     struct cast_dynamic_sentinel {};
 
     template <typename To, typename I, typename S>
     requires concepts::dynamic_castable_iters<To, I, S>
     struct cast_dynamic_iterator {
-        I it; S st;
+        I it;
+        S st;
         mutable To cached = nullptr;
 
         using value_type = To;
@@ -103,7 +102,8 @@ namespace genex::views::detail::impl {
     template <typename To, typename I, typename S>
     requires concepts::dynamic_castable_iters<To, I, S>
     struct cast_dynamic_view {
-        I it; S st;
+        I it;
+        S st;
 
         GENEX_INLINE constexpr cast_dynamic_view(I first, S last) :
             it(std::move(first)), st(std::move(last)) {
@@ -120,7 +120,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     template <typename To>
@@ -146,4 +145,3 @@ namespace genex::views {
     export template <typename To>
     inline constexpr cast_dynamic_fn<To> cast_dynamic{};
 }
-

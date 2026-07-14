@@ -7,7 +7,6 @@ import genex.iterators.iter_pair;
 import genex.meta;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj>
     concept findable_if_not_iters =
@@ -21,7 +20,6 @@ namespace genex::algorithms::detail::concepts {
         findable_if_not_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
 }
 
-
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::findable_if_not_iters<I, S, Pred, Proj>
@@ -32,7 +30,6 @@ namespace genex::algorithms::detail::impl {
         return first;
     }
 }
-
 
 namespace genex {
     struct find_if_not_fn {

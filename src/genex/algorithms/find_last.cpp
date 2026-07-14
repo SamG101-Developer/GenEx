@@ -9,7 +9,6 @@ import genex.iterators.prev;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename E, typename Proj>
     concept findable_last_iters =
@@ -23,7 +22,6 @@ namespace genex::algorithms::detail::concepts {
         input_range<Rng> and
         findable_last_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
 }
-
 
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename E, typename Proj>
@@ -46,7 +44,6 @@ namespace genex::algorithms::detail::impl {
         return result;
     }
 }
-
 
 namespace genex {
     struct find_last_fn {

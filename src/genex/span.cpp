@@ -4,7 +4,6 @@ module;
 export module genex.span;
 import std;
 
-
 namespace genex {
     export template <typename T>
     class span {
@@ -30,7 +29,7 @@ namespace genex {
         }
 
         template <typename It, typename St>
-        requires std::contiguous_iterator<It> and std::sized_sentinel_for<St, It>
+            requires std::contiguous_iterator<It> and std::sized_sentinel_for<St, It>
         GENEX_INLINE constexpr span(It begin, St end) noexcept :
             m_ptr(std::addressof(*begin)),
             m_size(static_cast<std::size_t>(end - begin)) {

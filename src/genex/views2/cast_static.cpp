@@ -9,7 +9,6 @@ import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename To, typename I, typename S>
     concept static_castable_iters =
@@ -23,7 +22,6 @@ namespace genex::views::detail::concepts {
         static_castable_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
-
 namespace genex::views::detail::impl {
     template <typename To, typename I, typename S>
     requires concepts::static_castable_iters<To, I, S>
@@ -36,6 +34,9 @@ namespace genex::views::detail::impl {
         using iterator_category = std::iterator_traits<I>::iterator_category;
         using iterator_concept = iterator_category;
         GENEX_ITER_OPS(cast_static_iterator);
+
+        using reference = reference_type;
+        using pointer = void;
 
         GENEX_INLINE constexpr cast_static_iterator() = default;
 
@@ -91,7 +92,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     template <typename To>

@@ -9,10 +9,9 @@ import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::impl {
     template <typename Int>
-    requires std::weakly_incrementable<Int>
+        requires std::weakly_incrementable<Int>
     struct iota_iterator {
         Int lo;
         Int hi;
@@ -25,6 +24,9 @@ namespace genex::views::detail::impl {
         using iterator_category = std::random_access_iterator_tag;
         using iterator_concept = iterator_category;
         GENEX_ITER_OPS(iota_iterator)
+
+        using reference = reference_type;
+        using pointer = void;
 
         GENEX_INLINE constexpr iota_iterator() = default;
 
@@ -55,7 +57,7 @@ namespace genex::views::detail::impl {
     };
 
     template <typename Int>
-    requires std::weakly_incrementable<Int>
+        requires std::weakly_incrementable<Int>
     struct iota_view {
         Int lo;
         Int hi;
@@ -82,23 +84,22 @@ namespace genex::views::detail::impl {
     };
 }
 
-
 namespace genex::views {
     struct iota_fn {
         template <typename Int>
-        requires std::weakly_incrementable<Int>
+            requires std::weakly_incrementable<Int>
         GENEX_INLINE constexpr auto operator()(const Int lo, const Int hi, const Int step = 1) const {
             return detail::impl::iota_view(lo, hi, step);
         }
 
         template <typename Int>
-        requires std::weakly_incrementable<Int>
+            requires std::weakly_incrementable<Int>
         GENEX_INLINE constexpr auto operator()(const Int hi) const {
             return detail::impl::iota_view(static_cast<Int>(0), hi, static_cast<Int>(1));
         }
 
         template <typename Int>
-        requires std::weakly_incrementable<Int> and std::numeric_limits<Int>::is_specialized
+            requires std::weakly_incrementable<Int> and std::numeric_limits<Int>::is_specialized
         GENEX_INLINE constexpr auto operator()() const {
             return detail::impl::iota_view(static_cast<Int>(0), std::numeric_limits<Int>::max(), static_cast<Int>(1));
         }

@@ -9,7 +9,6 @@ import genex.iterators.iter_pair;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename E, typename Proj>
     concept containable_iters =
@@ -24,7 +23,6 @@ namespace genex::algorithms::detail::concepts {
         containable_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
 }
 
-
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename E, typename Proj>
     requires concepts::containable_iters<I, S, E, Proj>
@@ -33,7 +31,6 @@ namespace genex::algorithms::detail::impl {
         return it != last;
     }
 }
-
 
 namespace genex {
     struct contains_fn {

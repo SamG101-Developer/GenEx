@@ -5,7 +5,6 @@ export module genex.operations.size;
 import genex.concepts;
 import std;
 
-
 namespace genex::operations::detail::concepts {
     template <typename Rng>
     concept sizeable_range =
@@ -28,7 +27,6 @@ namespace genex::operations::detail::concepts {
         not has_std_size<Rng> and
         not has_member_size<Rng>;
 }
-
 
 namespace genex::operations {
     struct size_fn {

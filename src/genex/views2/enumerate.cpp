@@ -9,7 +9,6 @@ import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept enumerable_iters =
@@ -21,7 +20,6 @@ namespace genex::views::detail::concepts {
         input_range<Rng> and
         enumerable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
-
 
 namespace genex::views::detail::impl {
     /**
@@ -39,6 +37,11 @@ namespace genex::views::detail::impl {
 
         using value_type = std::pair<std::size_t, iter_value_t<I>>;
         using reference_type = std::pair<std::size_t, iter_reference_t<I>>;
+        // `reference`/`pointer` are the legacy nested typedefs std::iterator_traits needs to honour the explicit
+        // `iterator_category` below; without `reference` it derives the category from operator* (a prvalue pair) and
+        // demotes this to an input iterator, which makes `std::vector(first, last)` skip its reserve-and-copy fast path.
+        using reference = value_type;
+        using pointer = void;
         using difference_type = iter_difference_t<I>;
         using iterator_category = std::iterator_traits<I>::iterator_category;
         using iterator_concept = iterator_category;
@@ -77,7 +80,8 @@ namespace genex::views::detail::impl {
     template <typename I, typename S>
     requires concepts::enumerable_iters<I, S>
     struct enumerate_view {
-        I it; S st;
+        I it;
+        S st;
 
         GENEX_INLINE constexpr enumerate_view(I it, S st) :
             it(std::move(it)), st(std::move(st)) {
@@ -99,7 +103,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct enumerate_fn {

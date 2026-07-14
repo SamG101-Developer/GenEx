@@ -10,7 +10,6 @@ import genex.algorithms.find_if;
 import genex.iterators.access;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename Pred, typename Proj>
     concept removable_if_range =
@@ -18,7 +17,6 @@ namespace genex::actions::detail::concepts {
         std::permutable<iterator_t<Rng>> and
         std::indirect_unary_predicate<Pred, std::projected<iterator_t<Rng>, Proj>>;
 }
-
 
 namespace genex::actions {
     struct remove_if_fn {

@@ -10,7 +10,6 @@ import genex.iterators.iter_pair;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename New>
     concept interspersable_iters =
@@ -27,14 +26,14 @@ namespace genex::views::detail::concepts {
         interspersable_iters<iterator_t<Rng>, sentinel_t<Rng>, New>;
 }
 
-
 namespace genex::views::detail::impl {
     struct intersperse_sentinel {};
 
     template <typename I, typename S, typename New>
     requires concepts::interspersable_iters<I, S, New>
     struct intersperse_iterator {
-        I it; S st;
+        I it;
+        S st;
         GENEX_NO_UNIQUE_ADDRESS I base_it;
         GENEX_NO_UNIQUE_ADDRESS New new_value;
         bool yield_new = false;
@@ -97,11 +96,11 @@ namespace genex::views::detail::impl {
         }
     };
 
-
     template <typename I, typename S, typename New>
     requires concepts::interspersable_iters<I, S, New>
     struct intersperse_view {
-        I it; S st;
+        I it;
+        S st;
         GENEX_NO_UNIQUE_ADDRESS New new_value;
 
         GENEX_INLINE constexpr intersperse_view(I first, S last, New new_val) :
@@ -125,7 +124,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct intersperse_fn {

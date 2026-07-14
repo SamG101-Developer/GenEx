@@ -10,7 +10,6 @@ import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename New>
     concept joinable_with_iters =
@@ -25,14 +24,14 @@ namespace genex::views::detail::concepts {
         joinable_with_iters<iterator_t<Rng>, sentinel_t<Rng>, New>;
 }
 
-
 namespace genex::views::detail::impl {
     struct join_with_sentinel {};
 
     template <typename I, typename S, typename New>
     requires concepts::joinable_with_iters<I, S, New>
     struct join_with_iterator {
-        I it; S st;
+        I it;
+        S st;
         New new_value;
         bool use_new = false;
         iterator_t<iter_value_t<I>> inner_it;
@@ -115,7 +114,8 @@ namespace genex::views::detail::impl {
     template <typename I, typename S, typename New>
     requires concepts::joinable_with_iters<I, S, New>
     struct join_with_view {
-        I it; S st;
+        I it;
+        S st;
         New new_value;
 
         GENEX_INLINE constexpr join_with_view(I first, S last, New new_val) :
@@ -143,7 +143,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct join_with_fn {

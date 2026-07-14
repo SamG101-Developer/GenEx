@@ -10,7 +10,6 @@ import genex.iterators.iter_pair;
 import genex.operations.cmp;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename E, typename Proj>
     concept removable_iters =
@@ -24,14 +23,14 @@ namespace genex::views::detail::concepts {
         removable_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
 }
 
-
 namespace genex::views::detail {
-    struct remove_sentinel{};
+    struct remove_sentinel {};
 
     template <typename I, typename S, typename E, typename Proj>
     requires concepts::removable_iters<I, S, E, Proj>
     struct remove_iterator {
-        I it; S st;
+        I it;
+        S st;
         GENEX_NO_UNIQUE_ADDRESS E value;
         GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
@@ -79,21 +78,21 @@ namespace genex::views::detail {
 
     private:
         template <typename Self>
-        GENEX_INLINE constexpr auto fwd_to_valid(this Self&& self) -> void {
+        GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
             while (self.it != self.st and operations::eq{}(std::invoke(self.proj, *self.it), self.value)) { ++self.it; }
         }
 
         template <typename Self>
-        GENEX_INLINE constexpr auto bwd_to_valid(this Self&& self) -> void {
+        GENEX_INLINE constexpr auto bwd_to_valid(this Self &&self) -> void {
             while (self.it != self.st and operations::eq{}(std::invoke(self.proj, *self.it), self.value)) { --self.it; }
         }
     };
 
-
     template <typename I, typename S, typename E, typename Proj>
     requires concepts::removable_iters<I, S, E, Proj>
     struct remove_view {
-        I it; S st;
+        I it;
+        S st;
         GENEX_NO_UNIQUE_ADDRESS E value;
         GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
@@ -113,7 +112,6 @@ namespace genex::views::detail {
         }
     };
 }
-
 
 namespace genex::views {
     struct remove_fn {

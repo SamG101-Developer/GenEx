@@ -10,7 +10,6 @@ import genex.algorithms.tuple;
 import genex.views2.transform;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept mappable_iters =
@@ -23,7 +22,6 @@ namespace genex::views::detail::concepts {
         input_range<Rng> and
         mappable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
-
 
 namespace genex::views {
     template <std::size_t N>
@@ -49,4 +47,3 @@ namespace genex::views {
     export inline constexpr map_fn<0> keys{};
     export inline constexpr map_fn<1> vals{};
 }
-

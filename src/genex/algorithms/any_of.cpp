@@ -8,16 +8,14 @@ import genex.algorithms.find_if;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename Pred, typename Proj>
-    requires concepts::quantifiable_iters<I, S, Pred, Proj>
+        requires concepts::quantifiable_iters<I, S, Pred, Proj>
     GENEX_INLINE constexpr auto do_any_of(I first, S last, Pred &&pred, Proj &&proj) -> bool {
         auto it = genex::find_if(std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
         return it != last;
     }
 }
-
 
 namespace genex {
     struct any_of_fn {

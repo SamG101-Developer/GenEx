@@ -4,13 +4,11 @@ module;
 export module genex.iterators.prev;
 import std;
 
-
 namespace genex::iterators::detail::concepts {
     template <typename I>
     concept prevable_iters =
         std::bidirectional_iterator<I>;
 }
-
 
 namespace genex::iterators {
     struct prev_fn {

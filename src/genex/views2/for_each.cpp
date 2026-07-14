@@ -9,7 +9,6 @@ import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S, typename F>
     concept for_eachable_iters =
@@ -22,7 +21,6 @@ namespace genex::views::detail::concepts {
         input_range<Rng> and
         for_eachable_iters<iterator_t<Rng>, sentinel_t<Rng>, F>;
 }
-
 
 namespace genex::views {
     struct for_each_fn {

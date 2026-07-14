@@ -4,14 +4,13 @@ module;
 export module genex.meta;
 import std;
 
-
 export namespace genex::meta::detail::concepts {
     template <typename T>
-    concept dereferenceable = requires(T &&t) {
+    concept dereferenceable = requires(T &&t)
+    {
         { *std::forward<T>(t) };
     };
 }
-
 
 namespace genex::meta {
     struct deref_fn {
@@ -70,8 +69,51 @@ namespace genex::meta {
     };
 
     export inline constexpr invoke_fn invoke{};
-}
 
+    /**
+     * A minimal movable-box: wraps a value so it can be stored as a member while keeping the enclosing type assignable,
+     * even when @c T is only (copy/move)-constructible but not assignable. This is the case for a capturing lambda,
+     * whose assignment operators are deleted; storing it directly would delete the enclosing iterator's assignment and
+     * stop it modelling @c std::movable / @c std::input_iterator. Assignment is emulated via destroy-then-reconstruct
+     * (mirrors @c std::ranges' movable-box). Access the value with @c operator*.
+     */
+    export template <typename T>
+    class box {
+        GENEX_NO_UNIQUE_ADDRESS T m_value;
+
+    public:
+        box() requires std::default_initializable<T> = default;
+
+        GENEX_INLINE constexpr box(T value) noexcept(std::is_nothrow_move_constructible_v<T>) :
+            m_value(std::move(value)) {
+        }
+
+        box(const box &) = default;
+        box(box &&) = default;
+        ~box() = default;
+
+        GENEX_INLINE constexpr auto operator=(const box &that) -> box& requires std::copy_constructible<T> {
+            if (this != std::addressof(that)) {
+                std::destroy_at(std::addressof(m_value));
+                std::construct_at(std::addressof(m_value), that.m_value);
+            }
+            return *this;
+        }
+
+        GENEX_INLINE constexpr auto operator=(box &&that) noexcept(std::is_nothrow_move_constructible_v<T>) -> box& requires std::move_constructible<T> {
+            if (this != std::addressof(that)) {
+                std::destroy_at(std::addressof(m_value));
+                std::construct_at(std::addressof(m_value), std::move(that.m_value));
+            }
+            return *this;
+        }
+
+        template <typename Self>
+        GENEX_NODISCARD GENEX_INLINE constexpr auto operator*(this Self &&self) noexcept -> decltype(auto) {
+            return (std::forward<Self>(self).m_value);
+        }
+    };
+}
 
 namespace genex::meta::detail {
     // N-arg general implementation
@@ -178,7 +220,6 @@ namespace genex::meta::detail {
     };
 }
 
-
 namespace genex::meta {
     struct bind_back_fn {
         template <typename F, typename... BoundArgs>
@@ -190,7 +231,6 @@ namespace genex::meta {
 
     export inline constexpr bind_back_fn bind_back{};
 }
-
 
 namespace genex::meta {
     template <typename F>

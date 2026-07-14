@@ -8,7 +8,6 @@ import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::algorithms::detail::concepts {
     template <typename I, typename S, typename Pred, typename Proj, typename Int>
     concept positionable_last_iters =
@@ -23,14 +22,14 @@ namespace genex::algorithms::detail::concepts {
         positionable_last_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj, Int>;
 }
 
-
 namespace genex::algorithms::detail::impl {
     template <typename I, typename S, typename Pred, typename Proj, typename Int>
     requires concepts::positionable_last_iters<I, S, Pred, Proj, Int> and std::bidirectional_iterator<I>
     GENEX_INLINE constexpr auto do_position_last(I first, S last, Pred &&pred, Proj &&proj, const Int def) -> Int {
         auto pos = iterators::distance(first, last);
         while (first != last) {
-            --last; --pos;
+            --last;
+            --pos;
             if (meta::invoke(pred, meta::invoke(proj, *last))) { return static_cast<Int>(pos); }
         }
         return def;
@@ -46,7 +45,6 @@ namespace genex::algorithms::detail::impl {
         return pos;
     }
 }
-
 
 namespace genex {
     struct position_last_fn {

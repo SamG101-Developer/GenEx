@@ -9,7 +9,6 @@ import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename T1, typename T2>
     using interleave_common_t = std::common_type_t<
@@ -32,13 +31,14 @@ namespace genex::views::detail::concepts {
         interleavable_iters<iterator_t<Rng1>, sentinel_t<Rng1>, iterator_t<Rng2>, sentinel_t<Rng2>>;
 }
 
-
 namespace genex::views::detail::impl {
     template <typename I1, typename S1, typename I2, typename S2>
     requires concepts::interleavable_iters<I1, S1, I2, S2>
     struct interleave_iterator {
-        I1 it1; S1 st1;
-        I2 it2; S2 st2;
+        I1 it1;
+        S1 st1;
+        I2 it2;
+        S2 st2;
         bool use_first = true;
         bool extend;
 
@@ -77,7 +77,7 @@ namespace genex::views::detail::impl {
         }
 
         template <typename Self>
-        GENEX_VIEW_CUSTOM_PREV = delete;  // for now
+        GENEX_VIEW_CUSTOM_PREV = delete; // for now
 
         template <typename Self>
         GENEX_VIEW_CUSTOM_DEREF {
@@ -107,8 +107,10 @@ namespace genex::views::detail::impl {
     template <typename I1, typename S1, typename I2, typename S2>
     requires concepts::interleavable_iters<I1, S1, I2, S2>
     struct interleave_view {
-        I1 it1; S1 st1;
-        I2 it2; S2 st2;
+        I1 it1;
+        S1 st1;
+        I2 it2;
+        S2 st2;
         bool extend;
 
         GENEX_INLINE constexpr interleave_view(I1 first1, S1 last1, I2 first2, S2 last2, const bool extend) :
@@ -133,7 +135,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct interleave_fn {

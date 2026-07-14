@@ -9,7 +9,6 @@ import genex.actions.insert;
 import genex.iterators.access;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename... Rngs>
     concept concatenatable_range =
@@ -17,7 +16,6 @@ namespace genex::actions::detail::concepts {
         (input_range<Rngs> and ...) and
         requires { typename std::common_type_t<range_value_t<Rngs>...>; };
 }
-
 
 namespace genex::actions {
     struct concat_fn {

@@ -8,7 +8,6 @@ import genex.iterators.access;
 import genex.iterators.iter_pair;
 import std;
 
-
 namespace genex {
     export template <template <typename> typename Out, typename Rng>
     requires input_range<Rng> and std::copyable<range_value_t<Rng>> and requires(Rng &&rng) { Out<range_value_t<Rng>>(iterators::begin(rng), iterators::end(rng)); }

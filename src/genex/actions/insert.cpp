@@ -7,7 +7,6 @@ import genex.concepts;
 import genex.meta;
 import std;
 
-
 namespace genex::actions::detail::concepts {
     template <typename Rng, typename I, typename E>
     concept insertable_range =
@@ -33,7 +32,6 @@ namespace genex::actions::detail::concepts {
         not has_member_push<Rng> and
         not has_member_emplace<Rng>;
 }
-
 
 namespace genex::actions {
     struct insert_fn {

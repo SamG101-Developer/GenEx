@@ -10,7 +10,6 @@ import genex.meta;
 import genex.span;
 import std;
 
-
 namespace genex::views::detail::concepts {
     template <typename I, typename S>
     concept addressable_iters =
@@ -24,7 +23,6 @@ namespace genex::views::detail::concepts {
         input_range<Rng> and
         addressable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
-
 
 namespace genex::views::detail::impl {
     /**
@@ -41,6 +39,11 @@ namespace genex::views::detail::impl {
 
         using value_type = std::add_pointer_t<iter_value_t<I>>;
         using reference_type = std::add_pointer_t<iter_value_t<I>>;
+        // Legacy nested typedefs so std::iterator_traits honours the explicit `iterator_category`; without `reference`
+        // the prvalue pointer from operator* makes it derive an input category, defeating the reserve-and-copy fast
+        // path in `std::vector(first, last)`.
+        using reference = reference_type;
+        using pointer = void;
         using difference_type = iter_difference_t<I>;
         using iterator_category = std::iterator_traits<I>::iterator_category;
         using iterator_concept = iterator_category;
@@ -78,7 +81,8 @@ namespace genex::views::detail::impl {
     template <typename I, typename S>
     requires concepts::addressable_iters<I, S>
     struct address_of_view {
-        I it; S st;
+        I it;
+        S st;
 
         GENEX_INLINE constexpr address_of_view(I first, S last) noexcept(
             std::is_nothrow_move_constructible_v<I> and
@@ -87,13 +91,13 @@ namespace genex::views::detail::impl {
         }
 
         template <typename Self>
-        GENEX_NODISCARD GENEX_INLINE constexpr auto begin(this Self&& self) noexcept(
+        GENEX_NODISCARD GENEX_INLINE constexpr auto begin(this Self &&self) noexcept(
             std::is_nothrow_constructible_v<address_of_view, I>) -> auto {
             return address_of_iterator<I, S>(self.it);
         }
 
         template <typename Self>
-        GENEX_NODISCARD GENEX_INLINE constexpr auto end(this Self&& self) noexcept(
+        GENEX_NODISCARD GENEX_INLINE constexpr auto end(this Self &&self) noexcept(
             std::is_nothrow_constructible_v<address_of_view, S>) -> auto {
             return address_of_iterator<I, S>(self.st);
         }
@@ -105,7 +109,6 @@ namespace genex::views::detail::impl {
         }
     };
 }
-
 
 namespace genex::views {
     struct address_of_fn {

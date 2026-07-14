@@ -5,14 +5,12 @@ export module genex.iterators.advance;
 import genex.concepts;
 import std;
 
-
 namespace genex::iterators::detail::concepts {
     template <typename I>
     concept advancable_iters =
         std::input_iterator<I> and
         requires(I &it, iter_difference_t<I> n) { std::advance(it, n); };
 }
-
 
 namespace genex::iterators {
     struct advance_fn {

@@ -5,6 +5,9 @@ ranges and iterators. It is designed with a generator interface, which allows fo
 ranges. Concepts are used to restrict the operations that can be performed on which types; for example, reversing a
 range will require the range be bidirectional.
 
+**Since the creation of this library, the implementation has shifted from generator based implementations to iterator
+based implementations, for vast performance gains.**
+
 ## Views
 
 GenEx provides a set of views that can be used to transform and filter ranges. These views are lazily evaluated, meaning
@@ -59,10 +62,5 @@ such as `any_of` or `fold_left`.
 ## Iterators
 
 The iterator abstraction layer provides a common interface to access key iteration members, such as `begin`, `end`,
-`data` etc. There are multiple specializations of `begin` for example, allowing for different ways to access the data
+`data` etc. There are multiple specialisations of `begin` for example, allowing for different ways to access the data
 depending on the design of the container.
-
-## Todo
-
-More algorithms, views and actions need to be implemented. The library is still in its early stages. `views::chunk` is
-also broken.
