@@ -278,14 +278,18 @@ namespace genex::views::detail::impl {
 namespace genex::views {
     struct concat_fn {
         template <typename... Is, typename... Ss>
-            requires detail::concepts::concatable_iters<std::tuple<Is...>, std::tuple<Ss...>>
-        GENEX_INLINE constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const {
+        requires detail::concepts::concatable_iters<std::tuple<Is...>, std::tuple<Ss...>>
+        GENEX_INLINE constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const noexcept(
+            SAFE_IMPL_CTOR(concat_view, std::tuple<Is...>, std::tuple<Ss...>) and
+            SAFE_MOVE(std::tuple<Is...>) and SAFE_MOVE(std::tuple<Ss...>)) {
             return detail::impl::concat_view<std::ranges::subrange<Is, Ss>...>(std::move(first), std::move(last));
         }
 
         template <typename... Rngs>
-            requires (detail::concepts::concatable_range<Rngs...> and sizeof...(Rngs) > 1)
-        GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const {
+        requires (detail::concepts::concatable_range<Rngs...> and sizeof...(Rngs) > 1)
+        GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const noexcept(
+            // SAFE_IMPL_CTOR(concat_view, std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>) and
+            SAFE_MOVE(std::tuple<iterator_t<Rngs>...>) and SAFE_MOVE(std::tuple<sentinel_t<Rngs>...>)) {
             return detail::impl::concat_view<Rngs...>(
                 std::make_tuple(iterators::begin(std::forward<Rngs>(ranges))...),
                 std::make_tuple(iterators::end(std::forward<Rngs>(ranges))...));

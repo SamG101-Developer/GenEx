@@ -43,18 +43,23 @@ namespace genex::views {
     struct materialize_fn {
         template <typename I, typename S>
         requires detail::concepts::materializable_iters<Cache, I, S>
-        GENEX_INLINE constexpr auto operator()(I first, S last) const {
+        GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
+            // SAFE_CALL(detail::impl::do_materialize<Cache>, I, S) and
+            SAFE_MOVE(I) and SAFE_MOVE(S)) {
             return detail::impl::do_materialize<Cache>(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::materializable_range<Cache, Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            // SAFE_CALL(detail::impl::do_materialize<Cache>, iterator_t<Rng>, sentinel_t<Rng>) and
+            SAFE_MOVE(Rng)) {
             auto [first, last] = iterators::iter_pair(rng);
             return detail::impl::do_materialize<Cache>(std::move(first), std::move(last));
         }
 
-        GENEX_INLINE constexpr auto operator()() const {
+        GENEX_INLINE constexpr auto operator()() const noexcept(
+            SAFE_CTOR(materialize_fn)) {
             return meta::bind_back(materialize_fn{});
         }
     };

@@ -184,13 +184,17 @@ namespace genex::views {
     struct zip_fn {
         template <typename... Is, typename... Ss>
         requires detail::concepts::zippable_iters<std::tuple<Is...>, std::tuple<Ss...>>
-        GENEX_INLINE constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const {
+        GENEX_INLINE constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const noexcept(
+            SAFE_IMPL_CTOR(zip_view, std::tuple<Is...>, std::tuple<Ss...>) and
+            SAFE_MOVE(std::tuple<Is...>) and SAFE_MOVE(std::tuple<Ss...>)) {
             return detail::impl::zip_view<std::ranges::subrange<Is, Ss>...>(std::move(first), std::move(last));
         }
 
         template <typename... Rngs>
         requires detail::concepts::zippable_range<Rngs...> and (sizeof...(Rngs) > 1)
-        GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const {
+        GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const noexcept(
+            // SAFE_IMPL_CTOR(zip_view, std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>) and
+            SAFE_MOVE(std::tuple<iterator_t<Rngs>...>) and SAFE_MOVE(std::tuple<sentinel_t<Rngs>...>)) {
             return detail::impl::zip_view<Rngs...>(
                 std::make_tuple(iterators::begin(std::forward<Rngs>(ranges))...),
                 std::make_tuple(iterators::end(std::forward<Rngs>(ranges))...));
@@ -198,7 +202,8 @@ namespace genex::views {
 
         template <typename Rng2>
         requires detail::concepts::zippable_range<Rng2>
-        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
+        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const noexcept(
+            SAFE_CTOR(zip_fn)) {
             return meta::bind_back(zip_fn{}, std::forward<Rng2>(rng2));
         }
     };

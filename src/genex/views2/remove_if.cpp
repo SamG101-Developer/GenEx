@@ -115,20 +115,25 @@ namespace genex::views {
     struct remove_if_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::removable_if_iters<I, S, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const noexcept(
+            SAFE_IMPL_CTOR(remove_if_view, I, S, Pred, Proj) and
+            SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
             return detail::impl::remove_if_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::removable_if_range<Rng, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const noexcept(
+            SAFE_IMPL_CTOR(remove_if_view, iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj) and
+            SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
             auto [first, last] = iterators::iter_pair(rng);
             return detail::impl::remove_if_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
         }
 
         template <typename Pred, typename Proj = meta::identity>
         requires (not range<Pred>)
-        GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const noexcept(
+            SAFE_CTOR(remove_if_fn) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
             return meta::bind_back(remove_if_fn{}, std::move(pred), std::move(proj));
         }
     };

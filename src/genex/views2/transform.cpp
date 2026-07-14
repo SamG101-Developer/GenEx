@@ -138,20 +138,25 @@ namespace genex::views {
     struct transform_fn {
         template <typename I, typename S, typename F, typename Proj = meta::identity>
         requires detail::concepts::transformable_iters<I, S, F, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, F f, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(I first, S last, F f, Proj proj = {}) const noexcept(
+            SAFE_IMPL_CTOR(transform_view, I, S, F, Proj) and SAFE_MOVE(I) and
+            SAFE_MOVE(S) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
             return detail::impl::transform_view(std::move(first), std::move(last), std::move(f), std::move(proj));
         }
 
         template <typename Rng, typename F, typename Proj = meta::identity>
         requires detail::concepts::transformable_range<Rng, F, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const noexcept(
+            SAFE_IMPL_CTOR(transform_view, iterator_t<Rng>, sentinel_t<Rng>, F, Proj) and
+            SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
             auto [first, last] = iterators::iter_pair(rng);
             return detail::impl::transform_view(std::move(first), std::move(last), std::move(f), std::move(proj));
         }
 
         template <typename F, typename Proj = meta::identity>
         requires (not range<F>)
-        GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const noexcept(
+            SAFE_CTOR(transform_fn) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
             return meta::bind_back(transform_fn{}, std::move(f), std::move(proj));
         }
     };

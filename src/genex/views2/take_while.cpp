@@ -104,19 +104,24 @@ namespace genex::views {
     struct take_while_fn {
         template <typename I, typename S, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::takeable_while_iters<I, S, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const noexcept(
+            SAFE_IMPL_CTOR(take_while_view, I, S, Pred, Proj) and
+            SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
             return detail::impl::take_while_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
         }
 
         template <typename Rng, typename Pred, typename Proj = meta::identity>
         requires detail::concepts::takeable_while_range<Rng, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const noexcept(
+            SAFE_IMPL_CTOR(take_while_view, iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj) and
+            SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
             auto [first, last] = iterators::iter_pair(rng);
             return detail::impl::take_while_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
         }
 
         template <typename Pred, typename Proj = meta::identity>
-        GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const noexcept(
+            SAFE_CTOR(take_while_fn) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
             return meta::bind_back(take_while_fn{}, std::move(pred), std::move(proj));
         }
     };

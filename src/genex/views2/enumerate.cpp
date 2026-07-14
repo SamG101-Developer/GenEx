@@ -108,18 +108,22 @@ namespace genex::views {
     struct enumerate_fn {
         template <typename I, typename S>
         requires detail::concepts::enumerable_iters<I, S>
-        GENEX_INLINE constexpr auto operator()(I first, S last) const {
+        GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
+            SAFE_IMPL_CTOR(enumerate_view, I, S) and
+            SAFE_MOVE(I) and SAFE_MOVE(S)) {
             return detail::impl::enumerate_view(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::enumerable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            SAFE_IMPL_CTOR(enumerate_view, iterator_t<Rng>, sentinel_t<Rng>)) {
             auto [first, last] = iterators::iter_pair(rng);
             return detail::impl::enumerate_view(std::move(first), std::move(last));
         }
 
-        GENEX_INLINE constexpr auto operator()() const {
+        GENEX_INLINE constexpr auto operator()() const noexcept(
+            SAFE_CTOR(enumerate_fn)) {
             return meta::bind_back(enumerate_fn{});
         }
     };

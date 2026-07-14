@@ -147,20 +147,25 @@ namespace genex::views {
     struct duplicates_fn {
         template <typename I, typename S, typename Comp = operations::eq, typename Proj = meta::identity>
         requires detail::concepts::duplicate_checkable_iters<I, S, Comp, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Comp comp = {}, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(I first, S last, Comp comp = {}, Proj proj = {}) const noexcept(
+            SAFE_IMPL_CTOR(duplicate_view, I, S, Comp, Proj) and
+            SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {
             return detail::impl::duplicate_view(std::move(first), std::move(last), std::move(comp), std::move(proj));
         }
 
         template <typename Rng, typename Comp = operations::eq, typename Proj = meta::identity>
         requires detail::concepts::duplicate_checkable_range<Rng, Comp, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const noexcept(
+            SAFE_IMPL_CTOR(duplicate_view, iterator_t<Rng>, sentinel_t<Rng>, Comp, Proj) and
+            SAFE_MOVE(Rng) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {
             auto [first, last] = iterators::iter_pair(rng);
             return detail::impl::duplicate_view(std::move(first), std::move(last), std::move(comp), std::move(proj));
         }
 
         template <typename Comp = operations::eq, typename Proj = meta::identity>
         requires (not range<Comp>)
-        GENEX_INLINE constexpr auto operator()(Comp comp = {}, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(Comp comp = {}, Proj proj = {}) const noexcept(
+            SAFE_CTOR(duplicates_fn) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {
             return meta::bind_back(duplicates_fn{}, std::move(comp), std::move(proj));
         }
     };

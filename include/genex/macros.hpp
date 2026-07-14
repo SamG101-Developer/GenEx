@@ -148,3 +148,15 @@
     requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                  \
         return *(*(&self) + n);                                                                                \
     }
+
+#define SAFE_CTOR(T, ...) \
+    std::is_nothrow_constructible_v<T __VA_OPT__(, __VA_ARGS__)>
+
+#define SAFE_IMPL_CTOR(T, ...) \
+    std::is_nothrow_constructible_v<::genex::views::detail::impl::T __VA_OPT__(<__VA_ARGS__>) __VA_OPT__(, __VA_ARGS__)>
+
+#define SAFE_MOVE(T) \
+    std::is_nothrow_move_constructible_v<T>
+
+#define SAFE_CALL(F, ...) \
+    std::is_nothrow_invocable_v<F __VA_OPT__(, __VA_ARGS__)>

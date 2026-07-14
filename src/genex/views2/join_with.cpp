@@ -148,19 +148,24 @@ namespace genex::views {
     struct join_with_fn {
         template <typename I, typename S, typename New>
         requires detail::concepts::joinable_with_iters<I, S, New>
-        GENEX_INLINE constexpr auto operator()(I first, S last, New new_value) const {
+        GENEX_INLINE constexpr auto operator()(I first, S last, New new_value) const noexcept(
+            SAFE_IMPL_CTOR(join_with_view, I, S, New) and
+            SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(New)) {
             return detail::impl::join_with_view(std::move(first), std::move(last), std::move(new_value));
         }
 
         template <typename Rng, typename New>
         requires detail::concepts::joinable_with_range<Rng, New>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, New new_value) const {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, New new_value) const noexcept(
+            SAFE_IMPL_CTOR(join_with_view, iterator_t<Rng>, sentinel_t<Rng>, New) and
+            SAFE_MOVE(New)) {
             auto [first, last] = iterators::iter_pair(rng);
             return detail::impl::join_with_view(std::move(first), std::move(last), std::move(new_value));
         }
 
         template <typename New>
-        GENEX_INLINE constexpr auto operator()(New new_value) const {
+        GENEX_INLINE constexpr auto operator()(New new_value) const noexcept(
+            SAFE_CTOR(join_with_fn) and SAFE_MOVE(New)) {
             return meta::bind_back(join_with_fn{}, std::move(new_value));
         }
     };

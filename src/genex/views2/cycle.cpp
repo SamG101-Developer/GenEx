@@ -104,20 +104,23 @@ namespace genex::views {
     struct cycle_fn {
         template <typename I, typename S>
         requires detail::concepts::cyclable_iters<I, S>
-        GENEX_INLINE constexpr auto operator()(I first, S last) const {
+        GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
+            SAFE_IMPL_CTOR(cycle_view, I, S) and SAFE_MOVE(I) and SAFE_MOVE(S)) {
             GENEX_ASSERT(std::invalid_argument, genex::iterators::distance(first, last) > 0);
             return detail::impl::cycle_view(std::move(first), std::move(last));
         }
 
         template <typename Rng>
         requires detail::concepts::cyclable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+            SAFE_IMPL_CTOR(cycle_view, iterator_t<Rng>, sentinel_t<Rng>)) {
             auto [first, last] = iterators::iter_pair(rng);
             GENEX_ASSERT(std::invalid_argument, genex::iterators::distance(first, last) > 0);
             return detail::impl::cycle_view(std::move(first), std::move(last));
         }
 
-        GENEX_INLINE constexpr auto operator()() const {
+        GENEX_INLINE constexpr auto operator()() const noexcept(
+            SAFE_CTOR(cycle_fn)) {
             return meta::bind_back(cycle_fn{});
         }
     };

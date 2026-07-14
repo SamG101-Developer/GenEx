@@ -24,7 +24,7 @@ namespace genex::views::detail::concepts {
         replaceable_if_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, New, Proj>;
 }
 
-namespace genex::views::detail {
+namespace genex::views::detail::impl {
     template <typename I, typename S, typename Pred, typename New, typename Proj>
     requires concepts::replaceable_if_iters<I, S, Pred, New, Proj>
     struct replace_iterator {
@@ -106,20 +106,25 @@ namespace genex::views {
     struct replace_if_fn {
         template <typename I, typename S, typename Pred, typename New, typename Proj = meta::identity>
         requires detail::concepts::replaceable_if_iters<I, S, Pred, New, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, New new_value, Proj proj = {}) const {
-            return detail::replace_view(std::move(first), std::move(last), std::move(pred), std::move(new_value), std::move(proj));
+        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, New new_value, Proj proj = {}) const noexcept(
+            SAFE_IMPL_CTOR(replace_view, I, S, Pred, New, Proj) and
+            SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
+            return detail::impl::replace_view(std::move(first), std::move(last), std::move(pred), std::move(new_value), std::move(proj));
         }
 
         template <typename Rng, typename Pred, typename New, typename Proj = meta::identity>
         requires detail::concepts::replaceable_if_range<Rng, Pred, New, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, New new_value, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, New new_value, Proj proj = {}) const noexcept(
+            SAFE_IMPL_CTOR(replace_view, iterator_t<Rng>, sentinel_t<Rng>, Pred, New, Proj) and
+            SAFE_MOVE(Pred) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::replace_view(std::move(first), std::move(last), std::move(pred), std::move(new_value), std::move(proj));
+            return detail::impl::replace_view(std::move(first), std::move(last), std::move(pred), std::move(new_value), std::move(proj));
         }
 
         template <typename Pred, typename New, typename Proj = meta::identity>
         requires (not range<Pred>)
-        GENEX_INLINE constexpr auto operator()(Pred pred, New new_value, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(Pred pred, New new_value, Proj proj = {}) const noexcept(
+            SAFE_CTOR(replace_if_fn) and SAFE_MOVE(Pred) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
             return meta::bind_back(replace_if_fn{}, std::move(pred), std::move(new_value), std::move(proj));
         }
     };

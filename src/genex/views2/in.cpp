@@ -48,14 +48,17 @@ namespace genex::views {
     struct in_base_fn {
         template <typename I1, typename S1, typename I2, typename S2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires detail::concepts::inable_iters<I1, S1, I2, S2, Proj1, Proj2>
-        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
+        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
+            // SAFE_IMPL_CTOR(membership_pred, Negate, I2, S2, Proj2) and
+            SAFE_MOVE(I1) and SAFE_MOVE(S1) and SAFE_MOVE(I2) and SAFE_MOVE(S2) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
             auto pred = detail::impl::membership_pred<Negate, I2, S2, Proj2>{std::move(first2), std::move(last2), std::move(proj2)};
             return genex::views::filter(std::move(first1), std::move(last1), std::move(pred), std::move(proj1));
         }
 
         template <typename Rng1, typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires detail::concepts::inable_range<Rng1, Rng2, Proj1, Proj2>
-        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
+        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
+            SAFE_MOVE(Rng1) and SAFE_MOVE(Rng2) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
             auto [first1, last1] = iterators::iter_pair(rng1);
             auto [first2, last2] = iterators::iter_pair(rng2);
             auto pred = detail::impl::membership_pred<Negate, iterator_t<Rng2>, sentinel_t<Rng2>, Proj2>{std::move(first2), std::move(last2), std::move(proj2)};
@@ -64,7 +67,9 @@ namespace genex::views {
 
         template <typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires (forward_range<Rng2> and not range<Proj1>)
-        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
+        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
+            SAFE_CTOR(in_base_fn<Negate>) and
+            SAFE_MOVE(Rng2) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
             return meta::bind_back(in_base_fn{}, std::forward<Rng2>(rng2), std::move(proj1), std::move(proj2));
         }
     };

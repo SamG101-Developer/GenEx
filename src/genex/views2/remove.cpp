@@ -23,7 +23,7 @@ namespace genex::views::detail::concepts {
         removable_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
 }
 
-namespace genex::views::detail {
+namespace genex::views::detail::impl {
     struct remove_sentinel {};
 
     template <typename I, typename S, typename E, typename Proj>
@@ -117,20 +117,25 @@ namespace genex::views {
     struct remove_fn {
         template <typename I, typename S, typename E, typename Proj = meta::identity>
         requires detail::concepts::removable_iters<I, S, E, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, E value, Proj proj = {}) const {
-            return detail::remove_view(std::move(first), std::move(last), std::move(value), std::move(proj));
+        GENEX_INLINE constexpr auto operator()(I first, S last, E value, Proj proj = {}) const noexcept(
+            SAFE_IMPL_CTOR(remove_view, I, S, E, Proj) and
+            SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(E) and SAFE_MOVE(Proj)) {
+            return detail::impl::remove_view(std::move(first), std::move(last), std::move(value), std::move(proj));
         }
 
         template <typename Rng, typename E, typename Proj = meta::identity>
         requires detail::concepts::removable_range<Rng, E, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, E value, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E value, Proj proj = {}) const noexcept(
+            SAFE_IMPL_CTOR(remove_view, iterator_t<Rng>, sentinel_t<Rng>, E, Proj) and
+            SAFE_MOVE(E) and SAFE_MOVE(Proj)) {
             auto [first, last] = iterators::iter_pair(rng);
-            return detail::remove_view(std::move(first), std::move(last), std::move(value), std::move(proj));
+            return detail::impl::remove_view(std::move(first), std::move(last), std::move(value), std::move(proj));
         }
 
         template <typename E, typename Proj = meta::identity>
         requires (not range<E>)
-        GENEX_INLINE constexpr auto operator()(E value, Proj proj = {}) const {
+        GENEX_INLINE constexpr auto operator()(E value, Proj proj = {}) const noexcept(
+            SAFE_CTOR(remove_fn) and SAFE_MOVE(E) and SAFE_MOVE(Proj)) {
             return meta::bind_back(remove_fn{}, std::move(value), std::move(proj));
         }
     };

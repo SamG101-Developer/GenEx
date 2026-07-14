@@ -129,19 +129,24 @@ namespace genex::views {
     struct intersperse_fn {
         template <typename I, typename S, typename New>
         requires detail::concepts::interspersable_iters<I, S, New>
-        GENEX_INLINE constexpr auto operator()(I first, S last, New sep) const {
+        GENEX_INLINE constexpr auto operator()(I first, S last, New sep) const noexcept(
+            SAFE_IMPL_CTOR(intersperse_view, I, S, New) and
+            SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(New)) {
             return detail::impl::intersperse_view(std::move(first), std::move(last), std::move(sep));
         }
 
         template <typename Rng, typename New>
         requires detail::concepts::interspersable_range<Rng, New>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, New sep) const {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, New sep) const noexcept(
+            SAFE_IMPL_CTOR(intersperse_view, iterator_t<Rng>, sentinel_t<Rng>, New) and
+            SAFE_MOVE(New)) {
             auto [first, last] = iterators::iter_pair(rng);
             return detail::impl::intersperse_view(std::move(first), std::move(last), std::move(sep));
         }
 
         template <typename New>
-        GENEX_INLINE constexpr auto operator()(New sep) const {
+        GENEX_INLINE constexpr auto operator()(New sep) const noexcept(
+            SAFE_CTOR(intersperse_fn) and SAFE_MOVE(New)) {
             return meta::bind_back(intersperse_fn{}, std::move(sep));
         }
     };

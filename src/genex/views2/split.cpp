@@ -24,7 +24,7 @@ namespace genex::views::detail::concepts {
         splittable_iters<iterator_t<Rng>, sentinel_t<Rng>, E>;
 }
 
-namespace genex::views {
+namespace genex::views::detail::impl {
     struct split_sentinel {};
 
     template <typename I, typename S, typename E>
@@ -52,7 +52,7 @@ namespace genex::views {
 
         template <typename Self>
         GENEX_VIEW_CUSTOM_NEXT {
-            while (self.it != self.st && not operations::eq{}(*self.it, self.elem)) { ++self.it; }
+            while (self.it != self.st and not operations::eq{}(*self.it, self.elem)) { ++self.it; }
             if (self.it != self.st) { ++self.it; }
             return self;
         }
@@ -72,7 +72,7 @@ namespace genex::views {
         template <typename Self>
         GENEX_VIEW_CUSTOM_DEREF {
             auto end_it = self.it;
-            while (end_it != self.st && not operations::eq{}(*end_it, self.elem)) { ++end_it; }
+            while (end_it != self.st and not operations::eq{}(*end_it, self.elem)) { ++end_it; }
             return std::ranges::subrange(self.it, end_it);
         }
 
@@ -118,19 +118,24 @@ namespace genex::views {
     struct split_fn {
         template <typename I, typename S, typename E>
         requires detail::concepts::splittable_iters<I, S, E>
-        GENEX_INLINE constexpr auto operator()(I first, S last, E elem) const -> split_view<I, S, E> {
-            return split_view(std::move(first), std::move(last), std::move(elem));
+        GENEX_INLINE constexpr auto operator()(I first, S last, E elem) const noexcept(
+            SAFE_IMPL_CTOR(split_view, I, S, E) and
+            SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(E)) {
+            return detail::impl::split_view(std::move(first), std::move(last), std::move(elem));
         }
 
         template <typename Rng, typename E>
         requires detail::concepts::splittable_range<Rng, E>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> split_view<iterator_t<Rng>, sentinel_t<Rng>, E> {
+        GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const noexcept(
+            SAFE_IMPL_CTOR(split_view, iterator_t<Rng>, sentinel_t<Rng>, E) and
+            SAFE_MOVE(E)) {
             auto [first, last] = iterators::iter_pair(rng);
-            return split_view(std::move(first), std::move(last), std::move(elem));
+            return detail::impl::split_view(std::move(first), std::move(last), std::move(elem));
         }
 
         template <typename E>
-        GENEX_INLINE constexpr auto operator()(E elem) const -> auto {
+        GENEX_INLINE constexpr auto operator()(E elem) const noexcept(
+            SAFE_CTOR(split_fn) and SAFE_MOVE(E)) {
             return meta::bind_back(split_fn{}, std::move(elem));
         }
     };

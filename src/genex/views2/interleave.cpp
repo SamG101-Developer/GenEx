@@ -140,13 +140,17 @@ namespace genex::views {
     struct interleave_fn {
         template <typename I1, typename S1, typename I2, typename S2>
         requires detail::concepts::interleavable_iters<I1, S1, I2, S2>
-        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, bool extend = true) const {
+        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, bool extend = true) const noexcept(
+            SAFE_IMPL_CTOR(interleave_view, I1, S1, I2, S2) and
+            SAFE_MOVE(I1) and SAFE_MOVE(S1) and SAFE_MOVE(I2) and SAFE_MOVE(S2)) {
             return detail::impl::interleave_view(std::move(first1), std::move(last1), std::move(first2), std::move(last2), extend);
         }
 
         template <typename Rng1, typename Rng2>
         requires detail::concepts::interleavable_range<Rng1, Rng2>
-        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, bool extend = true) const {
+        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, bool extend = true) const noexcept(
+            SAFE_IMPL_CTOR(interleave_view, iterator_t<Rng1>, sentinel_t<Rng1>, iterator_t<Rng2>, sentinel_t<Rng2>) and
+            SAFE_MOVE(Rng1) and SAFE_MOVE(Rng2)) {
             auto [first1, last1] = iterators::iter_pair(rng1);
             auto [first2, last2] = iterators::iter_pair(rng2);
             return detail::impl::interleave_view(std::move(first1), std::move(last1), std::move(first2), std::move(last2), extend);
@@ -154,7 +158,8 @@ namespace genex::views {
 
         template <typename Rng2>
         requires range<Rng2>
-        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, bool extend = true) const {
+        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, bool extend = true) const noexcept(
+            SAFE_CTOR(interleave_fn)) {
             return meta::bind_back(interleave_fn{}, std::forward<Rng2>(rng2), extend);
         }
     };

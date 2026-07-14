@@ -227,13 +227,17 @@ namespace genex::views {
     struct set_algorithms_base_fn {
         template <typename I1, typename S1, typename I2, typename S2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires detail::concepts::set_algorithmicable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
-        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
+        GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
+            // SAFE_IMPL_CTOR(set_algorithm_view, Op, I1, S1, I2, S2, Comp, Proj1, Proj2) and
+            SAFE_MOVE(I1) and SAFE_MOVE(S1) and SAFE_MOVE(I2) and SAFE_MOVE(S2) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
             return detail::impl::set_algorithm_view<Op, I1, S1, I2, S2, Comp, Proj1, Proj2>(std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1), std::move(proj2));
         }
 
         template <typename Rng1, typename Rng2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires detail::concepts::set_algorithmicable_range<Rng1, Rng2, Comp, Proj1, Proj2>
-        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
+        GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
+            // SAFE_IMPL_CTOR(set_algorithm_view, Op, iterator_t<Rng1>, sentinel_t<Rng1>, iterator_t<Rng2>, sentinel_t<Rng2>, Comp, Proj1, Proj2) and
+            SAFE_MOVE(Comp) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
             auto [first1, last1] = iterators::iter_pair(rng1);
             auto [first2, last2] = iterators::iter_pair(rng2);
             return detail::impl::set_algorithm_view<Op, iterator_t<Rng1>, sentinel_t<Rng1>, iterator_t<Rng2>, sentinel_t<Rng2>, Comp, Proj1, Proj2>(std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1), std::move(proj2));
@@ -241,7 +245,8 @@ namespace genex::views {
 
         template <typename Rng2, typename Comp = operations::eq, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
         requires (range<Rng2> and not range<Comp>)
-        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
+        GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
+            SAFE_CTOR(set_algorithms_base_fn) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
             return meta::bind_back(set_algorithms_base_fn{}, std::forward<Rng2>(rng2), std::move(comp), std::move(proj1), std::move(proj2));
         }
     };
