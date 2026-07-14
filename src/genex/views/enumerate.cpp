@@ -31,7 +31,7 @@ namespace genex::views::detail::impl {
         GENEX_ITER_GUARD;
         auto i = 0;
         for (; first != last; ++first) {
-            co_yield {i++, static_cast<iter_value_t<I>>(*first)};
+            co_yield std::make_pair(i++, static_cast<iter_value_t<I>>(*first));
         }
     }
 }
