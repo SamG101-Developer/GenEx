@@ -30,7 +30,10 @@ namespace genex {
             out.reserve(std::bit_cast<std::size_t>(rng.size()));
         }
         for (; first != last; ++first) {
-            out.push_back(std::move(*first));
+            // Never moves out of the source: a view is an rvalue even when it refers to someone
+            // else's lvalue elements. Moving is opt-in via `genex::views::move`, whose deref
+            // already yields an rvalue here.
+            out.push_back(*first);
         }
         return out;
     }
@@ -44,7 +47,8 @@ namespace genex {
             out.reserve(std::bit_cast<std::size_t>(rng.size()));
         }
         for (; first != last; ++first) {
-            out.push_back(std::move(*first));
+            // See the note in the `Out<range_value_t<Rng>>` overload above.
+            out.push_back(*first);
         }
         return out;
     }
