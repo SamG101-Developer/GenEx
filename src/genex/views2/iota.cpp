@@ -11,7 +11,7 @@ import std;
 
 namespace genex::views::detail::impl {
     template <typename Int>
-        requires std::weakly_incrementable<Int>
+    requires std::weakly_incrementable<Int>
     struct iota_iterator {
         Int lo;
         Int hi;
@@ -57,7 +57,7 @@ namespace genex::views::detail::impl {
     };
 
     template <typename Int>
-        requires std::weakly_incrementable<Int>
+    requires std::weakly_incrementable<Int>
     struct iota_view {
         Int lo;
         Int hi;
