@@ -10,16 +10,13 @@ set(CMAKE_INSTALL_RPATH "/usr/local/gcc-dev/lib64")
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
 # Collect source files.
-file(GLOB_RECURSE MODULE_SOURCES CONFIGURE_DEPENDS src/*.cpp)
-file(GLOB_RECURSE PUBLIC_HEADERS CONFIGURE_DEPENDS include/*.hpp)
+file(GLOB_RECURSE PUBLIC_HEADERS CONFIGURE_DEPENDS headers/*.hpp)
+file(GLOB_RECURSE MODULE_SOURCES CONFIGURE_DEPENDS sources/*.cpp)
 add_library(${PROJECT_NAME} STATIC ${MODULE_SOURCES})
 
 target_sources(${PROJECT_NAME} PUBLIC
-        FILE_SET CXX_MODULES BASE_DIRS src include FILES ${MODULE_SOURCES}
-        FILE_SET HEADERS BASE_DIRS include FILES ${PUBLIC_HEADERS})
-
-target_compile_options(
-        ${PROJECT_NAME} PRIVATE -fmodules-ts)
+        FILE_SET CXX_MODULES BASE_DIRS headers sources FILES ${MODULE_SOURCES}
+        FILE_SET HEADERS BASE_DIRS headers FILES ${PUBLIC_HEADERS})
 
 target_compile_features(
         ${PROJECT_NAME} PUBLIC cxx_std_26)
@@ -27,7 +24,7 @@ target_compile_features(
 
 # Create the GenEx library, and link 3rd party libraries.
 target_include_directories(${PROJECT_NAME} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/headers>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 # Install the library + export information

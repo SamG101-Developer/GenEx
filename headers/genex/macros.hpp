@@ -1,6 +1,5 @@
 #pragma once
 
-
 #ifndef NDEBUG
 #define GENEX_ASSERT(E, cond)                               \
     do {                                                    \
@@ -10,7 +9,6 @@
 #define GENEX_ASSERT(E, cond) \
     ((void)0)
 #endif
-
 
 #define GENEX_INLINE [[gnu::always_inline]] inline __attribute__((always_inline))
 
