@@ -58,7 +58,17 @@ install(
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
         DESTINATION lib/cmake/${PROJECT_NAME})
 
-# Create the tests.
-enable_testing()
-add_subdirectory(tests)
-add_subdirectory(benchmarks)
+# Optional tests and benchmarks.
+option(GENEX_BUILD_TESTS "Build the GenEx tests" OFF)
+option(GENEX_BUILD_BENCHMARKS "Build the GenEx benchmarks" OFF)
+
+if(GENEX_BUILD_TESTS)
+    message("Building tests...")
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+if(GENEX_BUILD_BENCHMARKS)
+    message("Building benchmarks...")
+    add_subdirectory(benchmarks)
+endif()
