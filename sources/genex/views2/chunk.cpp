@@ -52,14 +52,14 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_VIEW_CUSTOM_NEXT {
-            auto n = std::min(self.chunk_size, (Int)iterators::distance(self.it, self.st));
+            auto n = std::min(self.chunk_size, static_cast<Int>(iterators::distance(self.it, self.st)));
             iterators::advance(self.it, n);
             return self;
         }
 
         template <typename Self>
         GENEX_VIEW_CUSTOM_PREV {
-            auto n = std::min(self.chunk_size, (Int)iterators::distance(self.it, self.st));
+            auto n = std::min(self.chunk_size, static_cast<Int>(iterators::distance(self.it, self.st)));
             iterators::advance(self.it, -n);
             return self;
         }
