@@ -31,10 +31,12 @@ namespace genex::views::detail::impl {
     struct join_iterator {
         // When the outer iterator dereferences to a prvalue range (e.g. transform/intersperse
         // that yield elements by value), the inner range is a temporary and its iterators would
-        // dangle. In that case we cache the current inner range inside the iterator itself.
+        // dangle. In that case we cache the current inner range inside the iterator itself. The
+        // cache is boxed on the heap because `inner_it`/`inner_st` point into it: copying or
+        // moving the iterator must not change where the cached range lives.
         static constexpr bool ref_is_glvalue = std::is_reference_v<iter_reference_t<I>>;
         using inner_cache_t = std::conditional_t<
-            ref_is_glvalue, std::monostate, std::optional<iter_value_t<I>>>;
+            ref_is_glvalue, std::monostate, std::shared_ptr<iter_value_t<I>>>;
 
         I it;
         S st;
@@ -95,7 +97,7 @@ namespace genex::views::detail::impl {
                 return (*self.it);
             }
             else {
-                self.inner_cache.emplace(*self.it);
+                self.inner_cache = std::make_shared<iter_value_t<I>>(*self.it);
                 return (*self.inner_cache);
             }
         }
