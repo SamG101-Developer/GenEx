@@ -71,6 +71,7 @@ namespace genex::views::detail::impl {
         }
 
         GENEX_VIEW_ITER_EQ(take_while_iterator, take_while_sentinel) {
+            GENEX_IGNORE(that);
             return self.it == self.st;
         }
     };

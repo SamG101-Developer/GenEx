@@ -45,6 +45,7 @@ namespace genex::views {
         requires detail::concepts::takeable_iters<I, S, Int> and std::contiguous_iterator<I>
         GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const noexcept(
             SAFE_CTOR(genex::span<iter_value_t<I>>, I, I) and SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
+            GENEX_IGNORE(last);
             return genex::span<iter_value_t<I>>(std::move(first), std::move(first) + static_cast<std::ptrdiff_t>(n));
         }
 

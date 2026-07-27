@@ -237,7 +237,7 @@ namespace genex::views::detail::impl {
     };
 
     template <typename... Rngs>
-        requires concepts::concatable_range<Rngs...>
+    requires concepts::concatable_range<Rngs...>
     struct concat_view {
         std::tuple<iterator_t<Rngs>...> its;
         std::tuple<sentinel_t<Rngs>...> sts;
@@ -258,7 +258,7 @@ namespace genex::views::detail::impl {
         }
 
         template <typename Self>
-            requires (sized_range<Rngs> && ...)
+        requires (sized_range<Rngs> && ...)
         GENEX_NODISCARD GENEX_INLINE constexpr auto size(this Self &&self) -> std::size_t {
             return self.template size_impl<0>();
         }

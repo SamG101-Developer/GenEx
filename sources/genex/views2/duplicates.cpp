@@ -79,6 +79,7 @@ namespace genex::views::detail::impl {
         }
 
         GENEX_VIEW_ITER_EQ(duplicate_iterator, duplicate_sentinel) {
+            GENEX_IGNORE(that);
             return self.it == self.st and not self.pending.has_value() and not self.cur_elem.has_value();
         }
 
@@ -138,6 +139,7 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_ITER_END {
+            GENEX_IGNORE(self);
             return duplicate_sentinel();
         }
     };

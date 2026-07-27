@@ -70,6 +70,8 @@ namespace genex::views::detail::impl {
         }
 
         GENEX_VIEW_ITER_EQ(cycle_iterator, cycle_sentinel) {
+            GENEX_IGNORE(self);
+            GENEX_IGNORE(that);
             return false;
         }
     };
@@ -92,6 +94,7 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_ITER_END {
+            GENEX_IGNORE(self);
             return cycle_sentinel();
         }
 

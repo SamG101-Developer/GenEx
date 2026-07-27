@@ -52,6 +52,7 @@ namespace genex::views::detail::impl {
         }
 
         GENEX_VIEW_ITER_EQ(iota_iterator, iota_iterator) {
+            GENEX_IGNORE(that);
             return self.it >= self.hi;
         }
     };

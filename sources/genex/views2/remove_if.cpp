@@ -71,6 +71,7 @@ namespace genex::views::detail::impl {
         }
 
         GENEX_VIEW_ITER_EQ(remove_if_iterator, remove_if_sentinel) {
+            GENEX_IGNORE(that);
             return self.it == self.st;
         }
 
@@ -106,6 +107,7 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_ITER_END {
+            GENEX_IGNORE(self);
             return remove_if_sentinel();
         }
     };

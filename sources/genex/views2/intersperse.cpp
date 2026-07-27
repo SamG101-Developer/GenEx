@@ -84,6 +84,7 @@ namespace genex::views::detail::impl {
         }
 
         GENEX_VIEW_ITER_EQ(intersperse_iterator, intersperse_sentinel) {
+            GENEX_IGNORE(that);
             if (self.it == self.st) { return true; }
 
             if (self.yield_new) {
@@ -115,6 +116,7 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_ITER_END {
+            GENEX_IGNORE(self);
             return intersperse_sentinel();
         }
 

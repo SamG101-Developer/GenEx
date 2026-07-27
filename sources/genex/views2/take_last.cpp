@@ -31,6 +31,7 @@ namespace genex::views {
         GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const noexcept(
             SAFE_CTOR(genex::span<iter_value_t<I>>, I, S) and
             SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
+            GENEX_IGNORE(first);
             return genex::span<iter_value_t<I>>(std::move(last) - n, std::move(last));
         }
 

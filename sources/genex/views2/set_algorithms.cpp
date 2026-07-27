@@ -78,6 +78,7 @@ namespace genex::views::detail::impl {
         }
 
         GENEX_VIEW_ITER_EQ(set_iterator, set_algorithm_sentinel) {
+            GENEX_IGNORE(that);
             return not self.cur_elem.has_value();
         }
 
@@ -217,6 +218,7 @@ namespace genex::views::detail::impl {
 
         template <typename Self>
         GENEX_ITER_END {
+            GENEX_IGNORE(self);
             return set_algorithm_sentinel();
         }
     };

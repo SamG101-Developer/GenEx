@@ -92,6 +92,7 @@ namespace genex::views::detail::impl {
         }
 
         GENEX_VIEW_ITER_EQ(interleave_iterator, interleave_iterator) {
+            GENEX_IGNORE(that);
             return self.done();
         }
 
