@@ -1,5 +1,7 @@
 #pragma once
 
+#define GENEX_IGNORE(x) (void)x
+
 #ifndef NDEBUG
 #define GENEX_ASSERT(E, cond)                               \
     do {                                                    \
