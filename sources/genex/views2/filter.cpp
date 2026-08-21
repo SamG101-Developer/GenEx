@@ -9,136 +9,136 @@ import genex.iterators.iter_pair;
 import std;
 
 namespace genex::views::detail::concepts {
-    template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-    concept filterable_iters =
-        std::input_iterator<I> and
-        std::sentinel_for<S, I> and
-        std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
+  template <typename I, typename S, typename Pred, typename Proj = meta::identity>
+  concept filterable_iters =
+    std::input_iterator<I> and
+    std::sentinel_for<S, I> and
+    std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
 
-    template <typename Rng, typename Pred, typename Proj = meta::identity>
-    concept filterable_range =
-        input_range<Rng> and
-        filterable_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj>;
+  template <typename Rng, typename Pred, typename Proj = meta::identity>
+  concept filterable_range =
+    input_range<Rng> and
+    filterable_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj>;
 }
 
 namespace genex::views::detail::impl {
-    struct filter_sentinel {};
+  struct filter_sentinel {};
 
-    template <typename I, typename S, typename Pred, typename Proj>
+  template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::filterable_iters<I, S, Pred, Proj>
-    struct filter_iterator {
-        I it;
-        S st;
-        GENEX_NO_UNIQUE_ADDRESS meta::box<Pred> pred;
-        GENEX_NO_UNIQUE_ADDRESS meta::box<Proj> proj;
+  struct filter_iterator {
+    I it;
+    S st;
+    GENEX_NO_UNIQUE_ADDRESS meta::box<Pred> pred;
+    GENEX_NO_UNIQUE_ADDRESS meta::box<Proj> proj;
 
-        using value_type = iter_value_t<I>;
-        using reference_type = iter_reference_t<I>;
-        using difference_type = iter_difference_t<I>;
-        using iterator_category = std::input_iterator_tag;
-        using iterator_concept = iterator_category;
-        GENEX_ITER_OPS(filter_iterator)
+    using value_type = iter_value_t<I>;
+    using reference_type = iter_reference_t<I>;
+    using difference_type = iter_difference_t<I>;
+    using iterator_category = std::input_iterator_tag;
+    using iterator_concept = iterator_category;
+    GENEX_ITER_OPS(filter_iterator)
 
-        GENEX_INLINE constexpr filter_iterator() = default;
+    GENEX_INLINE constexpr filter_iterator() = default;
 
-        GENEX_INLINE constexpr filter_iterator(I first, S last, Pred pred, Proj proj) :
-            it(std::move(first)), st(std::move(last)),
-            pred(std::move(pred)), proj(std::move(proj)) {
-            fwd_to_valid();
-        }
+    GENEX_INLINE constexpr filter_iterator(I first, S last, Pred pred, Proj proj) :
+      it(std::move(first)), st(std::move(last)),
+      pred(std::move(pred)), proj(std::move(proj)) {
+      fwd_to_valid();
+    }
 
-        template <typename Self>
-        GENEX_VIEW_CUSTOM_NEXT {
-            ++self.it;
-            self.fwd_to_valid();
-            return self;
-        }
+    template <typename Self>
+    GENEX_VIEW_CUSTOM_NEXT {
+      ++self.it;
+      self.fwd_to_valid();
+      return self;
+    }
 
-        template <typename Self>
-        GENEX_VIEW_CUSTOM_PREV {
-            --self.it;
-            self.bwd_to_valid();
-            return self;
-        }
+    template <typename Self>
+    GENEX_VIEW_CUSTOM_PREV {
+      --self.it;
+      self.bwd_to_valid();
+      return self;
+    }
 
-        template <typename Self>
-        GENEX_VIEW_CUSTOM_DEREF {
-            return *self.it;
-        }
+    template <typename Self>
+    GENEX_VIEW_CUSTOM_DEREF {
+      return *self.it;
+    }
 
-        GENEX_VIEW_ITER_EQ(filter_iterator, filter_iterator) {
-            return self.it == that.it;
-        }
+    GENEX_VIEW_ITER_EQ(filter_iterator, filter_iterator) {
+      return self.it == that.it;
+    }
 
-        GENEX_VIEW_ITER_EQ(filter_iterator, filter_sentinel) {
-            GENEX_IGNORE(that);
-            return self.it == self.st;
-        }
+    GENEX_VIEW_ITER_EQ(filter_iterator, filter_sentinel) {
+      GENEX_IGNORE(that);
+      return self.it == self.st;
+    }
 
-    private:
-        template <typename Self>
-        GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
-            while (self.it != self.st and not meta::invoke(*self.pred, meta::invoke(*self.proj, *self.it))) { ++self.it; }
-        }
+  private:
+    template <typename Self>
+    GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
+      while (self.it != self.st and not meta::invoke(*self.pred, meta::invoke(*self.proj, *self.it))) { ++self.it; }
+    }
 
-        template <typename Self> requires std::bidirectional_iterator<I>
-        GENEX_INLINE constexpr auto bwd_to_valid(this Self &&self) -> void {
-            while (self.it != self.st and not meta::invoke(*self.pred, meta::invoke(*self.proj, *self.it))) { --self.it; }
-        }
-    };
+    template <typename Self> requires std::bidirectional_iterator<I>
+    GENEX_INLINE constexpr auto bwd_to_valid(this Self &&self) -> void {
+      while (self.it != self.st and not meta::invoke(*self.pred, meta::invoke(*self.proj, *self.it))) { --self.it; }
+    }
+  };
 
-    template <typename I, typename S, typename Pred, typename Proj>
+  template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::filterable_iters<I, S, Pred, Proj>
-    struct filter_view {
-        I it;
-        S st;
-        GENEX_NO_UNIQUE_ADDRESS Pred pred;
-        GENEX_NO_UNIQUE_ADDRESS Proj proj;
+  struct filter_view {
+    I it;
+    S st;
+    GENEX_NO_UNIQUE_ADDRESS Pred pred;
+    GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
-        GENEX_INLINE constexpr filter_view(I first, S last, Pred p, Proj prj = {}) :
-            it(std::move(first)), st(std::move(last)),
-            pred(std::move(p)), proj(std::move(prj)) {
-        }
+    GENEX_INLINE constexpr filter_view(I first, S last, Pred p, Proj prj = {}) :
+      it(std::move(first)), st(std::move(last)),
+      pred(std::move(p)), proj(std::move(prj)) {
+    }
 
-        template <typename Self>
-        GENEX_ITER_BEGIN {
-            return filter_iterator(self.it, self.st, self.pred, self.proj);
-        }
+    template <typename Self>
+    GENEX_ITER_BEGIN {
+      return filter_iterator(self.it, self.st, self.pred, self.proj);
+    }
 
-        template <typename Self>
-        GENEX_ITER_END {
-            GENEX_IGNORE(self);
-            return filter_sentinel();
-        }
-    };
+    template <typename Self>
+    GENEX_ITER_END {
+      GENEX_IGNORE(self);
+      return filter_sentinel();
+    }
+  };
 }
 
 namespace genex::views {
-    struct filter_fn {
-        template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-        requires detail::concepts::filterable_iters<I, S, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const noexcept(
-            SAFE_IMPL_CTOR(filter_view, I, S, Pred, Proj) and
-            SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
-            return detail::impl::filter_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
-        }
+  struct filter_fn {
+    template <typename I, typename S, typename Pred, typename Proj = meta::identity>
+      requires detail::concepts::filterable_iters<I, S, Pred, Proj>
+    GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const noexcept(
+      SAFE_IMPL_CTOR(filter_view, I, S, Pred, Proj) and
+      SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
+      return detail::impl::filter_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
+    }
 
-        template <typename Rng, typename Pred, typename Proj = meta::identity>
-        requires detail::concepts::filterable_range<Rng, Pred, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const noexcept(
-            SAFE_IMPL_CTOR(filter_view, iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj) and
-            SAFE_MOVE(Rng) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
-            auto [first, last] = iterators::iter_pair(rng);
-            return detail::impl::filter_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
-        }
+    template <typename Rng, typename Pred, typename Proj = meta::identity>
+      requires detail::concepts::filterable_range<Rng, Pred, Proj>
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const noexcept(
+      SAFE_IMPL_CTOR(filter_view, iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj) and
+      SAFE_MOVE(Rng) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
+      auto [first, last] = iterators::iter_pair(rng);
+      return detail::impl::filter_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
+    }
 
-        template <typename Pred, typename Proj = meta::identity>
-        requires (not range<Pred>)
-        GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const noexcept(
-            SAFE_CTOR(filter_fn) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
-            return meta::bind_back(filter_fn{}, std::move(pred), std::move(proj));
-        }
-    };
+    template <typename Pred, typename Proj = meta::identity>
+      requires (not range<Pred>)
+    GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const noexcept(
+      SAFE_CTOR(filter_fn) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
+      return meta::bind_back(filter_fn{}, std::move(pred), std::move(proj));
+    }
+  };
 
-    export inline constexpr filter_fn filter{};
+  export inline constexpr filter_fn filter{};
 }

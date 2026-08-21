@@ -15,60 +15,66 @@ file(GLOB_RECURSE MODULE_SOURCES CONFIGURE_DEPENDS sources/*.cpp)
 add_library(${PROJECT_NAME} STATIC)
 
 target_sources(${PROJECT_NAME} PUBLIC
-        FILE_SET CXX_MODULES BASE_DIRS headers sources FILES ${MODULE_SOURCES}
-        FILE_SET HEADERS BASE_DIRS headers FILES ${PUBLIC_HEADERS})
+  FILE_SET CXX_MODULES BASE_DIRS headers sources FILES ${MODULE_SOURCES}
+  FILE_SET HEADERS BASE_DIRS headers FILES ${PUBLIC_HEADERS})
 
 target_compile_features(
-        ${PROJECT_NAME} PUBLIC cxx_std_26)
+  ${PROJECT_NAME}
+  PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:cxx_std_26>
+)
 
+target_compile_options(
+  ${PROJECT_NAME}
+  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/std:c++latest>
+)
 
 # Create the GenEx library, and link 3rd party libraries.
 target_include_directories(${PROJECT_NAME} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/headers>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/headers>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 # Install the library + export information
 install(
-        TARGETS ${PROJECT_NAME}
-        EXPORT ${PROJECT_NAME}Targets
-        FILE_SET CXX_MODULES DESTINATION lib/cmake/${PROJECT_NAME}/modules
-        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
+  FILE_SET CXX_MODULES DESTINATION lib/cmake/${PROJECT_NAME}/modules
+  FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 install(
-        EXPORT ${PROJECT_NAME}Targets
-        NAMESPACE ${PROJECT_NAME}::
-        DESTINATION lib/cmake/${PROJECT_NAME})
+  EXPORT ${PROJECT_NAME}Targets
+  NAMESPACE ${PROJECT_NAME}::
+  DESTINATION lib/cmake/${PROJECT_NAME})
 
 include(
-        CMakePackageConfigHelpers)
+  CMakePackageConfigHelpers)
 
 write_basic_package_version_file(
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY SameMajorVersion)
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion)
 
 configure_package_config_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-        INSTALL_DESTINATION lib/cmake/${PROJECT_NAME})
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+  INSTALL_DESTINATION lib/cmake/${PROJECT_NAME})
 
 install(
-        FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-        DESTINATION lib/cmake/${PROJECT_NAME})
+  FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+  DESTINATION lib/cmake/${PROJECT_NAME})
 
 # Optional tests and benchmarks.
 option(GENEX_BUILD_TESTS "Build the GenEx tests" OFF)
 option(GENEX_BUILD_BENCHMARKS "Build the GenEx benchmarks" OFF)
 
-if(GENEX_BUILD_TESTS)
-    message("Building tests...")
-    enable_testing()
-    add_subdirectory(tests)
-endif()
+if (GENEX_BUILD_TESTS)
+  message("Building tests...")
+  enable_testing()
+  add_subdirectory(tests)
+endif ()
 
-if(GENEX_BUILD_BENCHMARKS)
-    message("Building benchmarks...")
-    add_subdirectory(benchmarks)
-endif()
+if (GENEX_BUILD_BENCHMARKS)
+  message("Building benchmarks...")
+  add_subdirectory(benchmarks)
+endif ()

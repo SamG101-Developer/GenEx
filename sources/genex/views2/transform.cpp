@@ -10,156 +10,156 @@ import genex.iterators.iter_pair;
 import std;
 
 namespace genex::views::detail::concepts {
-    template <typename I, typename S, typename F, typename Proj = meta::identity>
-    concept transformable_iters =
-        std::input_iterator<I> and
-        std::sentinel_for<S, I> and
-        std::indirectly_unary_invocable<Proj, I> and
-        std::indirectly_unary_invocable<F, std::projected<I, Proj>>;
+  template <typename I, typename S, typename F, typename Proj = meta::identity>
+  concept transformable_iters =
+    std::input_iterator<I> and
+    std::sentinel_for<S, I> and
+    std::indirectly_unary_invocable<Proj, I> and
+    std::indirectly_unary_invocable<F, std::projected<I, Proj>>;
 
-    template <typename Rng, typename F, typename Proj = meta::identity>
-    concept transformable_range =
-        input_range<Rng> and
-        transformable_iters<iterator_t<Rng>, sentinel_t<Rng>, F, Proj>;
+  template <typename Rng, typename F, typename Proj = meta::identity>
+  concept transformable_range =
+    input_range<Rng> and
+    transformable_iters<iterator_t<Rng>, sentinel_t<Rng>, F, Proj>;
 }
 
 namespace genex::views::detail::impl {
-    template <typename S>
-    struct transform_sentinel {
-        S st;
-    };
+  template <typename S>
+  struct transform_sentinel {
+    S st;
+  };
 
-    /**
-     * The @c transform_iterator applies a transformation function to the elements of the underlying iterator. Note that
-     * there is no special "sentinel" type for the @c transform_iterator, because the end is always known from the
-     * underlying range.
-     * @tparam I The type of the underlying iterator.
-     * @tparam S The type of the underlying sentinel.
-     * @tparam F The type of the transformation function.
-     * @tparam Proj The type of the projection function.
-     */
-    export template <typename I, typename S, typename F, typename Proj>
+  /**
+   * The @c transform_iterator applies a transformation function to the elements of the underlying iterator. Note that
+   * there is no special "sentinel" type for the @c transform_iterator, because the end is always known from the
+   * underlying range.
+   * @tparam I The type of the underlying iterator.
+   * @tparam S The type of the underlying sentinel.
+   * @tparam F The type of the transformation function.
+   * @tparam Proj The type of the projection function.
+   */
+  export template <typename I, typename S, typename F, typename Proj>
     requires concepts::transformable_iters<I, S, F, Proj>
-    struct transform_iterator {
-        I it;
-        GENEX_NO_UNIQUE_ADDRESS meta::box<F> f;
-        GENEX_NO_UNIQUE_ADDRESS meta::box<Proj> proj;
+  struct transform_iterator {
+    I it;
+    GENEX_NO_UNIQUE_ADDRESS meta::box<F> f;
+    GENEX_NO_UNIQUE_ADDRESS meta::box<Proj> proj;
 
-        using projected_reference_type = std::invoke_result_t<Proj&, iter_reference_t<I>>;
-        using transformed_reference_type = std::invoke_result_t<F&, projected_reference_type>;
+    using projected_reference_type = std::invoke_result_t<Proj&, iter_reference_t<I>>;
+    using transformed_reference_type = std::invoke_result_t<F&, projected_reference_type>;
 
-        using value_type = std::remove_cvref_t<transformed_reference_type>;
-        using reference_type = transformed_reference_type;
-        // Legacy nested typedefs so std::iterator_traits honours the explicit `iterator_category`; without `reference`
-        // a by-value transform result (prvalue operator*) makes it derive an input category, defeating the
-        // reserve-and-copy fast path in `std::vector(first, last)`.
-        using reference = reference_type;
-        using pointer = void;
-        using difference_type = iter_difference_t<I>;
-        using iterator_category = std::iterator_traits<I>::iterator_category;
-        using iterator_concept = iterator_category;
-        GENEX_ITER_OPS(transform_iterator)
+    using value_type = std::remove_cvref_t<transformed_reference_type>;
+    using reference_type = transformed_reference_type;
+    // Legacy nested typedefs so std::iterator_traits honours the explicit `iterator_category`; without `reference`
+    // a by-value transform result (prvalue operator*) makes it derive an input category, defeating the
+    // reserve-and-copy fast path in `std::vector(first, last)`.
+    using reference = reference_type;
+    using pointer = void;
+    using difference_type = iter_difference_t<I>;
+    using iterator_category = std::iterator_traits<I>::iterator_category;
+    using iterator_concept = iterator_category;
+    GENEX_ITER_OPS(transform_iterator)
 
-        GENEX_INLINE constexpr transform_iterator() = default;
-        GENEX_INLINE constexpr transform_iterator(I it, F f, Proj proj = {}) :
-            it(std::move(it)), f(std::move(f)), proj(std::move(proj)) {
-        }
+    GENEX_INLINE constexpr transform_iterator() = default;
+    GENEX_INLINE constexpr transform_iterator(I it, F f, Proj proj = {}) :
+      it(std::move(it)), f(std::move(f)), proj(std::move(proj)) {
+    }
 
-        template <typename Self>
-        GENEX_VIEW_CUSTOM_NEXT {
-            ++self.it;
-            return self;
-        }
+    template <typename Self>
+    GENEX_VIEW_CUSTOM_NEXT {
+      ++self.it;
+      return self;
+    }
 
-        template <typename Self>
-        GENEX_VIEW_CUSTOM_PREV {
-            --self.it;
-            return self;
-        }
+    template <typename Self>
+    GENEX_VIEW_CUSTOM_PREV {
+      --self.it;
+      return self;
+    }
 
-        template <typename Self>
-        GENEX_VIEW_CUSTOM_DEREF {
-            return meta::invoke(*self.f, meta::invoke(*self.proj, *self.it));
-        }
+    template <typename Self>
+    GENEX_VIEW_CUSTOM_DEREF {
+      return meta::invoke(*self.f, meta::invoke(*self.proj, *self.it));
+    }
 
-        GENEX_VIEW_ITER_EQ(transform_iterator, transform_iterator) {
-            return self.it == that.it;
-        }
+    GENEX_VIEW_ITER_EQ(transform_iterator, transform_iterator) {
+      return self.it == that.it;
+    }
 
-        template <typename S2>
-        GENEX_VIEW_ITER_EQ(transform_iterator, transform_sentinel<S2>) {
-            return self.recursive_eq(self.it, that.st);
-        }
+    template <typename S2>
+    GENEX_VIEW_ITER_EQ(transform_iterator, transform_sentinel<S2>) {
+      return self.recursive_eq(self.it, that.st);
+    }
 
-    private:
-        template <typename Self, typename I2, typename S2>
-        auto recursive_eq(this Self &&self, I2 i, S2 s) -> bool {
-            if constexpr (requires { i == s; }) { return i == s; }
-            else { return self.recursive_eq(i.it, s); }
-        }
-    };
+  private:
+    template <typename Self, typename I2, typename S2>
+    auto recursive_eq(this Self &&self, I2 i, S2 s) -> bool {
+      if constexpr (requires { i == s; }) { return i == s; }
+      else { return self.recursive_eq(i.it, s); }
+    }
+  };
 
-    template <typename I, typename S, typename F, typename Proj>
+  template <typename I, typename S, typename F, typename Proj>
     requires concepts::transformable_iters<I, S, F, Proj>
-    struct transform_view {
-        I it;
-        S st;
-        GENEX_NO_UNIQUE_ADDRESS F f;
-        GENEX_NO_UNIQUE_ADDRESS Proj proj;
+  struct transform_view {
+    I it;
+    S st;
+    GENEX_NO_UNIQUE_ADDRESS F f;
+    GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
-        GENEX_INLINE constexpr transform_view(I first, S last, F f, Proj proj) :
-            it(std::move(first)), st(std::move(last)), f(std::move(f)), proj(std::move(proj)) {
-        }
+    GENEX_INLINE constexpr transform_view(I first, S last, F f, Proj proj) :
+      it(std::move(first)), st(std::move(last)), f(std::move(f)), proj(std::move(proj)) {
+    }
 
-        template <typename Self>
-        GENEX_ITER_BEGIN {
-            return transform_iterator<I, S, F, Proj>{self.it, self.f, self.proj};
-        }
+    template <typename Self>
+    GENEX_ITER_BEGIN {
+      return transform_iterator<I, S, F, Proj>{self.it, self.f, self.proj};
+    }
 
-        template <typename Self>
-        requires std::convertible_to<S, I> and std::semiregular<transform_iterator<I, S, F, Proj>>
-        GENEX_ITER_END {
-            return transform_iterator<I, S, F, Proj>{self.st, self.f, self.proj};
-        }
+    template <typename Self>
+      requires std::convertible_to<S, I> and std::semiregular<transform_iterator<I, S, F, Proj>>
+    GENEX_ITER_END {
+      return transform_iterator<I, S, F, Proj>{self.st, self.f, self.proj};
+    }
 
-        template <typename Self>
-        GENEX_ITER_END {
-            return transform_sentinel(self.st);
-        }
+    template <typename Self>
+    GENEX_ITER_END {
+      return transform_sentinel(self.st);
+    }
 
-        template <typename Self>
-        GENEX_ITER_SIZE {
-            return iterators::distance(self.it, self.st);
-        }
-    };
+    template <typename Self>
+    GENEX_ITER_SIZE {
+      return iterators::distance(self.it, self.st);
+    }
+  };
 }
 
 namespace genex::views {
-    struct transform_fn {
-        template <typename I, typename S, typename F, typename Proj = meta::identity>
-        requires detail::concepts::transformable_iters<I, S, F, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, F f, Proj proj = {}) const noexcept(
-            SAFE_IMPL_CTOR(transform_view, I, S, F, Proj) and SAFE_MOVE(I) and
-            SAFE_MOVE(S) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
-            return detail::impl::transform_view(std::move(first), std::move(last), std::move(f), std::move(proj));
-        }
+  struct transform_fn {
+    template <typename I, typename S, typename F, typename Proj = meta::identity>
+      requires detail::concepts::transformable_iters<I, S, F, Proj>
+    GENEX_INLINE constexpr auto operator()(I first, S last, F f, Proj proj = {}) const noexcept(
+      SAFE_IMPL_CTOR(transform_view, I, S, F, Proj) and SAFE_MOVE(I) and
+      SAFE_MOVE(S) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
+      return detail::impl::transform_view(std::move(first), std::move(last), std::move(f), std::move(proj));
+    }
 
-        template <typename Rng, typename F, typename Proj = meta::identity>
-        requires detail::concepts::transformable_range<Rng, F, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const noexcept(
-            SAFE_IMPL_CTOR(transform_view, iterator_t<Rng>, sentinel_t<Rng>, F, Proj) and
-            SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
-            auto [first, last] = iterators::iter_pair(rng);
-            return detail::impl::transform_view(std::move(first), std::move(last), std::move(f), std::move(proj));
-        }
+    template <typename Rng, typename F, typename Proj = meta::identity>
+      requires detail::concepts::transformable_range<Rng, F, Proj>
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const noexcept(
+      SAFE_IMPL_CTOR(transform_view, iterator_t<Rng>, sentinel_t<Rng>, F, Proj) and
+      SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
+      auto [first, last] = iterators::iter_pair(rng);
+      return detail::impl::transform_view(std::move(first), std::move(last), std::move(f), std::move(proj));
+    }
 
-        template <typename F, typename Proj = meta::identity>
-        requires (not range<F>)
-        GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const noexcept(
-            SAFE_CTOR(transform_fn) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
-            return meta::bind_back(transform_fn{}, std::move(f), std::move(proj));
-        }
-    };
+    template <typename F, typename Proj = meta::identity>
+      requires (not range<F>)
+    GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const noexcept(
+      SAFE_CTOR(transform_fn) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
+      return meta::bind_back(transform_fn{}, std::move(f), std::move(proj));
+    }
+  };
 
-    export inline constexpr transform_fn transform{};
+  export inline constexpr transform_fn transform{};
 }
