@@ -3,7 +3,6 @@ set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
 project(GenEx VERSION 0.1.0 LANGUAGES CXX)
 
 # Set standard and include some common packages.
-set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_INSTALL_RPATH "/usr/local/gcc-dev/lib64")
