@@ -29,7 +29,7 @@ target_compile_features(
 
 target_compile_options(
   ${PROJECT_NAME}
-  PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/std:c++latest>
+  PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/std:c++latest /Zc:preprocessor>
 )
 
 # Create the GenEx library, and link 3rd party libraries.
