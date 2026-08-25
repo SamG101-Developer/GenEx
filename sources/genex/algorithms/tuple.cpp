@@ -8,27 +8,27 @@ namespace genex {
   struct tuple_head_fn {
     template <typename... Ts>
       requires (sizeof...(Ts) > 0)
-        GENEX_INLINE constexpr auto operator()(Ts &&... args) const -> decltype(auto) {
-      return std::get < 0 > (std::forward_as_tuple(std::forward<Ts>(args)...));
+    GENEX_INLINE constexpr auto operator()(Ts &&... args) const -> decltype(auto) {
+      return std::get<0>(std::forward_as_tuple(std::forward<Ts>(args)...));
     }
 
     template <typename... Ts>
       requires (sizeof...(Ts) > 0)
-        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> const &tpl) const -> decltype(auto) {
-      return std::get < 0 > (tpl);
+    GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> const &tpl) const -> decltype(auto) {
+      return std::get<0>(tpl);
     }
 
     template <typename... Ts>
       requires (sizeof...(Ts) > 0)
-        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> &&tpl) const -> decltype(auto) {
-      return std::get < 0 > (std::move(tpl));
+    GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> &&tpl) const -> decltype(auto) {
+      return std::get<0>(std::move(tpl));
     }
   };
 
   struct tuple_tail_fn {
     template <typename... Ts>
       requires (sizeof...(Ts) > 1)
-        GENEX_INLINE constexpr auto operator()(Ts &&... args) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Ts &&... args) const -> decltype(auto) {
       return std::apply([]<typename... T0>(auto &&, T0 &&... rest) {
         return std::make_tuple(std::forward<T0>(rest)...);
       }, std::forward_as_tuple(std::forward<Ts>(args)...));
@@ -36,7 +36,7 @@ namespace genex {
 
     template <typename... Ts>
       requires (sizeof...(Ts) > 1)
-        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> const &tpl) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> const &tpl) const -> decltype(auto) {
       return std::apply([]<typename... T0>(auto &&, T0 &&... rest) {
         return std::make_tuple(std::forward<T0>(rest)...);
       }, tpl);
@@ -44,13 +44,13 @@ namespace genex {
 
     template <typename... Ts>
       requires (sizeof...(Ts) <= 1)
-        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> const &) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> const &) const -> decltype(auto) {
       return std::make_tuple();
     }
 
     template <typename... Ts>
       requires (sizeof...(Ts) > 1)
-        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> &&tpl) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> &&tpl) const -> decltype(auto) {
       return std::apply([]<typename... T0>(auto &&, T0 &&... rest) {
         return std::make_tuple(std::forward<T0>(rest)...);
       }, std::move(tpl));
@@ -58,7 +58,7 @@ namespace genex {
 
     template <typename... Ts>
       requires (sizeof...(Ts) <= 1)
-        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> &&) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> &&) const -> decltype(auto) {
       return std::make_tuple();
     }
   };
@@ -67,67 +67,47 @@ namespace genex {
   struct get_fn {
     template <typename... Ts>
       requires (N < sizeof...(Ts))
-        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> &tpl) const -> decltype(auto) {
-      return std::get < N > (tpl);
+    GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> &tpl) const -> decltype(auto) {
+      return std::get<N>(tpl);
     }
 
     template <typename... Ts>
       requires (N < sizeof...(Ts))
-        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> const &tpl) const -> decltype(auto) {
-      return std::get < N > (tpl);
+    GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> const &tpl) const -> decltype(auto) {
+      return std::get<N>(tpl);
     }
 
     template <typename... Ts>
       requires (N < sizeof...(Ts))
-        GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> &&tpl) const -> decltype(auto) {
-      return std::get < N > (std::move(tpl));
+    GENEX_INLINE constexpr auto operator()(std::tuple<Ts...> &&tpl) const -> decltype(auto) {
+      return std::get<N>(std::move(tpl));
     }
 
     template <typename T, typename U>
-      requires (N == 0
-    or N
-    ==
-    1
-    )
-        GENEX_INLINE constexpr auto operator()(std::pair<T, U> &p) const -> decltype(auto) {
+      requires (N == 0 or N == 1)
+    GENEX_INLINE constexpr auto operator()(std::pair<T, U> &p) const -> decltype(auto) {
       if constexpr (N == 0) { return p.first; }
       else { return p.second; }
     }
 
     template <typename T, typename U>
-      requires (N == 0
-    or N
-    ==
-    1
-    )
-        GENEX_INLINE constexpr auto operator()(std::pair<T, U> const &p) const -> decltype(auto) {
+      requires (N == 0 or N == 1)
+    GENEX_INLINE constexpr auto operator()(std::pair<T, U> const &p) const -> decltype(auto) {
       if constexpr (N == 0) { return p.first; }
       else { return p.second; }
     }
 
     template <typename T, typename U>
-      requires (N == 0
-    or N
-    ==
-    1
-    )
-        GENEX_INLINE constexpr auto operator()(std::pair<T, U> &&p) const -> decltype(auto) {
+      requires (N == 0 or N == 1)
+    GENEX_INLINE constexpr auto operator()(std::pair<T, U> &&p) const -> decltype(auto) {
       if constexpr (N == 0) { return std::move(p.first); }
       else { return std::move(p.second); }
     }
 
     template <typename... Ts>
-      requires (N<sizeof...(Ts))
-    and (
-
-    sizeof
-    ...
-    (Ts)
-    >
-    1
-    )
-        GENEX_INLINE constexpr auto operator()(Ts &&... args) const -> decltype(auto) {
-      return std::get < N > (std::forward_as_tuple(std::forward < Ts > (args)...));
+      requires (N < sizeof...(Ts)) and (sizeof...(Ts) > 1)
+    GENEX_INLINE constexpr auto operator()(Ts &&... args) const -> decltype(auto) {
+      return std::get<N>(std::forward_as_tuple(std::forward<Ts>(args)...));
     }
   };
 

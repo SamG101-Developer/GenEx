@@ -13,14 +13,14 @@ import std;
 namespace genex::views::detail::concepts {
   template <typename I, typename S>
   concept move_reversible_iters =
-  std::bidirectional_iterator<I> and
-  std::sentinel_for<S, I> and
-  std::movable<iter_value_t<I>>;
+    std::bidirectional_iterator<I> and
+    std::sentinel_for<S, I> and
+    std::movable<iter_value_t<I>>;
 
   template <typename Rng>
   concept move_reversible_range =
-  bidirectional_range<Rng> and
-  move_reversible_iters<iterator_t<Rng>, sentinel_t<Rng>>;
+    bidirectional_range<Rng> and
+    move_reversible_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
 namespace genex::views::detail::impl {
@@ -99,23 +99,21 @@ namespace genex::views {
   struct move_reverse_fn {
     template <typename I, typename S>
       requires detail::concepts::move_reversible_iters<I, S>
-        GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
+    GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
       SAFE_IMPL_CTOR(move_reverse_view, I, S) and
-    SAFE_MOVE (I) and SAFE_MOVE(S)
-    )
- {
-            return detail::impl::move_reverse_view(std::move(first), std::move(last));
-        }
+      SAFE_MOVE(I) and SAFE_MOVE(S)) {
+      return detail::impl::move_reverse_view(std::move(first), std::move(last));
+    }
 
     template <typename Rng>
       requires detail::concepts::move_reversible_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_IMPL_CTOR(move_reverse_view, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::move_reverse_view(std::move(first), std::move(last));
     }
 
-        GENEX_INLINE constexpr auto operator()() const noexcept(
+    GENEX_INLINE constexpr auto operator()() const noexcept(
       SAFE_CTOR(move_reverse_fn)) {
       return meta::bind_back(move_reverse_fn{});
     }

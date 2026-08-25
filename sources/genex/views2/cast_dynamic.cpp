@@ -11,16 +11,15 @@ import std;
 namespace genex::views::detail::concepts {
   template <typename To, typename I, typename S>
   concept dynamic_castable_iters =
-  std::input_iterator<I> and
-
-  std::sentinel_for<S, I> and
-    (std::is_pointer_v<To> or std::is_lvalue_reference_v<To>) and
-    requires(iter_value_t<I> && from) { dynamic_cast<To>(from); };
+    std::input_iterator<I> and
+    std::sentinel_for<S, I> and
+    std::is_pointer_v<To> and
+    requires(iter_reference_t<I> from) { dynamic_cast<To>(from); };
 
   template <typename To, typename Rng>
   concept dynamic_castable_range =
-  input_range<Rng> and
-  dynamic_castable_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
+    input_range<Rng> and
+    dynamic_castable_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
 namespace genex::views::detail::impl {
@@ -57,7 +56,7 @@ namespace genex::views::detail::impl {
     template <typename Self>
     GENEX_VIEW_CUSTOM_PREV {
       --self.it;
-      self.fwd_to_valid();
+      self.bwd_to_valid();
       return self;
     }
 
@@ -77,7 +76,7 @@ namespace genex::views::detail::impl {
 
   private:
     template <typename Self>
-        GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
+    GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
       while (self.it != self.st) {
         self.update_cache();
         if (self.cached != nullptr) { break; }
@@ -86,7 +85,7 @@ namespace genex::views::detail::impl {
     }
 
     template <typename Self>
-        GENEX_INLINE constexpr auto bwd_to_valid(this Self &&self) -> void {
+    GENEX_INLINE constexpr auto bwd_to_valid(this Self &&self) -> void {
       while (self.it != self.st) {
         self.update_cache();
         if (self.cached != nullptr) { break; }
@@ -95,7 +94,7 @@ namespace genex::views::detail::impl {
     }
 
     template <typename Self>
-        GENEX_INLINE constexpr auto update_cache(this Self &&self) -> void {
+    GENEX_INLINE constexpr auto update_cache(this Self &&self) -> void {
       if (self.it != self.st) { self.cached = dynamic_cast<To>(*self.it); }
       else { self.cached = nullptr; }
     }
@@ -129,23 +128,20 @@ namespace genex::views {
   struct cast_dynamic_fn {
     template <typename I, typename S>
       requires detail::concepts::dynamic_castable_iters<To, I, S>
-        GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
-      SAFE_IMPL_CTOR(cast_dynamic_view, To, I, S) and SAFE_MOVE
-    (I) and SAFE_MOVE(S)
-    )
- {
-            return detail::impl::cast_dynamic_view<To, I, S>(std::move(first), std::move(last));
-        }
+    GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
+      SAFE_IMPL_CTOR(cast_dynamic_view, To, I, S) and SAFE_MOVE(I) and SAFE_MOVE(S)) {
+      return detail::impl::cast_dynamic_view<To, I, S>(std::move(first), std::move(last));
+    }
 
     template <typename Rng>
       requires detail::concepts::dynamic_castable_range<To, Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_IMPL_CTOR(cast_dynamic_view, To, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::cast_dynamic_view<To, iterator_t<Rng>, sentinel_t<Rng>>(std::move(first), std::move(last));
     }
 
-        GENEX_INLINE constexpr auto operator()() const noexcept(
+    GENEX_INLINE constexpr auto operator()() const noexcept(
       SAFE_CTOR(cast_dynamic_fn)) {
       return meta::bind_back(cast_dynamic_fn{});
     }

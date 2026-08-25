@@ -12,14 +12,14 @@ import std;
 namespace genex::views::detail::concepts {
   template <typename To, typename I, typename S>
   concept static_castable_iters =
-  std::input_iterator<I> and
-  std::sentinel_for<S, I> and
-  requires(iter_value_t<I> &&from) { static_cast<To>(from); };
+    std::input_iterator<I> and
+    std::sentinel_for<S, I> and
+    requires(iter_value_t<I> &&from) { static_cast<To>(from); };
 
   template <typename To, typename Rng>
   concept static_castable_range =
-  input_range<Rng> and
-  static_castable_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
+    input_range<Rng> and
+    static_castable_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
 namespace genex::views::detail::impl {
@@ -98,23 +98,20 @@ namespace genex::views {
   struct cast_static_fn {
     template <typename I, typename S>
       requires detail::concepts::static_castable_iters<To, I, S>
-        GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
-      SAFE_IMPL_CTOR(cast_static_view, To, I, S) and SAFE_MOVE
-    (I) and SAFE_MOVE(S)
-    )
- {
-            return detail::impl::cast_static_view<To, I, S>(std::move(first), std::move(last));
-        }
+    GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
+      SAFE_IMPL_CTOR(cast_static_view, To, I, S) and SAFE_MOVE(I) and SAFE_MOVE(S)) {
+      return detail::impl::cast_static_view<To, I, S>(std::move(first), std::move(last));
+    }
 
     template <typename Rng>
       requires detail::concepts::static_castable_range<To, Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_IMPL_CTOR(cast_static_view, To, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::cast_static_view<To, iterator_t<Rng>, sentinel_t<Rng>>(std::move(first), std::move(last));
     }
 
-        GENEX_INLINE constexpr auto operator()() const noexcept(
+    GENEX_INLINE constexpr auto operator()() const noexcept(
       SAFE_CTOR(cast_static_fn)) {
       return meta::bind_back(cast_static_fn{});
     }

@@ -38,7 +38,7 @@ namespace genex::views::detail::impl {
     sentinel_t<iter_value_t<I>> inner_st;
 
     using value_type = range_value_t<iter_value_t<I>>;
-    using reference_type = range_reference_t<iter_value_t<I>>;
+    using reference_type = std::common_reference_t<range_reference_t<iter_value_t<I>>, const New&>;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::conditional_t<
       std::forward_iterator<I>,
@@ -57,13 +57,13 @@ namespace genex::views::detail::impl {
     template <typename Self>
     GENEX_VIEW_CUSTOM_NEXT {
       if (self.it == self.st) { return self; }
-      ++self.inner_it;
       if (self.use_new) {
         self.use_new = false;
         ++self.it;
         self.fwd_to_valid();
         return self;
       }
+      ++self.inner_it;
       if (self.inner_it == self.inner_st) {
         self.use_new = true;
       }
@@ -77,8 +77,9 @@ namespace genex::views::detail::impl {
     GENEX_VIEW_CUSTOM_DEREF {
       GENEX_ASSERT(std::runtime_error, self.it != self.st);
       GENEX_ASSERT(std::runtime_error, self.inner_it != self.inner_st or self.use_new);
-      if (self.use_new) { return *&self.new_value; }
-      return *self.inner_it;
+      return self.use_new
+        ? static_cast<reference_type>(self.new_value)
+        : static_cast<reference_type>(*self.inner_it);
     }
 
     GENEX_VIEW_ITER_EQ(join_with_iterator, join_with_iterator) {

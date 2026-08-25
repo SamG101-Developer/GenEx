@@ -89,34 +89,28 @@ namespace genex::views {
   struct iota_fn {
     template <typename Int>
       requires std::weakly_incrementable<Int>
-        GENEX_INLINE constexpr auto operator()(const Int lo, const Int hi, const Int step = 1) const noexcept(
+    GENEX_INLINE constexpr auto operator()(const Int lo, const Int hi, const Int step = 1) const noexcept(
       SAFE_IMPL_CTOR(iota_view, Int) and
-    SAFE_MOVE (Int)
-    )
- {
-            return detail::impl::iota_view(lo, hi, step);
-        }
+      SAFE_MOVE(Int)) {
+      return detail::impl::iota_view(lo, hi, step);
+    }
 
     template <typename Int>
       requires std::weakly_incrementable<Int>
-        GENEX_INLINE constexpr auto operator()(const Int hi) const noexcept(
+    GENEX_INLINE constexpr auto operator()(const Int hi) const noexcept(
       SAFE_IMPL_CTOR(iota_view, Int) and
-    SAFE_MOVE (Int)
-    )
- {
-            return detail::impl::iota_view(static_cast<Int>(0), hi, static_cast<Int>(1));
-        }
+      SAFE_MOVE(Int)) {
+      return detail::impl::iota_view(static_cast<Int>(0), hi, static_cast<Int>(1));
+    }
 
     template <typename Int>
       requires std::weakly_incrementable<Int>
-    and std::numeric_limits<Int>::is_specialized
-        GENEX_INLINE constexpr auto operator()() const noexcept(
+      and std::numeric_limits<Int>::is_specialized
+    GENEX_INLINE constexpr auto operator()() const noexcept(
       SAFE_IMPL_CTOR(iota_view, Int) and
-    SAFE_MOVE (Int)
-    )
- {
-            return detail::impl::iota_view(static_cast<Int>(0), std::numeric_limits<Int>::max(), static_cast<Int>(1));
-        }
+      SAFE_MOVE(Int)) {
+      return detail::impl::iota_view(static_cast<Int>(0), std::numeric_limits<Int>::max(), static_cast<Int>(1));
+    }
   };
 
   export inline constexpr iota_fn iota{};

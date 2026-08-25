@@ -17,28 +17,24 @@ operations on ranges.
 ### Examples
 
 ```cpp
-#include <genex/views/filter.hpp>
-#include <genex/views/materialize.hpp>
-#include <genex/views/reverse.hpp>
-#include <genex/views/transform.hpp>
-#include <genex/to_container.hpp>
+import genex
 
 
 auto main() -> int {
-    auto vec = std::vector<int>{1, 2, 3, 4, 5};
+  auto vec = std::vector<int>{1, 2, 3, 4, 5};
 
-    auto result = vec
-        | genex::views::transform([](const int i) { return i * 2; })
-        | genex::views::filter([](const int i) { return i % 4 == 0; })
-        | genex::views::materialize
-        | genex::views::reverse
-        | genex::to<std::vector>();
+  auto result = vec
+    | genex::views::transform([](const int i) { return i * 2; })
+    | genex::views::filter([](const int i) { return i % 4 == 0; })
+    | genex::views::materialize
+    | genex::views::reverse
+    | genex::to<std::vector>();
 
-    for (auto i : result) {
-        std::cout << i << ", ";
-    }
+  for (auto i : result) {
+    std::cout << i << ", ";
+  }
 
-    return 0;
+  return 0;
 }
 ```
 

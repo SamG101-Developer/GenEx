@@ -4,8 +4,9 @@ module;
 export module genex.views2.chunk;
 export import genex.pipe;
 import genex.concepts;
+import genex.subrange;
 import genex.meta;
-import genex.iterators.advance;
+import genex.iterators.next;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
@@ -33,14 +34,10 @@ namespace genex::views::detail::impl {
     S st;
     Int chunk_size;
 
-    using value_type = std::ranges::subrange<I>;
-    using reference_type = std::ranges::subrange<I>;
+    using value_type = genex::subrange<I>;
+    using reference_type = genex::subrange<I>;
     using difference_type = iter_difference_t<I>;
-    using iterator_category =
-    std::conditional_t<
-      std::random_access_iterator<I>, std::random_access_iterator_tag, std::conditional_t<
-        std::bidirectional_iterator<I>, std::bidirectional_iterator_tag,
-        std::forward_iterator_tag>>;
+    using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;
     GENEX_ITER_OPS(chunk_iterator);
 
@@ -52,31 +49,25 @@ namespace genex::views::detail::impl {
 
     template <typename Self>
     GENEX_VIEW_CUSTOM_NEXT {
-      auto n = std::min(self.chunk_size, static_cast<Int>(iterators::distance(self.it, self.st)));
-      iterators::advance(self.it, n);
+      self.it = iterators::next(self.it, static_cast<iter_difference_t<I>>(self.chunk_size), self.st);
       return self;
     }
 
     template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      auto n = std::min(self.chunk_size, static_cast<Int>(iterators::distance(self.it, self.st)));
-      iterators::advance(self.it, -n);
-      return self;
-    }
+    GENEX_VIEW_CUSTOM_PREV = delete;
 
     template <typename Self>
     GENEX_VIEW_CUSTOM_DEREF {
       auto end_it = self.it;
       for (Int i = 0; i < self.chunk_size and end_it != self.st; ++i) { ++end_it; }
-      return std::ranges::subrange(self.it, end_it);
+      return genex::subrange(self.it, end_it);
     }
 
     template <typename Self>
-      requires std::random_access_iterator<I>
+      requires std::random_access_iterator<I> and std::sized_sentinel_for<S, I>
     GENEX_VIEW_CUSTOM_DEREF {
-      auto end_it = self.it + self.chunk_size;
-      if (end_it > self.st) { end_it = self.st; }
-      return std::ranges::subrange(self.it, end_it);
+      const auto n = std::min(static_cast<iter_difference_t<I>>(self.chunk_size), self.st - self.it);
+      return genex::subrange(self.it, self.it + n);
     }
 
     GENEX_VIEW_ITER_EQ(chunk_iterator, chunk_iterator) {

@@ -7,28 +7,25 @@ import genex.to_container;
 import genex.views2.address_of;
 import std;
 
-
 static void BM_StdRanges_AddressOf_Contiguous(benchmark::State &state) {
-    std::vector<int> data(1000);
-    std::iota(data.begin(), data.end(), 0);
+  std::vector<int> data(1000);
+  std::iota(data.begin(), data.end(), 0);
 
-    for (auto _ : state) {
-        auto result = data | ranges::views::addressof | ranges::to<std::vector>();
-        benchmark::DoNotOptimize(result);
-    }
+  for (auto _ : state) {
+    auto result = data | ranges::views::addressof | ranges::to<std::vector>();
+    benchmark::DoNotOptimize(result);
+  }
 }
-
 
 static void BM_Genex_V2_AddressOf_Contiguous(benchmark::State &state) {
-    std::vector<int> data(1000);
-    std::iota(data.begin(), data.end(), 0);
+  std::vector<int> data(1000);
+  std::iota(data.begin(), data.end(), 0);
 
-    for (auto _ : state) {
-        auto result = data | genex::views::address_of | genex::to<std::vector>();
-        benchmark::DoNotOptimize(result);
-    }
+  for (auto _ : state) {
+    auto result = data | genex::views::address_of | genex::to<std::vector>();
+    benchmark::DoNotOptimize(result);
+  }
 }
-
 
 // static void BM_StdRanges_AddressOf_Forward(benchmark::State &state) {
 //     std::deque<int> data(1000);
@@ -40,7 +37,6 @@ static void BM_Genex_V2_AddressOf_Contiguous(benchmark::State &state) {
 //     }
 // }
 
-
 // static void BM_Genex_V2_AddressOf_Forward(benchmark::State &state) {
 //     std::deque<int> data(1000);
 //     std::iota(data.begin(), data.end(), 0);
@@ -50,7 +46,6 @@ static void BM_Genex_V2_AddressOf_Contiguous(benchmark::State &state) {
 //         benchmark::DoNotOptimize(result);
 //     }
 // }
-
 
 // BENCHMARK(BM_StdRanges_AddressOf_Contiguous);
 // BENCHMARK(BM_Genex_V2_AddressOf_Contiguous);

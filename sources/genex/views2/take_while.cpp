@@ -29,8 +29,9 @@ namespace genex::views::detail::impl {
   struct take_while_iterator {
     I it;
     S st;
-    GENEX_NO_UNIQUE_ADDRESS Pred pred;
-    GENEX_NO_UNIQUE_ADDRESS Proj proj;
+    GENEX_NO_UNIQUE_ADDRESS meta::box<Pred> pred;
+    GENEX_NO_UNIQUE_ADDRESS meta::box<Proj> proj;
+    bool done = true;
 
     using value_type = iter_value_t<I>;
     using reference_type = iter_reference_t<I>;
@@ -44,20 +45,20 @@ namespace genex::views::detail::impl {
     GENEX_INLINE constexpr take_while_iterator(I it, S st, Pred pred, Proj proj) :
       it(std::move(it)), st(std::move(st)),
       pred(std::move(pred)), proj(std::move(proj)) {
+      refresh_done();
     }
 
     template <typename Self>
     GENEX_VIEW_CUSTOM_NEXT {
       ++self.it;
-      if (self.it != self.st and not meta::invoke(self.pred, meta::invoke(self.proj, *self.it))) {
-        self.it = self.st;
-      }
+      self.refresh_done();
       return self;
     }
 
     template <typename Self>
     GENEX_VIEW_CUSTOM_PREV {
       --self.it;
+      self.refresh_done();
       return self;
     }
 
@@ -67,12 +68,18 @@ namespace genex::views::detail::impl {
     }
 
     GENEX_VIEW_ITER_EQ(take_while_iterator, take_while_iterator) {
-      return self.it == that.it;
+      return self.done == that.done and (self.done or self.it == that.it);
     }
 
     GENEX_VIEW_ITER_EQ(take_while_iterator, take_while_sentinel) {
       GENEX_IGNORE(that);
-      return self.it == self.st;
+      return self.done;
+    }
+
+  private:
+    template <typename Self>
+    GENEX_INLINE constexpr auto refresh_done(this Self &&self) -> void {
+      self.done = self.it == self.st or not meta::invoke(*self.pred, meta::invoke(*self.proj, *self.it));
     }
   };
 
@@ -96,7 +103,8 @@ namespace genex::views::detail::impl {
 
     template <typename Self>
     GENEX_ITER_END {
-      return take_while_iterator(self.st, self.st, self.pred, self.proj);
+      GENEX_IGNORE(self);
+      return take_while_sentinel();
     }
   };
 }
@@ -121,6 +129,7 @@ namespace genex::views {
     }
 
     template <typename Pred, typename Proj = meta::identity>
+      requires (not range<Pred>)
     GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const noexcept(
       SAFE_CTOR(take_while_fn) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
       return meta::bind_back(take_while_fn{}, std::move(pred), std::move(proj));

@@ -25,7 +25,7 @@ namespace genex::operations {
   struct at_fn {
     template <typename Rng>
       requires detail::concepts::randomly_access_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, const std::size_t n) const -> range_value_t<Rng>& {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, const std::size_t n) const -> decltype(auto) {
       return rng[n];
     }
   };
@@ -33,7 +33,7 @@ namespace genex::operations {
   struct front_fn {
     template <typename Rng>
       requires detail::concepts::frontable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> range_value_t<Rng> {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
       return *iterators::begin(rng);
     }
   };
@@ -41,7 +41,7 @@ namespace genex::operations {
   struct back_fn {
     template <typename Rng>
       requires detail::concepts::backable_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> range_value_t<Rng>& {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
       return *iterators::prev(iterators::end(rng));
     }
   };

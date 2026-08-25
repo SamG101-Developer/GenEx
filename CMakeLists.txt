@@ -19,17 +19,17 @@ target_sources(${PROJECT_NAME} PUBLIC
 
 target_compile_features(
   ${PROJECT_NAME}
-  PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:cxx_std_26>
+  PUBLIC $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:cxx_std_26>
 )
 
 target_compile_features(
   ${PROJECT_NAME}
-  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:cxx_std_23>
+  PUBLIC $<$<CXX_COMPILER_ID:MSVC>:cxx_std_23>
 )
 
 target_compile_options(
   ${PROJECT_NAME}
-  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/std:c++latest>
+  PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/std:c++latest>
 )
 
 # Create the GenEx library, and link 3rd party libraries.

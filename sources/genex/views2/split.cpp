@@ -5,6 +5,7 @@ export module genex.views2.split;
 export import genex.pipe;
 import genex.algorithms.count;
 import genex.concepts;
+import genex.subrange;
 import genex.meta;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
@@ -16,7 +17,7 @@ namespace genex::views::detail::concepts {
   concept splittable_iters =
     std::forward_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirect_equivalence_relation<operations::eq, I, std::remove_cvref_t<E> const*>;;
+    std::indirect_equivalence_relation<operations::eq, I, std::remove_cvref_t<E> const*>;
 
   template <typename Rng, typename E>
   concept splittable_range =
@@ -31,16 +32,14 @@ namespace genex::views::detail::impl {
     requires detail::concepts::splittable_iters<I, S, E>
   struct split_iterator {
     I it;
+    I field_end;
     S st;
     E elem;
 
-    using value_type = std::ranges::subrange<I>;
-    using reference_type = std::ranges::subrange<I>;
+    using value_type = genex::subrange<I>;
+    using reference_type = genex::subrange<I>;
     using difference_type = iter_difference_t<I>;
-    using iterator_category =
-    std::conditional_t<
-      std::random_access_iterator<I>, std::random_access_iterator_tag, std::conditional_t<
-        std::bidirectional_iterator<I>, std::bidirectional_iterator_tag, std::forward_iterator_tag>>;
+    using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;
     GENEX_ITER_OPS(split_iterator);
 
@@ -48,32 +47,23 @@ namespace genex::views::detail::impl {
 
     GENEX_INLINE constexpr split_iterator(I first, S last, E e) :
       it(std::move(first)), st(std::move(last)), elem(std::move(e)) {
+      seek_field_end();
     }
 
     template <typename Self>
     GENEX_VIEW_CUSTOM_NEXT {
-      while (self.it != self.st and not operations::eq{}(*self.it, self.elem)) { ++self.it; }
+      self.it = self.field_end;
       if (self.it != self.st) { ++self.it; }
+      self.seek_field_end();
       return self;
     }
 
     template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      while (self.it != self.st) {
-        --self.it;
-        if (operations::eq{}(*self.it, self.elem)) {
-          ++self.it;
-          break;
-        }
-      }
-      return self;
-    }
+    GENEX_VIEW_CUSTOM_PREV = delete;
 
     template <typename Self>
     GENEX_VIEW_CUSTOM_DEREF {
-      auto end_it = self.it;
-      while (end_it != self.st and not operations::eq{}(*end_it, self.elem)) { ++end_it; }
-      return std::ranges::subrange(self.it, end_it);
+      return genex::subrange(self.it, self.field_end);
     }
 
     GENEX_VIEW_ITER_EQ(split_iterator, split_iterator) {
@@ -83,6 +73,13 @@ namespace genex::views::detail::impl {
     GENEX_VIEW_ITER_EQ(split_iterator, split_sentinel) {
       GENEX_IGNORE(that);
       return self.it == self.st;
+    }
+
+  private:
+    template <typename Self>
+    GENEX_INLINE constexpr auto seek_field_end(this Self &&self) -> void {
+      self.field_end = self.it;
+      while (self.field_end != self.st and not operations::eq{}(*self.field_end, self.elem)) { ++self.field_end; }
     }
   };
 

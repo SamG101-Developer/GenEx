@@ -13,15 +13,15 @@ import std;
 namespace genex::views::detail::concepts {
   template <typename I, typename S, typename Pred, typename New, typename Proj>
   concept replaceable_if_iters =
-  std::input_iterator<I> and
-  std::sentinel_for<S, I> and
-  std::indirect_unary_predicate<Pred, std::projected<I, Proj>> and
-  std::convertible_to<New, iter_value_t<I>>;
+    std::input_iterator<I> and
+    std::sentinel_for<S, I> and
+    std::indirect_unary_predicate<Pred, std::projected<I, Proj>> and
+    std::convertible_to<New, iter_value_t<I>>;
 
   template <typename Rng, typename Pred, typename New, typename Proj>
   concept replaceable_if_range =
-  input_range<Rng> and
-  replaceable_if_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, New, Proj>;
+    input_range<Rng> and
+    replaceable_if_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, New, Proj>;
 }
 
 namespace genex::views::detail::impl {
@@ -30,9 +30,9 @@ namespace genex::views::detail::impl {
   struct replace_iterator {
     I it;
     S st;
-        GENEX_NO_UNIQUE_ADDRESS Pred pred;
-        GENEX_NO_UNIQUE_ADDRESS New new_value;
-        GENEX_NO_UNIQUE_ADDRESS Proj proj;
+    GENEX_NO_UNIQUE_ADDRESS Pred pred;
+    GENEX_NO_UNIQUE_ADDRESS New new_value;
+    GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
     using value_type = iter_value_t<I>;
     using reference_type = iter_reference_t<I>;
@@ -63,7 +63,7 @@ namespace genex::views::detail::impl {
 
     template <typename Self>
     GENEX_VIEW_CUSTOM_DEREF {
-      return meta::invoke(self.pred, meta::invoke(self.proj, *self.it)) ? *&self.new_value : *self.it;
+      return meta::invoke(self.pred, meta::invoke(self.proj, *self.it)) ? self.new_value : *self.it;
     }
 
     GENEX_VIEW_ITER_EQ(replace_iterator, replace_iterator) {
@@ -76,9 +76,9 @@ namespace genex::views::detail::impl {
   struct replace_view {
     I it;
     S st;
-        GENEX_NO_UNIQUE_ADDRESS Pred pred;
-        GENEX_NO_UNIQUE_ADDRESS New new_value;
-        GENEX_NO_UNIQUE_ADDRESS Proj proj;
+    GENEX_NO_UNIQUE_ADDRESS Pred pred;
+    GENEX_NO_UNIQUE_ADDRESS New new_value;
+    GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
     GENEX_INLINE constexpr replace_view(I first, S last, Pred pred, New new_val, Proj proj) :
       it(std::move(first)), st(std::move(last)),
@@ -106,41 +106,30 @@ namespace genex::views {
   struct replace_if_fn {
     template <typename I, typename S, typename Pred, typename New, typename Proj = meta::identity>
       requires detail::concepts::replaceable_if_iters<I, S, Pred, New, Proj>
-        GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, New new_value,
+    GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, New new_value,
       Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(replace_view, I, S, Pred, New, Proj) and
-    SAFE_MOVE (I) and SAFE_MOVE(S) and SAFE_MOVE
-    (Pred) and SAFE_MOVE(New) and SAFE_MOVE
-    (Proj)
-    )
- {
-            return detail::impl::replace_view(std::move(first), std::move(last), std::move(pred), std::move(new_value), std::move(proj));
-        }
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
+      return detail::impl::replace_view(
+        std::move(first), std::move(last), std::move(pred), std::move(new_value), std::move(proj));
+    }
 
     template <typename Rng, typename Pred, typename New, typename Proj = meta::identity>
       requires detail::concepts::replaceable_if_range<Rng, Pred, New, Proj>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, New new_value, Proj proj = {}) const noexcept(
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, New new_value, Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(replace_view, iterator_t<Rng>, sentinel_t<Rng>, Pred, New, Proj) and
-    SAFE_MOVE (Pred) and SAFE_MOVE(New) and SAFE_MOVE
-    (Proj)
-    )
- {
-            auto [first, last] = iterators::iter_pair(rng);
-            return detail::impl::replace_view(std::move(first), std::move(last), std::move(pred), std::move(new_value), std::move(proj));
-        }
+      SAFE_MOVE(Pred) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
+      auto [first, last] = iterators::iter_pair(rng);
+      return detail::impl::replace_view(
+        std::move(first), std::move(last), std::move(pred), std::move(new_value), std::move(proj));
+    }
 
     template <typename Pred, typename New, typename Proj = meta::identity>
-      requires (not
-    range<Pred>
-    )
-        GENEX_INLINE constexpr auto operator()(Pred pred, New new_value, Proj proj = {}) const noexcept(
-      SAFE_CTOR(replace_if_fn) and SAFE_MOVE
-    (Pred) and SAFE_MOVE(New) and SAFE_MOVE
-    (Proj)
-    )
- {
-            return meta::bind_back(replace_if_fn{}, std::move(pred), std::move(new_value), std::move(proj));
-        }
+      requires (not range<Pred>)
+    GENEX_INLINE constexpr auto operator()(Pred pred, New new_value, Proj proj = {}) const noexcept(
+      SAFE_CTOR(replace_if_fn) and SAFE_MOVE(Pred) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
+      return meta::bind_back(replace_if_fn{}, std::move(pred), std::move(new_value), std::move(proj));
+    }
   };
 
   export inline constexpr replace_if_fn replace_if{};

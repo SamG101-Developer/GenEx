@@ -15,21 +15,21 @@ namespace genex::actions::detail::concepts {
 
   template <typename Rng>
   concept front_poppable_select_pop_front =
-  front_poppable_range<Rng> and
-  has_member_pop_front<Rng>;
+    front_poppable_range<Rng> and
+    has_member_pop_front<Rng>;
 
   template <typename Rng>
   concept front_poppable_select_erase =
-  front_poppable_range<Rng> and
-  has_member_erase<Rng> and
-  not front_poppable_select_pop_front<Rng>;
+    front_poppable_range<Rng> and
+    has_member_erase<Rng> and
+    not front_poppable_select_pop_front<Rng>;
 }
 
 namespace genex::actions {
   struct pop_front_fn {
     template <typename Rng>
       requires detail::concepts::front_poppable_select_pop_front<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
       return rng.pop_front();
     }
 
@@ -39,7 +39,7 @@ namespace genex::actions {
       return actions::erase(rng, iterators::begin(rng));
     }
 
-        GENEX_INLINE constexpr auto operator()() const {
+    GENEX_INLINE constexpr auto operator()() const {
       return meta::bind_back(pop_front_fn{});
     }
   };

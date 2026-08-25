@@ -9,30 +9,27 @@ import genex.views2.cycle;
 import genex.views2.take;
 import std;
 
+static void BM_StdRanges_Cycle(benchmark::State &state) {
+  std::vector<int> vec(1000);
+  std::iota(vec.begin(), vec.end(), 0);
 
-static void BM_StdRanges_Cycle(benchmark::State& state) {
-    std::vector<int> vec(1000);
-    std::iota(vec.begin(), vec.end(), 0);
-
-    for (auto _ : state) {
-        for (auto val : vec | ranges::views::cycle | ranges::views::take(2500) | ranges::to<std::vector>()) {
-            benchmark::DoNotOptimize(val);
-        }
+  for (auto _ : state) {
+    for (auto val : vec | ranges::views::cycle | ranges::views::take(2500) | ranges::to<std::vector>()) {
+      benchmark::DoNotOptimize(val);
     }
+  }
 }
 
+static void BM_Genex_V2_Cycle(benchmark::State &state) {
+  std::vector<int> vec(1000);
+  std::iota(vec.begin(), vec.end(), 0);
 
-static void BM_Genex_V2_Cycle(benchmark::State& state) {
-    std::vector<int> vec(1000);
-    std::iota(vec.begin(), vec.end(), 0);
-
-    for (auto _ : state) {
-        for (auto val : vec | genex::views::cycle | genex::views::take(2500) | genex::to<std::vector>()) {
-            benchmark::DoNotOptimize(val);
-        }
+  for (auto _ : state) {
+    for (auto val : vec | genex::views::cycle | genex::views::take(2500) | genex::to<std::vector>()) {
+      benchmark::DoNotOptimize(val);
     }
+  }
 }
 
-
-BENCHMARK(BM_StdRanges_Cycle);
-BENCHMARK(BM_Genex_V2_Cycle);
+BENCHMARK (BM_StdRanges_Cycle);
+BENCHMARK (BM_Genex_V2_Cycle);

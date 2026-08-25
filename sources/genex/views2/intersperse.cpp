@@ -32,7 +32,6 @@ namespace genex::views::detail::impl {
   template <typename I, typename S, typename New>
     requires concepts::interspersable_iters<I, S, New>
   struct intersperse_iterator {
-    GENEX_NO_UNIQUE_ADDRESS I base_it;
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS New new_value;
@@ -41,59 +40,62 @@ namespace genex::views::detail::impl {
     using value_type = iter_value_t<I>;
     using reference_type = iter_reference_t<I>;
     using difference_type = iter_difference_t<I>;
-    using iterator_category = std::iterator_traits<I>::iterator_category;
+    using iterator_category = std::conditional_t<
+      std::bidirectional_iterator<I>, std::bidirectional_iterator_tag,
+      typename std::iterator_traits<I>::iterator_category>;
     using iterator_concept = iterator_category;
     GENEX_ITER_OPS(intersperse_iterator)
 
     GENEX_INLINE constexpr intersperse_iterator() = default;
 
-    GENEX_INLINE constexpr intersperse_iterator(I base_it, I first, S last, New new_val) :
-      base_it(std::move(base_it)), it(std::move(first)), st(std::move(last)),
+    GENEX_INLINE constexpr intersperse_iterator(I first, S last, New new_val) :
+      it(std::move(first)), st(std::move(last)),
       new_value(std::move(new_val)) {
     }
 
+
     template <typename Self>
     GENEX_VIEW_CUSTOM_NEXT {
-      if (self.it == self.st) { return self; }
-      if (not self.yield_new) { self.yield_new = true; }
-      else {
+      if (self.yield_new) {
         self.yield_new = false;
         ++self.it;
+      }
+      else {
+        auto peek = self.it;
+        ++peek;
+        if (peek == self.st) { self.it = std::move(peek); }
+        else { self.yield_new = true; }
       }
       return self;
     }
 
     template <typename Self>
     GENEX_VIEW_CUSTOM_PREV {
-      if (self.it == self.base_it) { return self; }
-      if (self.yield_new) { self.yield_new = false; }
-      else {
-        self.yield_new = true;
-        --self.it;
+      if (self.yield_new) {
+        self.yield_new = false;
+        return self;
       }
+      // Backing out of the end lands on the last element, which owes no separator; every other
+      // element is preceded by one.
+      const auto from_end = self.it == self.st;
+      --self.it;
+      self.yield_new = not from_end;
       return self;
     }
 
     template <typename Self>
     GENEX_VIEW_CUSTOM_DEREF {
-      return self.yield_new ? *&self.new_value : *self.it;
+      return self.yield_new ? self.new_value : *self.it;
     }
 
     GENEX_VIEW_ITER_EQ(intersperse_iterator, intersperse_iterator) {
-      return self.it == that.it;
+      // `yield_new` is part of the position: the same base element is two distinct items.
+      return self.it == that.it and self.yield_new == that.yield_new;
     }
 
     GENEX_VIEW_ITER_EQ(intersperse_iterator, intersperse_sentinel) {
       GENEX_IGNORE(that);
-      if (self.it == self.st) { return true; }
-
-      if (self.yield_new) {
-        auto next_it = self.it;
-        ++next_it;
-        return next_it == self.st;
-      }
-
-      return false;
+      return self.it == self.st;
     }
   };
 
@@ -111,7 +113,7 @@ namespace genex::views::detail::impl {
 
     template <typename Self>
     GENEX_ITER_BEGIN {
-      return intersperse_iterator(self.it, self.it, self.st, self.new_value);
+      return intersperse_iterator(self.it, self.st, self.new_value);
     }
 
     template <typename Self>

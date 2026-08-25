@@ -2,6 +2,7 @@ module;
 #include <genex/macros.hpp>
 
 export module genex.iterators.prev;
+import genex.concepts;
 import std;
 
 namespace genex::iterators::detail::concepts {
@@ -13,20 +14,23 @@ namespace genex::iterators::detail::concepts {
 namespace genex::iterators {
   struct prev_fn {
     template <typename I>
-      requires detail::concepts::prevable_iters<I>
-    and std::copyable<I>
-
-    GENEX_INLINE auto operator()(I it, const std::ptrdiff_t n = 1) const -> I {
+      requires detail::concepts::prevable_iters<I> and std::copyable<I>
+    GENEX_INLINE constexpr auto operator()(I it, const iter_difference_t<I> n = 1) const -> I {
       return std::prev(std::move(it), n);
     }
 
-    template <typename I1, typename I2>
-      requires detail::concepts::prevable_iters<I1>
-    and std::copyable<I1>
-
-    GENEX_INLINE auto operator()(I1 it, const std::ptrdiff_t n, const I2) const -> I1 {
-      auto res = std::prev(std::move(it), n); // todo: use bound
-      return res;
+    template <typename I>
+      requires detail::concepts::prevable_iters<I> and std::copyable<I>
+    GENEX_INLINE constexpr auto operator()(I it, const iter_difference_t<I> n, const I bound) const -> I {
+      if (n <= 0) { return it; }
+      if constexpr (std::random_access_iterator<I>) {
+        const auto remaining = it - bound;
+        return it - (n < remaining ? n : remaining);
+      }
+      else {
+        for (auto i = iter_difference_t<I>{0}; i < n and it != bound; ++i) { --it; }
+        return it;
+      }
     }
   };
 

@@ -12,14 +12,14 @@ namespace genex::iterators::detail::concepts {
 
   template <typename Rng>
   concept beginable_select_begin =
-  beginable_range<Rng> and
-  has_member_begin<Rng>;
+    beginable_range<Rng> and
+    has_member_begin<Rng>;
 
   template <typename Rng>
   concept beginable_select_std_begin =
-  beginable_range<Rng> and
-  has_std_begin<Rng> and
-  not has_member_begin<Rng>;
+    beginable_range<Rng> and
+    has_std_begin<Rng> and
+    not has_member_begin<Rng>;
 
   template <typename Rng>
   concept reverse_beginable_range =
@@ -27,14 +27,14 @@ namespace genex::iterators::detail::concepts {
 
   template <typename Rng>
   concept reverse_beginable_select_rbegin =
-  reverse_beginable_range<Rng> and
-  has_member_rbegin<Rng>;
+    reverse_beginable_range<Rng> and
+    has_member_rbegin<Rng>;
 
   template <typename Rng>
   concept reverse_beginable_select_std_rbegin =
-  reverse_beginable_range<Rng> and
-  has_std_rbegin<Rng> and
-  not has_member_rbegin<Rng>;
+    reverse_beginable_range<Rng> and
+    has_std_rbegin<Rng> and
+    not has_member_rbegin<Rng>;
 
   template <typename Rng>
   concept endable_range =
@@ -42,14 +42,14 @@ namespace genex::iterators::detail::concepts {
 
   template <typename Rng>
   concept endable_select_end =
-  endable_range<Rng> and
-  has_member_end<Rng>;
+    endable_range<Rng> and
+    has_member_end<Rng>;
 
   template <typename Rng>
   concept endable_select_std_end =
-  endable_range<Rng> and
-  has_std_end<Rng> and
-  not has_member_end<Rng>;
+    endable_range<Rng> and
+    has_std_end<Rng> and
+    not has_member_end<Rng>;
 
   template <typename Rng>
   concept reverse_endable_range =
@@ -57,14 +57,14 @@ namespace genex::iterators::detail::concepts {
 
   template <typename Rng>
   concept reverse_endable_select_rend =
-  reverse_endable_range<Rng> and
-  has_member_rend<Rng>;
+    reverse_endable_range<Rng> and
+    has_member_rend<Rng>;
 
   template <typename Rng>
   concept reverse_endable_select_std_rend =
-  reverse_endable_range<Rng> and
-  has_std_rend<Rng> and
-  not has_member_rend<Rng>;
+    reverse_endable_range<Rng> and
+    has_std_rend<Rng> and
+    not has_member_rend<Rng>;
 }
 
 namespace genex::iterators {

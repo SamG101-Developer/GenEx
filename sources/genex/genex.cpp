@@ -5,6 +5,7 @@ export import genex.concepts;
 export import genex.meta;
 export import genex.pipe;
 export import genex.span;
+export import genex.subrange;
 export import genex.to_container;
 
 // Actions

@@ -29,15 +29,6 @@ namespace genex::views::detail::impl {
     S st;
   };
 
-  /**
-   * The @c transform_iterator applies a transformation function to the elements of the underlying iterator. Note that
-   * there is no special "sentinel" type for the @c transform_iterator, because the end is always known from the
-   * underlying range.
-   * @tparam I The type of the underlying iterator.
-   * @tparam S The type of the underlying sentinel.
-   * @tparam F The type of the transformation function.
-   * @tparam Proj The type of the projection function.
-   */
   export template <typename I, typename S, typename F, typename Proj>
     requires concepts::transformable_iters<I, S, F, Proj>
   struct transform_iterator {
@@ -50,9 +41,6 @@ namespace genex::views::detail::impl {
 
     using value_type = std::remove_cvref_t<transformed_reference_type>;
     using reference_type = transformed_reference_type;
-    // Legacy nested typedefs so std::iterator_traits honours the explicit `iterator_category`; without `reference`
-    // a by-value transform result (prvalue operator*) makes it derive an input category, defeating the
-    // reserve-and-copy fast path in `std::vector(first, last)`.
     using reference = reference_type;
     using pointer = void;
     using difference_type = iter_difference_t<I>;

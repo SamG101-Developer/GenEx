@@ -7,45 +7,45 @@ import genex.views2.join_with;
 import genex.views2.transform;
 
 TEST(GenexViewsJoin, VecInput) {
-    auto vec = std::vector<std::vector<int>>{{1, 2, 3}, {4, 5}, {6}};
-    const auto rng = vec
-        | genex::views::join
-        | genex::to<std::vector>();
-    const auto exp = std::vector<int>{1, 2, 3, 4, 5, 6};
-    EXPECT_EQ(rng, exp);
+  auto vec = std::vector<std::vector<int>>{{1, 2, 3}, {4, 5}, {6}};
+  const auto rng = vec
+    | genex::views::join
+    | genex::to<std::vector>();
+  const auto exp = std::vector<int>{1, 2, 3, 4, 5, 6};
+  EXPECT_EQ(rng, exp);
 }
 
 TEST(GenexViewsJoin, StrInput) {
-    auto vec = std::vector<std::string>{"hello", "world", "!"};
-    const auto rng = vec
-        | genex::views::join
-        | genex::to<std::vector>();
-    const auto exp = std::vector{'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!'};
-    EXPECT_EQ(rng, exp);
+  auto vec = std::vector<std::string>{"hello", "world", "!"};
+  const auto rng = vec
+    | genex::views::join
+    | genex::to<std::vector>();
+  const auto exp = std::vector{'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!'};
+  EXPECT_EQ(rng, exp);
 
-    const auto str = rng
-        | genex::to<std::string>();
+  const auto str = rng
+    | genex::to<std::string>();
 
-    const auto exp_str = std::string{"helloworld!"};
-    EXPECT_EQ(str, exp_str);
+  const auto exp_str = std::string{"helloworld!"};
+  EXPECT_EQ(str, exp_str);
 }
 
 TEST(GenexViewsJoinWith, VecInput) {
-    auto vec = std::vector<std::vector<int>>{{1, 2, 3}, {4, 5}, {6}};
+  auto vec = std::vector<std::vector<int>>{{1, 2, 3}, {4, 5}, {6}};
 
-    const auto rng = vec
-        | genex::views::join_with(0)
-        | genex::to<std::vector>();
-    const auto exp = std::vector{1, 2, 3, 0, 4, 5, 0, 6};
-    EXPECT_EQ(rng, exp);
+  const auto rng = vec
+    | genex::views::join_with(0)
+    | genex::to<std::vector>();
+  const auto exp = std::vector{1, 2, 3, 0, 4, 5, 0, 6};
+  EXPECT_EQ(rng, exp);
 }
 
 TEST(GenexViewsJoinWith, VecStrInput) {
-    auto vec = std::vector<std::string>{"hello", "world", "!"};
+  auto vec = std::vector<std::string>{"hello", "world", "!"};
 
-    const auto rng = vec
-        | genex::views::join_with(' ')
-        | genex::to<std::string>();
-    const auto exp = std::string{"hello world !"};
-    EXPECT_EQ(rng, exp);
+  const auto rng = vec
+    | genex::views::join_with(' ')
+    | genex::to<std::string>();
+  const auto exp = std::string{"hello world !"};
+  EXPECT_EQ(rng, exp);
 }

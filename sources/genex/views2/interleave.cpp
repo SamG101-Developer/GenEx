@@ -40,14 +40,12 @@ namespace genex::views::detail::impl {
     I2 it2;
     S2 st2;
     bool use_first = true;
-    bool extend;
+    bool extend = false;
 
     using value_type = concepts::interleave_common_t<I1, I2>;
     using reference_type = value_type;
     using difference_type = std::common_type_t<iter_difference_t<I1>, iter_difference_t<I2>>;
-    using iterator_category = std::common_type_t<
-      typename std::iterator_traits<I1>::iterator_category,
-      typename std::iterator_traits<I2>::iterator_category>;
+    using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;
     GENEX_ITER_OPS_MINIMAL(interleave_iterator)
 
@@ -131,8 +129,11 @@ namespace genex::views::detail::impl {
     }
 
     template <typename Self>
-    GENEX_ITER_SIZE {
-      return iterators::distance(self.it1, self.st1) + iterators::distance(self.it2, self.st2);
+      requires std::sized_sentinel_for<S1, I1> and std::sized_sentinel_for<S2, I2>
+    GENEX_NODISCARD GENEX_INLINE constexpr auto size(this Self &&self) -> std::size_t {
+      const auto n1 = iterators::distance(self.it1, self.st1);
+      const auto n2 = iterators::distance(self.it2, self.st2);
+      return static_cast<std::size_t>(self.extend ? n1 + n2 : 2 * std::min(n1, n2));
     }
   };
 }

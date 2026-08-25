@@ -12,7 +12,11 @@
   ((void)0)
 #endif
 
-#define GENEX_INLINE [[gnu::always_inline]] inline __attribute__((always_inline))
+#if defined(_MSC_VER) && !defined(__clang__)
+#define GENEX_INLINE __forceinline
+#else
+#define GENEX_INLINE [[gnu::always_inline]] inline
+#endif
 
 #define GENEX_NODISCARD [[nodiscard]]
 

@@ -5,26 +5,25 @@ import genex.to_container;
 import genex.views2.move;
 import genex.views2.transform;
 
-
 struct TestStruct {
-    std::string a;
-    std::uint32_t b;
+  std::string a;
+  std::uint32_t b;
 
-    auto operator==(const TestStruct &other) const -> bool {
-        return a == other.a and b == other.b;
-    }
+  auto operator==(const TestStruct &other) const -> bool {
+    return a == other.a
+    and b == other.b;
+  }
 };
 
-
 TEST(GenexViewsMove, VecInput) {
-    auto vec = std::vector<std::unique_ptr<TestStruct>>{};
-    vec.emplace_back(std::make_unique<TestStruct>(TestStruct{"one", 1}));
-    vec.emplace_back(std::make_unique<TestStruct>(TestStruct{"two", 2}));
+  auto vec = std::vector<std::unique_ptr<TestStruct>>{};
+  vec.emplace_back(std::make_unique<TestStruct>(TestStruct{"one", 1}));
+  vec.emplace_back(std::make_unique<TestStruct>(TestStruct{"two", 2}));
 
-    const auto rng = vec
-        | genex::views::move
-        | genex::views::transform([](auto &&x) { return x->b; })
-        | genex::to<std::vector>();
-    const auto exp = std::vector<unsigned int>{1, 2};
-    EXPECT_EQ(rng, exp);
+  const auto rng = vec
+    | genex::views::move
+    | genex::views::transform([](auto &&x) { return x->b; })
+    | genex::to<std::vector>();
+  const auto exp = std::vector<unsigned int>{1, 2};
+  EXPECT_EQ(rng, exp);
 }

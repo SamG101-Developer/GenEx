@@ -37,6 +37,12 @@ export namespace genex {
 
   template <typename T>
   using range_difference_t = iter_difference_t<iterator_t<T>>;
+
+  template <typename T>
+  using iter_element_t = std::remove_reference_t<iter_reference_t<T>>;
+
+  template <typename T>
+  using range_element_t = iter_element_t<iterator_t<T>>;
 }
 
 export namespace genex {
@@ -84,6 +90,9 @@ export namespace genex {
 
   template <typename Rng>
   concept has_member_reserve = requires(Rng &rng) { rng.reserve(std::declval<std::size_t>()); };
+
+  template <typename Rng>
+  concept has_member_reserve_hint = requires(Rng &rng) { rng.reserve_hint(); };
 
   template <typename Rng>
   concept has_member_empty = requires(Rng &rng) { rng.empty(); };
@@ -137,10 +146,7 @@ export namespace genex {
 export namespace genex {
   template <typename Rng>
   concept range =
-    (has_std_begin<Rng>
-  or has_member_begin<Rng>
-  )
-  and
+    (has_std_begin<Rng> or has_member_begin<Rng>) and
     (has_std_end<Rng> or has_member_end<Rng>);
 }
 
@@ -152,43 +158,35 @@ export namespace genex::views::detail {
 export namespace genex {
   template <typename Rng>
   concept input_range = range<Rng>
-  and std::input_iterator<iterator_t<Rng>>;
+    and std::input_iterator<iterator_t<Rng>>;
 
   template <typename Rng>
   concept forward_range = input_range<Rng>
-  and std::forward_iterator<iterator_t<Rng>>;
+    and std::forward_iterator<iterator_t<Rng>>;
 
   template <typename Rng>
   concept bidirectional_range = forward_range<Rng>
-  and std::bidirectional_iterator<iterator_t<Rng>>;
+    and std::bidirectional_iterator<iterator_t<Rng>>;
 
   template <typename Rng>
   concept random_access_range = bidirectional_range<Rng>
-  and std::random_access_iterator<iterator_t<Rng>>;
+    and std::random_access_iterator<iterator_t<Rng>>;
 
   template <typename Rng>
   concept contiguous_range = random_access_range<Rng>
-  and std::contiguous_iterator<iterator_t<Rng>>;
+    and std::contiguous_iterator<iterator_t<Rng>>;
 
   template <typename Rng>
   concept sized_range = input_range<Rng>
-  and std::sized_sentinel_for<sentinel_t<Rng>, iterator_t<Rng>>;
+    and std::sized_sentinel_for<sentinel_t<Rng>, iterator_t<Rng>>;
 }
 
 export namespace genex {
-  template <std::size_t I = 0, typename... Ts, typename... Us> requires (I <= sizeof...(Ts)
-  and
-  sizeof
-  ...
-  (Ts)
-  ==
-  sizeof
-  ...
-  (Us)
-  )
-  auto any_iterator_finished(std::tuple<Ts...> &starts, const std::tuple<Us...> &ends) -> bool {
+  template <std::size_t I = 0, typename... Ts, typename... Us>
+    requires (I <= sizeof...(Ts) and sizeof...(Ts) == sizeof...(Us))
+  constexpr auto any_iterator_finished(const std::tuple<Ts...> &starts, const std::tuple<Us...> &ends) -> bool {
     if constexpr (I < sizeof...(Ts)) {
-      return std::get<I>(starts) == std::get<I>(ends) || any_iterator_finished < I + 1 > (starts, ends);
+      return std::get<I>(starts) == std::get<I>(ends) or any_iterator_finished<I + 1>(starts, ends);
     }
     else {
       return false;
@@ -196,26 +194,59 @@ export namespace genex {
   }
 
   template <typename Tuple, std::size_t... Is>
-  auto deref_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> auto {
-    return std::tuple < iter_value_t<std::tuple_element_t<Is, Tuple>>...>
-    {
-      (*std::get < Is > (t))...
-    };
+  constexpr auto deref_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> auto {
+    return std::tuple<iter_reference_t<std::tuple_element_t<Is, Tuple>>...>{(*std::get<Is>(t))...};
   }
 
   template <typename Tuple>
-  auto deref_tuple(Tuple &t) -> auto {
+  constexpr auto deref_tuple(Tuple &t) -> auto {
     return deref_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
   }
 
   template <typename Tuple, std::size_t... Is>
-  auto advance_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> void {
-    ((++std::get < Is > (t)), ...);
+  constexpr auto advance_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> void {
+    ((++std::get<Is>(t)), ...);
   }
 
   template <typename Tuple>
-  auto advance_tuple(Tuple &t) -> void {
+  constexpr auto advance_tuple(Tuple &t) -> void {
     advance_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+  }
+
+  template <typename Tuple, typename Diff, std::size_t... Is>
+  constexpr auto advance_tuple_impl(Tuple &t, Diff n, std::index_sequence<Is...>) -> void {
+    ((std::get<Is>(t) += n), ...);
+  }
+
+  template <typename Tuple, typename Diff>
+  constexpr auto advance_tuple(Tuple &t, Diff n) -> void {
+    advance_tuple_impl(t, n, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+  }
+
+  template <typename Tuple, std::size_t... Is>
+  constexpr auto retreat_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> void {
+    ((--std::get<Is>(t)), ...);
+  }
+
+  template <typename Tuple>
+  constexpr auto retreat_tuple(Tuple &t) -> void {
+    retreat_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+  }
+
+  template <typename Tuple, typename Diff, std::size_t... Is>
+  constexpr auto retreat_tuple_impl(Tuple &t, Diff n, std::index_sequence<Is...>) -> void {
+    ((std::get<Is>(t) -= n), ...);
+  }
+
+  template <typename Tuple, typename Diff>
+  constexpr auto retreat_tuple(Tuple &t, Diff n) -> void {
+    retreat_tuple_impl(t, n, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+  }
+
+  template <typename Tuple>
+    requires (std::tuple_size_v<Tuple> > 0)
+  constexpr auto distance_tuple(const Tuple &a, const Tuple &b) -> auto {
+    return std::get<0>(a) - std::get<0>(b);
   }
 }
 
@@ -269,9 +300,9 @@ export namespace genex {
 
   template <typename C>
   concept strict_char_like =
-  std::same_as<std::remove_cv_t<C>, char> or
-  std::same_as<std::remove_cv_t<C>, signed char> or
-  std::same_as<std::remove_cv_t<C>, unsigned char>;
+    std::same_as<std::remove_cv_t<C>, char> or
+    std::same_as<std::remove_cv_t<C>, signed char> or
+    std::same_as<std::remove_cv_t<C>, unsigned char>;
 
   template <typename C>
   concept wide_char_like =
@@ -280,16 +311,16 @@ export namespace genex {
   template <typename C>
   concept utf_char_like =
 #if __cpp_char8_t >= 201811L
-  std::same_as<std::remove_cv_t<C>, char8_t> or
+    std::same_as<std::remove_cv_t<C>, char8_t> or
 #endif
-  std::same_as<std::remove_cv_t<C>, char16_t> or
-  std::same_as<std::remove_cv_t<C>, char32_t>;
+    std::same_as<std::remove_cv_t<C>, char16_t> or
+    std::same_as<std::remove_cv_t<C>, char32_t>;
 
   template <typename C>
   concept char_like =
-  strict_char_like<C> or
-  wide_char_like<C> or
-  utf_char_like<C>;
+    strict_char_like<C> or
+    wide_char_like<C> or
+    utf_char_like<C>;
 
   template <typename T>
   struct is_pair_like : std::false_type {
@@ -308,9 +339,8 @@ struct genex::iterator<Rng> {
   using type = decltype(std::begin(std::declval<Rng>()));
 };
 
-template <typename Rng> requires (not
- genex::has_std_begin<Rng> and genex::has_member_begin<Rng>
-)
+template <typename Rng>
+  requires (not genex::has_std_begin<Rng> and genex::has_member_begin<Rng>)
 struct genex::iterator<Rng> {
   using type = decltype(std::declval<Rng>().begin());
 };
@@ -320,9 +350,8 @@ struct genex::sentinel<Rng> {
   using type = decltype(std::end(std::declval<Rng>()));
 };
 
-template <typename Rng> requires (not
- genex::has_std_end<Rng> and genex::has_member_end<Rng>
-)
+template <typename Rng>
+  requires (not genex::has_std_end<Rng> and genex::has_member_end<Rng>)
 struct genex::sentinel<Rng> {
   using type = decltype(std::declval<Rng>().end());
 };

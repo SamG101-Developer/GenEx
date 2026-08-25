@@ -13,13 +13,13 @@ import std;
 namespace genex::views::detail::concepts {
   template <typename I, typename S>
   concept reversible_iters =
-  std::bidirectional_iterator<I> and
-  std::sentinel_for<S, I>;
+    std::bidirectional_iterator<I> and
+    std::sentinel_for<S, I>;
 
   template <typename Rng>
   concept reversible_range =
-  bidirectional_range<Rng> and
-  reversible_iters<iterator_t<Rng>, sentinel_t<Rng>>;
+    bidirectional_range<Rng> and
+    reversible_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
 namespace genex::views::detail::impl {
@@ -63,9 +63,9 @@ namespace genex::views::detail::impl {
       return self.it == that.it;
     }
 
-        GENEX_INLINE friend constexpr auto operator-(reverse_iterator const &self,
+    GENEX_INLINE friend constexpr auto operator-(reverse_iterator const &self,
       reverse_iterator const &that) -> difference_type requires std::random_access_iterator<I> {
-      return self.it - that.it;
+      return that.it - self.it;
     }
   };
 
@@ -100,23 +100,21 @@ namespace genex::views {
   struct reverse_fn {
     template <typename I, typename S>
       requires detail::concepts::reversible_iters<I, S>
-        GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
+    GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
       SAFE_IMPL_CTOR(reverse_view, I, S) and
-    SAFE_MOVE (I) and SAFE_MOVE(S)
-    )
- {
-            return detail::impl::reverse_view(std::move(first), std::move(last));
-        }
+      SAFE_MOVE(I) and SAFE_MOVE(S)) {
+      return detail::impl::reverse_view(std::move(first), std::move(last));
+    }
 
     template <typename Rng>
       requires detail::concepts::reversible_range<Rng>
-        GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_IMPL_CTOR(reverse_view, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::reverse_view(std::move(first), std::move(last));
     }
 
-        GENEX_INLINE constexpr auto operator()() const noexcept(
+    GENEX_INLINE constexpr auto operator()() const noexcept(
       SAFE_CTOR(reverse_fn)) {
       return meta::bind_back(reverse_fn{});
     }

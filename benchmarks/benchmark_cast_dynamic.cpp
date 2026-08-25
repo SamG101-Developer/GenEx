@@ -8,7 +8,6 @@ import genex.to_container;
 import genex.views2.cast_dynamic;
 import std;
 
-
 // static void BM_StdRanges_CastDynamic(benchmark::State &state) {
 //     struct Base {
 //         virtual ~Base() = default;

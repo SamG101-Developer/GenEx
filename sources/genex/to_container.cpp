@@ -11,9 +11,10 @@ import std;
 namespace genex {
   export template <template <typename> typename Out, typename Rng>
     requires input_range<Rng>
-  and std::copyable<range_value_t<Rng>> and requires(Rng &&rng) {
-    Out<range_value_t<Rng>>(iterators::begin(rng), iterators::end(rng));
-  }
+    and std::copyable<range_value_t<Rng>> and requires(Rng &&rng)
+    {
+      Out<range_value_t<Rng>>(iterators::begin(rng), iterators::end(rng));
+    }
 
   GENEX_INLINE auto to_base_fn(Rng &&rng) -> Out<range_value_t<Rng>> {
     return Out<range_value_t<Rng>>(iterators::begin(rng), iterators::end(rng));
@@ -21,7 +22,7 @@ namespace genex {
 
   export template <typename Out, typename Rng>
     requires input_range<Rng>
-  and std::copyable<range_value_t<Rng>> and requires(Rng &&rng) { Out(iterators::begin(rng), iterators::end(rng)); }
+    and std::copyable<range_value_t<Rng>> and requires(Rng &&rng) { Out(iterators::begin(rng), iterators::end(rng)); }
 
   GENEX_INLINE auto to_base_fn(Rng &&rng) -> Out {
     return Out(iterators::begin(rng), iterators::end(rng));
@@ -33,12 +34,12 @@ namespace genex {
     Out<range_value_t<Rng>> out;
     auto [first, last] = iterators::iter_pair(rng);
     if constexpr (has_member_size<Rng> and has_member_reserve<Out<range_value_t<Rng>>>) {
-      out.reserve(std::bit_cast<std::size_t>(rng.size()));
+      out.reserve(static_cast<std::size_t>(rng.size()));
+    }
+    else if constexpr (has_member_reserve_hint<Rng> and has_member_reserve<Out<range_value_t<Rng>>>) {
+      out.reserve(static_cast<std::size_t>(rng.reserve_hint()));
     }
     for (; first != last; ++first) {
-      // Never moves out of the source: a view is an rvalue even when it refers to someone
-      // else's lvalue elements. Moving is opt-in via `genex::views::move`, whose deref
-      // already yields an rvalue here.
       out.push_back(*first);
     }
     return out;
@@ -50,10 +51,12 @@ namespace genex {
     Out out;
     auto [first, last] = iterators::iter_pair(rng);
     if constexpr (has_member_size<Rng> and has_member_reserve<Out>) {
-      out.reserve(std::bit_cast<std::size_t>(rng.size()));
+      out.reserve(static_cast<std::size_t>(rng.size()));
+    }
+    else if constexpr (has_member_reserve_hint<Rng> and has_member_reserve<Out>) {
+      out.reserve(static_cast<std::size_t>(rng.reserve_hint()));
     }
     for (; first != last; ++first) {
-      // See the note in the `Out<range_value_t<Rng>>` overload above.
       out.push_back(*first);
     }
     return out;
