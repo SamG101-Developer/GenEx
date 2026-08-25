@@ -22,6 +22,11 @@ target_compile_features(
   PRIVATE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:cxx_std_26>
 )
 
+target_compile_features(
+  ${PROJECT_NAME}
+  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:cxx_std_23>
+)
+
 target_compile_options(
   ${PROJECT_NAME}
   PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/std:c++latest>
