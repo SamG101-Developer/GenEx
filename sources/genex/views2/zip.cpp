@@ -62,23 +62,21 @@ namespace genex::views::detail::impl {
 
     // A zip ends as soon as *any* of its ranges does, so the sentinel test is a disjunction over
     // all of them rather than a comparison of the iterator tuples.
-    template <typename Self>
-    GENEX_INLINE constexpr auto operator==(this Self &&self, zip_sentinel<Rngs...> const &that) -> bool {
+    GENEX_VIEW_ITER_EQ(zip_iterator, zip_sentinel<Rngs...>) {
       return genex::any_iterator_finished(self.its, that.sts);
     }
 
-    template <typename Self>
-    GENEX_INLINE constexpr auto operator==(this Self &&self, zip_iterator const &that) -> bool {
+    GENEX_VIEW_ITER_EQ(zip_iterator, zip_iterator) {
       return self.its == that.its;
     }
 
-    template <typename Self>
-    GENEX_INLINE constexpr auto operator!=(this Self &&self, zip_sentinel<Rngs...> const &that) -> bool {
+    GENEX_INLINE friend constexpr auto operator!=(
+      zip_iterator const &self, zip_sentinel<Rngs...> const &that) -> bool {
       return not(self == that);
     }
 
-    template <typename Self>
-    GENEX_INLINE constexpr auto operator!=(this Self &&self, zip_iterator const &that) -> bool {
+    GENEX_INLINE friend constexpr auto operator!=(
+      zip_iterator const &self, zip_iterator const &that) -> bool {
       return not(self == that);
     }
 
