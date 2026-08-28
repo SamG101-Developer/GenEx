@@ -71,6 +71,10 @@
     return not (self == that);                                                                \
   }
 
+#define GENEX_RANDOM_ACCESS_ON_IT(Type)                           \
+  (std::random_access_iterator<decltype(std::declval<Type>().it)> \
+   || std::integral<decltype(std::declval<Type>().it)>)
+
 #define GENEX_ITER_OPS(Type)                                                                                \
   GENEX_ITER_OPS_MINIMAL(Type)                                                                              \
                                                                                                             \
@@ -92,64 +96,64 @@
   }                                                                                                         \
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator+=(Type &self, Type::difference_type m) -> Type&               \
-  requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
+  requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
     self.it += m;                                                                                           \
     return self;                                                                                            \
   }                                                                                                         \
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator+(Type const &self, Type::difference_type m) -> Type           \
-  requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
+  requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
     auto temp = self;                                                                                       \
     temp += m;                                                                                              \
     return temp;                                                                                            \
   }                                                                                                         \
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator+(Type::difference_type m, Type const &self) -> Type           \
-  requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
+  requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
     return self + m;                                                                                        \
   }                                                                                                         \
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator-=(Type &self, Type::difference_type m) -> Type&               \
-  requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
+  requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
     self.it -= m;                                                                                           \
     return self;                                                                                            \
   }                                                                                                         \
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator-(Type const &self, Type::difference_type m) -> Type           \
-  requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
+  requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
     auto temp = self;                                                                                       \
     temp -= m;                                                                                              \
     return temp;                                                                                            \
   }                                                                                                         \
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator-(Type const &self, Type const &that) -> Type::difference_type \
-  requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
+  requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
     return self.it - that.it;                                                                               \
   }                                                                                                         \
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator<(Type const &self, Type const &that) -> bool                  \
-  requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
+  requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
     return self.it < that.it;                                                                               \
   }                                                                                                         \
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator<=(Type const &self, Type const &that) -> bool                 \
-  requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
+  requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
     return self.it <= that.it;                                                                              \
   }                                                                                                         \
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator>(Type const &self, Type const &that) -> bool                  \
-  requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
+  requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
     return self.it > that.it;                                                                               \
   }                                                                                                         \
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator>=(Type const &self, Type const &that) -> bool                 \
-  requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
+  requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
     return self.it >= that.it;                                                                              \
   }                                                                                                         \
                                                                                                             \
   template <typename Self>                                                                                  \
   GENEX_INLINE constexpr auto operator[](this Self &&self, Type::difference_type n) -> decltype(auto)       \
-  requires std::random_access_iterator<decltype(std::declval<Type>().it)> {                                 \
+  requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
     return *(*(&self) + n);                                                                                 \
   }
 
