@@ -97,7 +97,10 @@
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator+=(Type &self, Type::difference_type m) -> Type&               \
   requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
-    self.it += m;                                                                                           \
+    if constexpr (std::integral<decltype(self.it)>) {                                                       \
+      self.it = static_cast<decltype(self.it)>(                                                             \
+        static_cast<typename Type::difference_type>(self.it) + m);                                          \
+    } else { self.it += m; }                                                                                \
     return self;                                                                                            \
   }                                                                                                         \
                                                                                                             \
@@ -115,7 +118,10 @@
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator-=(Type &self, Type::difference_type m) -> Type&               \
   requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
-    self.it -= m;                                                                                           \
+    if constexpr (std::integral<decltype(self.it)>) {                                                       \
+      self.it = static_cast<decltype(self.it)>(                                                             \
+        static_cast<typename Type::difference_type>(self.it) - m);                                          \
+    } else { self.it -= m; }                                                                                \
     return self;                                                                                            \
   }                                                                                                         \
                                                                                                             \
@@ -128,7 +134,10 @@
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator-(Type const &self, Type const &that) -> Type::difference_type \
   requires GENEX_RANDOM_ACCESS_ON_IT(Type) {                                                                \
-    return self.it - that.it;                                                                               \
+    if constexpr (std::integral<decltype(self.it)>) {                                                       \
+      return static_cast<typename Type::difference_type>(self.it)                                           \
+        - static_cast<typename Type::difference_type>(that.it);                                             \
+    } else { return self.it - that.it; }                                                                    \
   }                                                                                                         \
                                                                                                             \
   GENEX_INLINE friend constexpr auto operator<(Type const &self, Type const &that) -> bool                  \
