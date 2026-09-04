@@ -95,6 +95,7 @@ export import genex.views2.chunk;
 export import genex.views2.chunk_by;
 export import genex.views2.concat;
 export import genex.views2.cycle;
+export import genex.views2.divide;
 export import genex.views2.drop;
 export import genex.views2.drop_last;
 export import genex.views2.drop_while;
