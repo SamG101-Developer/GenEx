@@ -8,6 +8,14 @@ set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_INSTALL_RPATH "/usr/local/gcc-dev/lib64")
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
+if (NOT MSVC)
+  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=127228
+  add_compile_options(-fvisibility-inlines-hidden)
+endif ()
+
+# The parallel algorithms spawn std::jthreads.
+find_package(Threads REQUIRED)
+
 # Collect source files.
 file(GLOB_RECURSE PUBLIC_HEADERS CONFIGURE_DEPENDS headers/*.hpp)
 file(GLOB_RECURSE MODULE_SOURCES CONFIGURE_DEPENDS sources/*.cpp)
@@ -19,18 +27,20 @@ target_sources(${PROJECT_NAME} PUBLIC
 
 target_compile_features(
   ${PROJECT_NAME}
-  PUBLIC $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:cxx_std_26>
-)
+  PUBLIC $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:cxx_std_26>)
 
 target_compile_features(
   ${PROJECT_NAME}
-  PUBLIC $<$<CXX_COMPILER_ID:MSVC>:cxx_std_23>
-)
+  PUBLIC $<$<CXX_COMPILER_ID:MSVC>:cxx_std_23>)
 
 target_compile_options(
   ${PROJECT_NAME}
-  PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/std:c++latest /Zc:preprocessor>
-)
+  PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/std:c++latest /Zc:preprocessor>)
+
+target_link_libraries(
+  ${PROJECT_NAME}
+  PUBLIC
+  Threads::Threads)
 
 # Create the GenEx library, and link 3rd party libraries.
 target_include_directories(${PROJECT_NAME} PUBLIC
