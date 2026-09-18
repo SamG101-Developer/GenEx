@@ -25,6 +25,10 @@ target_sources(${PROJECT_NAME} PUBLIC
   FILE_SET CXX_MODULES BASE_DIRS headers sources FILES ${MODULE_SOURCES}
   FILE_SET HEADERS BASE_DIRS headers FILES ${PUBLIC_HEADERS})
 
+set_target_properties(
+  ${PROJECT_NAME}
+  PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 target_compile_features(
   ${PROJECT_NAME}
   PUBLIC $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:cxx_std_26>)
