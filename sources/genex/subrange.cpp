@@ -55,12 +55,6 @@ namespace genex {
       return static_cast<size_type>(m_st - m_it);
     }
 
-    /**
-     * A cheap upper bound on the length, in the spirit of C++26's @c ranges::reserve_hint. A
-     * counted iterator knows how many steps it has left even when the range it walks cannot say
-     * how many elements it holds -- which is exactly the shape @c take and @c slice produce over
-     * a non-sized range. Only ever a sizing hint: use @c size() when an exact answer is needed.
-     */
     GENEX_NODISCARD GENEX_INLINE constexpr auto reserve_hint() const -> size_type
       requires (not std::sized_sentinel_for<S, I>) and requires(const I &i) { i.count(); } {
       return static_cast<size_type>(m_it.count());
