@@ -35,6 +35,25 @@ namespace genex {
       m_size(static_cast<std::size_t>(end - begin)) {
     }
 
+    /// A view of a contiguous range's elements. An rvalue range must
+    /// outlive the span, so only a borrowed one, or a span of const
+    /// elements (bound for the length of a call), is allowed.
+    template <typename Rng>
+      requires (not std::same_as<std::remove_cvref_t<Rng>, span>)
+      and std::ranges::contiguous_range<Rng> and std::ranges::sized_range<Rng>
+      and std::convertible_to<std::remove_reference_t<std::ranges::range_reference_t<Rng>>(*)[], T(*)[]>
+      and (std::is_lvalue_reference_v<Rng> or std::ranges::borrowed_range<Rng> or std::is_const_v<T>)
+    GENEX_INLINE constexpr span(Rng &&rng) noexcept :
+      m_ptr(std::ranges::data(rng)), m_size(std::ranges::size(rng)) {
+    }
+
+    /// A span of "U" as a span of "T", e.g. "U" to "U const".
+    template <typename U>
+      requires (not std::same_as<U, T>) and std::convertible_to<U(*)[], T(*)[]>
+    GENEX_INLINE constexpr span(span<U> const &other) noexcept :
+      m_ptr(other.data()), m_size(other.size()) {
+    }
+
     template <typename Self>
     GENEX_NODISCARD GENEX_INLINE constexpr auto data(this Self &&self) noexcept -> T* {
       return self.m_ptr;
@@ -73,6 +92,22 @@ namespace genex {
     template <typename Self>
     GENEX_NODISCARD GENEX_INLINE constexpr auto back(this Self &&self) noexcept -> T& {
       return *(self.m_ptr + self.m_size - 1);
+    }
+
+    /// The first "count" elements.
+    GENEX_NODISCARD GENEX_INLINE constexpr auto first(const std::size_t count) const noexcept -> span {
+      return span(m_ptr, count);
+    }
+
+    /// The last "count" elements.
+    GENEX_NODISCARD GENEX_INLINE constexpr auto last(const std::size_t count) const noexcept -> span {
+      return span(m_ptr + (m_size - count), count);
+    }
+
+    /// The "count" elements from "offset", or every element from it.
+    GENEX_NODISCARD GENEX_INLINE constexpr auto subspan(
+      const std::size_t offset, const std::size_t count = std::dynamic_extent) const noexcept -> span {
+      return span(m_ptr + offset, count == std::dynamic_extent ? m_size - offset : count);
     }
   };
 }
