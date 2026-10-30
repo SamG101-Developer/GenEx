@@ -31,6 +31,7 @@ namespace genex::views::detail::concepts {
 
   template <typename... Rngs>
   concept concatable_range =
+    (non_dangling_range<Rngs> and ...) and
     (input_range<Rngs> and ...) and
     concatable_iters<std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>>;
 }
@@ -140,7 +141,7 @@ namespace genex::views::detail::impl {
 
   template <typename... Rngs>
     requires concepts::concatable_range<Rngs...>
-  struct concat_view {
+  struct concat_view : view_base {
     std::tuple<iterator_t<Rngs>...> its;
     std::tuple<sentinel_t<Rngs>...> sts;
 

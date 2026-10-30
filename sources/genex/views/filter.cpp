@@ -17,6 +17,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename Pred, typename Proj = meta::identity>
   concept filterable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     filterable_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj>;
 }
@@ -89,7 +90,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::filterable_iters<I, S, Pred, Proj>
-  struct filter_view {
+  struct filter_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS Pred pred;

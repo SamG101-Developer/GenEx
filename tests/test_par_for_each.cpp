@@ -86,7 +86,7 @@ TEST(GenexParallelForEach, ActuallyUsesMultipleThreads) {
 
   auto distinct = std::vector<std::thread::id>{};
   for (const auto id : ids) {
-    if (std::ranges::find(distinct, id) == distinct.end()) { distinct.push_back(id); }
+    if (std::find(distinct.begin(), distinct.end(), id) == distinct.end()) { distinct.push_back(id); }
   }
   EXPECT_EQ(distinct.size(), 4uz);
 }

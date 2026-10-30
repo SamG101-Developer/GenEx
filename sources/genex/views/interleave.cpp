@@ -26,6 +26,8 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng1, typename Rng2>
   concept interleavable_range =
+    non_dangling_range<Rng1> and
+    non_dangling_range<Rng2> and
     input_range<Rng1> and
     input_range<Rng2> and
     interleavable_iters<iterator_t<Rng1>, sentinel_t<Rng1>, iterator_t<Rng2>, sentinel_t<Rng2>>;
@@ -105,7 +107,7 @@ namespace genex::views::detail::impl {
 
   template <typename I1, typename S1, typename I2, typename S2>
     requires concepts::interleavable_iters<I1, S1, I2, S2>
-  struct interleave_view {
+  struct interleave_view : view_base {
     I1 it1;
     S1 st1;
     I2 it2;
@@ -165,9 +167,8 @@ namespace genex::views {
 
     template <typename Rng2>
       requires range<Rng2>
-    GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, bool extend = true) const noexcept(
-      SAFE_CTOR(interleave_fn) and SAFE_CTOR(std::decay_t<Rng2>, Rng2)) {
-      return meta::bind_back(interleave_fn{}, std::forward<Rng2>(rng2), extend);
+    GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, bool extend = true) const {
+      return genex::detail::bind_range_back(interleave_fn{}, std::forward<Rng2>(rng2), extend);
     }
   };
 

@@ -18,6 +18,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng>
   concept movable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     movable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
@@ -62,7 +63,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
     requires concepts::movable_iters<I, S>
-  struct move_view {
+  struct move_view : view_base {
     I it;
     S st;
 

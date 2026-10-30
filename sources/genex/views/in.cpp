@@ -22,6 +22,8 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng1, typename Rng2, typename Proj1, typename Proj2>
   concept inable_range =
+    non_dangling_range<Rng1> and
+    non_dangling_range<Rng2> and
     input_range<Rng1> and
     forward_range<Rng2> and
     inable_iters<iterator_t<Rng1>, sentinel_t<Rng1>, iterator_t<Rng2>, sentinel_t<Rng2>, Proj1, Proj2>;
@@ -80,10 +82,8 @@ namespace genex::views {
 
     template <typename Rng2, typename Proj1 = meta::identity, typename Proj2 = meta::identity>
       requires (forward_range<Rng2> and not range<Proj1>)
-    GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
-      SAFE_CTOR(in_base_fn<Negate>) and
-      SAFE_CTOR(std::decay_t<Rng2>, Rng2) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
-      return meta::bind_back(in_base_fn{}, std::forward<Rng2>(rng2), std::move(proj1), std::move(proj2));
+    GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const {
+      return genex::detail::bind_range_back(in_base_fn{}, std::forward<Rng2>(rng2), std::move(proj1), std::move(proj2));
     }
   };
 

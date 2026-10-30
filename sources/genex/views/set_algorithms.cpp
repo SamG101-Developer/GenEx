@@ -20,6 +20,8 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng1, typename Rng2, typename Comp, typename Proj1, typename Proj2>
   concept set_algorithmicable_range =
+    non_dangling_range<Rng1> and
+    non_dangling_range<Rng2> and
     input_range<Rng1> and
     input_range<Rng2> and
     set_algorithmicable_iters<
@@ -197,7 +199,7 @@ namespace genex::views::detail::impl {
     set_op Op, typename I1, typename S1, typename I2, typename S2,
     typename Comp, typename Proj1, typename Proj2>
     requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
-  struct set_algorithm_view {
+  struct set_algorithm_view : view_base {
     I1 first1;
     S1 last1;
     I2 first2;
@@ -273,10 +275,8 @@ namespace genex::views {
       typename Proj1 = meta::identity, typename Proj2 =meta::identity>
       requires (range<Rng2> and not range<Comp>)
     GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {},
-      Proj2 proj2 = {}) const noexcept(
-      SAFE_CTOR(set_algorithms_base_fn) and SAFE_CTOR(std::decay_t<Rng2>, Rng2) and
-      SAFE_MOVE(Comp) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
-      return meta::bind_back(
+      Proj2 proj2 = {}) const {
+      return genex::detail::bind_range_back(
         set_algorithms_base_fn{}, std::forward<Rng2>(rng2), std::move(comp), std::move(proj1), std::move(proj2));
     }
   };

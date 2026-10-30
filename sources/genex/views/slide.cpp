@@ -20,6 +20,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename Int>
   concept slideable_range =
+    non_dangling_range<Rng> and
     forward_range<Rng> and
     slideable_iters<iterator_t<Rng>, sentinel_t<Rng>, Int>;
 }
@@ -75,7 +76,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Int>
     requires concepts::slideable_iters<I, S, Int>
-  struct slide_view {
+  struct slide_view : view_base {
     I it;
     S st;
     Int window;

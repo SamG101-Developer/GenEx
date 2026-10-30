@@ -66,7 +66,7 @@ namespace genex::views::detail::impl {
 
   template <typename F>
     requires concepts::generatable_fn<F>
-  struct generate_view {
+  struct generate_view : view_base {
     GENEX_NO_UNIQUE_ADDRESS F f;
     std::ptrdiff_t count;
 

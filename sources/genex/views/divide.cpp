@@ -20,6 +20,7 @@ namespace genex::views::detail::concepts {
 
   template <std::size_t N, typename Rng>
   concept divisible_range =
+    non_dangling_range<Rng> and
     forward_range<Rng> and
     divisible_iters<N, iterator_t<Rng>, sentinel_t<Rng>>;
 }

@@ -2,6 +2,8 @@ module;
 #include <genex/macros.hpp>
 
 export module genex.span;
+import genex.concepts;
+import genex.iterators.access;
 import std;
 
 namespace genex {
@@ -40,11 +42,11 @@ namespace genex {
     /// elements (bound for the length of a call), is allowed.
     template <typename Rng>
       requires (not std::same_as<std::remove_cvref_t<Rng>, span>)
-      and std::ranges::contiguous_range<Rng> and std::ranges::sized_range<Rng>
-      and std::convertible_to<std::remove_reference_t<std::ranges::range_reference_t<Rng>>(*)[], T(*)[]>
-      and (std::is_lvalue_reference_v<Rng> or std::ranges::borrowed_range<Rng> or std::is_const_v<T>)
+      and contiguous_range<Rng> and sized_range<Rng>
+      and std::convertible_to<std::remove_reference_t<range_reference_t<Rng>>(*)[], T(*)[]>
+      and (non_dangling_range<Rng> or std::is_const_v<T>)
     GENEX_INLINE constexpr span(Rng &&rng) noexcept :
-      m_ptr(std::ranges::data(rng)), m_size(std::ranges::size(rng)) {
+      span(iterators::begin(rng), iterators::end(rng)) {
     }
 
     /// A span of "U" as a span of "T", e.g. "U" to "U const".
@@ -111,3 +113,9 @@ namespace genex {
     }
   };
 }
+
+template <typename T>
+inline constexpr bool genex::enable_borrowed_range<genex::span<T>> = true;
+
+template <typename T>
+inline constexpr bool genex::enable_view<genex::span<T>> = true;

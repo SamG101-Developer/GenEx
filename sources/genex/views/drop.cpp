@@ -20,6 +20,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename Int>
   concept droppable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     droppable_iters<iterator_t<Rng>, sentinel_t<Rng>, Int>;
 }

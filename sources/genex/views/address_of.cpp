@@ -20,6 +20,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng>
   concept addressable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     addressable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
@@ -80,7 +81,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
     requires concepts::addressable_iters<I, S>
-  struct address_of_view {
+  struct address_of_view : view_base {
     I it;
     S st;
 

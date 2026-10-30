@@ -17,6 +17,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename Pred, typename Proj = meta::identity>
   concept removable_if_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     removable_if_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj>;
 }
@@ -89,7 +90,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::removable_if_iters<I, S, Pred, Proj>
-  struct remove_if_view {
+  struct remove_if_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS Pred pred;

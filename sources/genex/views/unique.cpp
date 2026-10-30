@@ -18,6 +18,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename Comp, typename Proj>
   concept uniqueable_range =
+    non_dangling_range<Rng> and
     forward_range<Rng> and
     uniqueable_iters<iterator_t<Rng>, sentinel_t<Rng>, Comp, Proj>;
 }
@@ -78,7 +79,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Comp, typename Proj>
     requires concepts::uniqueable_iters<I, S, Comp, Proj>
-  struct unique_view {
+  struct unique_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS Comp comp;

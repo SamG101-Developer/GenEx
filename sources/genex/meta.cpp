@@ -77,7 +77,7 @@ namespace genex::meta {
    *
    *  - Assignability: storing @c T directly would delete the enclosing iterator's assignment and stop it modelling
    *    @c std::movable / @c std::input_iterator. Assignment is emulated via destroy-then-reconstruct of the whole
-   *    storage object (mirrors @c std::ranges' movable-box), which only needs @c T (copy/move)-constructible.
+   *    storage object, which only needs @c T (copy/move)-constructible.
    *  - Default-constructibility: when @c T is not default-constructible we store it in an @c std::optional so the box
    *    stays default-constructible (defaulting to an empty/singular state). Without this the iterator is not
    *    @c std::semiregular, which cascades into it failing @c forward_iterator / @c sentinel_for and makes views such

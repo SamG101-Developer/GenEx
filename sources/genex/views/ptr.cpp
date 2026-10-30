@@ -19,6 +19,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng>
   concept ptr_gettable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     ptr_gettable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }

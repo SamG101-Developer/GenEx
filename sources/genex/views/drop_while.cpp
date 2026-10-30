@@ -17,6 +17,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename Pred, typename Proj>
   concept droppable_while_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     droppable_while_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj>;
 }
@@ -77,7 +78,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::droppable_while_iters<I, S, Pred, Proj>
-  struct drop_while_view {
+  struct drop_while_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS Pred pred;

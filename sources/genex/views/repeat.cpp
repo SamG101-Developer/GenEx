@@ -54,7 +54,7 @@ namespace genex::views::detail::impl {
 
   template <typename T>
     requires std::copyable<T>
-  struct repeat_view {
+  struct repeat_view : view_base {
     T value;
     std::ptrdiff_t count;
 

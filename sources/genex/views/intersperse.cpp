@@ -22,6 +22,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename New>
   concept interspersable_range =
+    non_dangling_range<Rng> and
     forward_range<Rng> and
     interspersable_iters<iterator_t<Rng>, sentinel_t<Rng>, New>;
 }
@@ -101,7 +102,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename New>
     requires concepts::interspersable_iters<I, S, New>
-  struct intersperse_view {
+  struct intersperse_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS New new_value;

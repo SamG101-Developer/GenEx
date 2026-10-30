@@ -18,6 +18,7 @@ namespace genex::views::detail::concepts {
 
   template <typename To, typename Rng>
   concept static_castable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     static_castable_iters<To, iterator_t<Rng>, sentinel_t<Rng>>;
 }
@@ -68,7 +69,7 @@ namespace genex::views::detail::impl {
 
   template <typename To, typename I, typename S>
     requires concepts::static_castable_iters<To, I, S>
-  struct cast_static_view {
+  struct cast_static_view : view_base {
     I it;
     S st;
 

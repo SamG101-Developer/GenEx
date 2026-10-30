@@ -21,6 +21,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename E>
   concept splittable_range =
+    non_dangling_range<Rng> and
     forward_range<Rng> and
     splittable_iters<iterator_t<Rng>, sentinel_t<Rng>, E>;
 }
@@ -85,7 +86,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename E>
     requires detail::concepts::splittable_iters<I, S, E>
-  struct split_view {
+  struct split_view : view_base {
     I it;
     S st;
     E elem;

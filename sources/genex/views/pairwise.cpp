@@ -18,6 +18,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng>
   concept pairwiseable_range =
+    non_dangling_range<Rng> and
     forward_range<Rng> and
     pairwiseable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
@@ -75,7 +76,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
     requires concepts::pairwiseable_iters<I, S>
-  struct pairwise_view {
+  struct pairwise_view : view_base {
     I it;
     S st;
 

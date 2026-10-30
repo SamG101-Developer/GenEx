@@ -19,6 +19,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename E, typename Proj>
   concept removable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     removable_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
 }
@@ -91,7 +92,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename E, typename Proj>
     requires concepts::removable_iters<I, S, E, Proj>
-  struct remove_view {
+  struct remove_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS E value;

@@ -18,6 +18,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng>
   concept reversible_range =
+    non_dangling_range<Rng> and
     bidirectional_range<Rng> and
     reversible_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
@@ -71,7 +72,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
     requires concepts::reversible_iters<I, S>
-  struct reverse_view {
+  struct reverse_view : view_base {
     I it;
     S st;
 

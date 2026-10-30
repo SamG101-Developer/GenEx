@@ -17,6 +17,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng>
   concept cyclable_range =
+    non_dangling_range<Rng> and
     forward_range<Rng> and
     cyclable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
@@ -78,7 +79,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
     requires concepts::cyclable_iters<I, S>
-  struct cycle_view {
+  struct cycle_view : view_base {
     I it;
     I it_cpy;
     S st;

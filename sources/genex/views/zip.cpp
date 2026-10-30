@@ -28,6 +28,7 @@ namespace genex::views::detail::concepts {
 
   template <typename... Rngs>
   concept zippable_range =
+    (non_dangling_range<Rngs> and ...) and
     sizeof...(Rngs) > 0 and
     (input_range<Rngs> and ...) and
     zippable_iters<std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>>;
@@ -152,7 +153,7 @@ namespace genex::views::detail::impl {
 
   template <typename... Rngs>
     requires concepts::zippable_range<Rngs...>
-  struct zip_view {
+  struct zip_view : view_base {
     std::tuple<iterator_t<Rngs>...> m_its;
     std::tuple<sentinel_t<Rngs>...> m_sts;
 
@@ -203,10 +204,9 @@ namespace genex::views {
     }
 
     template <typename Rng2>
-      requires detail::concepts::zippable_range<Rng2>
-    GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const noexcept(
-      SAFE_CTOR(zip_fn) and SAFE_CTOR(std::decay_t<Rng2>, Rng2)) {
-      return meta::bind_back(zip_fn{}, std::forward<Rng2>(rng2));
+      requires input_range<Rng2>
+    GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
+      return genex::detail::bind_range_back(zip_fn{}, std::forward<Rng2>(rng2));
     }
   };
 

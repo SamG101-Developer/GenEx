@@ -18,6 +18,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename Pred>
   concept chunkable_by_range =
+    non_dangling_range<Rng> and
     forward_range<Rng> and
     chunkable_by_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred>;
 }
@@ -87,7 +88,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Pred>
     requires concepts::chunkable_by_iters<I, S, Pred>
-  struct chunk_by_view {
+  struct chunk_by_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS Pred pred;

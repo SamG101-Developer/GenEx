@@ -12,6 +12,8 @@ import std;
 namespace genex::views::detail::concepts {
   template <typename Rng1, typename Rng2, typename F>
   concept zip_withable_range =
+    non_dangling_range<Rng1> and
+    non_dangling_range<Rng2> and
     input_range<Rng1> and
     input_range<Rng2> and
     std::invocable<F&, range_reference_t<Rng1>, range_reference_t<Rng2>>;
@@ -41,9 +43,8 @@ namespace genex::views {
 
     template <typename Rng2, typename F>
       requires (input_range<Rng2> and not range<F>)
-    GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, F f) const noexcept(
-      SAFE_CTOR(zip_with_fn) and SAFE_CTOR(std::decay_t<Rng2>, Rng2) and SAFE_MOVE(F)) {
-      return meta::bind_back(zip_with_fn{}, std::forward<Rng2>(rng2), std::move(f));
+    GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, F f) const {
+      return genex::detail::bind_range_back(zip_with_fn{}, std::forward<Rng2>(rng2), std::move(f));
     }
   };
 

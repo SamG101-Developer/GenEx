@@ -19,6 +19,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng>
   concept joinable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     joinable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
@@ -119,7 +120,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
     requires concepts::joinable_iters<I, S>
-  struct join_view {
+  struct join_view : view_base {
     I it;
     S st;
 

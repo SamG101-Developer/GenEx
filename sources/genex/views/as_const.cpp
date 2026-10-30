@@ -18,6 +18,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng>
   concept constable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     constable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
@@ -76,7 +77,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
     requires concepts::constable_iters<I, S>
-  struct as_const_view {
+  struct as_const_view : view_base {
     I it;
     S st;
 

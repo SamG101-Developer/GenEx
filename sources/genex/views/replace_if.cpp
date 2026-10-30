@@ -20,6 +20,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename Pred, typename New, typename Proj>
   concept replaceable_if_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     replaceable_if_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, New, Proj>;
 }
@@ -73,7 +74,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Pred, typename New, typename Proj>
     requires concepts::replaceable_if_iters<I, S, Pred, New, Proj>
-  struct replace_view {
+  struct replace_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS Pred pred;

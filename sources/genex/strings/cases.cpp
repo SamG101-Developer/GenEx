@@ -18,6 +18,7 @@ namespace genex::strings::detail::concepts {
 
   template <typename Rng>
   concept can_case_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     can_case_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }

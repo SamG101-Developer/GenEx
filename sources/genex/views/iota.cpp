@@ -59,7 +59,7 @@ namespace genex::views::detail::impl {
 
   template <typename Int>
     requires std::weakly_incrementable<Int>
-  struct iota_view {
+  struct iota_view : view_base {
     Int lo;
     Int hi;
     Int step;

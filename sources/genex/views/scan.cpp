@@ -24,6 +24,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename F, typename Init>
   concept scannable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     scannable_iters<iterator_t<Rng>, sentinel_t<Rng>, F, Init>;
 
@@ -34,6 +35,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename F>
   concept summable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     summable_iters<iterator_t<Rng>, sentinel_t<Rng>, F>;
 }
@@ -95,7 +97,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename F, typename Acc>
     requires std::input_iterator<I> and std::sentinel_for<S, I>
-  struct scan_view {
+  struct scan_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS F op;

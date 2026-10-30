@@ -18,6 +18,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng>
   concept viewable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     viewable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }

@@ -19,6 +19,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename Int>
   concept strideable_range =
+    non_dangling_range<Rng> and
     forward_range<Rng> and
     strideable_iters<iterator_t<Rng>, sentinel_t<Rng>, Int>;
 }
@@ -74,7 +75,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Int>
     requires concepts::strideable_iters<I, S, Int>
-  struct stride_view {
+  struct stride_view : view_base {
     I it;
     S st;
     Int step;

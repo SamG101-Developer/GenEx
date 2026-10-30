@@ -19,6 +19,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng>
   concept mappable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     mappable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }

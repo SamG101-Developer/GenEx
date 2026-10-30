@@ -18,6 +18,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename Comp, typename Proj>
   concept duplicate_checkable_range =
+    non_dangling_range<Rng> and
     forward_range<Rng> and
     duplicate_checkable_iters<iterator_t<Rng>, sentinel_t<Rng>, Comp, Proj>;
 }
@@ -121,7 +122,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Comp, typename Proj>
     requires concepts::duplicate_checkable_iters<I, S, Comp, Proj>
-  struct duplicate_view {
+  struct duplicate_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS Comp comp;

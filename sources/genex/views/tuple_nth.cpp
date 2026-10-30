@@ -21,6 +21,7 @@ namespace genex::views::detail::concepts {
 
   template <std::size_t N, typename Rng>
   concept tuple_indexable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     tuple_indexable_iters<N, iterator_t<Rng>, sentinel_t<Rng>>;
 }

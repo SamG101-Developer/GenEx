@@ -162,11 +162,44 @@ export namespace genex {
   concept range =
     (has_std_begin<Rng> or has_member_begin<Rng>) and
     (has_std_end<Rng> or has_member_end<Rng>);
-}
 
-export namespace genex::views::detail {
-  template <typename Rng> requires range<Rng>
-  struct view_base;
+  /**
+   * The base of every view. A view is cheap to move, and the iterators it hands out hold copies of what they use, so
+   * they stay valid after the view itself is gone.
+   */
+  struct view_base {
+  };
+
+  template <typename T>
+  inline constexpr bool enable_view = std::derived_from<T, view_base>;
+
+  template <typename CharT, typename Traits>
+  inline constexpr bool enable_view<std::basic_string_view<CharT, Traits>> = true;
+
+  template <typename T, std::size_t Extent>
+  inline constexpr bool enable_view<std::span<T, Extent>> = true;
+
+  /**
+   * Whether a range's iterators stay valid after the range itself is gone, because it does not own what they point to.
+   */
+  template <typename T>
+  inline constexpr bool enable_borrowed_range = false;
+
+  template <typename CharT, typename Traits>
+  inline constexpr bool enable_borrowed_range<std::basic_string_view<CharT, Traits>> = true;
+
+  template <typename T, std::size_t Extent>
+  inline constexpr bool enable_borrowed_range<std::span<T, Extent>> = true;
+
+  /**
+   * A range a view can safely point into: an lvalue, or a range whose iterators do not depend on it staying alive. Any
+   * other rvalue would dangle, so a view takes one through the pipe operator, which keeps it alive.
+   */
+  template <typename Rng>
+  concept non_dangling_range =
+    std::is_lvalue_reference_v<Rng> or
+    enable_view<std::remove_cvref_t<Rng>> or
+    enable_borrowed_range<std::remove_cvref_t<Rng>>;
 }
 
 export namespace genex {
@@ -362,24 +395,24 @@ export namespace genex {
 
 template <typename Rng> requires genex::has_std_begin<Rng>
 struct genex::iterator<Rng> {
-  using type = decltype(std::begin(std::declval<Rng>()));
+  using type = decltype(std::begin(std::declval<Rng&>()));
 };
 
 template <typename Rng>
   requires (not genex::has_std_begin<Rng> and genex::has_member_begin<Rng>)
 struct genex::iterator<Rng> {
-  using type = decltype(std::declval<Rng>().begin());
+  using type = decltype(std::declval<Rng&>().begin());
 };
 
 template <typename Rng> requires genex::has_std_end<Rng>
 struct genex::sentinel<Rng> {
-  using type = decltype(std::end(std::declval<Rng>()));
+  using type = decltype(std::end(std::declval<Rng&>()));
 };
 
 template <typename Rng>
   requires (not genex::has_std_end<Rng> and genex::has_member_end<Rng>)
 struct genex::sentinel<Rng> {
-  using type = decltype(std::declval<Rng>().end());
+  using type = decltype(std::declval<Rng&>().end());
 };
 
 template <typename T> requires requires(T &&t) { *std::declval<T>(); }

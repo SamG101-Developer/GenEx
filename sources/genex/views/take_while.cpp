@@ -17,6 +17,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename Pred, typename Proj>
   concept takeable_while_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     takeable_while_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj>;
 }
@@ -85,7 +86,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::takeable_while_iters<I, S, Pred, Proj>
-  struct take_while_view {
+  struct take_while_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS Pred pred;

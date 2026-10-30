@@ -19,6 +19,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename F, typename Proj = meta::identity>
   concept transformable_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     transformable_iters<iterator_t<Rng>, sentinel_t<Rng>, F, Proj>;
 }
@@ -89,7 +90,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename F, typename Proj>
     requires concepts::transformable_iters<I, S, F, Proj>
-  struct transform_view {
+  struct transform_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS F f;

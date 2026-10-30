@@ -8,7 +8,7 @@ import std;
 
 namespace genex::views::detail::impl {
   template <typename T>
-  struct empty_view {
+  struct empty_view : view_base {
     GENEX_NODISCARD GENEX_INLINE constexpr auto begin() const noexcept -> const T* {
       return nullptr;
     }

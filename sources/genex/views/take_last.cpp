@@ -21,6 +21,7 @@ namespace genex::views::detail::concepts {
 
   template <typename Rng, typename Int>
   concept takeable_last_range =
+    non_dangling_range<Rng> and
     input_range<Rng> and
     takeable_last_iters<iterator_t<Rng>, sentinel_t<Rng>, Int>;
 }

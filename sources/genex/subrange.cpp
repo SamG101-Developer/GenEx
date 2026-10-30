@@ -88,7 +88,7 @@ namespace genex {
 }
 
 template <typename I, typename S>
-inline constexpr auto std::ranges::enable_borrowed_range<genex::subrange<I, S>> = true;
+inline constexpr bool genex::enable_borrowed_range<genex::subrange<I, S>> = true;
 
 template <typename I, typename S>
-inline constexpr auto std::ranges::enable_view<genex::subrange<I, S>> = true;
+inline constexpr bool genex::enable_view<genex::subrange<I, S>> = true;
