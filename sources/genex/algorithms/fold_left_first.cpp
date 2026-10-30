@@ -26,7 +26,7 @@ namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename F>
     requires concepts::left_foldable_first_iters<I, S, F>
   GENEX_INLINE constexpr auto do_fold_left_first(I first, S last, F &&f) -> iter_value_t<I> {
-    GENEX_ASSERT(std::out_of_range, first != last);
+    GENEX_ASSERT(first != last);
     auto acc = *first;
     ++first;
     for (; first != last; ++first) {

@@ -102,7 +102,7 @@ namespace genex::views {
       requires detail::concepts::generatable_fn<F> and std::integral<Int>
     GENEX_INLINE constexpr auto operator()(F f, const Int count) const noexcept(
       SAFE_CTOR(detail::impl::generate_view<F>, F, std::ptrdiff_t) and SAFE_MOVE(F)) {
-      GENEX_ASSERT(std::out_of_range, count >= 0);
+      GENEX_ASSERT(count >= 0);
       return detail::impl::generate_view<F>(std::move(f), static_cast<std::ptrdiff_t>(count));
     }
   };

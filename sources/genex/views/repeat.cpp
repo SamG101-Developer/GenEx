@@ -81,7 +81,7 @@ namespace genex::views {
       requires std::copyable<T> and std::integral<Int>
     GENEX_INLINE constexpr auto operator()(T value, const Int count) const noexcept(
       SAFE_CTOR(detail::impl::repeat_view<T>, T, std::ptrdiff_t) and SAFE_MOVE(T)) {
-      GENEX_ASSERT(std::out_of_range, count >= 0);
+      GENEX_ASSERT(count >= 0);
       return detail::impl::repeat_view<T>(std::move(value), static_cast<std::ptrdiff_t>(count));
     }
 

@@ -3,12 +3,15 @@
 #define GENEX_IGNORE(x) (void)x
 
 #ifndef NDEBUG
-#define GENEX_ASSERT(E, cond)                                     \
-  do {                                                            \
-    if (!(cond)) { throw E("Runtime assertion failed: " #cond); } \
+#define GENEX_ASSERT(cond)                                                                                 \
+  do {                                                                                                     \
+    if (!(cond)) {                                                                                         \
+      std::cerr << __FILE__ << ':' << __LINE__ << ": Runtime assertion failed: " << #cond << std::endl;    \
+      std::abort();                                                                                        \
+    }                                                                                                      \
   } while (0)
 #else
-#define GENEX_ASSERT(E, cond) \
+#define GENEX_ASSERT(cond) \
   ((void)0)
 #endif
 

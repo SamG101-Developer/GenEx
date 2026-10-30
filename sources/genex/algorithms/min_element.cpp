@@ -25,7 +25,7 @@ namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Comp, typename Proj>
     requires concepts::minable_iters<I, S, Comp, Proj>
   GENEX_INLINE constexpr auto do_min_element(I first, S last, Comp &&comp, Proj &&proj) -> iter_reference_t<I> {
-    GENEX_ASSERT(std::out_of_range, first != last);
+    GENEX_ASSERT(first != last);
     for (auto next = first; ++next != last;) {
       if (meta::invoke(comp, meta::invoke(proj, *next), meta::invoke(proj, *first))) { first = next; }
     }

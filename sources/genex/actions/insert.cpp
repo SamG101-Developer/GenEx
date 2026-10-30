@@ -39,7 +39,7 @@ namespace genex::actions::detail {
     GENEX_IGNORE(rng);
     GENEX_IGNORE(it);
     if constexpr (std::random_access_iterator<std::remove_cvref_t<I>>) {
-      GENEX_ASSERT(std::out_of_range, it >= std::begin(rng) and it <= std::end(rng));
+      GENEX_ASSERT(it >= std::begin(rng) and it <= std::end(rng));
     }
   }
 }

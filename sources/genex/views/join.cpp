@@ -77,8 +77,8 @@ namespace genex::views::detail::impl {
 
     template <typename Self>
     GENEX_VIEW_CUSTOM_DEREF {
-      GENEX_ASSERT(std::runtime_error, self.it != self.st);
-      GENEX_ASSERT(std::runtime_error, self.inner_it != self.inner_st);
+      GENEX_ASSERT(self.it != self.st);
+      GENEX_ASSERT(self.inner_it != self.inner_st);
       return *self.inner_it;
     }
 

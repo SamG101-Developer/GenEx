@@ -28,7 +28,7 @@ namespace genex::actions {
     template <typename Rng, typename Int>
       requires detail::concepts::takeable_last_range<Rng, Int>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const -> decltype(auto) {
-      GENEX_ASSERT(std::out_of_range, n >= 0);
+      GENEX_ASSERT(n >= 0);
       const auto len = iterators::distance(iterators::begin(rng), iterators::end(rng));
       const auto count = std::min(static_cast<std::ptrdiff_t>(n), len);
       actions::erase(
@@ -40,7 +40,7 @@ namespace genex::actions {
     template <typename Int>
       requires std::weakly_incrementable<Int>
     GENEX_INLINE constexpr auto operator()(const Int n) const {
-      GENEX_ASSERT(std::out_of_range, n >= 0);
+      GENEX_ASSERT(n >= 0);
       return meta::bind_back(take_last_fn{}, n);
     }
   };

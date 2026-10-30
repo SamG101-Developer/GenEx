@@ -67,13 +67,13 @@ namespace genex {
 
     GENEX_NODISCARD GENEX_INLINE constexpr auto front() const -> reference
       requires std::forward_iterator<I> {
-      GENEX_ASSERT(std::out_of_range, not empty());
+      GENEX_ASSERT(not empty());
       return *m_it;
     }
 
     GENEX_NODISCARD GENEX_INLINE constexpr auto back() const -> reference
       requires std::bidirectional_iterator<I> and std::same_as<I, S> {
-      GENEX_ASSERT(std::out_of_range, not empty());
+      GENEX_ASSERT(not empty());
       return *std::prev(m_st);
     }
 

@@ -111,7 +111,7 @@ namespace genex::views {
     GENEX_INLINE constexpr auto operator()(I first, S last, const Int window) const noexcept(
       SAFE_IMPL_CTOR(slide_view, I, S, Int) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
-      GENEX_ASSERT(std::out_of_range, window > 0);
+      GENEX_ASSERT(window > 0);
       return detail::impl::slide_view(std::move(first), std::move(last), window);
     }
 
@@ -120,7 +120,7 @@ namespace genex::views {
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int window) const noexcept(
       SAFE_IMPL_CTOR(slide_view, iterator_t<Rng>, sentinel_t<Rng>, Int) and
       SAFE_MOVE(Int)) {
-      GENEX_ASSERT(std::out_of_range, window > 0);
+      GENEX_ASSERT(window > 0);
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::slide_view(std::move(first), std::move(last), window);
     }
@@ -129,7 +129,7 @@ namespace genex::views {
       requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int window) const noexcept(
       SAFE_CTOR(slide_fn) and SAFE_MOVE(Int)) {
-      GENEX_ASSERT(std::out_of_range, window > 0);
+      GENEX_ASSERT(window > 0);
       return meta::bind_back(slide_fn{}, window);
     }
   };

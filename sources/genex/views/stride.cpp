@@ -108,7 +108,7 @@ namespace genex::views {
     GENEX_INLINE constexpr auto operator()(I first, S last, const Int step) const noexcept(
       SAFE_IMPL_CTOR(stride_view, I, S, Int) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
-      GENEX_ASSERT(std::out_of_range, step > 0);
+      GENEX_ASSERT(step > 0);
       return detail::impl::stride_view(std::move(first), std::move(last), step);
     }
 
@@ -117,7 +117,7 @@ namespace genex::views {
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int step) const noexcept(
       SAFE_IMPL_CTOR(stride_view, iterator_t<Rng>, sentinel_t<Rng>, Int) and
       SAFE_MOVE(Int)) {
-      GENEX_ASSERT(std::out_of_range, step > 0);
+      GENEX_ASSERT(step > 0);
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::stride_view(std::move(first), std::move(last), step);
     }
@@ -126,7 +126,7 @@ namespace genex::views {
       requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int step) const noexcept(
       SAFE_CTOR(stride_fn) and SAFE_MOVE(Int)) {
-      GENEX_ASSERT(std::out_of_range, step > 0);
+      GENEX_ASSERT(step > 0);
       return meta::bind_back(stride_fn{}, step);
     }
   };

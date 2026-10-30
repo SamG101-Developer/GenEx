@@ -22,7 +22,7 @@ namespace genex::actions {
     template <typename Rng, typename Int>
       requires detail::concepts::takeable_range<Rng, Int>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Int n) const -> decltype(auto) {
-      GENEX_ASSERT(std::out_of_range, n >= 0);
+      GENEX_ASSERT(n >= 0);
       actions::erase(
         rng,
         iterators::next(iterators::begin(rng), static_cast<range_difference_t<Rng>>(n), iterators::end(rng)),
@@ -33,7 +33,7 @@ namespace genex::actions {
     template <typename Int>
       requires std::weakly_incrementable<Int>
     GENEX_INLINE constexpr auto operator()(const Int n) const {
-      GENEX_ASSERT(std::out_of_range, n >= 0);
+      GENEX_ASSERT(n >= 0);
       return meta::bind_back(take_fn{}, n);
     }
   };
