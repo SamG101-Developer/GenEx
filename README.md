@@ -72,3 +72,7 @@ vec | genex::parallel::for_each(f, genex::parallel::params{.threads = 4, .thresh
 The iterator abstraction layer provides a common interface to access key iteration members, such as `begin`, `end`,
 `data` etc. There are multiple specialisations of `begin` for example, allowing for different ways to access the data
 depending on the design of the container.
+
+## License
+
+GenEx is licensed under the [Boost Software License 1.0](LICENSE).
