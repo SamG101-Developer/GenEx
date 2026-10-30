@@ -1,6 +1,6 @@
 #include <benchmark/benchmark.h>
 
-import genex.views2.divide;
+import genex.views.divide;
 import std;
 
 static void BM_StdRanges_Divide_RandomAccess(benchmark::State &state) {

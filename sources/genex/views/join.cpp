@@ -1,13 +1,13 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.join;
+export module genex.views.join;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.access;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -46,7 +46,7 @@ namespace genex::views::detail::impl {
     sentinel_t<iter_value_t<I>> inner_st;
 
     using value_type = range_value_t<iter_value_t<I>>;
-    using reference_type = range_reference_t<iter_value_t<I>>;
+    using reference = range_reference_t<iter_value_t<I>>;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::conditional_t<
       ref_is_glvalue and std::forward_iterator<I>,

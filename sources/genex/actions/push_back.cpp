@@ -2,10 +2,10 @@ module;
 #include <genex/macros.hpp>
 
 export module genex.actions.push_back;
-import genex.concepts;
-import genex.meta;
 import genex.actions.insert;
+import genex.concepts;
 import genex.iterators.access;
+import genex.meta;
 import std;
 
 namespace genex::actions::detail::concepts {

@@ -3,10 +3,9 @@ module;
 
 export module genex.strings.cases;
 export import genex.pipe;
-import genex.views2.transform;
 import genex.concepts;
-import genex.iterators.iter_pair;
 import genex.meta;
+import genex.views.transform;
 import std;
 
 namespace genex::strings::detail::concepts {

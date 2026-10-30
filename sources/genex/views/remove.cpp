@@ -1,12 +1,11 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.remove;
+export module genex.views.remove;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
-import genex.iterators.distance;
 import genex.iterators.iter_pair;
+import genex.meta;
 import genex.operations.cmp;
 import std;
 
@@ -36,7 +35,7 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
     using value_type = iter_value_t<I>;
-    using reference_type = iter_reference_t<I>;
+    using reference = iter_reference_t<I>;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;

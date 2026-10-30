@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.slide;
+import genex.views.slide;
 
 TEST(GenexViewsSlide, VecInput) {
   auto vec = std::vector{1, 2, 3, 4};

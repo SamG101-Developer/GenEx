@@ -1,14 +1,14 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.chunk;
+export module genex.views.chunk;
 export import genex.pipe;
 import genex.concepts;
-import genex.subrange;
-import genex.meta;
-import genex.iterators.next;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
+import genex.iterators.next;
+import genex.meta;
+import genex.subrange;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -36,7 +36,7 @@ namespace genex::views::detail::impl {
     Int chunk_size;
 
     using value_type = genex::subrange<I>;
-    using reference_type = genex::subrange<I>;
+    using reference = genex::subrange<I>;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;

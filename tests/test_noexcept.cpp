@@ -4,11 +4,11 @@
 #include <vector>
 
 import genex.meta;
-import genex.views2.drop;
-import genex.views2.filter;
-import genex.views2.materialize;
-import genex.views2.stride;
-import genex.views2.zip;
+import genex.views.drop;
+import genex.views.filter;
+import genex.views.materialize;
+import genex.views.stride;
+import genex.views.zip;
 
 namespace {
   constexpr auto keep = [](const int) { return true; };

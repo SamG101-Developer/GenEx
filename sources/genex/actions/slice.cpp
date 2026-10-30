@@ -3,11 +3,11 @@ module;
 
 export module genex.actions.slice;
 export import genex.pipe;
-import genex.concepts;
-import genex.meta;
 import genex.actions.erase;
+import genex.concepts;
 import genex.iterators.access;
 import genex.iterators.next;
+import genex.meta;
 import std;
 
 // Todo: random_access_iterator versions with optimizations.

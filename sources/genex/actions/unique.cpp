@@ -3,10 +3,10 @@ module;
 
 export module genex.actions.unique;
 export import genex.pipe;
-import genex.concepts;
-import genex.meta;
 import genex.actions.erase;
+import genex.concepts;
 import genex.iterators.access;
+import genex.meta;
 import genex.operations.cmp;
 import std;
 

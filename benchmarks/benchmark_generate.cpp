@@ -6,8 +6,8 @@
 #include <range/v3/view/take.hpp>
 
 import genex.to_container;
-import genex.views2.generate;
-import genex.views2.take;
+import genex.views.generate;
+import genex.views.take;
 import std;
 
 static void BM_StdRanges_GenerateN(benchmark::State &state) {

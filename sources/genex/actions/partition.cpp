@@ -4,8 +4,8 @@ module;
 export module genex.actions.partition;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::actions::detail::concepts {

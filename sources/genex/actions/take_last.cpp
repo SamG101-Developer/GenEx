@@ -3,12 +3,12 @@ module;
 
 export module genex.actions.take_last;
 export import genex.pipe;
-import genex.concepts;
-import genex.meta;
 import genex.actions.erase;
+import genex.concepts;
 import genex.iterators.access;
 import genex.iterators.distance;
 import genex.iterators.next;
+import genex.meta;
 import std;
 
 namespace genex::actions::detail::concepts {

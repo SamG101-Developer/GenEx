@@ -6,8 +6,8 @@
 #include <range/v3/view/take.hpp>
 
 import genex.to_container;
-import genex.views2.repeat;
-import genex.views2.take;
+import genex.views.repeat;
+import genex.views.take;
 import std;
 
 static void BM_StdRanges_RepeatN(benchmark::State &state) {

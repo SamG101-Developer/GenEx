@@ -4,7 +4,7 @@
 #include <range/v3/view/partial_sum.hpp>
 
 import genex.to_container;
-import genex.views2.scan;
+import genex.views.scan;
 import std;
 
 static void BM_StdRanges_PartialSum(benchmark::State &state) {

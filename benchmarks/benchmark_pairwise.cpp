@@ -4,7 +4,7 @@
 #include <range/v3/view/sliding.hpp>
 
 import genex.to_container;
-import genex.views2.pairwise;
+import genex.views.pairwise;
 import std;
 
 // ranges-v3 has no pairwise view, so the closest equivalent -- a sliding window of two -- is the

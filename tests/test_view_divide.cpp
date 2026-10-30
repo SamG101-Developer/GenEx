@@ -1,9 +1,8 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 #include <list>
 
 import genex.to_container;
-import genex.views2.divide;
+import genex.views.divide;
 
 TEST(GenexViewsDivide, VecInputEven) {
   auto vec = std::vector{0, 1, 2, 3, 4, 5};

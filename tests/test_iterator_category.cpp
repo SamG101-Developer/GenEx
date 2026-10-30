@@ -9,12 +9,12 @@
 import genex.iterators.distance;
 import genex.iterators.next;
 import genex.iterators.prev;
-import genex.views2.filter;
-import genex.views2.move_reverse;
-import genex.views2.reverse;
-import genex.views2.stride;
-import genex.views2.take;
-import genex.views2.transform;
+import genex.views.filter;
+import genex.views.move_reverse;
+import genex.views.reverse;
+import genex.views.stride;
+import genex.views.take;
+import genex.views.transform;
 import genex.to_container;
 
 namespace {

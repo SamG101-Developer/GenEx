@@ -3,7 +3,7 @@
 #include <range/v3/to_container.hpp>
 
 import genex.to_container;
-import genex.views2.duplicates;
+import genex.views.duplicates;
 import std;
 
 // ranges-v3 has no duplicates view, so the baseline is the hand-rolled scan-against-seen loop that

@@ -3,8 +3,8 @@ module;
 
 export module genex.algorithms.position;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::algorithms::detail::concepts {

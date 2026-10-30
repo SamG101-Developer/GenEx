@@ -1,12 +1,12 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.transform;
+export module genex.views.transform;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -41,12 +41,11 @@ namespace genex::views::detail::impl {
     using transformed_reference_type = std::invoke_result_t<F&, projected_reference_type>;
 
     using value_type = std::remove_cvref_t<transformed_reference_type>;
-    using reference_type = transformed_reference_type;
-    using reference = reference_type;
+    using reference = transformed_reference_type;
     using pointer = void;
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
-    using iterator_category = legacy_iter_category_t<reference_type, iterator_concept>;
+    using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
     GENEX_ITER_OPS(transform_iterator)
 
     GENEX_INLINE constexpr transform_iterator() = default;

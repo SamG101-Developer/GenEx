@@ -1,10 +1,9 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.interleave;
+export module genex.views.interleave;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
@@ -45,7 +44,7 @@ namespace genex::views::detail::impl {
     bool extend = false;
 
     using value_type = concepts::interleave_common_t<I1, I2>;
-    using reference_type = value_type;
+    using reference = value_type;
     using difference_type = std::common_type_t<iter_difference_t<I1>, iter_difference_t<I2>>;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;

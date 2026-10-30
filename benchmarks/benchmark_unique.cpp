@@ -4,7 +4,7 @@
 #include <range/v3/view/unique.hpp>
 
 import genex.to_container;
-import genex.views2.unique;
+import genex.views.unique;
 import std;
 
 static void BM_StdRanges_Unique(benchmark::State &state) {

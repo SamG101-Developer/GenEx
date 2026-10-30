@@ -3,9 +3,9 @@ module;
 
 export module genex.algorithms.find_last_if_not;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.iter_pair;
 import genex.iterators.prev;
+import genex.meta;
 import std;
 
 namespace genex::algorithms::detail::concepts {

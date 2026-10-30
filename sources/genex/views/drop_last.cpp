@@ -1,16 +1,15 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.drop_last;
+export module genex.views.drop_last;
 export import genex.pipe;
 import genex.concepts;
-import genex.subrange;
-import genex.meta;
-import genex.span;
-import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
 import genex.iterators.prev;
+import genex.meta;
+import genex.span;
+import genex.subrange;
 import std;
 
 namespace genex::views::detail::concepts {

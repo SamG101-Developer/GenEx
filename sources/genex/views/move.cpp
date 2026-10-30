@@ -1,12 +1,12 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.move;
+export module genex.views.move;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -30,7 +30,7 @@ namespace genex::views::detail::impl {
     I it;
 
     using value_type = iter_value_t<I>;
-    using reference_type = iter_value_t<I>&&;
+    using reference = iter_value_t<I>&&;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::input_iterator_tag; // Can't move the same element twice.
     using iterator_concept = iterator_category;

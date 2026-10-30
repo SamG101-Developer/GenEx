@@ -4,7 +4,7 @@
 #include <range/v3/view/iota.hpp>
 
 import genex.to_container;
-import genex.views2.iota;
+import genex.views.iota;
 import std;
 
 static void BM_StdRanges_Iota_StartEnd(benchmark::State &state) {

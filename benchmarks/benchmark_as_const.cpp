@@ -4,7 +4,7 @@
 #include <range/v3/view/const.hpp>
 
 import genex.to_container;
-import genex.views2.as_const;
+import genex.views.as_const;
 import std;
 
 static void BM_StdRanges_AsConst(benchmark::State &state) {

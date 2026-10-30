@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-import genex.views2.stride;
+import genex.views.stride;
 
 // GENEX_ASSERT compiles to nothing in Release.
 #ifndef NDEBUG

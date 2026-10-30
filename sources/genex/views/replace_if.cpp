@@ -1,13 +1,12 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.replace_if;
+export module genex.views.replace_if;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
-import genex.operations.cmp;
+import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -36,10 +35,10 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
     using value_type = iter_value_t<I>;
-    using reference_type = iter_reference_t<I>;
+    using reference = iter_reference_t<I>;
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
-    using iterator_category = legacy_iter_category_t<reference_type, iterator_concept>;
+    using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
     GENEX_ITER_OPS(replace_iterator)
 
     GENEX_INLINE constexpr replace_iterator() = default;

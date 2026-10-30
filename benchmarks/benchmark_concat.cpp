@@ -4,7 +4,7 @@
 #include <range/v3/view/concat.hpp>
 
 import genex.to_container;
-import genex.views2.concat;
+import genex.views.concat;
 import std;
 
 static void BM_StdRanges_Concat(benchmark::State &state) {

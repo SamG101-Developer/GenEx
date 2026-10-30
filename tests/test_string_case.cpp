@@ -1,4 +1,3 @@
-#include <coroutine>
 #include <gtest/gtest.h>
 
 import genex.strings.cases;

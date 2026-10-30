@@ -1,13 +1,13 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.stride;
+export module genex.views.stride;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
+import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -35,7 +35,7 @@ namespace genex::views::detail::impl {
     Int step;
 
     using value_type = iter_value_t<I>;
-    using reference_type = iter_reference_t<I>;
+    using reference = iter_reference_t<I>;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;

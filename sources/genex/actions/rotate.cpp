@@ -4,9 +4,9 @@ module;
 export module genex.actions.rotate;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.access;
 import genex.iterators.next;
+import genex.meta;
 import std;
 
 namespace genex::actions::detail::concepts {

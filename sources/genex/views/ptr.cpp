@@ -1,13 +1,12 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.ptr;
+export module genex.views.ptr;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
-import genex.iterators.distance;
 import genex.iterators.iter_pair;
-import genex.views2.transform;
+import genex.meta;
+import genex.views.transform;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -15,7 +14,7 @@ namespace genex::views::detail::concepts {
   concept ptr_gettable_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
-    (unique_ptr<iter_value_t<I>> or shared_ptr<iter_value_t<I>>);
+    (unique_ptr_like<iter_value_t<I>> or shared_ptr_like<iter_value_t<I>>);
 
   template <typename Rng>
   concept ptr_gettable_range =

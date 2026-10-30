@@ -8,12 +8,12 @@
 
 import genex.concepts;
 import genex.to_container;
-import genex.views2.filter;
-import genex.views2.in;
-import genex.views2.materialize;
-import genex.views2.reverse;
-import genex.views2.transform;
-import genex.views2.zip;
+import genex.views.filter;
+import genex.views.in;
+import genex.views.materialize;
+import genex.views.reverse;
+import genex.views.transform;
+import genex.views.zip;
 
 namespace {
   constexpr auto is_even = [](const int x) { return x % 2 == 0; };

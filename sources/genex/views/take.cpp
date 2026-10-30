@@ -1,14 +1,13 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.take;
+export module genex.views.take;
 export import genex.pipe;
 import genex.concepts;
-import genex.subrange;
+import genex.iterators.iter_pair;
 import genex.meta;
 import genex.span;
-import genex.iterators.iter_pair;
-import genex.iterators.next;
+import genex.subrange;
 import std;
 
 namespace genex::views::detail::concepts {

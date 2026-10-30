@@ -1,13 +1,13 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.pairwise;
+export module genex.views.pairwise;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
+import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -34,8 +34,7 @@ namespace genex::views::detail::impl {
     S st;
 
     using value_type = std::pair<iter_value_t<I>, iter_value_t<I>>;
-    using reference_type = std::pair<iter_reference_t<I>, iter_reference_t<I>>;
-    using reference = reference_type;
+    using reference = std::pair<iter_reference_t<I>, iter_reference_t<I>>;
     using pointer = void;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::forward_iterator_tag;
@@ -61,7 +60,7 @@ namespace genex::views::detail::impl {
 
     template <typename Self>
     GENEX_VIEW_CUSTOM_DEREF {
-      return reference_type(*self.it, *self.snd);
+      return reference(*self.it, *self.snd);
     }
 
     GENEX_VIEW_ITER_EQ(pairwise_iterator, pairwise_iterator) {

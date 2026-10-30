@@ -1,9 +1,8 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.filter;
-import genex.views2.move;
+import genex.views.filter;
+import genex.views.move;
 
 TEST(GenexToContainer, FilteredLvalueSourceIsNotMovedFrom) {
   auto vec = std::vector<std::shared_ptr<int>>{};

@@ -4,7 +4,7 @@
 #include <range/v3/view/stride.hpp>
 
 import genex.to_container;
-import genex.views2.stride;
+import genex.views.stride;
 import std;
 
 static void BM_StdRanges_Stride(benchmark::State &state) {

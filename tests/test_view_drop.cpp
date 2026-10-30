@@ -1,10 +1,9 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.drop;
-import genex.views2.drop_last;
-import genex.views2.drop_while;
+import genex.views.drop;
+import genex.views.drop_last;
+import genex.views.drop_while;
 
 TEST(GenexViewsDrop, VecInput) {
   auto vec = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};

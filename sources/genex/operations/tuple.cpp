@@ -1,7 +1,7 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.algorithms.tuple;
+export module genex.operations.tuple;
 import std;
 
 namespace genex {

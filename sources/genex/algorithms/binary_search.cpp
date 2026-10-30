@@ -3,8 +3,8 @@ module;
 
 export module genex.algorithms.binary_search;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.iter_pair;
+import genex.meta;
 import genex.operations.cmp;
 import std;
 

@@ -1,9 +1,8 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.remove;
-import genex.views2.remove_if;
+import genex.views.remove;
+import genex.views.remove_if;
 
 TEST(GenexViewsRemove, VecInput) {
   auto vec = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};

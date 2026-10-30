@@ -2,10 +2,10 @@ module;
 #include <genex/macros.hpp>
 
 export module genex.algorithms.contains_if;
-import genex.concepts;
-import genex.meta;
 import genex.algorithms.find_if;
+import genex.concepts;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::algorithms::detail::concepts {

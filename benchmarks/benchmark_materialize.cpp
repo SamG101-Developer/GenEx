@@ -4,8 +4,8 @@
 #include <range/v3/view/filter.hpp>
 
 import genex.to_container;
-import genex.views2.filter;
-import genex.views2.materialize;
+import genex.views.filter;
+import genex.views.materialize;
 import std;
 
 // ranges-v3 has no materialize view: caching a pipeline into a container there *is* `ranges::to`, so

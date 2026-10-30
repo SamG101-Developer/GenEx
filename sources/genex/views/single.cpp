@@ -1,11 +1,10 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.single;
+export module genex.views.single;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
-import genex.views2.repeat;
+import genex.views.repeat;
 import std;
 
 namespace genex::views {

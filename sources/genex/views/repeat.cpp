@@ -1,10 +1,9 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.repeat;
+export module genex.views.repeat;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import std;
 
 namespace genex::views::detail::impl {
@@ -17,8 +16,7 @@ namespace genex::views::detail::impl {
     std::ptrdiff_t count = 0;
 
     using value_type = T;
-    using reference_type = T;
-    using reference = reference_type;
+    using reference = T;
     using pointer = void;
     using difference_type = std::ptrdiff_t;
     using iterator_category = std::input_iterator_tag;

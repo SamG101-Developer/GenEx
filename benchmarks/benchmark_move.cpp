@@ -4,7 +4,7 @@
 #include <range/v3/view/move.hpp>
 
 import genex.to_container;
-import genex.views2.move;
+import genex.views.move;
 import std;
 
 // The source is refilled inside the timed region on both sides -- moving out of it is destructive,

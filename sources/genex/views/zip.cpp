@@ -1,12 +1,12 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.zip;
+export module genex.views.zip;
 export import genex.pipe;
 import genex.concepts;
-import genex.subrange;
-import genex.meta;
+import genex.detail.tuple;
 import genex.iterators.access;
+import genex.subrange;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -47,13 +47,13 @@ namespace genex::views::detail::impl {
     std::tuple<iterator_t<Rngs>...> its;
 
     using value_type = std::tuple<iter_value_t<iterator_t<Rngs>>...>;
-    using reference_type = std::tuple<iter_reference_t<iterator_t<Rngs>>...>;
+    using reference = std::tuple<iter_reference_t<iterator_t<Rngs>>...>;
     using difference_type = std::common_type_t<iter_difference_t<iterator_t<Rngs>>...>;
     using iterator_concept = std::conditional_t<
       (std::random_access_iterator<iterator_t<Rngs>> and ...), std::random_access_iterator_tag, std::conditional_t<
         (std::bidirectional_iterator<iterator_t<Rngs>> and ...), std::bidirectional_iterator_tag, std::conditional_t<
           (std::forward_iterator<iterator_t<Rngs>> and ...), std::forward_iterator_tag, std::input_iterator_tag>>>;
-    using iterator_category = legacy_iter_category_t<reference_type, iterator_concept>;
+    using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
 
     GENEX_INLINE constexpr zip_iterator() = default;
 
@@ -64,7 +64,7 @@ namespace genex::views::detail::impl {
     // A zip ends as soon as *any* of its ranges does, so the sentinel test is a disjunction over
     // all of them rather than a comparison of the iterator tuples.
     GENEX_VIEW_ITER_EQ(zip_iterator, zip_sentinel<Rngs...>) {
-      return genex::any_iterator_finished(self.its, that.sts);
+      return genex::detail::any_iterator_finished(self.its, that.sts);
     }
 
     GENEX_VIEW_ITER_EQ(zip_iterator, zip_iterator) {
@@ -83,12 +83,12 @@ namespace genex::views::detail::impl {
 
     template <typename Self>
     GENEX_INLINE constexpr auto operator*(this Self &&self) -> decltype(auto) {
-      return genex::deref_tuple(self.its);
+      return genex::detail::deref_tuple(self.its);
     }
 
     template <typename Self>
     GENEX_INLINE constexpr auto operator++(this Self &&self) -> zip_iterator& {
-      genex::advance_tuple(self.its);
+      genex::detail::advance_tuple(self.its);
       return self;
     }
 
@@ -102,7 +102,7 @@ namespace genex::views::detail::impl {
     template <typename Self>
       requires (std::bidirectional_iterator<iterator_t<Rngs>> and ...)
     GENEX_INLINE constexpr auto operator--(this Self &&self) -> zip_iterator& {
-      genex::retreat_tuple(self.its);
+      genex::detail::retreat_tuple(self.its);
       return self;
     }
 
@@ -117,14 +117,14 @@ namespace genex::views::detail::impl {
     template <typename Self>
       requires (std::random_access_iterator<iterator_t<Rngs>> and ...)
     GENEX_INLINE constexpr auto operator+=(this Self &&self, difference_type n) -> zip_iterator& {
-      genex::advance_tuple(self.its, n);
+      genex::detail::advance_tuple(self.its, n);
       return self;
     }
 
     template <typename Self>
       requires (std::random_access_iterator<iterator_t<Rngs>> and ...)
     GENEX_INLINE constexpr auto operator-=(this Self &&self, difference_type n) -> zip_iterator& {
-      genex::retreat_tuple(self.its, n);
+      genex::detail::retreat_tuple(self.its, n);
       return self;
     }
 
@@ -147,7 +147,7 @@ namespace genex::views::detail::impl {
     template <typename Self>
       requires (std::random_access_iterator<iterator_t<Rngs>> and ...)
     GENEX_INLINE constexpr auto operator-(this Self &&self, zip_iterator const &that) -> difference_type {
-      return static_cast<difference_type>(genex::distance_tuple(self.its, that.its));
+      return static_cast<difference_type>(genex::detail::distance_tuple(self.its, that.its));
     }
   };
 

@@ -1,13 +1,12 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.concat;
+export module genex.views.concat;
 export import genex.pipe;
 import genex.concepts;
-import genex.subrange;
-import genex.meta;
 import genex.iterators.access;
 import genex.iterators.distance;
+import genex.subrange;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -47,7 +46,7 @@ namespace genex::views::detail::impl {
     std::size_t active = 0;
 
     using value_type = std::common_type_t<iter_value_t<iterator_t<Rngs>>...>;
-    using reference_type = std::common_reference_t<iter_reference_t<iterator_t<Rngs>>...>;
+    using reference = std::common_reference_t<iter_reference_t<iterator_t<Rngs>>...>;
     using difference_type = std::common_type_t<iter_difference_t<iterator_t<Rngs>>...>;
     using iterator_category = std::conditional_t<
       (std::forward_iterator<iterator_t<Rngs>> and ...), std::forward_iterator_tag, std::input_iterator_tag>;
@@ -101,7 +100,7 @@ namespace genex::views::detail::impl {
 
   private:
     template <std::size_t I, typename Self>
-    GENEX_INLINE constexpr auto deref_impl(this Self &&self) -> reference_type {
+    GENEX_INLINE constexpr auto deref_impl(this Self &&self) -> reference {
       if constexpr (I < sizeof...(Rngs)) {
         if (self.active == I) { return *std::get<I>(self.its); }
         return self.template deref_impl<I + 1>();

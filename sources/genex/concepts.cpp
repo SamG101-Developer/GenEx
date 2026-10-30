@@ -8,9 +8,6 @@ export namespace genex {
   template <typename Rng>
   struct sentinel;
 
-  template <typename T>
-  struct deref_value;
-
   template <typename I>
   using iter_value_t = std::iter_value_t<I>;
 
@@ -22,9 +19,6 @@ export namespace genex {
 
   template <typename Rng>
   using sentinel_t = sentinel<Rng>::type;
-
-  template <typename T>
-  using deref_value_t = deref_value<T>::type;
 
   template <typename T>
   using iter_reference_t = std::iter_reference_t<T>;
@@ -142,11 +136,6 @@ export namespace genex {
 
   template <typename Rng>
   concept has_member_pop_front = requires(Rng &rng) { rng.pop_front(); };
-
-  template <typename Rng>
-  concept has_member_pop = requires(Rng &rng) {
-    rng.pop(std::declval<std::size_t>());
-  };
 
   template <typename Rng>
   concept has_member_erase = requires(Rng &rng) {
@@ -268,87 +257,6 @@ export namespace genex {
 }
 
 export namespace genex {
-  template <std::size_t I = 0, typename... Ts, typename... Us>
-    requires (I <= sizeof...(Ts) and sizeof...(Ts) == sizeof...(Us))
-  constexpr auto any_iterator_finished(const std::tuple<Ts...> &starts,
-    const std::tuple<Us...> &ends) -> bool {
-    if constexpr (I < sizeof...(Ts)) {
-      return std::get<I>(starts) == std::get<I>(ends) or any_iterator_finished<I
-        + 1>(starts, ends);
-    }
-    else {
-      return false;
-    }
-  }
-
-  template <typename Tuple, std::size_t... Is>
-  constexpr auto
-  deref_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> auto {
-    return std::tuple<iter_reference_t<std::tuple_element_t<Is, Tuple>>...>{
-      (*std::get<Is>(t))...
-    };
-  }
-
-  template <typename Tuple>
-  constexpr auto deref_tuple(Tuple &t) -> auto {
-    return deref_tuple_impl(
-      t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-  }
-
-  template <typename Tuple, std::size_t... Is>
-  constexpr auto advance_tuple_impl(Tuple &t,
-    std::index_sequence<Is...>) -> void {
-    ((++std::get<Is>(t)), ...);
-  }
-
-  template <typename Tuple>
-  constexpr auto advance_tuple(Tuple &t) -> void {
-    advance_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-  }
-
-  template <typename Tuple, typename Diff, std::size_t... Is>
-  constexpr auto advance_tuple_impl(Tuple &t, Diff n,
-    std::index_sequence<Is...>) -> void {
-    ((std::get<Is>(t) += n), ...);
-  }
-
-  template <typename Tuple, typename Diff>
-  constexpr auto advance_tuple(Tuple &t, Diff n) -> void {
-    advance_tuple_impl(
-      t, n, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-  }
-
-  template <typename Tuple, std::size_t... Is>
-  constexpr auto retreat_tuple_impl(Tuple &t,
-    std::index_sequence<Is...>) -> void {
-    ((--std::get<Is>(t)), ...);
-  }
-
-  template <typename Tuple>
-  constexpr auto retreat_tuple(Tuple &t) -> void {
-    retreat_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-  }
-
-  template <typename Tuple, typename Diff, std::size_t... Is>
-  constexpr auto retreat_tuple_impl(Tuple &t, Diff n,
-    std::index_sequence<Is...>) -> void {
-    ((std::get<Is>(t) -= n), ...);
-  }
-
-  template <typename Tuple, typename Diff>
-  constexpr auto retreat_tuple(Tuple &t, Diff n) -> void {
-    retreat_tuple_impl(
-      t, n, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-  }
-
-  template <typename Tuple>
-    requires (std::tuple_size_v<Tuple> > 0)
-  constexpr auto distance_tuple(const Tuple &a, const Tuple &b) -> auto {
-    return std::get<0>(a) - std::get<0>(b);
-  }
-}
-
-export namespace genex {
   template <typename T>
   struct is_unique_ptr : std::false_type {
   };
@@ -358,7 +266,7 @@ export namespace genex {
   };
 
   template <typename T>
-  concept unique_ptr = is_unique_ptr<std::remove_cvref_t<T>>::value;
+  concept unique_ptr_like = is_unique_ptr<std::remove_cvref_t<T>>::value;
 
   template <typename T>
   struct is_shared_ptr : std::false_type {
@@ -369,18 +277,7 @@ export namespace genex {
   };
 
   template <typename T>
-  concept shared_ptr = is_shared_ptr<std::remove_cvref_t<T>>::value;
-
-  template <typename T>
-  struct is_weak_ptr : std::false_type {
-  };
-
-  template <typename T>
-  struct is_weak_ptr<std::weak_ptr<T>> : std::true_type {
-  };
-
-  template <typename T>
-  concept weak_ptr = is_weak_ptr<std::remove_cvref_t<T>>::value;
+  concept shared_ptr_like = is_shared_ptr<std::remove_cvref_t<T>>::value;
 
   template <typename T>
   struct is_tuple_like : std::false_type {
@@ -392,9 +289,6 @@ export namespace genex {
 
   template <typename T>
   concept tuple_like = is_tuple_like<std::remove_cvref_t<T>>::value;
-
-  template <typename T>
-  concept integer_like = std::is_integral_v<std::remove_cvref_t<T>>;
 
   template <typename C>
   concept strict_char_like =
@@ -452,9 +346,4 @@ template <typename Rng>
   requires (not genex::has_std_end<Rng> and genex::has_member_end<Rng>)
 struct genex::sentinel<Rng> {
   using type = decltype(std::declval<Rng&>().end());
-};
-
-template <typename T> requires requires(T &&t) { *std::declval<T>(); }
-struct genex::deref_value<T> {
-  using type = decltype(*std::declval<T>());
 };

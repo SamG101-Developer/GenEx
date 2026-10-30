@@ -1,7 +1,7 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.generate;
+export module genex.views.generate;
 export import genex.pipe;
 import genex.concepts;
 import genex.meta;
@@ -26,8 +26,7 @@ namespace genex::views::detail::impl {
     std::optional<std::remove_cvref_t<std::invoke_result_t<F&>>> cur;
 
     using value_type = std::remove_cvref_t<std::invoke_result_t<F&>>;
-    using reference_type = const value_type&;
-    using reference = reference_type;
+    using reference = const value_type&;
     using pointer = void;
     using difference_type = std::ptrdiff_t;
     using iterator_category = std::input_iterator_tag;

@@ -5,8 +5,8 @@
 #include <range/v3/view/single.hpp>
 
 import genex.to_container;
-import genex.views2.empty;
-import genex.views2.single;
+import genex.views.empty;
+import genex.views.single;
 import std;
 
 static void BM_StdRanges_Single(benchmark::State &state) {

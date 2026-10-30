@@ -1,12 +1,12 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.cast_static;
+export module genex.views.cast_static;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -30,13 +30,12 @@ namespace genex::views::detail::impl {
     I it;
 
     using value_type = To;
-    using reference_type = To;
+    using reference = To;
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
-    using iterator_category = legacy_iter_category_t<reference_type, iterator_concept>;
+    using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
     GENEX_ITER_OPS(cast_static_iterator);
 
-    using reference = reference_type;
     using pointer = void;
 
     GENEX_INLINE constexpr cast_static_iterator() = default;

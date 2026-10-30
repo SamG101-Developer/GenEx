@@ -4,8 +4,8 @@ module;
 export module genex.actions.replace;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.access;
+import genex.meta;
 import genex.operations.cmp;
 import std;
 

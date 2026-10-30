@@ -1,11 +1,11 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.set_algorithms;
+export module genex.views.set_algorithms;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.iter_pair;
+import genex.meta;
 import genex.operations.cmp;
 import std;
 
@@ -48,7 +48,7 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS Proj2 proj2;
 
     using value_type = std::common_type_t<iter_value_t<I1>, iter_value_t<I2>>;
-    using reference_type = std::common_reference_t<iter_reference_t<I1>, iter_reference_t<I2>>;
+    using reference = std::common_reference_t<iter_reference_t<I1>, iter_reference_t<I2>>;
     using difference_type = std::common_type_t<iter_difference_t<I1>, iter_difference_t<I2>>;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;

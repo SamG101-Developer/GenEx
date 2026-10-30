@@ -1,12 +1,12 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.materialize;
+export module genex.views.materialize;
 export import genex.pipe;
-import genex.concepts;
-import genex.meta;
 import genex.actions.push_back;
+import genex.concepts;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {

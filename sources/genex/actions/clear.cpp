@@ -3,8 +3,8 @@ module;
 
 export module genex.actions.clear;
 export import genex.pipe;
-import genex.meta;
 import genex.concepts;
+import genex.meta;
 import std;
 
 namespace genex::actions::detail::concepts {

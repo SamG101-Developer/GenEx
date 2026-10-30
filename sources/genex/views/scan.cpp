@@ -1,12 +1,12 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.scan;
+export module genex.views.scan;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -52,8 +52,7 @@ namespace genex::views::detail::impl {
     std::optional<Acc> acc;
 
     using value_type = Acc;
-    using reference_type = const Acc&;
-    using reference = reference_type;
+    using reference = const Acc&;
     using pointer = void;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::input_iterator_tag;

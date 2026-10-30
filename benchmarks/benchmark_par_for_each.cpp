@@ -1,7 +1,7 @@
 #include <benchmark/benchmark.h>
 
 import genex.parallel.for_each;
-import genex.views2.for_each;
+import genex.algorithms.for_each;
 import std;
 
 // Sweeps two axes: the element count (range(0)) and how much work the callable does per element (range(1), in LCG
@@ -23,7 +23,7 @@ static void BM_Genex_ForEach_Serial(benchmark::State &state) {
   const auto work = state.range(1);
 
   for (auto _ : state) {
-    data | genex::views::for_each([work](std::uint32_t &x) { x = step(x, work); });
+    data | genex::for_each([work](std::uint32_t &x) { x = step(x, work); });
     benchmark::ClobberMemory();
   }
   state.SetItemsProcessed(state.iterations() * state.range(0));

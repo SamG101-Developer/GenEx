@@ -1,14 +1,14 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.in;
+export module genex.views.in;
 export import genex.pipe;
-import genex.views2.filter;
-import genex.concepts;
-import genex.meta;
 import genex.algorithms.contains;
+import genex.concepts;
 import genex.iterators.iter_pair;
+import genex.meta;
 import genex.operations.cmp;
+import genex.views.filter;
 import std;
 
 namespace genex::views::detail::concepts {

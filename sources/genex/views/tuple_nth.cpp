@@ -1,14 +1,13 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.tuple_nth;
+export module genex.views.tuple_nth;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
-import genex.algorithms.tuple;
-import genex.iterators.distance;
 import genex.iterators.iter_pair;
-import genex.views2.transform;
+import genex.meta;
+import genex.operations.tuple;
+import genex.views.transform;
 import std;
 
 namespace genex::views::detail::concepts {

@@ -2,10 +2,10 @@ module;
 #include <genex/macros.hpp>
 
 export module genex.algorithms.contains;
-import genex.concepts;
-import genex.meta;
 import genex.algorithms.find;
+import genex.concepts;
 import genex.iterators.iter_pair;
+import genex.meta;
 import genex.operations.cmp;
 import std;
 

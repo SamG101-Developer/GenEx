@@ -9,8 +9,8 @@ import genex.algorithms.min_element;
 import genex.concepts;
 import genex.operations.access;
 import genex.to_container;
-import genex.views2.divide;
-import genex.views2.filter;
+import genex.views.divide;
+import genex.views.filter;
 
 namespace {
   constexpr auto is_even = [](const int x) { return x % 2 == 0; };

@@ -2,11 +2,11 @@ module;
 #include <genex/macros.hpp>
 
 export module genex.parallel.for_each;
-export import genex.pipe;
 export import genex.parallel.params;
+export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::parallel::detail::concepts {

@@ -4,7 +4,7 @@
 #include <range/v3/view/sliding.hpp>
 
 import genex.to_container;
-import genex.views2.slide;
+import genex.views.slide;
 import std;
 
 static void BM_StdRanges_Slide(benchmark::State &state) {

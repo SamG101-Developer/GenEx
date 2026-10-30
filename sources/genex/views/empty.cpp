@@ -1,7 +1,7 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.empty;
+export module genex.views.empty;
 export import genex.pipe;
 import genex.concepts;
 import std;

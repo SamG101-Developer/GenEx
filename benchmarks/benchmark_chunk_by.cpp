@@ -4,7 +4,7 @@
 #include <range/v3/view/chunk_by.hpp>
 
 import genex.to_container;
-import genex.views2.chunk_by;
+import genex.views.chunk_by;
 import std;
 
 static void BM_StdRanges_ChunkBy(benchmark::State &state) {

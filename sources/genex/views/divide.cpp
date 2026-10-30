@@ -1,14 +1,14 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.divide;
+export module genex.views.divide;
 export import genex.pipe;
 import genex.concepts;
+import genex.iterators.iter_pair;
+import genex.iterators.next;
 import genex.meta;
 import genex.span;
 import genex.subrange;
-import genex.iterators.iter_pair;
-import genex.iterators.next;
 import std;
 
 namespace genex::views::detail::concepts {

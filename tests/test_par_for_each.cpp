@@ -9,8 +9,8 @@
 #include <vector>
 
 import genex.parallel.for_each;
-import genex.views2.filter;
-import genex.views2.transform;
+import genex.views.filter;
+import genex.views.transform;
 
 using genex::parallel::params;
 

@@ -1,11 +1,11 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.cast_dynamic;
+export module genex.views.cast_dynamic;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -34,7 +34,7 @@ namespace genex::views::detail::impl {
     mutable To cached = nullptr;
 
     using value_type = To;
-    using reference_type = To;
+    using reference = To;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;

@@ -3,10 +3,10 @@ module;
 
 export module genex.actions.push_front;
 export import genex.pipe;
-import genex.concepts;
-import genex.meta;
 import genex.actions.insert;
+import genex.concepts;
 import genex.iterators.access;
+import genex.meta;
 import std;
 
 namespace genex::actions::detail::concepts {

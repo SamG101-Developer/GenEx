@@ -3,10 +3,10 @@
 #include <vector>
 
 import genex.to_container;
-import genex.views2.filter;
-import genex.views2.reverse;
-import genex.views2.take;
-import genex.views2.transform;
+import genex.views.filter;
+import genex.views.reverse;
+import genex.views.take;
+import genex.views.transform;
 
 namespace {
   constexpr auto is_even = [](const int x) { return x % 2 == 0; };

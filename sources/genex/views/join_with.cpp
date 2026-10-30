@@ -1,13 +1,13 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.join_with;
+export module genex.views.join_with;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.access;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -39,7 +39,7 @@ namespace genex::views::detail::impl {
     sentinel_t<iter_value_t<I>> inner_st;
 
     using value_type = range_value_t<iter_value_t<I>>;
-    using reference_type = std::common_reference_t<range_reference_t<iter_value_t<I>>, const New&>;
+    using reference = std::common_reference_t<range_reference_t<iter_value_t<I>>, const New&>;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::conditional_t<
       std::forward_iterator<I>,
@@ -79,8 +79,8 @@ namespace genex::views::detail::impl {
       GENEX_ASSERT(self.it != self.st);
       GENEX_ASSERT(self.inner_it != self.inner_st or self.use_new);
       return self.use_new
-        ? static_cast<reference_type>(self.new_value)
-        : static_cast<reference_type>(*self.inner_it);
+        ? static_cast<reference>(self.new_value)
+        : static_cast<reference>(*self.inner_it);
     }
 
     GENEX_VIEW_ITER_EQ(join_with_iterator, join_with_iterator) {

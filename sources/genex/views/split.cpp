@@ -1,15 +1,15 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.split;
+export module genex.views.split;
 export import genex.pipe;
 import genex.algorithms.count;
 import genex.concepts;
-import genex.subrange;
-import genex.meta;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
+import genex.meta;
 import genex.operations.cmp;
+import genex.subrange;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -38,7 +38,7 @@ namespace genex::views::detail::impl {
     E elem;
 
     using value_type = genex::subrange<I>;
-    using reference_type = genex::subrange<I>;
+    using reference = genex::subrange<I>;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;

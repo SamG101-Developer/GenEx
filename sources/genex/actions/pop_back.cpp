@@ -3,11 +3,11 @@ module;
 
 export module genex.actions.pop_back;
 export import genex.pipe;
-import genex.concepts;
-import genex.meta;
 import genex.actions.erase;
+import genex.concepts;
 import genex.iterators.access;
 import genex.iterators.prev;
+import genex.meta;
 
 namespace genex::actions::detail::concepts {
   template <typename Rng>

@@ -1,13 +1,13 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.map;
+export module genex.views.map;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.iter_pair;
-import genex.algorithms.tuple;
-import genex.views2.transform;
+import genex.meta;
+import genex.operations.tuple;
+import genex.views.transform;
 import std;
 
 namespace genex::views::detail::concepts {

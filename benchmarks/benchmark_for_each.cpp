@@ -2,7 +2,7 @@
 
 #include <range/v3/algorithm/for_each.hpp>
 
-import genex.views2.for_each;
+import genex.algorithms.for_each;
 import std;
 
 static void BM_StdRanges_ForEach(benchmark::State &state) {
@@ -22,7 +22,7 @@ static void BM_Genex_V2_ForEach(benchmark::State &state) {
 
   for (auto _ : state) {
     auto sum = 0;
-    data | genex::views::for_each([&sum](const int x) { sum += x; });
+    data | genex::for_each([&sum](const int x) { sum += x; });
     benchmark::DoNotOptimize(sum);
   }
 }

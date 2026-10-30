@@ -4,7 +4,7 @@
 #include <range/v3/view/zip_with.hpp>
 
 import genex.to_container;
-import genex.views2.zip_with;
+import genex.views.zip_with;
 import std;
 
 static void BM_StdRanges_ZipWith(benchmark::State &state) {

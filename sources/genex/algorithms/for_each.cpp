@@ -1,15 +1,13 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.for_each;
+export module genex.algorithms.for_each;
 export import genex.pipe;
 import genex.concepts;
 import genex.meta;
-import genex.iterators.distance;
-import genex.iterators.iter_pair;
 import std;
 
-namespace genex::views::detail::concepts {
+namespace genex::algorithms::detail::concepts {
   template <typename I, typename S, typename F>
   concept for_eachable_iters =
     std::input_iterator<I> and
@@ -22,16 +20,16 @@ namespace genex::views::detail::concepts {
     for_eachable_iters<iterator_t<Rng>, sentinel_t<Rng>, F>;
 }
 
-namespace genex::views {
+namespace genex {
   struct for_each_fn {
     template <typename I, typename S, typename F>
-      requires detail::concepts::for_eachable_iters<I, S, F>
+      requires algorithms::detail::concepts::for_eachable_iters<I, S, F>
     GENEX_INLINE constexpr auto operator()(I first, S last, F f) const {
       for (; first != last; ++first) { meta::invoke(f, *first); }
     }
 
     template <typename Rng, typename F>
-      requires detail::concepts::for_eachable_range<Rng, F>
+      requires algorithms::detail::concepts::for_eachable_range<Rng, F>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, F f) const {
       for (auto &&it : rng) { meta::invoke(f, std::forward<decltype(it)>(it)); }
     }

@@ -1,11 +1,10 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.algorithms.tuple;
-import genex.views2.filter;
-import genex.views2.transform;
-import genex.views2.zip;
+import genex.operations.tuple;
+import genex.views.filter;
+import genex.views.transform;
+import genex.views.zip;
 import genex.meta;
 
 struct TestStruct {

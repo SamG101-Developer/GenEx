@@ -1,12 +1,12 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.chunk_by;
+export module genex.views.chunk_by;
 export import genex.pipe;
 import genex.concepts;
-import genex.subrange;
-import genex.meta;
 import genex.iterators.iter_pair;
+import genex.meta;
+import genex.subrange;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -35,7 +35,7 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS meta::box<Pred> pred;
 
     using value_type = genex::subrange<I>;
-    using reference_type = genex::subrange<I>;
+    using reference = genex::subrange<I>;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;

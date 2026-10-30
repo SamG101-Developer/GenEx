@@ -1,10 +1,9 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
 import genex.algorithms.all_of;
-import genex.views2.address_of;
-import genex.views2.indirect;
+import genex.views.address_of;
+import genex.views.indirect;
 
 struct TestStruct1 {
   int a;

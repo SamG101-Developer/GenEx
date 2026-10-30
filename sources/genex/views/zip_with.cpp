@@ -1,12 +1,11 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.zip_with;
+export module genex.views.zip_with;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
-import genex.views2.transform;
-import genex.views2.zip;
+import genex.views.transform;
+import genex.views.zip;
 import std;
 
 namespace genex::views::detail::concepts {

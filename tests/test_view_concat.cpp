@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.concat;
+import genex.views.concat;
 
 TEST(GenexViewsConcat, VecInput) {
   auto vec1 = std::vector{1, 2, 3, 4, 5, 6};

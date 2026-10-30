@@ -2,10 +2,10 @@ module;
 #include <genex/macros.hpp>
 
 export module genex.algorithms.none_of;
-import genex.meta;
 import genex.algorithms.concepts;
 import genex.algorithms.find_if;
 import genex.iterators.iter_pair;
+import genex.meta;
 import std;
 
 namespace genex::algorithms::detail::impl {

@@ -3,11 +3,11 @@ module;
 
 export module genex.actions.drop_while;
 export import genex.pipe;
-import genex.concepts;
-import genex.meta;
 import genex.actions.erase;
 import genex.algorithms.find_if_not;
+import genex.concepts;
 import genex.iterators.access;
+import genex.meta;
 import std;
 
 namespace genex::actions::detail::concepts {

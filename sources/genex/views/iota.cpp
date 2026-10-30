@@ -1,12 +1,10 @@
 module;
 #include <genex/macros.hpp>
 
-export module genex.views2.iota;
+export module genex.views.iota;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.distance;
-import genex.iterators.iter_pair;
 import std;
 
 namespace genex::views::detail::impl {
@@ -19,13 +17,12 @@ namespace genex::views::detail::impl {
     Int it;
 
     using value_type = Int;
-    using reference_type = Int;
+    using reference = Int;
     using difference_type = std::ptrdiff_t;
     using iterator_category = std::random_access_iterator_tag;
     using iterator_concept = iterator_category;
     GENEX_ITER_OPS(iota_iterator)
 
-    using reference = reference_type;
     using pointer = void;
 
     GENEX_INLINE constexpr iota_iterator() = default;

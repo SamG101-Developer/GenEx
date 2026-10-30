@@ -5,7 +5,7 @@
 #include <range/v3/view/filter.hpp>
 
 import genex.to_container;
-import genex.views2.in;
+import genex.views.in;
 import std;
 
 // ranges-v3 has no membership view, so the baseline is the filter-over-contains it expands to.

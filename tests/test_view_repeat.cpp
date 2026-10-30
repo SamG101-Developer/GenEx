@@ -1,11 +1,10 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.empty;
-import genex.views2.repeat;
-import genex.views2.single;
-import genex.views2.take;
+import genex.views.empty;
+import genex.views.repeat;
+import genex.views.single;
+import genex.views.take;
 
 TEST(GenexViewsRepeat, CountedRepeat) {
   const auto rng = genex::views::repeat(7, 3)
