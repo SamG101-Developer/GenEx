@@ -91,7 +91,8 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS Pred pred;
     GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
-    GENEX_INLINE constexpr take_while_view(I first, S last, Pred pred, Proj proj) :
+    GENEX_INLINE constexpr take_while_view(I first, S last, Pred pred, Proj proj) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) :
       it(std::move(first)), st(std::move(last)),
       pred(std::move(pred)), proj(std::move(proj)) {
     }
@@ -122,6 +123,7 @@ namespace genex::views {
     template <typename Rng, typename Pred, typename Proj = meta::identity>
       requires detail::concepts::takeable_while_range<Rng, Pred, Proj>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(take_while_view, iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj) and
       SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
       auto [first, last] = iterators::iter_pair(rng);

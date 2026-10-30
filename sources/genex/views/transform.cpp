@@ -95,7 +95,8 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS F f;
     GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
-    GENEX_INLINE constexpr transform_view(I first, S last, F f, Proj proj) :
+    GENEX_INLINE constexpr transform_view(I first, S last, F f, Proj proj) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) :
       it(std::move(first)), st(std::move(last)), f(std::move(f)), proj(std::move(proj)) {
     }
 
@@ -135,6 +136,7 @@ namespace genex::views {
     template <typename Rng, typename F, typename Proj = meta::identity>
       requires detail::concepts::transformable_range<Rng, F, Proj>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(transform_view, iterator_t<Rng>, sentinel_t<Rng>, F, Proj) and
       SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
       auto [first, last] = iterators::iter_pair(rng);

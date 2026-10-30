@@ -127,7 +127,8 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS Comp comp;
     GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
-    GENEX_INLINE constexpr duplicate_view(I first, S last, Comp comp, Proj proj = {}) :
+    GENEX_INLINE constexpr duplicate_view(I first, S last, Comp comp, Proj proj = {}) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) :
       it(std::move(first)), st(std::move(last)),
       comp(std::move(comp)), proj(std::move(proj)) {
     }
@@ -158,8 +159,9 @@ namespace genex::views {
     template <typename Rng, typename Comp = operations::eq, typename Proj = meta::identity>
       requires detail::concepts::duplicate_checkable_range<Rng, Comp, Proj>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(duplicate_view, iterator_t<Rng>, sentinel_t<Rng>, Comp, Proj) and
-      SAFE_MOVE(Rng) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {
+      SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::duplicate_view(std::move(first), std::move(last), std::move(comp), std::move(proj));
     }

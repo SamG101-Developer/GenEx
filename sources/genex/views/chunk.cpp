@@ -87,7 +87,8 @@ namespace genex::views::detail::impl {
     S st;
     Int chunk_size;
 
-    GENEX_INLINE constexpr chunk_view(I first, S last, Int size) :
+    GENEX_INLINE constexpr chunk_view(I first, S last, Int size) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_CTOR(Int, Int&)) :
       it(std::move(first)), st(std::move(last)), chunk_size(size) {
     }
 
@@ -121,6 +122,7 @@ namespace genex::views {
     template <typename Rng, typename Int>
       requires detail::concepts::chunkable_range<Rng, Int>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int size) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(chunk_view, iterator_t<Rng>, sentinel_t<Rng>, Int) and SAFE_MOVE(Int)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::chunk_view(std::move(first), std::move(last), size);

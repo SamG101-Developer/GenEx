@@ -67,8 +67,7 @@ namespace genex::views {
 
     template <typename I, typename S, typename Int>
       requires detail::concepts::sliceable_iters<I, S, Int>
-    GENEX_INLINE constexpr auto operator()(I first, S last, const Int n, const Int m) const noexcept(
-      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
+    GENEX_INLINE constexpr auto operator()(I first, S last, const Int n, const Int m) const {
       const auto lo = static_cast<iter_difference_t<I>>(n);
       const auto hi = static_cast<iter_difference_t<I>>(m);
       return genex::subrange(
@@ -80,6 +79,7 @@ namespace genex::views {
       requires detail::concepts::sliceable_range<Rng, Int>
       and std::contiguous_iterator<iterator_t<Rng>> and std::sized_sentinel_for<sentinel_t<Rng>, iterator_t<Rng>>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n, const Int m) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(genex::span<range_element_t<Rng>>, iterator_t<Rng>, iterator_t<Rng>) and
       SAFE_MOVE(Int)) {
       auto [first, last] = iterators::iter_pair(rng);
@@ -91,8 +91,7 @@ namespace genex::views {
 
     template <typename Rng, typename Int>
       requires detail::concepts::sliceable_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n, const Int m) const noexcept(
-      SAFE_MOVE(iterator_t<Rng>) and SAFE_MOVE(sentinel_t<Rng>) and SAFE_MOVE(Int)) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n, const Int m) const {
       auto [first, last] = iterators::iter_pair(rng);
       const auto lo = static_cast<range_difference_t<Rng>>(n);
       const auto hi = static_cast<range_difference_t<Rng>>(m);

@@ -75,7 +75,8 @@ namespace genex::views::detail::impl {
     I it;
     S st;
 
-    GENEX_INLINE constexpr reverse_view(I first, S last) :
+    GENEX_INLINE constexpr reverse_view(I first, S last) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S)) :
       it(std::move(first)), st(std::move(last)) {
     }
 
@@ -109,6 +110,7 @@ namespace genex::views {
     template <typename Rng>
       requires detail::concepts::reversible_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(reverse_view, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::reverse_view(std::move(first), std::move(last));

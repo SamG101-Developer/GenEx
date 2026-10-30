@@ -58,7 +58,8 @@ namespace genex::views::detail::impl {
     T value;
     std::ptrdiff_t count;
 
-    GENEX_INLINE constexpr repeat_view(T value, const std::ptrdiff_t count) :
+    GENEX_INLINE constexpr repeat_view(T value, const std::ptrdiff_t count) noexcept(
+      SAFE_MOVE(T)) :
       value(std::move(value)), count(count) {
     }
 

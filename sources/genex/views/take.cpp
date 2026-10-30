@@ -75,6 +75,7 @@ namespace genex::views {
       requires detail::concepts::takeable_range<Rng, Int>
       and std::contiguous_iterator<iterator_t<Rng>> and std::sized_sentinel_for<sentinel_t<Rng>, iterator_t<Rng>>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(genex::span<range_element_t<Rng>>, iterator_t<Rng>, iterator_t<Rng>) and SAFE_MOVE(Int)) {
       auto [first, last] = iterators::iter_pair(rng);
       const auto count = std::min(static_cast<range_difference_t<Rng>>(n), last - first);
@@ -84,6 +85,7 @@ namespace genex::views {
     template <typename Rng, typename Int>
       requires detail::concepts::takeable_range<Rng, Int>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_MOVE(iterator_t<Rng>) and SAFE_MOVE(sentinel_t<Rng>) and SAFE_MOVE(Int)) {
       auto [first, last] = iterators::iter_pair(rng);
       return genex::subrange(

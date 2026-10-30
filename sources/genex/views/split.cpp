@@ -90,7 +90,8 @@ namespace genex::views::detail::impl {
     S st;
     E elem;
 
-    GENEX_INLINE constexpr split_view(I first, S last, E e) :
+    GENEX_INLINE constexpr split_view(I first, S last, E e) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(E)) :
       it(std::move(first)), st(std::move(last)), elem(std::move(e)) {
     }
 
@@ -126,6 +127,7 @@ namespace genex::views {
     template <typename Rng, typename E>
       requires detail::concepts::splittable_range<Rng, E>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(split_view, iterator_t<Rng>, sentinel_t<Rng>, E) and
       SAFE_MOVE(E)) {
       auto [first, last] = iterators::iter_pair(rng);

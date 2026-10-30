@@ -101,7 +101,8 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS F op;
     std::optional<Acc> seed;
 
-    GENEX_INLINE constexpr scan_view(I first, S last, F op, std::optional<Acc> seed) :
+    GENEX_INLINE constexpr scan_view(I first, S last, F op, std::optional<Acc> seed) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(F) and SAFE_MOVE(std::optional<Acc>)) :
       it(std::move(first)), st(std::move(last)), op(std::move(op)), seed(std::move(seed)) {
     }
 
@@ -131,6 +132,7 @@ namespace genex::views {
       SAFE_CTOR(
         detail::impl::scan_view<I, S, F, detail::concepts::scan_acc_t<I, F, Init>>, I, S, F,
         std::optional<detail::concepts::scan_acc_t<I, F, Init>>) and
+      SAFE_CTOR(detail::concepts::scan_acc_t<I, F, Init>, Init) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Init) and SAFE_MOVE(F)) {
       using acc_t = detail::concepts::scan_acc_t<I, F, Init>;
       return detail::impl::scan_view<I, S, F, acc_t>(
@@ -140,11 +142,13 @@ namespace genex::views {
     template <typename Rng, typename Init, typename F = std::plus<>>
       requires detail::concepts::scannable_range<Rng, F, Init>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Init init, F op = {}) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(
         detail::impl::scan_view<
         iterator_t<Rng>, sentinel_t<Rng>, F, detail::concepts::scan_acc_t<iterator_t<Rng>, F, Init>>,
         iterator_t<Rng>, sentinel_t<Rng>, F,
         std::optional<detail::concepts::scan_acc_t<iterator_t<Rng>, F, Init>>) and
+      SAFE_CTOR(detail::concepts::scan_acc_t<iterator_t<Rng>, F, Init>, Init) and
       SAFE_MOVE(Init) and SAFE_MOVE(F)) {
       using acc_t = detail::concepts::scan_acc_t<iterator_t<Rng>, F, Init>;
       auto [first, last] = iterators::iter_pair(rng);
@@ -174,6 +178,7 @@ namespace genex::views {
     template <typename Rng, typename F = std::plus<>>
       requires detail::concepts::summable_range<Rng, F>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, F op = {}) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(
         detail::impl::scan_view<iterator_t<Rng>, sentinel_t<Rng>, F, range_value_t<Rng>>,
         iterator_t<Rng>, sentinel_t<Rng>, F, std::optional<range_value_t<Rng>>) and

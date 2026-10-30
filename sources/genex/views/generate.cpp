@@ -70,7 +70,8 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS F f;
     std::ptrdiff_t count;
 
-    GENEX_INLINE constexpr generate_view(F f, const std::ptrdiff_t count) :
+    GENEX_INLINE constexpr generate_view(F f, const std::ptrdiff_t count) noexcept(
+      SAFE_MOVE(F)) :
       f(std::move(f)), count(count) {
     }
 

@@ -55,7 +55,6 @@ namespace genex::views {
       requires detail::concepts::inable_iters<I1, S1, I2, S2, Proj1, Proj2>
     GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Proj1 proj1 = {},
       Proj2 proj2 = {}) const noexcept(
-      // SAFE_IMPL_CTOR(membership_pred, Negate, I2, S2, Proj2) and
       SAFE_MOVE(I1) and SAFE_MOVE(S1) and SAFE_MOVE(I2) and SAFE_MOVE(S2) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
       auto pred = detail::impl::membership_pred<Negate, I2, S2, Proj2>{
         std::move(first2), std::move(last2), std::move(proj2)
@@ -67,7 +66,10 @@ namespace genex::views {
       requires detail::concepts::inable_range<Rng1, Rng2, Proj1, Proj2>
     GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Proj1 proj1 = {},
       Proj2 proj2 = {}) const noexcept(
-      SAFE_MOVE(Rng1) and SAFE_MOVE(Rng2) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
+      SAFE_CALL(decltype(iterators::iter_pair), Rng1&) and SAFE_CALL(decltype(iterators::iter_pair), Rng2&) and
+      SAFE_MOVE(iterator_t<Rng1>) and SAFE_MOVE(sentinel_t<Rng1>) and
+      SAFE_MOVE(iterator_t<Rng2>) and SAFE_MOVE(sentinel_t<Rng2>) and
+      SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
       auto [first1, last1] = iterators::iter_pair(rng1);
       auto [first2, last2] = iterators::iter_pair(rng2);
       auto pred = detail::impl::membership_pred<Negate, iterator_t<Rng2>, sentinel_t<Rng2>, Proj2>{
@@ -80,7 +82,7 @@ namespace genex::views {
       requires (forward_range<Rng2> and not range<Proj1>)
     GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
       SAFE_CTOR(in_base_fn<Negate>) and
-      SAFE_MOVE(Rng2) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
+      SAFE_CTOR(std::decay_t<Rng2>, Rng2) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
       return meta::bind_back(in_base_fn{}, std::forward<Rng2>(rng2), std::move(proj1), std::move(proj2));
     }
   };

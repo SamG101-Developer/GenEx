@@ -120,7 +120,8 @@ namespace genex::views::detail::impl {
     S st;
     New new_value;
 
-    GENEX_INLINE constexpr join_with_view(I first, S last, New new_val) :
+    GENEX_INLINE constexpr join_with_view(I first, S last, New new_val) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(New)) :
       it(std::move(first)), st(std::move(last)), new_value(std::move(new_val)) {
     }
 
@@ -160,6 +161,7 @@ namespace genex::views {
     template <typename Rng, typename New>
       requires detail::concepts::joinable_with_range<Rng, New>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, New new_value) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(join_with_view, iterator_t<Rng>, sentinel_t<Rng>, New) and
       SAFE_MOVE(New)) {
       auto [first, last] = iterators::iter_pair(rng);

@@ -71,13 +71,13 @@ namespace genex::iterators {
   struct begin_fn {
     template <typename Rng>
       requires detail::concepts::beginable_select_begin<Rng>
-    GENEX_INLINE auto operator()(Rng &&rng) const {
+    GENEX_INLINE auto operator()(Rng &&rng) const noexcept(SAFE_NOEX(rng.begin())) {
       return rng.begin();
     }
 
     template <typename Rng>
       requires detail::concepts::beginable_select_std_begin<Rng>
-    GENEX_INLINE auto operator()(Rng &&rng) const {
+    GENEX_INLINE auto operator()(Rng &&rng) const noexcept(SAFE_NOEX(std::begin(std::forward<Rng>(rng)))) {
       return std::begin(std::forward<Rng>(rng));
     }
   };
@@ -85,13 +85,13 @@ namespace genex::iterators {
   struct end_fn {
     template <typename Rng>
       requires detail::concepts::endable_select_end<Rng>
-    GENEX_INLINE auto operator()(Rng &&rng) const {
+    GENEX_INLINE auto operator()(Rng &&rng) const noexcept(SAFE_NOEX(rng.end())) {
       return rng.end();
     }
 
     template <typename Rng>
       requires detail::concepts::endable_select_std_end<Rng>
-    GENEX_INLINE auto operator()(Rng &&rng) const {
+    GENEX_INLINE auto operator()(Rng &&rng) const noexcept(SAFE_NOEX(std::end(std::forward<Rng>(rng)))) {
       return std::end(std::forward<Rng>(rng));
     }
   };

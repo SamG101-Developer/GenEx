@@ -67,17 +67,13 @@ namespace genex::views {
   struct divide_fn {
     template <typename I, typename S>
       requires detail::concepts::divisible_iters<N, I, S>
-    GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
-      SAFE_CTOR(detail::impl::divide_part_t<I, S>, I, I) and
-      SAFE_MOVE(I) and SAFE_MOVE(S)) {
+    GENEX_INLINE constexpr auto operator()(I first, S last) const {
       return detail::impl::divide_impl<N>(std::move(first), std::move(last));
     }
 
     template <typename Rng>
       requires detail::concepts::divisible_range<N, Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
-      SAFE_CTOR(detail::impl::divide_part_t<iterator_t<Rng>, sentinel_t<Rng>>,
-        iterator_t<Rng>, iterator_t<Rng>)) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::divide_impl<N>(std::move(first), std::move(last));
     }

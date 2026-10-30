@@ -39,8 +39,8 @@ namespace genex::views {
     template <typename Rng>
       requires detail::concepts::tuple_indexable_range<N, Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
-      SAFE_CALL(decltype(transform), iterator_t<Rng>, sentinel_t<Rng>, meta::identity) and
-      SAFE_MOVE(Rng)) {
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
+      SAFE_CALL(decltype(transform), iterator_t<Rng>, sentinel_t<Rng>, meta::identity)) {
       auto [first, last] = iterators::iter_pair(rng);
       return transform(std::move(first), std::move(last), genex::get<N>);
     }

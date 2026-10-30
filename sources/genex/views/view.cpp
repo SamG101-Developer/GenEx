@@ -45,6 +45,7 @@ namespace genex::views {
       requires detail::concepts::viewable_range<Rng>
       and std::contiguous_iterator<iterator_t<Rng>> and std::sized_sentinel_for<sentinel_t<Rng>, iterator_t<Rng>>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(genex::span<range_element_t<Rng>>, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
       return genex::span<range_element_t<Rng>>(std::move(first), std::move(last));
@@ -53,6 +54,7 @@ namespace genex::views {
     template <typename Rng>
       requires detail::concepts::viewable_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(genex::subrange<iterator_t<Rng>, sentinel_t<Rng>>, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
       return genex::subrange<iterator_t<Rng>, sentinel_t<Rng>>(std::move(first), std::move(last));

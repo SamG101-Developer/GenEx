@@ -84,11 +84,17 @@ namespace genex::meta {
    *    as @c intersperse, @c zip and @c enumerate reject any capturing-lambda @c transform. When @c T is already
    *    default-constructible we store it directly, keeping the box trivial and @c operator* always valid.
    *
+   * A @c T that can throw while being reconstructed is always stored in the @c std::optional, which is left empty if
+   * the reconstruction throws. Storing it directly would leave a destroyed value for the destructor to destroy again.
+   *
    * Access the value with @c operator* (undefined on an empty box, exactly as dereferencing a singular iterator is).
    */
   export template <typename T>
   class box {
-    static constexpr bool store_direct = std::default_initializable<T>;
+    static constexpr bool store_direct =
+      std::default_initializable<T> and
+      std::is_nothrow_move_constructible_v<T> and
+      (std::is_nothrow_copy_constructible_v<T> or not std::copy_constructible<T>);
     using storage_t = std::conditional_t<store_direct, T, std::optional<T>>;
     GENEX_NO_UNIQUE_ADDRESS storage_t m_value;
 
@@ -103,10 +109,17 @@ namespace genex::meta {
     box(box &&) = default;
     ~box() = default;
 
-    GENEX_INLINE constexpr auto operator=(const box &that) -> box& requires std::copy_constructible<T> {
+    GENEX_INLINE constexpr auto operator=(const box &that) noexcept(std::is_nothrow_copy_constructible_v<T>) -> box&
+      requires std::copy_constructible<T> {
       if (this != std::addressof(that)) {
-        std::destroy_at(std::addressof(m_value));
-        std::construct_at(std::addressof(m_value), that.m_value);
+        if constexpr (store_direct) {
+          std::destroy_at(std::addressof(m_value));
+          std::construct_at(std::addressof(m_value), that.m_value);
+        }
+        else {
+          m_value.reset();
+          if (that.m_value) { m_value.emplace(*that.m_value); }
+        }
       }
       return *this;
     }
@@ -114,8 +127,14 @@ namespace genex::meta {
     GENEX_INLINE constexpr auto operator=(box &&that) noexcept(std::is_nothrow_move_constructible_v<T>) -> box& requires
       std::move_constructible<T> {
       if (this != std::addressof(that)) {
-        std::destroy_at(std::addressof(m_value));
-        std::construct_at(std::addressof(m_value), std::move(that.m_value));
+        if constexpr (store_direct) {
+          std::destroy_at(std::addressof(m_value));
+          std::construct_at(std::addressof(m_value), std::move(that.m_value));
+        }
+        else {
+          m_value.reset();
+          if (that.m_value) { m_value.emplace(std::move(*that.m_value)); }
+        }
       }
       return *this;
     }

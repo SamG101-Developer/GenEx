@@ -45,10 +45,10 @@
   GENEX_INLINE friend constexpr auto operator==(const IterType& self, const SentType& that) -> bool
 
 #define GENEX_ITER_BEGIN \
-  GENEX_NODISCARD GENEX_INLINE constexpr auto begin(this Self&& self) noexcept -> auto
+  GENEX_NODISCARD GENEX_INLINE constexpr auto begin(this Self&& self) -> auto
 
 #define GENEX_ITER_END \
-  GENEX_NODISCARD GENEX_INLINE constexpr auto end(this Self&& self) noexcept -> auto
+  GENEX_NODISCARD GENEX_INLINE constexpr auto end(this Self&& self) -> auto
 
 #define GENEX_ITER_SIZE                                               \
   requires requires (Self &&s) { iterators::distance(s.it, s.st); } \
@@ -180,3 +180,6 @@
 
 #define SAFE_CALL(F, ...) \
   std::is_nothrow_invocable_v<F __VA_OPT__(, __VA_ARGS__)>
+
+#define SAFE_NOEX(...) \
+  noexcept(__VA_ARGS__)

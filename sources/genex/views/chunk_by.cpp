@@ -92,7 +92,8 @@ namespace genex::views::detail::impl {
     S st;
     GENEX_NO_UNIQUE_ADDRESS Pred pred;
 
-    GENEX_INLINE constexpr chunk_by_view(I first, S last, Pred pred) :
+    GENEX_INLINE constexpr chunk_by_view(I first, S last, Pred pred) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred)) :
       it(std::move(first)), st(std::move(last)), pred(std::move(pred)) {
     }
 
@@ -122,6 +123,7 @@ namespace genex::views {
     template <typename Rng, typename Pred>
       requires detail::concepts::chunkable_by_range<Rng, Pred>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(chunk_by_view, iterator_t<Rng>, sentinel_t<Rng>, Pred) and
       SAFE_MOVE(Pred)) {
       auto [first, last] = iterators::iter_pair(rng);

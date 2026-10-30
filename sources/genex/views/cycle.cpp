@@ -83,7 +83,8 @@ namespace genex::views::detail::impl {
     I it_cpy;
     S st;
 
-    GENEX_INLINE constexpr cycle_view(I first, S last) :
+    GENEX_INLINE constexpr cycle_view(I first, S last) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_CTOR(I, I&)) :
       it(std::move(first)), it_cpy(it), st(std::move(last)) {
     }
 
@@ -116,6 +117,7 @@ namespace genex::views {
     template <typename Rng>
       requires detail::concepts::cyclable_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(cycle_view, iterator_t<Rng>, sentinel_t<Rng>) and
       SAFE_MOVE(iterator_t<Rng>) and SAFE_MOVE(sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);

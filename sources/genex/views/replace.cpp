@@ -80,7 +80,8 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS New new_value;
     GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
-    GENEX_INLINE constexpr replace_view(I first, S last, Old old_val, New new_val, Proj proj) :
+    GENEX_INLINE constexpr replace_view(I first, S last, Old old_val, New new_val, Proj proj) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Old) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) :
       it(std::move(first)), st(std::move(last)),
       old_value(std::move(old_val)), new_value(std::move(new_val)), proj(std::move(proj)) {
     }
@@ -117,8 +118,9 @@ namespace genex::views {
     template <typename Rng, typename Old, typename New, typename Proj = meta::identity>
       requires detail::concepts::replaceable_range<Rng, Old, New, Proj>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Old old_value, New new_value, Proj proj = {}) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(replace_view, iterator_t<Rng>, sentinel_t<Rng>, Old, New, Proj) and
-      SAFE_MOVE(Rng) and SAFE_MOVE(Old) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
+      SAFE_MOVE(Old) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::replace_view(
         std::move(first), std::move(last), std::move(old_value), std::move(new_value), std::move(proj));

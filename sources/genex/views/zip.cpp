@@ -156,7 +156,8 @@ namespace genex::views::detail::impl {
     std::tuple<iterator_t<Rngs>...> m_its;
     std::tuple<sentinel_t<Rngs>...> m_sts;
 
-    GENEX_INLINE constexpr zip_view(std::tuple<iterator_t<Rngs>...> its, std::tuple<sentinel_t<Rngs>...> sts) :
+    GENEX_INLINE constexpr zip_view(std::tuple<iterator_t<Rngs>...> its, std::tuple<sentinel_t<Rngs>...> sts) noexcept(
+      SAFE_MOVE(std::tuple<iterator_t<Rngs>...>) and SAFE_MOVE(std::tuple<sentinel_t<Rngs>...>)) :
       m_its(std::move(its)), m_sts(std::move(sts)) {
     }
 
@@ -185,7 +186,7 @@ namespace genex::views {
     template <typename... Is, typename... Ss>
       requires detail::concepts::zippable_iters<std::tuple<Is...>, std::tuple<Ss...>>
     GENEX_INLINE constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const noexcept(
-      SAFE_IMPL_CTOR(zip_view, std::tuple<Is...>, std::tuple<Ss...>) and
+      SAFE_CTOR(detail::impl::zip_view<genex::subrange<Is, Ss>...>, std::tuple<Is...>, std::tuple<Ss...>) and
       SAFE_MOVE(std::tuple<Is...>) and SAFE_MOVE(std::tuple<Ss...>)) {
       return detail::impl::zip_view<genex::subrange<Is, Ss>...>(std::move(first), std::move(last));
     }
@@ -193,6 +194,8 @@ namespace genex::views {
     template <typename... Rngs>
       requires (detail::concepts::zippable_range<Rngs...> and sizeof...(Rngs) > 1)
     GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const noexcept(
+      (SAFE_CALL(decltype(iterators::begin), Rngs&) and ...) and
+      (SAFE_CALL(decltype(iterators::end), Rngs&) and ...) and
       SAFE_MOVE(std::tuple<iterator_t<Rngs>...>) and SAFE_MOVE(std::tuple<sentinel_t<Rngs>...>)) {
       return detail::impl::zip_view<Rngs...>(
         std::make_tuple(iterators::begin(ranges)...),
@@ -202,7 +205,7 @@ namespace genex::views {
     template <typename Rng2>
       requires detail::concepts::zippable_range<Rng2>
     GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const noexcept(
-      SAFE_CTOR(zip_fn)) {
+      SAFE_CTOR(zip_fn) and SAFE_CTOR(std::decay_t<Rng2>, Rng2)) {
       return meta::bind_back(zip_fn{}, std::forward<Rng2>(rng2));
     }
   };

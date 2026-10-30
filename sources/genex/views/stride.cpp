@@ -79,7 +79,8 @@ namespace genex::views::detail::impl {
     S st;
     Int step;
 
-    GENEX_INLINE constexpr stride_view(I first, S last, Int step) :
+    GENEX_INLINE constexpr stride_view(I first, S last, Int step) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_CTOR(Int, Int&)) :
       it(std::move(first)), st(std::move(last)), step(step) {
     }
 
@@ -115,6 +116,7 @@ namespace genex::views {
     template <typename Rng, typename Int>
       requires detail::concepts::strideable_range<Rng, Int>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int step) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(stride_view, iterator_t<Rng>, sentinel_t<Rng>, Int) and
       SAFE_MOVE(Int)) {
       GENEX_ASSERT(step > 0);

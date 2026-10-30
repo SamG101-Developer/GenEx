@@ -37,6 +37,7 @@ namespace genex::views {
     template <typename Rng>
       requires detail::concepts::indirectable_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CALL(decltype(transform), iterator_t<Rng>, sentinel_t<Rng>, meta::identity)) {
       auto [first, last] = iterators::iter_pair(rng);
       return transform(std::move(first), std::move(last), [](auto &&ptr) -> decltype(auto) { return *ptr; });

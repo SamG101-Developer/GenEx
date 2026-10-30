@@ -80,7 +80,8 @@ namespace genex::views::detail::impl {
     S st;
     Int window;
 
-    GENEX_INLINE constexpr slide_view(I first, S last, Int window) :
+    GENEX_INLINE constexpr slide_view(I first, S last, Int window) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_CTOR(Int, Int&)) :
       it(std::move(first)), st(std::move(last)), window(window) {
     }
 
@@ -118,6 +119,7 @@ namespace genex::views {
     template <typename Rng, typename Int>
       requires detail::concepts::slideable_range<Rng, Int>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int window) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(slide_view, iterator_t<Rng>, sentinel_t<Rng>, Int) and
       SAFE_MOVE(Int)) {
       GENEX_ASSERT(window > 0);
