@@ -1,10 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.split;
 export import genex.pipe;
-import genex.algorithms.count;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -31,7 +31,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename E>
     requires detail::concepts::splittable_iters<I, S, E>
-  struct split_iterator {
+  struct split_iterator : genex::detail::iterator_ops<split_iterator<I, S, E>> {
     I it;
     I field_end;
     S st;
@@ -42,7 +42,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(split_iterator);
 
     GENEX_INLINE constexpr split_iterator() = default;
 
@@ -51,36 +50,28 @@ namespace genex::views::detail::impl {
       seek_field_end();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      self.it = self.field_end;
-      if (self.it != self.st) { ++self.it; }
-      self.seek_field_end();
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      it = field_end;
+      if (it != st) { ++it; }
+      seek_field_end();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete;
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return genex::subrange(self.it, self.field_end);
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return genex::subrange(it, field_end);
     }
 
-    GENEX_VIEW_ITER_EQ(split_iterator, split_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(const split_iterator &self, const split_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(split_iterator, split_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const split_iterator &self, split_sentinel) -> bool {
       return self.it == self.st;
     }
 
   private:
-    template <typename Self>
-    GENEX_INLINE constexpr auto seek_field_end(this Self &&self) -> void {
-      self.field_end = self.it;
-      while (self.field_end != self.st and not operations::eq{}(*self.field_end, self.elem)) { ++self.field_end; }
+    constexpr auto seek_field_end() -> void {
+      field_end = it;
+      while (field_end != st and not operations::eq{}(*field_end, elem)) { ++field_end; }
     }
   };
 
@@ -96,21 +87,24 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)), elem(std::move(e)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return split_iterator(self.it, self.st, self.elem);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return split_iterator(it, st, elem);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return split_sentinel();
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      auto elem_count = genex::count(self.it, self.st, self.elem);
-      return elem_count == 0 ? 1 : elem_count + 1;
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      // Every separator ends a field, and anything after the last one is a field of its own.
+      auto fields = 0z;
+      auto in_field = false;
+      for (auto cur = it; cur != st; ++cur) {
+        in_field = not operations::eq{}(*cur, elem);
+        if (not in_field) { ++fields; }
+      }
+      return in_field ? fields + 1z : fields;
     }
   };
 }

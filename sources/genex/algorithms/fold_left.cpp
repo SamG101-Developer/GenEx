@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.fold_left;
 import genex.concepts;
@@ -26,7 +26,7 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename E, typename F>
     requires concepts::left_foldable_iters<I, S, E, F>
-  GENEX_INLINE constexpr auto do_fold_left(I first, S last, E &&init, F &&f) -> std::remove_cvref_t<E> {
+  constexpr auto do_fold_left(I first, S last, E &&init, F &&f) -> std::remove_cvref_t<E> {
     auto acc = std::remove_cvref_t<E>(std::forward<E>(init));
     for (; first != last; ++first) {
       acc = meta::invoke(f, std::move(acc), *first);

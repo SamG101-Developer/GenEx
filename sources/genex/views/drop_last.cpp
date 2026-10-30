@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.drop_last;
 export import genex.pipe;
@@ -26,6 +26,18 @@ namespace genex::views::detail::concepts {
     droppable_last_iters<iterator_t<Rng>, sentinel_t<Rng>, Int>;
 }
 
+namespace genex::views::detail::impl {
+  // A forward range can only find its length by walking it. Knowing that, there is no need to walk to where it stops
+  // as well: the result already knows how many elements it has, and whoever reads it only walks those.
+  template <typename I, typename S>
+  constexpr auto drop_last_counted(I first, const S last, const iter_difference_t<I> n) {
+    auto total = iter_difference_t<I>{0};
+    for (auto it = first; it != last; ++it) { ++total; }
+    return genex::subrange(std::counted_iterator(std::move(first), std::max(total - n, iter_difference_t<I>{0})),
+                           std::default_sentinel);
+  }
+}
+
 namespace genex::views {
   struct drop_last_fn {
     template <typename I, typename S, typename Int>
@@ -49,14 +61,8 @@ namespace genex::views {
 
     template <typename I, typename S, typename Int>
       requires detail::concepts::droppable_last_iters<I, S, Int>
-    GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const {
-      auto probe = iterators::next(first, static_cast<iter_difference_t<I>>(n), last);
-      auto stop = first;
-      while (probe != last) {
-        ++probe;
-        ++stop;
-      }
-      return genex::subrange<I, I>(std::move(first), std::move(stop));
+    constexpr auto operator()(I first, S last, const Int n) const {
+      return detail::impl::drop_last_counted(std::move(first), std::move(last), static_cast<iter_difference_t<I>>(n));
     }
 
     template <typename Rng, typename Int>
@@ -83,16 +89,9 @@ namespace genex::views {
 
     template <typename Rng, typename Int>
       requires detail::concepts::droppable_last_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const {
+    constexpr auto operator()(Rng &&rng, const Int n) const {
       auto [first, last] = iterators::iter_pair(rng);
-      // See the iterator-pair overload: one traversal, not two.
-      auto probe = iterators::next(first, static_cast<range_difference_t<Rng>>(n), last);
-      auto stop = first;
-      while (probe != last) {
-        ++probe;
-        ++stop;
-      }
-      return genex::subrange<iterator_t<Rng>, iterator_t<Rng>>(std::move(first), std::move(stop));
+      return detail::impl::drop_last_counted(std::move(first), std::move(last), static_cast<range_difference_t<Rng>>(n));
     }
 
     template <typename Int>

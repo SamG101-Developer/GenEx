@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.all_of;
 import genex.algorithms.concepts;

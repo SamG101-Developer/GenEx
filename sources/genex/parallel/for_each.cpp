@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.parallel.for_each;
 export import genex.parallel.params;
@@ -26,7 +26,7 @@ namespace genex::parallel::detail::concepts {
 
 namespace genex::parallel::detail::impl {
   template <typename I, typename F>
-  GENEX_INLINE auto for_each_chunk(I first, const I last, F &f) -> void {
+  auto for_each_chunk(I first, const I last, F &f) -> void {
     for (; first != last; ++first) { meta::invoke(f, *first); }
   }
 

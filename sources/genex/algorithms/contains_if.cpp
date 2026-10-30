@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.contains_if;
 import genex.algorithms.find_if;

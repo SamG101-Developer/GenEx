@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.for_each;
 export import genex.pipe;
@@ -24,13 +24,13 @@ namespace genex {
   struct for_each_fn {
     template <typename I, typename S, typename F>
       requires algorithms::detail::concepts::for_eachable_iters<I, S, F>
-    GENEX_INLINE constexpr auto operator()(I first, S last, F f) const {
+    constexpr auto operator()(I first, S last, F f) const {
       for (; first != last; ++first) { meta::invoke(f, *first); }
     }
 
     template <typename Rng, typename F>
       requires algorithms::detail::concepts::for_eachable_range<Rng, F>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, F f) const {
+    constexpr auto operator()(Rng &&rng, F f) const {
       for (auto &&it : rng) { meta::invoke(f, std::forward<decltype(it)>(it)); }
     }
 

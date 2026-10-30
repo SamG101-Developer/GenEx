@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.set_algorithms;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.iter_pair;
 import genex.meta;
 import genex.operations.cmp;
@@ -38,7 +39,7 @@ namespace genex::views::detail::impl {
     set_op Op, typename I1, typename S1, typename I2, typename S2,
     typename Comp, typename Proj1, typename Proj2>
     requires concepts::set_algorithmicable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
-  struct set_iterator {
+  struct set_iterator : genex::detail::iterator_ops<set_iterator<Op, I1, S1, I2, S2, Comp, Proj1, Proj2>> {
     I1 it1;
     S1 st1;
     I2 it2;
@@ -54,7 +55,6 @@ namespace genex::views::detail::impl {
     using iterator_concept = iterator_category;
 
     std::optional<value_type> cur_elem = std::nullopt;
-    GENEX_ITER_OPS_MINIMAL(set_iterator)
 
     GENEX_INLINE constexpr set_iterator() = default;
 
@@ -65,129 +65,121 @@ namespace genex::views::detail::impl {
       fwd_to_valid();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      self.fwd_to_valid();
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      fwd_to_valid();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete;
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return *self.cur_elem;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return *cur_elem;
     }
 
-    GENEX_VIEW_ITER_EQ(set_iterator, set_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(const set_iterator &self, const set_iterator &that) -> bool {
       return self.it1 == that.it1 and self.it2 == that.it2 and self.cur_elem == that.cur_elem;
     }
 
-    GENEX_VIEW_ITER_EQ(set_iterator, set_algorithm_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const set_iterator &self, set_algorithm_sentinel) -> bool {
       return not self.cur_elem.has_value();
     }
 
   private:
-    template <typename Self>
-    GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
-      self.cur_elem.reset();
+    GENEX_INLINE constexpr auto fwd_to_valid() -> void {
+      cur_elem.reset();
 
       auto less12 = [&](auto const &a, auto const &b) {
-        return meta::invoke(self.comp, meta::invoke(self.proj1, a), meta::invoke(self.proj2, b));
+        return meta::invoke(comp, meta::invoke(proj1, a), meta::invoke(proj2, b));
       };
       auto less21 = [&](auto const &a, auto const &b) {
-        return meta::invoke(self.comp, meta::invoke(self.proj2, b), meta::invoke(self.proj1, a));
+        return meta::invoke(comp, meta::invoke(proj2, b), meta::invoke(proj1, a));
       };
 
       if constexpr (Op == set_op::difference) {
-        while (self.it1 != self.st1) {
-          if (self.it2 == self.st2 or less12(*self.it1, *self.it2)) {
-            self.cur_elem = *self.it1;
-            ++self.it1;
+        while (it1 != st1) {
+          if (it2 == st2 or less12(*it1, *it2)) {
+            cur_elem = *it1;
+            ++it1;
             return;
           }
-          if (less21(*self.it1, *self.it2)) {
-            ++self.it2;
+          if (less21(*it1, *it2)) {
+            ++it2;
             continue;
           }
-          ++self.it1;
-          ++self.it2;
+          ++it1;
+          ++it2;
         }
         return;
       }
 
       if constexpr (Op == set_op::intersection) {
-        while (self.it1 != self.st1 and self.it2 != self.st2) {
-          if (less12(*self.it1, *self.it2)) {
-            ++self.it1;
+        while (it1 != st1 and it2 != st2) {
+          if (less12(*it1, *it2)) {
+            ++it1;
             continue;
           }
-          if (less21(*self.it1, *self.it2)) {
-            ++self.it2;
+          if (less21(*it1, *it2)) {
+            ++it2;
             continue;
           }
-          self.cur_elem = *self.it1;
-          ++self.it1;
-          ++self.it2;
+          cur_elem = *it1;
+          ++it1;
+          ++it2;
           return;
         }
         return;
       }
 
       if constexpr (Op == set_op::symmetric_difference) {
-        while (self.it1 != self.st1 or self.it2 != self.st2) {
-          if (self.it1 == self.st1) {
-            self.cur_elem = *self.it2;
-            ++self.it2;
+        while (it1 != st1 or it2 != st2) {
+          if (it1 == st1) {
+            cur_elem = *it2;
+            ++it2;
             return;
           }
-          if (self.it2 == self.st2) {
-            self.cur_elem = *self.it1;
-            ++self.it1;
+          if (it2 == st2) {
+            cur_elem = *it1;
+            ++it1;
             return;
           }
-          if (less12(*self.it1, *self.it2)) {
-            self.cur_elem = *self.it1;
-            ++self.it1;
+          if (less12(*it1, *it2)) {
+            cur_elem = *it1;
+            ++it1;
             return;
           }
-          if (less21(*self.it1, *self.it2)) {
-            self.cur_elem = *self.it2;
-            ++self.it2;
+          if (less21(*it1, *it2)) {
+            cur_elem = *it2;
+            ++it2;
             return;
           }
-          ++self.it1;
-          ++self.it2;
+          ++it1;
+          ++it2;
         }
         return;
       }
 
       if constexpr (Op == set_op::union_) {
-        while (self.it1 != self.st1 or self.it2 != self.st2) {
-          if (self.it1 == self.st1) {
-            self.cur_elem = *self.it2;
-            ++self.it2;
+        while (it1 != st1 or it2 != st2) {
+          if (it1 == st1) {
+            cur_elem = *it2;
+            ++it2;
             return;
           }
-          if (self.it2 == self.st2) {
-            self.cur_elem = *self.it1;
-            ++self.it1;
+          if (it2 == st2) {
+            cur_elem = *it1;
+            ++it1;
             return;
           }
-          if (less12(*self.it1, *self.it2)) {
-            self.cur_elem = *self.it1;
-            ++self.it1;
+          if (less12(*it1, *it2)) {
+            cur_elem = *it1;
+            ++it1;
             return;
           }
-          if (less21(*self.it1, *self.it2)) {
-            self.cur_elem = *self.it2;
-            ++self.it2;
+          if (less21(*it1, *it2)) {
+            cur_elem = *it2;
+            ++it2;
             return;
           }
-          self.cur_elem = *self.it1;
-          ++self.it1;
-          ++self.it2;
+          cur_elem = *it1;
+          ++it1;
+          ++it2;
           return;
         }
         return;
@@ -217,15 +209,12 @@ namespace genex::views::detail::impl {
       comp(std::move(c)), proj1(std::move(p1)), proj2(std::move(p2)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
       return set_iterator<Op, I1, S1, I2, S2, Comp, Proj1, Proj2>(
-        self.first1, self.last1, self.first2, self.last2, self.comp, self.proj1, self.proj2);
+        first1, last1, first2, last2, comp, proj1, proj2);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return set_algorithm_sentinel();
     }
   };

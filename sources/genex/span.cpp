@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.span;
 import genex.concepts;
@@ -57,57 +57,55 @@ namespace genex {
     }
 
     template <typename Self>
-    GENEX_NODISCARD GENEX_INLINE constexpr auto data(this Self &&self) noexcept -> T* {
+    [[nodiscard]] GENEX_INLINE constexpr auto data(this Self &&self) noexcept -> T* {
       return self.m_ptr;
     }
 
     template <typename Self>
-    GENEX_NODISCARD GENEX_INLINE constexpr auto size(this Self &&self) noexcept -> std::size_t {
+    [[nodiscard]] GENEX_INLINE constexpr auto size(this Self &&self) noexcept -> std::size_t {
       return self.m_size;
     }
 
     template <typename Self>
-    GENEX_NODISCARD GENEX_INLINE constexpr auto empty(this Self &&self) noexcept -> bool {
+    [[nodiscard]] GENEX_INLINE constexpr auto empty(this Self &&self) noexcept -> bool {
       return self.m_size == 0;
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return self.m_ptr;
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return m_ptr;
+    }
+
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      return m_ptr + m_size;
     }
 
     template <typename Self>
-    GENEX_ITER_END {
-      return self.m_ptr + self.m_size;
-    }
-
-    template <typename Self>
-    GENEX_NODISCARD GENEX_INLINE constexpr auto operator[](this Self &&self, const std::size_t index) noexcept -> T& {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator[](this Self &&self, const std::size_t index) noexcept -> T& {
       return self.m_ptr[index];
     }
 
     template <typename Self>
-    GENEX_NODISCARD GENEX_INLINE constexpr auto front(this Self &&self) noexcept -> T& {
+    [[nodiscard]] GENEX_INLINE constexpr auto front(this Self &&self) noexcept -> T& {
       return *self.m_ptr;
     }
 
     template <typename Self>
-    GENEX_NODISCARD GENEX_INLINE constexpr auto back(this Self &&self) noexcept -> T& {
+    [[nodiscard]] GENEX_INLINE constexpr auto back(this Self &&self) noexcept -> T& {
       return *(self.m_ptr + self.m_size - 1);
     }
 
     /// The first "count" elements.
-    GENEX_NODISCARD GENEX_INLINE constexpr auto first(const std::size_t count) const noexcept -> span {
+    [[nodiscard]] GENEX_INLINE constexpr auto first(const std::size_t count) const noexcept -> span {
       return span(m_ptr, count);
     }
 
     /// The last "count" elements.
-    GENEX_NODISCARD GENEX_INLINE constexpr auto last(const std::size_t count) const noexcept -> span {
+    [[nodiscard]] GENEX_INLINE constexpr auto last(const std::size_t count) const noexcept -> span {
       return span(m_ptr + (m_size - count), count);
     }
 
     /// The "count" elements from "offset", or every element from it.
-    GENEX_NODISCARD GENEX_INLINE constexpr auto subspan(
+    [[nodiscard]] GENEX_INLINE constexpr auto subspan(
       const std::size_t offset, const std::size_t count = std::dynamic_extent) const noexcept -> span {
       return span(m_ptr + offset, count == std::dynamic_extent ? m_size - offset : count);
     }

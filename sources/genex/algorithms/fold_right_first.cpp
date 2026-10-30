@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.fold_right_first;
 import genex.concepts;
@@ -25,7 +25,7 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename F>
     requires concepts::right_foldable_first_iters<I, S, F>
-  GENEX_INLINE constexpr auto do_fold_right_first(I first, S last, F &&f) -> iter_value_t<I> {
+  constexpr auto do_fold_right_first(I first, S last, F &&f) -> iter_value_t<I> {
     GENEX_ASSERT(first != last);
     auto acc = *--last;
     while (first != last) {

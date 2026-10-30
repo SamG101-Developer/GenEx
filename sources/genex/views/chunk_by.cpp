@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.chunk_by;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.iter_pair;
 import genex.meta;
 import genex.subrange;
@@ -28,7 +29,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Pred>
     requires concepts::chunkable_by_iters<I, S, Pred>
-  struct chunk_by_iterator {
+  struct chunk_by_iterator : genex::detail::iterator_ops<chunk_by_iterator<I, S, Pred>> {
     I it;
     I nxt;
     S st;
@@ -39,7 +40,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(chunk_by_iterator);
 
     GENEX_INLINE constexpr chunk_by_iterator() = default;
 
@@ -48,33 +48,27 @@ namespace genex::views::detail::impl {
       nxt = find_chunk_end(it);
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      self.it = self.nxt;
-      self.nxt = self.find_chunk_end(self.it);
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      it = nxt;
+      nxt = find_chunk_end(it);
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete;
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return genex::subrange(self.it, self.nxt);
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return genex::subrange(it, nxt);
     }
 
-    GENEX_VIEW_ITER_EQ(chunk_by_iterator, chunk_by_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(
+      const chunk_by_iterator &self, const chunk_by_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(chunk_by_iterator, chunk_by_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const chunk_by_iterator &self, chunk_by_sentinel) -> bool {
       return self.it == self.st;
     }
 
   private:
     template <typename Self>
-    GENEX_INLINE constexpr auto find_chunk_end(this Self &&self, I cur) -> I {
+    constexpr auto find_chunk_end(this Self &&self, I cur) -> I {
       if (cur == self.st) { return cur; }
       auto prev = cur;
       ++cur;
@@ -98,14 +92,11 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)), pred(std::move(pred)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return chunk_by_iterator<I, S, Pred>(self.it, self.st, self.pred);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return chunk_by_iterator<I, S, Pred>(it, st, pred);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return chunk_by_sentinel();
     }
   };

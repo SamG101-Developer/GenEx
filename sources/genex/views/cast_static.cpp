@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.cast_static;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -26,7 +27,7 @@ namespace genex::views::detail::concepts {
 namespace genex::views::detail::impl {
   template <typename To, typename I, typename S>
     requires concepts::static_castable_iters<To, I, S>
-  struct cast_static_iterator {
+  struct cast_static_iterator : genex::detail::adaptor_ops<cast_static_iterator<To, I, S>> {
     I it;
 
     using value_type = To;
@@ -34,7 +35,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
     using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
-    GENEX_ITER_OPS(cast_static_iterator);
 
     using pointer = void;
 
@@ -44,25 +44,8 @@ namespace genex::views::detail::impl {
       it(std::move(first)) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      --self.it;
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return static_cast<To>(*self.it);
-    }
-
-    GENEX_VIEW_ITER_EQ(cast_static_iterator, cast_static_iterator) {
-      return self.it == that.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return static_cast<To>(*it);
     }
   };
 
@@ -77,19 +60,17 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return cast_static_iterator<To, I, S>(self.it);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return cast_static_iterator<To, I, S>(it);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      return cast_static_iterator<To, I, S>(self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      return cast_static_iterator<To, I, S>(st);
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return iterators::distance(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return iterators::distance(it, st);
     }
   };
 }

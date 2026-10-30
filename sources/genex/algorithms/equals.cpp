@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.equals;
 import genex.concepts;
@@ -27,7 +27,7 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
   template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
     requires concepts::equatable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
-  GENEX_INLINE constexpr auto do_equals(I1 first1, S1 last1, I2 first2, S2 last2, Comp &&comp, Proj1 &&proj1,
+  constexpr auto do_equals(I1 first1, S1 last1, I2 first2, S2 last2, Comp &&comp, Proj1 &&proj1,
     Proj2 &&proj2) -> bool {
     for (; first1 != last1 and first2 != last2; ++first1, ++first2) {
       if (not meta::invoke(comp, meta::invoke(proj1, *first1), meta::invoke(proj2, *first2))) { return false; }

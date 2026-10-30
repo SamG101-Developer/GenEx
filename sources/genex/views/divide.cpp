@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.divide;
 export import genex.pipe;
 import genex.concepts;
+import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
 import genex.meta;
@@ -34,13 +35,9 @@ namespace genex::views::detail::impl {
 
   template <std::size_t N, typename I, typename S>
     requires concepts::divisible_iters<N, I, S>
-  GENEX_INLINE constexpr auto divide_impl(I first, S last) -> std::array<divide_part_t<I, S>, N> {
+  constexpr auto divide_impl(I first, const iter_difference_t<I> total) -> std::array<divide_part_t<I, S>, N> {
     using part_t = divide_part_t<I, S>;
     using diff_t = iter_difference_t<I>;
-
-    auto total = diff_t{0};
-    if constexpr (std::sized_sentinel_for<S, I>) { total = last - first; }
-    else { for (auto it = first; it != last; ++it) { ++total; } }
 
     // Spread the remainder over the leading pieces,
     // so the sizes never differ by more than 1.
@@ -51,7 +48,7 @@ namespace genex::views::detail::impl {
     auto cut = [&](const std::size_t i) -> part_t {
       const auto n = base + (static_cast<diff_t>(i) < rem ? diff_t{1} : diff_t{0});
       auto lo = it;
-      it = iterators::next(it, n, last);
+      it = iterators::next(it, n);
       return part_t(std::move(lo), it);
     };
 
@@ -69,14 +66,19 @@ namespace genex::views {
     template <typename I, typename S>
       requires detail::concepts::divisible_iters<N, I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const {
-      return detail::impl::divide_impl<N>(std::move(first), std::move(last));
+      const auto total = static_cast<iter_difference_t<I>>(iterators::distance(first, last));
+      return detail::impl::divide_impl<N, I, S>(std::move(first), total);
     }
 
     template <typename Rng>
       requires detail::concepts::divisible_range<N, Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::divide_impl<N>(std::move(first), std::move(last));
+      const auto total = [&] -> range_difference_t<Rng> {
+        if constexpr (has_member_size<Rng>) { return static_cast<range_difference_t<Rng>>(rng.size()); }
+        else { return static_cast<range_difference_t<Rng>>(iterators::distance(first, last)); }
+      }();
+      return detail::impl::divide_impl<N, iterator_t<Rng>, sentinel_t<Rng>>(std::move(first), total);
     }
 
     template <typename Rng>

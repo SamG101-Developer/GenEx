@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.iterators.next;
 import genex.concepts;
@@ -26,8 +26,9 @@ namespace genex::iterators {
     GENEX_INLINE constexpr auto operator()(I it, const iter_difference_t<I> n, const S bound) const -> I {
       if (n <= 0) { return it; }
       if constexpr (std::sized_sentinel_for<S, I> and std::random_access_iterator<I>) {
-        const auto remaining = bound - it;
-        return it + (n < remaining ? n : remaining);
+        // A branch and not a min: nearly every step misses the end, and a min would chain each one on the last.
+        if (n < bound - it) [[likely]] { return it + n; }
+        return it + (bound - it);
       }
       else {
         for (auto i = iter_difference_t<I>{0}; i < n and it != bound; ++i) { ++it; }

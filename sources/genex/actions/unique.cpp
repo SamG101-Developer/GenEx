@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.unique;
 export import genex.pipe;
@@ -22,19 +22,40 @@ namespace genex::actions {
   struct unique_fn {
     template <typename Rng, typename Comp = operations::eq, typename Proj = meta::identity>
       requires detail::concepts::uniqueable_range<Rng, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
-      auto it = iterators::begin(rng);
-      if (it == iterators::end(rng)) { return std::forward<Rng>(rng); }
+    constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
+      auto first = iterators::begin(rng);
+      auto last = iterators::end(rng);
+      if (first == last) { return std::forward<Rng>(rng); }
 
-      auto prev = it;
-      ++it;
-      while (it != iterators::end(rng)) {
-        if (meta::invoke(comp, meta::invoke(proj, *prev), meta::invoke(proj, *it))) {
-          it = actions::erase(rng, it);
+      // Each element is compared to the last one kept, and moved straight to its final place if it's kept too. Erasing
+      // as it goes would shift the whole tail for every duplicate.
+      if constexpr (std::permutable<iterator_t<Rng>>) {
+        // Nothing needs to move until the first duplicate, which also rules out moving an element onto itself.
+        auto kept = first;
+        for (++first; first != last; ++first) {
+          if (meta::invoke(comp, meta::invoke(proj, *kept), meta::invoke(proj, *first))) { break; }
+          kept = first;
         }
-        else {
-          prev = it;
-          ++it;
+        if (first == last) { return std::forward<Rng>(rng); }
+
+        for (++first; first != last; ++first) {
+          if (not meta::invoke(comp, meta::invoke(proj, *kept), meta::invoke(proj, *first))) {
+            *++kept = std::move(*first);
+          }
+        }
+        rng.erase(++kept, std::move(last));
+      }
+      else {
+        auto kept = first;
+        for (++first; first != last;) {
+          if (meta::invoke(comp, meta::invoke(proj, *kept), meta::invoke(proj, *first))) {
+            first = actions::erase(rng, first);
+            last = iterators::end(rng);
+          }
+          else {
+            kept = first;
+            ++first;
+          }
         }
       }
       return std::forward<Rng>(rng);

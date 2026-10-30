@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.reverse;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.prev;
@@ -26,7 +27,7 @@ namespace genex::views::detail::concepts {
 namespace genex::views::detail::impl {
   template <typename I, typename S>
     requires concepts::reversible_iters<I, S>
-  struct reverse_iterator {
+  struct reverse_iterator : genex::detail::iterator_ops<reverse_iterator<I, S>> {
     I it;
     S st;
 
@@ -35,7 +36,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::bidirectional_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(reverse_iterator)
 
     GENEX_INLINE constexpr reverse_iterator() = default;
 
@@ -43,30 +43,25 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      --self.it;
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      --it;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      ++self.it;
-      return self;
+    GENEX_INLINE constexpr auto prev() -> void requires std::bidirectional_iterator<decltype(it)> {
+      ++it;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return *iterators::prev(self.it);
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return *iterators::prev(it);
     }
 
-    GENEX_VIEW_ITER_EQ(reverse_iterator, reverse_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(const reverse_iterator &self, const reverse_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_INLINE friend constexpr auto operator-(reverse_iterator const &self,
-      reverse_iterator const &that) -> difference_type requires std::random_access_iterator<I> {
-      return that.it - self.it;
+    GENEX_INLINE constexpr auto distance_to(const reverse_iterator &that) const -> difference_type
+      requires std::random_access_iterator<I> {
+      return it - that.it;
     }
   };
 
@@ -81,19 +76,17 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return reverse_iterator<I, S>(self.st, self.it);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return reverse_iterator<I, S>(st, it);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      return reverse_iterator<I, S>(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      return reverse_iterator<I, S>(it, st);
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return iterators::distance(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return iterators::distance(it, st);
     }
   };
 }

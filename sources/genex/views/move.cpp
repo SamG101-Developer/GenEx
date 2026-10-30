@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.move;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -26,7 +27,7 @@ namespace genex::views::detail::concepts {
 namespace genex::views::detail::impl {
   template <typename I, typename S>
     requires concepts::movable_iters<I, S>
-  struct move_iterator {
+  struct move_iterator : genex::detail::adaptor_ops<move_iterator<I, S>> {
     I it;
 
     using value_type = iter_value_t<I>;
@@ -34,7 +35,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::input_iterator_tag; // Can't move the same element twice.
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(move_iterator);
 
     GENEX_INLINE constexpr move_iterator() = default;
 
@@ -42,22 +42,8 @@ namespace genex::views::detail::impl {
       it(std::move(first)) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete;
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return std::move(*self.it);
-    }
-
-    GENEX_VIEW_ITER_EQ(move_iterator, move_iterator) {
-      return self.it == that.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return std::move(*it);
     }
   };
 
@@ -72,19 +58,17 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return move_iterator<I, S>(self.it);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return move_iterator<I, S>(it);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      return move_iterator<I, S>(self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      return move_iterator<I, S>(st);
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return iterators::distance(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return iterators::distance(it, st);
     }
   };
 }

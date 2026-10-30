@@ -1,16 +1,17 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.iota;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import std;
 
 namespace genex::views::detail::impl {
   template <typename Int>
     requires std::weakly_incrementable<Int>
-  struct iota_iterator {
+  struct iota_iterator : genex::detail::iterator_ops<iota_iterator<Int>> {
     Int lo;
     Int hi;
     Int step;
@@ -21,7 +22,6 @@ namespace genex::views::detail::impl {
     using difference_type = std::ptrdiff_t;
     using iterator_category = std::random_access_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(iota_iterator)
 
     using pointer = void;
 
@@ -31,26 +31,32 @@ namespace genex::views::detail::impl {
       : lo(lo), hi(hi), step(step), it(lo) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      self.it += self.step;
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      it += step;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      self.it -= self.step;
-      return self;
+    GENEX_INLINE constexpr auto prev() -> void {
+      it -= step;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return self.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return it;
     }
 
-    GENEX_VIEW_ITER_EQ(iota_iterator, iota_iterator) {
-      GENEX_IGNORE(that);
-      return self.it >= self.hi;
+    GENEX_INLINE constexpr auto advance_by(const difference_type n) -> void requires std::integral<Int> {
+      it = static_cast<Int>(static_cast<difference_type>(it) + n * static_cast<difference_type>(step));
+    }
+
+    GENEX_INLINE constexpr auto distance_to(const iota_iterator &that) const -> difference_type
+      requires std::integral<Int> {
+      const auto gap = static_cast<difference_type>(that.it) - static_cast<difference_type>(it);
+      const auto width = static_cast<difference_type>(step);
+      return gap >= 0 ? (gap + width - 1) / width : -((-gap + width - 1) / width);
+    }
+
+    // Every position past the end is the end, as the last step can overshoot it.
+    GENEX_INLINE friend constexpr auto operator==(const iota_iterator &self, const iota_iterator &that) -> bool {
+      return self.it == that.it or (self.it >= self.hi and that.it >= that.hi);
     }
   };
 
@@ -66,19 +72,17 @@ namespace genex::views::detail::impl {
       : lo(lo), hi(hi), step(step) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return iota_iterator<Int>(self.lo, self.hi, self.step);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return iota_iterator<Int>(lo, hi, step);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      return iota_iterator<Int>(self.hi, self.hi, self.step);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      return iota_iterator<Int>(hi, hi, step);
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return (self.hi - self.lo + self.step - 1) / self.step;
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires std::integral<Int> {
+      return (hi - lo + step - 1) / step;
     }
   };
 }

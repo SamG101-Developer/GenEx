@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.cycle;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -27,7 +28,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
     requires concepts::cyclable_iters<I, S>
-  struct cycle_iterator {
+  struct cycle_iterator : genex::detail::iterator_ops<cycle_iterator<I, S>> {
     I it;
     I begin;
     S st;
@@ -36,43 +37,33 @@ namespace genex::views::detail::impl {
     using reference = iter_reference_t<I>;
     using difference_type = iter_difference_t<I>;
     using iterator_category =
-    std::conditional_t<
-      std::random_access_iterator<I>, std::random_access_iterator_tag, std::conditional_t<
-        std::bidirectional_iterator<I>, std::bidirectional_iterator_tag, std::forward_iterator_tag>>;
+      std::conditional_t<std::bidirectional_iterator<I>, std::bidirectional_iterator_tag, std::forward_iterator_tag>;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(cycle_iterator);
 
     GENEX_INLINE constexpr cycle_iterator() = default;
     GENEX_INLINE constexpr cycle_iterator(I first, I begin, S last) :
       it(std::move(first)), begin(std::move(begin)), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      if (self.it == self.st) { self.it = self.begin; }
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      ++it;
+      if (it == st) { it = begin; }
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      if (self.it == self.begin) { self.it = self.st; }
-      --self.it;
-      return self;
+    GENEX_INLINE constexpr auto prev() -> void requires std::bidirectional_iterator<decltype(it)> {
+      if (it == begin) { it = st; }
+      --it;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return *self.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return *it;
     }
 
-    GENEX_VIEW_ITER_EQ(cycle_iterator, cycle_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(const cycle_iterator &self, const cycle_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(cycle_iterator, cycle_sentinel) {
-      GENEX_IGNORE(self);
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const cycle_iterator &, cycle_sentinel) -> bool {
       return false;
     }
   };
@@ -89,19 +80,13 @@ namespace genex::views::detail::impl {
       it(std::move(first)), it_cpy(it), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return cycle_iterator<I, S>(self.it, self.it_cpy, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return cycle_iterator<I, S>(it, it_cpy, st);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return cycle_sentinel();
     }
-
-    template <typename Self>
-    GENEX_ITER_SIZE = delete;
   };
 }
 

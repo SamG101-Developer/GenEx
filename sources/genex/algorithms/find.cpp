@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.find;
 import genex.concepts;
@@ -24,7 +24,7 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename E, typename Proj>
     requires concepts::findable_iters<I, S, E, Proj>
-  GENEX_INLINE constexpr auto do_find(I first, S last, E &&elem, Proj &&proj) -> I {
+  constexpr auto do_find(I first, S last, E &&elem, Proj &&proj) -> I {
     for (; first != last; ++first) {
       if (meta::invoke(proj, *first) == elem) { break; }
     }

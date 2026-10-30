@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.position_last;
 import genex.concepts;
@@ -26,7 +26,7 @@ namespace genex::algorithms::detail::impl {
     requires concepts::positionable_last_iters<I, S, Pred, Proj>
     and std::bidirectional_iterator<I>
 
-  GENEX_INLINE constexpr auto do_position_last(I first, S last, Pred &&pred, Proj &&proj)
+  constexpr auto do_position_last(I first, S last, Pred &&pred, Proj &&proj)
     -> std::optional<std::size_t> {
     auto pos = static_cast<std::size_t>(iterators::distance(first, last));
     while (first != last) {
@@ -39,7 +39,7 @@ namespace genex::algorithms::detail::impl {
 
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::positionable_last_iters<I, S, Pred, Proj>
-  GENEX_INLINE constexpr auto do_position_last(I first, S last, Pred &&pred, Proj &&proj)
+  constexpr auto do_position_last(I first, S last, Pred &&pred, Proj &&proj)
     -> std::optional<std::size_t> {
     auto pos = std::optional<std::size_t>();
     for (auto i = 0uz; first != last; ++first, ++i) {

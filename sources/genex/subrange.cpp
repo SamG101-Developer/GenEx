@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.subrange;
 import genex.concepts;
@@ -29,49 +29,49 @@ namespace genex {
       m_it(std::move(first)), m_st(std::move(last)) {
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto begin() const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const noexcept(
       std::is_nothrow_copy_constructible_v<I>) -> I
       requires std::copyable<I> {
       return m_it;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto begin() noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() noexcept(
       std::is_nothrow_move_constructible_v<I>) -> I
       requires (not std::copyable<I>) {
       return std::move(m_it);
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto end() const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const noexcept(
       std::is_nothrow_copy_constructible_v<S>) -> S {
       return m_st;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto empty() const -> bool {
+    [[nodiscard]] GENEX_INLINE constexpr auto empty() const -> bool {
       return m_it == m_st;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto size() const -> size_type
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const -> size_type
       requires std::sized_sentinel_for<S, I> {
       return static_cast<size_type>(m_st - m_it);
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto reserve_hint() const -> size_type
+    [[nodiscard]] GENEX_INLINE constexpr auto reserve_hint() const -> size_type
       requires (not std::sized_sentinel_for<S, I>) and requires(const I &i) { i.count(); } {
       return static_cast<size_type>(m_it.count());
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto data() const noexcept -> std::add_pointer_t<iter_element_t<I>>
+    [[nodiscard]] GENEX_INLINE constexpr auto data() const noexcept -> std::add_pointer_t<iter_element_t<I>>
       requires std::contiguous_iterator<I> {
       return std::to_address(m_it);
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto front() const -> reference
+    [[nodiscard]] GENEX_INLINE constexpr auto front() const -> reference
       requires std::forward_iterator<I> {
       GENEX_ASSERT(not empty());
       return *m_it;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto back() const -> reference
+    [[nodiscard]] GENEX_INLINE constexpr auto back() const -> reference
       requires std::bidirectional_iterator<I> and std::same_as<I, S> {
       GENEX_ASSERT(not empty());
       auto last = m_st;
@@ -79,7 +79,7 @@ namespace genex {
       return *last;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto operator[](const difference_type n) const -> reference
+    [[nodiscard]] GENEX_INLINE constexpr auto operator[](const difference_type n) const -> reference
       requires std::random_access_iterator<I> {
       return m_it[n];
     }

@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.interleave;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import std;
@@ -35,7 +36,7 @@ namespace genex::views::detail::concepts {
 namespace genex::views::detail::impl {
   template <typename I1, typename S1, typename I2, typename S2>
     requires concepts::interleavable_iters<I1, S1, I2, S2>
-  struct interleave_iterator {
+  struct interleave_iterator : genex::detail::iterator_ops<interleave_iterator<I1, S1, I2, S2>> {
     I1 it1;
     S1 st1;
     I2 it2;
@@ -48,7 +49,6 @@ namespace genex::views::detail::impl {
     using difference_type = std::common_type_t<iter_difference_t<I1>, iter_difference_t<I2>>;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS_MINIMAL(interleave_iterator)
 
     GENEX_INLINE constexpr interleave_iterator() = default;
 
@@ -58,49 +58,42 @@ namespace genex::views::detail::impl {
       extend(extend) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      if (self.done()) { return self; }
-      if (self.use_first) {
-        if (self.it1 != self.st1) { ++self.it1; }
-        else if (self.extend and self.it2 != self.st2) { ++self.it2; }
+    GENEX_INLINE constexpr auto next() -> void {
+      if (done()) { return; }
+      if (use_first) {
+        if (it1 != st1) { ++it1; }
+        else if (extend and it2 != st2) { ++it2; }
       }
       else {
-        if (self.it2 != self.st2) { ++self.it2; }
-        else if (self.extend and self.it1 != self.st1) { ++self.it1; }
+        if (it2 != st2) { ++it2; }
+        else if (extend and it1 != st1) { ++it1; }
       }
-      self.use_first = not self.use_first;
-      if (self.it1 == self.st1 and self.it2 != self.st2) { self.use_first = false; }
-      if (self.it2 == self.st2 and self.it1 != self.st1) { self.use_first = true; }
-      return self;
+      use_first = not use_first;
+      if (it1 == st1 and it2 != st2) { use_first = false; }
+      if (it2 == st2 and it1 != st1) { use_first = true; }
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete; // for now
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      if (self.use_first) {
-        if (self.it1 != self.st1) { return *self.it1; }
-        return *self.it2;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      if (use_first) {
+        if (it1 != st1) { return *it1; }
+        return *it2;
       }
       else {
-        if (self.it2 != self.st2) { return *self.it2; }
-        return *self.it1;
+        if (it2 != st2) { return *it2; }
+        return *it1;
       }
     }
 
-    GENEX_VIEW_ITER_EQ(interleave_iterator, interleave_iterator) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(
+      const interleave_iterator &self, const interleave_iterator &) -> bool {
       return self.done();
     }
 
   private:
-    template <typename Self>
-    GENEX_INLINE constexpr auto done(this Self &&self) -> bool {
-      const auto end1 = self.it1 == self.st1;
-      const auto end2 = self.it2 == self.st2;
-      return self.extend ? (end1 and end2) : (end1 or end2);
+    GENEX_INLINE constexpr auto done() const -> bool {
+      const auto end1 = it1 == st1;
+      const auto end2 = it2 == st2;
+      return extend ? (end1 and end2) : (end1 or end2);
     }
   };
 
@@ -120,19 +113,17 @@ namespace genex::views::detail::impl {
       extend(extend) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return interleave_iterator(self.it1, self.st1, self.it2, self.st2, self.extend);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return interleave_iterator(it1, st1, it2, st2, extend);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      return interleave_iterator(self.st1, self.st1, self.st2, self.st2, self.extend);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      return interleave_iterator(st1, st1, st2, st2, extend);
     }
 
     template <typename Self>
       requires std::sized_sentinel_for<S1, I1> and std::sized_sentinel_for<S2, I2>
-    GENEX_NODISCARD GENEX_INLINE constexpr auto size(this Self &&self) -> std::size_t {
+    [[nodiscard]] GENEX_INLINE constexpr auto size(this Self &&self) -> std::size_t {
       const auto n1 = iterators::distance(self.it1, self.st1);
       const auto n2 = iterators::distance(self.it2, self.st2);
       return static_cast<std::size_t>(self.extend ? n1 + n2 : 2 * std::min(n1, n2));

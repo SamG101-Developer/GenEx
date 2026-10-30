@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.remove_if;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.iter_pair;
 import genex.meta;
 import std;
@@ -27,7 +28,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::removable_if_iters<I, S, Pred, Proj>
-  struct remove_if_iterator {
+  struct remove_if_iterator : genex::detail::iterator_ops<remove_if_iterator<I, S, Pred, Proj>> {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS meta::box<Pred> pred;
@@ -38,7 +39,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS_MINIMAL(remove_if_iterator)
 
     GENEX_INLINE constexpr remove_if_iterator() = default;
 
@@ -48,31 +48,27 @@ namespace genex::views::detail::impl {
       fwd_to_valid();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      self.fwd_to_valid();
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      ++it;
+      fwd_to_valid();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return *self.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return *it;
     }
 
-    GENEX_VIEW_ITER_EQ(remove_if_iterator, remove_if_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(
+      const remove_if_iterator &self, const remove_if_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(remove_if_iterator, remove_if_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const remove_if_iterator &self, remove_if_sentinel) -> bool {
       return self.it == self.st;
     }
 
   private:
-    template <typename Self>
-    GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
-      while (self.it != self.st and meta::invoke(*self.pred, meta::invoke(*self.proj, *self.it))) { ++self.it; }
+    constexpr auto fwd_to_valid() -> void {
+      while (it != st and meta::invoke(*pred, meta::invoke(*proj, *it))) { ++it; }
     }
   };
 
@@ -90,14 +86,11 @@ namespace genex::views::detail::impl {
       pred(std::move(p)), proj(std::move(prj)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return remove_if_iterator(self.it, self.st, self.pred, self.proj);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return remove_if_iterator(it, st, pred, proj);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return remove_if_sentinel();
     }
   };

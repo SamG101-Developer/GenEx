@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.generate;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.meta;
 import std;
 
@@ -18,9 +19,9 @@ namespace genex::views::detail::concepts {
 namespace genex::views::detail::impl {
   struct generate_sentinel {};
 
-  template <typename F>
+  template <typename F, bool Counted>
     requires concepts::generatable_fn<F>
-  struct generate_iterator {
+  struct generate_iterator : genex::detail::iterator_ops<generate_iterator<F, Counted>> {
     GENEX_NO_UNIQUE_ADDRESS meta::box<F> f;
     std::ptrdiff_t count = 0;
     std::optional<std::remove_cvref_t<std::invoke_result_t<F&>>> cur;
@@ -31,39 +32,40 @@ namespace genex::views::detail::impl {
     using difference_type = std::ptrdiff_t;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS_MINIMAL(generate_iterator);
 
     GENEX_INLINE constexpr generate_iterator() = default;
 
     GENEX_INLINE constexpr generate_iterator(F f, const std::ptrdiff_t count) :
       f(std::move(f)), count(count) {
-      if (count != 0) { cur.emplace(meta::invoke(*this->f)); }
+      if (not Counted or count != 0) { cur.emplace(meta::invoke(*this->f)); }
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      if (self.count > 0) { --self.count; }
-      if (self.count != 0) { self.cur.emplace(meta::invoke(*self.f)); }
-      else { self.cur.reset(); }
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      if constexpr (Counted) {
+        --count;
+        if (count == 0) {
+          cur.reset();
+          return;
+        }
+      }
+      cur.emplace(meta::invoke(*f));
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return *self.cur;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return *cur;
     }
 
-    GENEX_VIEW_ITER_EQ(generate_iterator, generate_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(
+      const generate_iterator &self, const generate_iterator &that) -> bool {
       return self.count == that.count;
     }
 
-    GENEX_VIEW_ITER_EQ(generate_iterator, generate_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const generate_iterator &self, generate_sentinel) -> bool {
       return self.count == 0;
     }
   };
 
-  template <typename F>
+  template <typename F, bool Counted>
     requires concepts::generatable_fn<F>
   struct generate_view : view_base {
     GENEX_NO_UNIQUE_ADDRESS F f;
@@ -74,15 +76,17 @@ namespace genex::views::detail::impl {
       f(std::move(f)), count(count) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return generate_iterator<F>(self.f, self.count);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return generate_iterator<F, Counted>(f, count);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
-      return generate_sentinel();
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      if constexpr (Counted) { return generate_sentinel(); }
+      else { return unreachable_sentinel(); }
+    }
+
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const -> std::size_t requires Counted {
+      return static_cast<std::size_t>(count);
     }
   };
 }
@@ -92,8 +96,8 @@ namespace genex::views {
     template <typename F>
       requires detail::concepts::generatable_fn<F>
     GENEX_INLINE constexpr auto operator()(F f) const noexcept(
-      SAFE_CTOR(detail::impl::generate_view<F>, F, std::ptrdiff_t) and SAFE_MOVE(F)) {
-      return detail::impl::generate_view<F>(std::move(f), std::ptrdiff_t{-1});
+      SAFE_CTOR(detail::impl::generate_view<F, false>, F, std::ptrdiff_t) and SAFE_MOVE(F)) {
+      return detail::impl::generate_view<F, false>(std::move(f), std::ptrdiff_t{0});
     }
   };
 
@@ -101,9 +105,9 @@ namespace genex::views {
     template <typename F, typename Int>
       requires detail::concepts::generatable_fn<F> and std::integral<Int>
     GENEX_INLINE constexpr auto operator()(F f, const Int count) const noexcept(
-      SAFE_CTOR(detail::impl::generate_view<F>, F, std::ptrdiff_t) and SAFE_MOVE(F)) {
+      SAFE_CTOR(detail::impl::generate_view<F, true>, F, std::ptrdiff_t) and SAFE_MOVE(F)) {
       GENEX_ASSERT(count >= 0);
-      return detail::impl::generate_view<F>(std::move(f), static_cast<std::ptrdiff_t>(count));
+      return detail::impl::generate_view<F, true>(std::move(f), static_cast<std::ptrdiff_t>(count));
     }
   };
 

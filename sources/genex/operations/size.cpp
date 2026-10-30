@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.operations.size;
 import genex.concepts;
@@ -44,7 +44,7 @@ namespace genex::operations {
 
     template <typename Rng>
       requires detail::concepts::sizeable_select_else<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&gen) const -> std::size_t {
+    constexpr auto operator()(Rng &&gen) const -> std::size_t {
       auto count = static_cast<std::size_t>(0);
       for (auto &&_ : gen) { ++count; }
       return count;

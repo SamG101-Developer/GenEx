@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.replace_if;
 export import genex.pipe;
@@ -21,7 +21,7 @@ namespace genex::actions {
   struct replace_if_fn {
     template <typename Rng, typename Pred, typename New, typename Proj = meta::identity>
       requires detail::concepts::replaceable_if_range<Rng, Pred, New, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, New new_val,
+    constexpr auto operator()(Rng &&rng, Pred pred, New new_val,
       Proj proj = {}) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       for (; first != last; ++first) {

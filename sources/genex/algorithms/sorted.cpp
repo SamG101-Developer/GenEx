@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.sorted;
 import genex.concepts;
@@ -25,7 +25,7 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Comp, typename Proj>
     requires concepts::sortabled_iters<I, S, Comp, Proj>
-  GENEX_INLINE constexpr auto do_sorted(I first, S last, Comp &&comp, Proj &&proj) -> std::vector<iter_value_t<I>> {
+  constexpr auto do_sorted(I first, S last, Comp &&comp, Proj &&proj) -> std::vector<iter_value_t<I>> {
     auto vec = std::vector<iter_value_t<I>>();
     for (; first != last; ++first) { vec.push_back(*first); }
     std::sort(vec.begin(), vec.end(), [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {

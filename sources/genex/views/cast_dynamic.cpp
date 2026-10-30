@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.cast_dynamic;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.iter_pair;
 import genex.meta;
 import std;
@@ -28,7 +29,7 @@ namespace genex::views::detail::impl {
 
   template <typename To, typename I, typename S>
     requires concepts::dynamic_castable_iters<To, I, S>
-  struct cast_dynamic_iterator {
+  struct cast_dynamic_iterator : genex::detail::iterator_ops<cast_dynamic_iterator<To, I, S>> {
     I it;
     S st;
     mutable To cached = nullptr;
@@ -38,7 +39,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS_MINIMAL(cast_dynamic_iterator);
 
     GENEX_INLINE constexpr cast_dynamic_iterator() = default;
 
@@ -47,41 +47,36 @@ namespace genex::views::detail::impl {
       fwd_to_valid();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      self.fwd_to_valid();
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      ++it;
+      fwd_to_valid();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return self.cached;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return cached;
     }
 
-    GENEX_VIEW_ITER_EQ(cast_dynamic_iterator, cast_dynamic_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(
+      const cast_dynamic_iterator &self, const cast_dynamic_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(cast_dynamic_iterator, cast_dynamic_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const cast_dynamic_iterator &self, cast_dynamic_sentinel) -> bool {
       return self.it == self.st;
     }
 
   private:
-    template <typename Self>
-    GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
-      while (self.it != self.st) {
-        self.update_cache();
-        if (self.cached != nullptr) { break; }
-        ++self.it;
+    constexpr auto fwd_to_valid() -> void {
+      while (it != st) {
+        update_cache();
+        if (cached != nullptr) { break; }
+        ++it;
       }
     }
 
-    template <typename Self>
-    GENEX_INLINE constexpr auto update_cache(this Self &&self) -> void {
-      if (self.it != self.st) { self.cached = dynamic_cast<To>(*self.it); }
-      else { self.cached = nullptr; }
+    GENEX_INLINE constexpr auto update_cache() -> void {
+      if (it != st) { cached = dynamic_cast<To>(*it); }
+      else { cached = nullptr; }
     }
   };
 
@@ -96,14 +91,11 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return cast_dynamic_iterator<To, I, S>{self.it, self.st};
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return cast_dynamic_iterator<To, I, S>{it, st};
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return cast_dynamic_sentinel{};
     }
   };

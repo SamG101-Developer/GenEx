@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.slide;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
@@ -30,7 +31,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Int>
     requires concepts::slideable_iters<I, S, Int>
-  struct slide_iterator {
+  struct slide_iterator : genex::detail::iterator_ops<slide_iterator<I, S, Int>> {
     I it;
     I back;
     S st;
@@ -40,7 +41,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(slide_iterator);
 
     GENEX_INLINE constexpr slide_iterator() = default;
 
@@ -49,27 +49,20 @@ namespace genex::views::detail::impl {
       back = iterators::next(it, static_cast<iter_difference_t<I>>(window) - 1, st);
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      ++self.back;
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      ++it;
+      ++back;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete;
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return genex::subrange(self.it, iterators::next(self.back));
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return genex::subrange(it, iterators::next(back));
     }
 
-    GENEX_VIEW_ITER_EQ(slide_iterator, slide_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(const slide_iterator &self, const slide_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(slide_iterator, slide_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const slide_iterator &self, slide_sentinel) -> bool {
       return self.back == self.st;
     }
   };
@@ -86,21 +79,18 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)), window(window) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return slide_iterator<I, S, Int>(self.it, self.st, self.window);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return slide_iterator<I, S, Int>(it, st, window);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return slide_sentinel();
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      const auto len = iterators::distance(self.it, self.st);
-      const auto width = static_cast<std::ptrdiff_t>(self.window);
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      const auto len = iterators::distance(it, st);
+      const auto width = static_cast<std::ptrdiff_t>(window);
       return len < width ? std::ptrdiff_t{0} : len - width + 1;
     }
   };

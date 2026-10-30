@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.drop_while;
 export import genex.pipe;
@@ -25,59 +25,6 @@ namespace genex::views::detail::concepts {
 namespace genex::views::detail::impl {
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::droppable_while_iters<I, S, Pred, Proj>
-  struct drop_while_iterator {
-    I it;
-    S st;
-    GENEX_NO_UNIQUE_ADDRESS Pred pred;
-    GENEX_NO_UNIQUE_ADDRESS Proj proj;
-
-    using value_type = iter_value_t<I>;
-    using reference = iter_reference_t<I>;
-    using difference_type = iter_difference_t<I>;
-    using iterator_category = std::input_iterator_tag;
-    using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(drop_while_iterator)
-
-    GENEX_INLINE constexpr drop_while_iterator() = default;
-
-    GENEX_INLINE constexpr drop_while_iterator(I it, S st, Pred pred, Proj proj) :
-      it(std::move(it)), st(std::move(st)),
-      pred(std::move(pred)), proj(std::move(proj)) {
-      fwd_to_valid();
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      --self.it;
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return *self.it;
-    }
-
-    GENEX_VIEW_ITER_EQ(drop_while_iterator, drop_while_iterator) {
-      return self.it == that.it;
-    }
-
-  private:
-    template <typename Self>
-    GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
-      while (self.it != self.st and meta::invoke(self.pred, meta::invoke(self.proj, *self.it))) {
-        ++self.it;
-      }
-    }
-  };
-
-  template <typename I, typename S, typename Pred, typename Proj>
-    requires concepts::droppable_while_iters<I, S, Pred, Proj>
   struct drop_while_view : view_base {
     I it;
     S st;
@@ -90,14 +37,22 @@ namespace genex::views::detail::impl {
       pred(std::move(pred)), proj(std::move(proj)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return drop_while_iterator(self.it, self.st, self.pred, self.proj);
+    // Once the leading elements are gone, what's left is just the rest of the range, with all of its strengths.
+    [[nodiscard]] constexpr auto begin() const -> I {
+      auto first = it;
+      auto keep_dropping = pred;
+      auto project = proj;
+      while (first != st and meta::invoke(keep_dropping, meta::invoke(project, *first))) { ++first; }
+      return first;
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      return drop_while_iterator(self.st, self.st, self.pred, self.proj);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const -> S {
+      return st;
+    }
+
+    [[nodiscard]] constexpr auto size() const
+      requires std::sized_sentinel_for<S, I> {
+      return st - begin();
     }
   };
 }

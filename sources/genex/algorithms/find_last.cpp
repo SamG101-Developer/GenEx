@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.find_last;
 import genex.concepts;
@@ -27,7 +27,7 @@ namespace genex::algorithms::detail::impl {
     requires concepts::findable_last_iters<I, S, E, Proj>
     and std::bidirectional_iterator<I> and std::convertible_to<S, I>
 
-  GENEX_INLINE constexpr auto do_find_last(I first, S last, E &&elem, Proj &&proj) -> I {
+  constexpr auto do_find_last(I first, S last, E &&elem, Proj &&proj) -> I {
     auto end = static_cast<I>(std::move(last));
     for (auto it = end; it != first; --it) {
       if (meta::invoke(proj, *iterators::prev(it)) == elem) { return iterators::prev(it); }
@@ -37,7 +37,7 @@ namespace genex::algorithms::detail::impl {
 
   template <typename I, typename S, typename E, typename Proj>
     requires concepts::findable_last_iters<I, S, E, Proj>
-  GENEX_INLINE constexpr auto do_find_last(I first, S last, E &&elem, Proj &&proj) -> I {
+  constexpr auto do_find_last(I first, S last, E &&elem, Proj &&proj) -> I {
     auto result = first;
     auto found = false;
     for (; first != last; ++first) {

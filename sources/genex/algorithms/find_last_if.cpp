@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.find_last_if;
 import genex.concepts;
@@ -26,7 +26,7 @@ namespace genex::algorithms::detail::impl {
     requires concepts::findable_last_if_iters<I, S, Pred, Proj>
     and std::bidirectional_iterator<I> and std::convertible_to<S, I>
 
-  GENEX_INLINE constexpr auto do_find_last_if(I first, S last, Pred &&pred, Proj &&proj) -> I {
+  constexpr auto do_find_last_if(I first, S last, Pred &&pred, Proj &&proj) -> I {
     auto end = static_cast<I>(std::move(last));
     for (auto it = end; it != first; --it) {
       if (meta::invoke(pred, meta::invoke(proj, *iterators::prev(it)))) { return iterators::prev(it); }
@@ -36,7 +36,7 @@ namespace genex::algorithms::detail::impl {
 
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::findable_last_if_iters<I, S, Pred, Proj>
-  GENEX_INLINE constexpr auto do_find_last_if(I first, S last, Pred &&pred, Proj &&proj) -> I {
+  constexpr auto do_find_last_if(I first, S last, Pred &&pred, Proj &&proj) -> I {
     auto result = first;
     auto found = false;
     for (; first != last; ++first) {

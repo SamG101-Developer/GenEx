@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.join;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.access;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
@@ -29,7 +30,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
     requires concepts::joinable_iters<I, S>
-  struct join_iterator {
+  struct join_iterator : genex::detail::iterator_ops<join_iterator<I, S>> {
     // When the outer iterator dereferences to a prvalue range (e.g. transform/intersperse
     // that yield elements by value), the inner range is a temporary and its iterators would
     // dangle. In that case we cache the current inner range inside the iterator itself. The
@@ -53,7 +54,6 @@ namespace genex::views::detail::impl {
       std::forward_iterator_tag,
       std::input_iterator_tag>;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(join_iterator)
 
     GENEX_INLINE constexpr join_iterator() = default;
 
@@ -62,59 +62,49 @@ namespace genex::views::detail::impl {
       fwd_to_valid();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      if (self.it == self.st) { return self; }
-      ++self.inner_it;
-      if (self.inner_it == self.inner_st) {
-        ++self.it;
-        self.fwd_to_valid();
+    GENEX_INLINE constexpr auto next() -> void {
+      ++inner_it;
+      if (inner_it == inner_st) {
+        ++it;
+        fwd_to_valid();
       }
-      return self;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete;
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      GENEX_ASSERT(self.it != self.st);
-      GENEX_ASSERT(self.inner_it != self.inner_st);
-      return *self.inner_it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      GENEX_ASSERT(it != st);
+      GENEX_ASSERT(inner_it != inner_st);
+      return *inner_it;
     }
 
-    GENEX_VIEW_ITER_EQ(join_iterator, join_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(const join_iterator &self, const join_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(join_iterator, join_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const join_iterator &self, join_sentinel) -> bool {
       return self.it == self.st;
     }
 
   private:
-    template <typename Self>
-    GENEX_INLINE constexpr auto satisfy_inner(this Self &&self) -> decltype(auto) {
+    GENEX_INLINE constexpr auto satisfy_inner() -> decltype(auto) {
       if constexpr (ref_is_glvalue) {
-        return (*self.it);
+        return (*it);
       }
       else {
-        self.inner_cache = std::make_shared<iter_value_t<I>>(*self.it);
-        return (*self.inner_cache);
+        inner_cache = std::make_shared<iter_value_t<I>>(*it);
+        return (*inner_cache);
       }
     }
 
-    template <typename Self>
-    GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
-      while (self.it != self.st) {
-        auto &&inner = self.satisfy_inner();
-        self.inner_it = iterators::begin(inner);
-        self.inner_st = iterators::end(inner);
-        if (self.inner_it != self.inner_st) { return; }
-        ++self.it;
+    constexpr auto fwd_to_valid() -> void {
+      while (it != st) {
+        auto &&inner = satisfy_inner();
+        inner_it = iterators::begin(inner);
+        inner_st = iterators::end(inner);
+        if (inner_it != inner_st) { return; }
+        ++it;
       }
-      self.inner_it = iterator_t<iter_value_t<I>>{};
-      self.inner_st = sentinel_t<iter_value_t<I>>{};
+      inner_it = iterator_t<iter_value_t<I>>{};
+      inner_st = sentinel_t<iter_value_t<I>>{};
     }
   };
 
@@ -129,22 +119,19 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return join_iterator(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return join_iterator(it, st);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return join_sentinel();
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE requires std::forward_iterator<I> {
+    [[nodiscard]] constexpr auto size() const
+      requires std::forward_iterator<I> and requires { iterators::distance(it, st); } {
       auto total_size = static_cast<iter_difference_t<I>>(0);
-      for (auto it = self.it; it != self.st; ++it) {
-        auto &&inner = *it;
+      for (auto cur = it; cur != st; ++cur) {
+        auto &&inner = *cur;
         total_size += iterators::distance(iterators::begin(inner), iterators::end(inner));
       }
       return total_size;

@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.position;
 import genex.concepts;
@@ -23,7 +23,7 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::positionable_iters<I, S, Pred, Proj>
-  GENEX_INLINE constexpr auto do_position(I first, S last, Pred &&pred, Proj &&proj,
+  constexpr auto do_position(I first, S last, Pred &&pred, Proj &&proj,
     const std::size_t drop) -> std::optional<std::size_t> {
     for (auto i = drop; first != last; ++first, ++i) {
       if (meta::invoke(pred, meta::invoke(proj, *first))) { return i; }

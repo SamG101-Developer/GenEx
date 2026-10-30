@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.transform;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -32,7 +33,7 @@ namespace genex::views::detail::impl {
 
   export template <typename I, typename S, typename F, typename Proj>
     requires concepts::transformable_iters<I, S, F, Proj>
-  struct transform_iterator {
+  struct transform_iterator : genex::detail::adaptor_ops<transform_iterator<I, S, F, Proj>> {
     I it;
     GENEX_NO_UNIQUE_ADDRESS meta::box<F> f;
     GENEX_NO_UNIQUE_ADDRESS meta::box<Proj> proj;
@@ -46,36 +47,19 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
     using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
-    GENEX_ITER_OPS(transform_iterator)
 
     GENEX_INLINE constexpr transform_iterator() = default;
     GENEX_INLINE constexpr transform_iterator(I it, F f, Proj proj = {}) :
       it(std::move(it)), f(std::move(f)), proj(std::move(proj)) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      --self.it;
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return meta::invoke(*self.f, meta::invoke(*self.proj, *self.it));
-    }
-
-    GENEX_VIEW_ITER_EQ(transform_iterator, transform_iterator) {
-      return self.it == that.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return meta::invoke(*f, meta::invoke(*proj, *it));
     }
 
     template <typename S2>
-    GENEX_VIEW_ITER_EQ(transform_iterator, transform_sentinel<S2>) {
+    GENEX_INLINE friend constexpr auto operator==(const transform_iterator &self, const transform_sentinel<S2> &that)
+      -> bool {
       return self.recursive_eq(self.it, that.st);
     }
 
@@ -100,25 +84,22 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)), f(std::move(f)), proj(std::move(proj)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return transform_iterator<I, S, F, Proj>{self.it, self.f, self.proj};
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return transform_iterator<I, S, F, Proj>{it, f, proj};
     }
 
-    template <typename Self>
-      requires std::convertible_to<S, I> and std::semiregular<transform_iterator<I, S, F, Proj>>
-    GENEX_ITER_END {
-      return transform_iterator<I, S, F, Proj>{self.st, self.f, self.proj};
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const
+      requires std::convertible_to<S, I> and std::semiregular<transform_iterator<I, S, F, Proj>> {
+      return transform_iterator<I, S, F, Proj>{st, f, proj};
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      return transform_sentinel(self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      return transform_sentinel(st);
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return iterators::distance(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return iterators::distance(it, st);
     }
   };
 }

@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.duplicates;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.iter_pair;
 import genex.meta;
 import genex.operations.cmp;
@@ -28,7 +29,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Comp, typename Proj>
     requires concepts::duplicate_checkable_iters<I, S, Comp, Proj>
-  struct duplicate_iterator {
+  struct duplicate_iterator : genex::detail::iterator_ops<duplicate_iterator<I, S, Comp, Proj>> {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS Comp comp;
@@ -45,7 +46,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(duplicate_iterator)
 
     GENEX_INLINE constexpr duplicate_iterator() = default;
 
@@ -55,67 +55,60 @@ namespace genex::views::detail::impl {
       fwd_to_valid();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      if (self.pending.has_value()) {
-        self.cur_elem = std::move(self.pending);
-        self.pending.reset();
-        return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      if (pending.has_value()) {
+        cur_elem = std::move(pending);
+        pending.reset();
+        return;
       }
 
-      self.fwd_to_valid();
-      return self;
+      fwd_to_valid();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete;
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return *self.cur_elem;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return *cur_elem;
     }
 
-    GENEX_VIEW_ITER_EQ(duplicate_iterator, duplicate_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(
+      const duplicate_iterator &self, const duplicate_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(duplicate_iterator, duplicate_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const duplicate_iterator &self, duplicate_sentinel) -> bool {
       return self.it == self.st and not self.pending.has_value() and not self.cur_elem.has_value();
     }
 
   private:
-    template <typename Self>
-    GENEX_INLINE constexpr auto fwd_to_valid(this Self &&self) -> void {
-      self.cur_elem.reset();
+    constexpr auto fwd_to_valid() -> void {
+      cur_elem.reset();
 
-      while (self.it != self.st) {
+      while (it != st) {
         // Inspect the current element (via projection)
-        decltype(auto) cur_proj = meta::invoke(self.proj, *self.it);
+        decltype(auto) cur_proj = meta::invoke(proj, *it);
 
-        if (self.dupe_elem.has_value()) {
-          if (meta::invoke(self.comp, cur_proj, meta::invoke(self.proj, *self.dupe_elem))) {
-            self.cur_elem = *self.it;
-            ++self.it;
+        if (dupe_elem.has_value()) {
+          if (meta::invoke(comp, cur_proj, meta::invoke(proj, *dupe_elem))) {
+            cur_elem = *it;
+            ++it;
             return;
           }
-          ++self.it;
+          ++it;
           continue;
         }
 
         // Search for the duplicate
-        for (const auto &s : self.seen) {
-          if (meta::invoke(self.comp, cur_proj, meta::invoke(self.proj, s))) {
-            self.dupe_elem = s;
-            self.cur_elem = s;
-            self.pending = *self.it;
-            ++self.it;
+        for (const auto &s : seen) {
+          if (meta::invoke(comp, cur_proj, meta::invoke(proj, s))) {
+            dupe_elem = s;
+            cur_elem = s;
+            pending = *it;
+            ++it;
             return;
           }
         }
 
-        self.seen.push_back(*self.it);
-        ++self.it;
+        seen.push_back(*it);
+        ++it;
       }
     }
   };
@@ -134,14 +127,11 @@ namespace genex::views::detail::impl {
       comp(std::move(comp)), proj(std::move(proj)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return duplicate_iterator(self.it, self.st, self.comp, self.proj);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return duplicate_iterator(it, st, comp, proj);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return duplicate_sentinel();
     }
   };

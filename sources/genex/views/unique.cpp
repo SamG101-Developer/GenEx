@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.unique;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.iter_pair;
 import genex.meta;
 import genex.operations.cmp;
@@ -28,7 +29,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Comp, typename Proj>
     requires concepts::uniqueable_iters<I, S, Comp, Proj>
-  struct unique_iterator {
+  struct unique_iterator : genex::detail::iterator_ops<unique_iterator<I, S, Comp, Proj>> {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS meta::box<Comp> comp;
@@ -39,7 +40,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(unique_iterator);
 
     GENEX_INLINE constexpr unique_iterator() = default;
 
@@ -50,29 +50,22 @@ namespace genex::views::detail::impl {
 
     // Every element skipped here compares equal to the one just yielded, so comparing each candidate
     // against that single element is enough for an equivalence relation -- no need to re-anchor.
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      auto prev = self.it;
-      ++self.it;
-      while (self.it != self.st and meta::invoke(
-        *self.comp, meta::invoke(*self.proj, *self.it), meta::invoke(*self.proj, *prev))) { ++self.it; }
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      auto prev = it;
+      ++it;
+      while (it != st and meta::invoke(
+        *comp, meta::invoke(*proj, *it), meta::invoke(*proj, *prev))) { ++it; }
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete;
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return *self.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return *it;
     }
 
-    GENEX_VIEW_ITER_EQ(unique_iterator, unique_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(const unique_iterator &self, const unique_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(unique_iterator, unique_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const unique_iterator &self, unique_sentinel) -> bool {
       return self.it == self.st;
     }
   };
@@ -91,14 +84,11 @@ namespace genex::views::detail::impl {
       comp(std::move(comp)), proj(std::move(proj)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return unique_iterator<I, S, Comp, Proj>(self.it, self.st, self.comp, self.proj);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return unique_iterator<I, S, Comp, Proj>(it, st, comp, proj);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return unique_sentinel();
     }
   };

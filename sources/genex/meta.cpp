@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.meta;
 import std;
@@ -140,7 +140,7 @@ namespace genex::meta {
     }
 
     template <typename Self>
-    GENEX_NODISCARD GENEX_INLINE constexpr auto operator*(this Self &&self) noexcept -> decltype(auto) {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator*(this Self &&self) noexcept -> decltype(auto) {
       if constexpr (store_direct) { return (std::forward<Self>(self).m_value); }
       else { return (*std::forward<Self>(self).m_value); }
     }

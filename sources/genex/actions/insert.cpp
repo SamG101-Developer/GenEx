@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.insert;
 export import genex.pipe;
@@ -35,9 +35,7 @@ namespace genex::actions::detail::concepts {
 
 namespace genex::actions::detail {
   template <typename Rng, typename I>
-  GENEX_INLINE constexpr auto assert_in_range(Rng &&rng, const I &it) -> void {
-    GENEX_IGNORE(rng);
-    GENEX_IGNORE(it);
+  GENEX_INLINE constexpr auto assert_in_range([[maybe_unused]] Rng &&rng, [[maybe_unused]] const I &it) -> void {
     if constexpr (std::random_access_iterator<std::remove_cvref_t<I>>) {
       GENEX_ASSERT(it >= std::begin(rng) and it <= std::end(rng));
     }

@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.take;
 export import genex.pipe;
@@ -36,14 +36,15 @@ namespace genex::views::detail::impl {
     }
 
     template <typename I>
-      requires std::sized_sentinel_for<S, I>
+      requires std::sized_sentinel_for<S, I> or std::same_as<S, unreachable_sentinel>
     GENEX_INLINE friend constexpr auto operator-(const take_sentinel &self,
       const std::counted_iterator<I> &it) -> std::iter_difference_t<I> {
-      return std::min(it.count(), self.st - it.base());
+      if constexpr (std::same_as<S, unreachable_sentinel>) { return it.count(); }
+      else { return std::min(it.count(), self.st - it.base()); }
     }
 
     template <typename I>
-      requires std::sized_sentinel_for<S, I>
+      requires std::sized_sentinel_for<S, I> or std::same_as<S, unreachable_sentinel>
     GENEX_INLINE friend constexpr auto operator-(const std::counted_iterator<I> &it,
       const take_sentinel &self) -> std::iter_difference_t<I> {
       return -(self - it);

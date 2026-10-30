@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.count_if;
 import genex.concepts;
@@ -23,7 +23,7 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::can_count_if_iters<I, S, Pred, Proj>
-  GENEX_INLINE constexpr auto do_count_if(I first, S last, Pred &&pred, Proj &&proj) -> std::size_t {
+  constexpr auto do_count_if(I first, S last, Pred &&pred, Proj &&proj) -> std::size_t {
     auto count = 0uz;
     for (; first != last; ++first) {
       if (meta::invoke(pred, meta::invoke(proj, *first))) { ++count; }

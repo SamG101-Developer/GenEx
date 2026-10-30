@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.replace;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -28,7 +29,7 @@ namespace genex::views::detail::concepts {
 namespace genex::views::detail::impl {
   template <typename I, typename S, typename Old, typename New, typename Proj>
     requires concepts::replaceable_iters<I, S, Old, New, Proj>
-  struct replace_iterator {
+  struct replace_iterator : genex::detail::adaptor_ops<replace_iterator<I, S, Old, New, Proj>> {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS Old old_value;
@@ -40,7 +41,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
     using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
-    GENEX_ITER_OPS(replace_iterator)
 
     GENEX_INLINE constexpr replace_iterator() = default;
 
@@ -50,25 +50,8 @@ namespace genex::views::detail::impl {
       proj(std::move(proj)) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      --self.it;
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return operations::eq{}(meta::invoke(self.proj, *self.it), self.old_value) ? self.new_value : *self.it;
-    }
-
-    GENEX_VIEW_ITER_EQ(replace_iterator, replace_iterator) {
-      return self.it == that.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return operations::eq{}(meta::invoke(proj, *it), old_value) ? new_value : *it;
     }
   };
 
@@ -87,19 +70,17 @@ namespace genex::views::detail::impl {
       old_value(std::move(old_val)), new_value(std::move(new_val)), proj(std::move(proj)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return replace_iterator(self.it, self.st, self.old_value, self.new_value, self.proj);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return replace_iterator(it, st, old_value, new_value, proj);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      return replace_iterator(self.st, self.st, self.old_value, self.new_value, self.proj);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      return replace_iterator(st, st, old_value, new_value, proj);
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return iterators::distance(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return iterators::distance(it, st);
     }
   };
 }

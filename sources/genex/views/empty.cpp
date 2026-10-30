@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.empty;
 export import genex.pipe;
@@ -9,19 +9,19 @@ import std;
 namespace genex::views::detail::impl {
   template <typename T>
   struct empty_view : view_base {
-    GENEX_NODISCARD GENEX_INLINE constexpr auto begin() const noexcept -> const T* {
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const noexcept -> const T* {
       return nullptr;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto end() const noexcept -> const T* {
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const noexcept -> const T* {
       return nullptr;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto size() const noexcept -> std::size_t {
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const noexcept -> std::size_t {
       return 0uz;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto empty() const noexcept -> bool {
+    [[nodiscard]] GENEX_INLINE constexpr auto empty() const noexcept -> bool {
       return true;
     }
   };

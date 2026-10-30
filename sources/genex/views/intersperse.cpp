@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.intersperse;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -31,7 +32,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename New>
     requires concepts::interspersable_iters<I, S, New>
-  struct intersperse_iterator {
+  struct intersperse_iterator : genex::detail::iterator_ops<intersperse_iterator<I, S, New>> {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS New new_value;
@@ -43,7 +44,6 @@ namespace genex::views::detail::impl {
     using iterator_concept = std::conditional_t<
       std::bidirectional_iterator<I>, std::bidirectional_iterator_tag, iter_strength_t<I>>;
     using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
-    GENEX_ITER_OPS(intersperse_iterator)
 
     GENEX_INLINE constexpr intersperse_iterator() = default;
 
@@ -53,47 +53,42 @@ namespace genex::views::detail::impl {
     }
 
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      if (self.yield_new) {
-        self.yield_new = false;
-        ++self.it;
+    GENEX_INLINE constexpr auto next() -> void {
+      if (yield_new) {
+        yield_new = false;
+        ++it;
       }
       else {
-        auto peek = self.it;
+        auto peek = it;
         ++peek;
-        if (peek == self.st) { self.it = std::move(peek); }
-        else { self.yield_new = true; }
+        if (peek == st) { it = std::move(peek); }
+        else { yield_new = true; }
       }
-      return self;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      if (self.yield_new) {
-        self.yield_new = false;
-        return self;
+    GENEX_INLINE constexpr auto prev() -> void requires std::bidirectional_iterator<decltype(it)> {
+      if (yield_new) {
+        yield_new = false;
+        return;
       }
       // Backing out of the end lands on the last element, which owes no separator; every other
       // element is preceded by one.
-      const auto from_end = self.it == self.st;
-      --self.it;
-      self.yield_new = not from_end;
-      return self;
+      const auto from_end = it == st;
+      --it;
+      yield_new = not from_end;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return self.yield_new ? self.new_value : *self.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return yield_new ? new_value : *it;
     }
 
-    GENEX_VIEW_ITER_EQ(intersperse_iterator, intersperse_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(
+      const intersperse_iterator &self, const intersperse_iterator &that) -> bool {
       // `yield_new` is part of the position: the same base element is two distinct items.
       return self.it == that.it and self.yield_new == that.yield_new;
     }
 
-    GENEX_VIEW_ITER_EQ(intersperse_iterator, intersperse_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const intersperse_iterator &self, intersperse_sentinel) -> bool {
       return self.it == self.st;
     }
   };
@@ -111,20 +106,36 @@ namespace genex::views::detail::impl {
       new_value(std::move(new_val)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return intersperse_iterator(self.it, self.st, self.new_value);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return intersperse_iterator(it, st, new_value);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return intersperse_sentinel();
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return std::max(0z, iterators::distance(self.it, self.st) * 2 - 1);
+    // Writes each element and separator as a pair, which a loop over the iterator would have to branch between.
+    template <overwritable_with<iter_reference_t<I>> Out>
+      requires requires { iterators::distance(it, st); }
+    constexpr auto append_to(Out &out) const -> void {
+      const auto count = static_cast<std::size_t>(iterators::distance(it, st));
+      if (count == 0) { return; }
+      out.resize(2 * count - 1);
+
+      auto cur = it;
+      auto *dst = out.data();
+      const auto sep = static_cast<iter_value_t<I>>(new_value);
+      for (auto i = std::size_t{0}; i + 1 < count; ++i) {
+        dst[2 * i] = *cur;
+        dst[2 * i + 1] = sep;
+        ++cur;
+      }
+      dst[2 * count - 2] = *cur;
+    }
+
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return std::max(0z, iterators::distance(it, st) * 2 - 1);
     }
   };
 }

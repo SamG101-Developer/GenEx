@@ -1,19 +1,72 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.to_container;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.access;
+import genex.iterators.advance;
 import genex.iterators.iter_pair;
 import std;
 
+namespace genex::detail {
+  /**
+   * Hands a container the number of elements to expect, so it can allocate once and fill in a single loop. A view that
+   * returns prvalues has to call itself an input iterator, which is right everywhere except here, where the size is
+   * known anyway and each element is only read once.
+   */
+  template <typename I>
+  struct sized_fill_iterator : iterator_ops<sized_fill_iterator<I>> {
+    I it;
+    std::ptrdiff_t left = 0;
+
+    using value_type = iter_value_t<I>;
+    using reference = iter_reference_t<I>;
+    using pointer = void;
+    using difference_type = std::ptrdiff_t;
+    using iterator_category = std::random_access_iterator_tag;
+
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return *it;
+    }
+
+    GENEX_INLINE constexpr auto next() -> void {
+      ++it;
+      --left;
+    }
+
+    GENEX_INLINE constexpr auto prev() -> void requires std::bidirectional_iterator<I> {
+      --it;
+      ++left;
+    }
+
+    // Standard libraries are free to use any of this once told it's random access, even if it means walking.
+    GENEX_INLINE constexpr auto advance_by(const difference_type n) -> void {
+      iterators::advance(it, static_cast<iter_difference_t<I>>(n));
+      left -= n;
+    }
+
+    GENEX_INLINE constexpr auto distance_to(const sized_fill_iterator &that) const -> difference_type {
+      return left - that.left;
+    }
+
+    GENEX_INLINE friend constexpr auto operator==(
+      const sized_fill_iterator &self, const sized_fill_iterator &that) -> bool {
+      return self.left == that.left;
+    }
+  };
+}
+
 namespace genex {
+  // Only where a range constructor couldn't size itself up front: where it can, it is faster than pushing one by one.
   template <typename Out, typename Rng>
   concept reserve_pushable =
     has_member_size<Rng> and
     has_member_reserve<Out> and
-    has_member_push_back<Out>;
+    has_member_push_back<Out> and
+    (not std::same_as<iterator_t<Rng>, sentinel_t<Rng>> or
+     not std::derived_from<typename std::iterator_traits<iterator_t<Rng>>::iterator_category, std::forward_iterator_tag>);
 
   export template <template <typename> typename Out, typename Rng>
     requires input_range<Rng>
@@ -34,6 +87,38 @@ namespace genex {
 
   GENEX_INLINE constexpr auto to_base_fn(Rng &&rng) -> Out {
     return Out(iterators::begin(rng), iterators::end(rng));
+  }
+
+  template <typename Out, typename Rng>
+  concept bulk_fillable =
+    reserve_pushable<Out, Rng> and
+    std::copy_constructible<iterator_t<Rng>> and
+    std::constructible_from<Out, detail::sized_fill_iterator<iterator_t<Rng>>, detail::sized_fill_iterator<iterator_t<Rng>>>;
+
+  template <typename Out, typename Rng>
+  GENEX_INLINE constexpr auto bulk_fill(Rng &rng) -> Out {
+    // A view that knows a faster way to write itself out than being iterated over.
+    if constexpr (requires(Out &out) { rng.append_to(out); }) {
+      auto out = Out();
+      rng.append_to(out);
+      return out;
+    }
+    using fill_t = detail::sized_fill_iterator<iterator_t<Rng>>;
+    const auto size = static_cast<std::ptrdiff_t>(rng.size());
+    auto first = iterators::begin(rng);
+    return Out(fill_t{{}, first, size}, fill_t{{}, first, 0});
+  }
+
+  export template <template <typename> typename Out, typename Rng>
+    requires input_range<Rng> and bulk_fillable<Out<range_value_t<Rng>>, Rng>
+  GENEX_INLINE constexpr auto to_base_fn(Rng &&rng) -> Out<range_value_t<Rng>> {
+    return bulk_fill<Out<range_value_t<Rng>>>(rng);
+  }
+
+  export template <typename Out, typename Rng>
+    requires input_range<Rng> and bulk_fillable<Out, Rng>
+  GENEX_INLINE constexpr auto to_base_fn(Rng &&rng) -> Out {
+    return bulk_fill<Out>(rng);
   }
 
   export template <template <typename> typename Out, typename Rng>

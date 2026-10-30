@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.stride;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
@@ -29,46 +30,54 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Int>
     requires concepts::strideable_iters<I, S, Int>
-  struct stride_iterator {
+  struct stride_iterator : genex::detail::iterator_ops<stride_iterator<I, S, Int>> {
     I it;
     S st;
     Int step;
+
+    static constexpr bool has_last_step =
+      std::random_access_iterator<I> and std::same_as<I, S> and std::sized_sentinel_for<S, I>;
+
+    // Where a step would reach the end. Measuring on every step would chain each one on the last.
+    GENEX_NO_UNIQUE_ADDRESS std::conditional_t<has_last_step, I, std::type_identity<I>> last_step{};
 
     using value_type = iter_value_t<I>;
     using reference = iter_reference_t<I>;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(stride_iterator);
 
     GENEX_INLINE constexpr stride_iterator() = default;
 
     GENEX_INLINE constexpr stride_iterator(I first, S last, Int step) :
       it(std::move(first)), st(std::move(last)), step(step) {
+      if constexpr (has_last_step) {
+        const auto left = iterators::distance(it, st);
+        last_step = it + (left > step ? left - step : 0);
+      }
     }
 
     // The step is bounded by the sentinel, so overshooting the end of a range whose length is not a
     // multiple of the step lands exactly on the end rather than running past it.
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      self.it = iterators::next(self.it, static_cast<iter_difference_t<I>>(self.step), self.st);
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      if constexpr (has_last_step) {
+        if (it < last_step) [[likely]] { it += static_cast<iter_difference_t<I>>(step); }
+        else { it = st; }
+      }
+      else {
+        it = iterators::next(it, static_cast<iter_difference_t<I>>(step), st);
+      }
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete;
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return *self.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return *it;
     }
 
-    GENEX_VIEW_ITER_EQ(stride_iterator, stride_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(const stride_iterator &self, const stride_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(stride_iterator, stride_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const stride_iterator &self, stride_sentinel) -> bool {
       return self.it == self.st;
     }
   };
@@ -85,20 +94,31 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)), step(step) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return stride_iterator<I, S, Int>(self.it, self.st, self.step);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return stride_iterator<I, S, Int>(it, st, step);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return stride_sentinel();
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return (iterators::distance(self.it, self.st) + self.step - 1) / self.step;
+    // Every position is known up front, so there is no need to work out each one from the last.
+    template <overwritable_with<iter_reference_t<I>> Out>
+      requires std::random_access_iterator<I> and std::sized_sentinel_for<S, I>
+    constexpr auto append_to(Out &out) const -> void {
+      const auto count = static_cast<std::size_t>(size());
+      out.resize(count);
+
+      auto *dst = out.data();
+      const auto width = static_cast<std::size_t>(step);
+      for (auto i = std::size_t{0}; i < count; ++i) {
+        dst[i] = it[static_cast<iter_difference_t<I>>(i * width)];
+      }
+    }
+
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return (iterators::distance(it, st) + step - 1) / step;
     }
   };
 }

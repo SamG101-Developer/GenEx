@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.scan;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -45,7 +46,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename F, typename Acc>
     requires std::input_iterator<I> and std::sentinel_for<S, I>
-  struct scan_iterator {
+  struct scan_iterator : genex::detail::iterator_ops<scan_iterator<I, S, F, Acc>> {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS meta::box<F> op;
@@ -57,7 +58,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(scan_iterator);
 
     GENEX_INLINE constexpr scan_iterator() = default;
 
@@ -68,28 +68,21 @@ namespace genex::views::detail::impl {
       else { this->acc.emplace(*this->it); }
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      if (self.it == self.st) { self.acc.reset(); }
-      else { self.acc = meta::invoke(*self.op, *self.acc, *self.it); }
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      ++it;
+      if (it == st) { acc.reset(); }
+      else { acc = meta::invoke(*op, *acc, *it); }
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete;
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return *self.acc;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return *acc;
     }
 
-    GENEX_VIEW_ITER_EQ(scan_iterator, scan_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(const scan_iterator &self, const scan_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(scan_iterator, scan_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const scan_iterator &self, scan_sentinel) -> bool {
       return self.it == self.st;
     }
   };
@@ -107,20 +100,17 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)), op(std::move(op)), seed(std::move(seed)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return scan_iterator<I, S, F, Acc>(self.it, self.st, self.op, self.seed);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return scan_iterator<I, S, F, Acc>(it, st, op, seed);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return scan_sentinel();
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return iterators::distance(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return iterators::distance(it, st);
     }
   };
 }

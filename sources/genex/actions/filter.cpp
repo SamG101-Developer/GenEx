@@ -1,11 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.filter;
 export import genex.pipe;
 import genex.actions.erase;
 import genex.concepts;
-import genex.iterators.access;
 import genex.meta;
 import std;
 
@@ -21,12 +20,10 @@ namespace genex::actions {
   struct filter_fn {
     template <typename Rng, typename Pred, typename Proj = meta::identity>
       requires detail::concepts::filterable_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
-      auto it = iterators::begin(rng);
-      while (it != iterators::end(rng)) {
-        if (meta::invoke(pred, meta::invoke(proj, *it))) { ++it; }
-        else { it = actions::erase(rng, it); }
-      }
+    constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
+      detail::keep_if(rng, [&]<typename T>(T &&elem) -> bool {
+        return meta::invoke(pred, meta::invoke(proj, std::forward<T>(elem)));
+      });
       return std::forward<Rng>(rng);
     }
 

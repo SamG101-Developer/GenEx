@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.take_last;
 export import genex.pipe;
@@ -39,7 +39,7 @@ namespace genex::views {
 
     template <typename I, typename S, typename Int>
       requires detail::concepts::takeable_last_iters<I, S, Int>
-    GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const {
+    constexpr auto operator()(I first, S last, const Int n) const {
       auto probe = iterators::next(first, static_cast<iter_difference_t<I>>(n), last);
       auto start = first;
       while (probe != last) {
@@ -63,7 +63,7 @@ namespace genex::views {
 
     template <typename Rng, typename Int>
       requires detail::concepts::takeable_last_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const {
+    constexpr auto operator()(Rng &&rng, const Int n) const {
       auto [first, last] = iterators::iter_pair(rng);
       auto probe = iterators::next(first, static_cast<range_difference_t<Rng>>(n), last);
       auto start = first;

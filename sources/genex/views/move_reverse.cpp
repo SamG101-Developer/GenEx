@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.move_reverse;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.prev;
@@ -27,7 +28,7 @@ namespace genex::views::detail::concepts {
 namespace genex::views::detail::impl {
   template <typename I, typename S>
     requires concepts::move_reversible_iters<I, S>
-  struct move_reverse_iterator {
+  struct move_reverse_iterator : genex::detail::iterator_ops<move_reverse_iterator<I, S>> {
     I it;
     S st;
 
@@ -35,7 +36,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::bidirectional_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(move_reverse_iterator)
 
     using reference = iter_value_t<I>&&;
     using pointer = void;
@@ -46,24 +46,20 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      --self.it;
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      --it;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      ++self.it;
-      return self;
+    GENEX_INLINE constexpr auto prev() -> void requires std::bidirectional_iterator<decltype(it)> {
+      ++it;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return std::move(*iterators::prev(self.it));
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return std::move(*iterators::prev(it));
     }
 
-    GENEX_VIEW_ITER_EQ(move_reverse_iterator, move_reverse_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(
+      const move_reverse_iterator &self, const move_reverse_iterator &that) -> bool {
       return self.it == that.it;
     }
   };
@@ -79,19 +75,17 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return move_reverse_iterator(self.st, self.it);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return move_reverse_iterator(st, it);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      return move_reverse_iterator(self.it, self.it);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      return move_reverse_iterator(it, it);
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return iterators::distance(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return iterators::distance(it, st);
     }
   };
 }

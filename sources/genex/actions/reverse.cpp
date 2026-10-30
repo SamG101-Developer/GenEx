@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.reverse;
 export import genex.pipe;
@@ -21,17 +21,21 @@ namespace genex::actions {
       requires detail::concepts::reversible_range<Rng>
       and random_access_range<Rng>
 
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> Rng {
+    constexpr auto operator()(Rng &&rng) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
-      while (first != last and first < --last) {
-        std::iter_swap(first++, last);
+      // A counted loop, as checking two moving iterators against each other stops it being vectorized.
+      const auto swaps = (last - first) / 2;
+      for (auto i = decltype(swaps){0}; i < swaps; ++i) {
+        --last;
+        std::iter_swap(first, last);
+        ++first;
       }
       return std::forward<Rng>(rng);
     }
 
     template <typename Rng>
       requires detail::concepts::reversible_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> Rng {
+    constexpr auto operator()(Rng &&rng) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       while (first != last and first != --last) {
         std::iter_swap(first++, last);

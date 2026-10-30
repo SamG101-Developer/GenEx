@@ -1,12 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.remove_if;
 export import genex.pipe;
 import genex.actions.erase;
-import genex.algorithms.find_if;
 import genex.concepts;
-import genex.iterators.access;
 import genex.meta;
 import std;
 
@@ -22,13 +20,10 @@ namespace genex::actions {
   struct remove_if_fn {
     template <typename Rng, typename Pred, typename Proj = meta::identity>
       requires detail::concepts::removable_if_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
-      // todo: optimize to prevent multi-passes.
-      while (true) {
-        auto it = genex::find_if(rng, pred, proj);
-        if (it == iterators::end(rng)) { break; }
-        actions::erase(rng, std::move(it));
-      }
+    constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
+      detail::keep_if(rng, [&]<typename T>(T &&elem) -> bool {
+        return not meta::invoke(pred, meta::invoke(proj, std::forward<T>(elem)));
+      });
       return std::forward<Rng>(rng);
     }
 

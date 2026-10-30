@@ -9,7 +9,7 @@
 #
 # Both configs run because GENEX_ASSERT only exists in Debug.
 # A target with "required: false" may fail without failing the
-# build, so a port's progress shows before it can block a merge.
+# build, so a new port's progress shows before it can block a merge.
 
 name: build
 
@@ -33,8 +33,8 @@ jobs:
         platform:
           - { target: x86_64-linux-gcc,    os: ubuntu-26.04,        compiler: gcc,  required: true }
           - { target: aarch64-linux-gcc,   os: ubuntu-26.04-arm,    compiler: gcc,  required: true }
-          - { target: aarch64-macos-llvm,  os: macos-26,            compiler: llvm, required: false }
-          - { target: x86_64-windows-msvc, os: windows-2025-vs2026, compiler: msvc, required: false }
+          - { target: aarch64-macos-llvm,  os: macos-26,            compiler: llvm, required: true }
+          - { target: x86_64-windows-msvc, os: windows-2025-vs2026, compiler: msvc, required: true }
 
     # Windows otherwise defaults "run" to PowerShell.
     defaults:

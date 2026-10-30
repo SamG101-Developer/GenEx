@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.max_element;
 import genex.concepts;
@@ -24,7 +24,7 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Comp, typename Proj>
     requires concepts::maxable_iters<I, S, Comp, Proj>
-  GENEX_INLINE constexpr auto do_max_element(I first, S last, Comp &&comp, Proj &&proj) -> iter_reference_t<I> {
+  constexpr auto do_max_element(I first, S last, Comp &&comp, Proj &&proj) -> iter_reference_t<I> {
     GENEX_ASSERT(first != last);
     for (auto next = first; ++next != last;) {
       if (meta::invoke(comp, meta::invoke(proj, *next), meta::invoke(proj, *first))) { first = next; }

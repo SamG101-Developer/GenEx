@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.as_const;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -31,7 +32,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
     requires concepts::constable_iters<I, S>
-  struct as_const_iterator {
+  struct as_const_iterator : genex::detail::adaptor_ops<as_const_iterator<I, S>> {
     I it;
 
     using value_type = iter_value_t<I>;
@@ -40,7 +41,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
     using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
-    GENEX_ITER_OPS(as_const_iterator);
 
     GENEX_INLINE constexpr as_const_iterator() = default;
 
@@ -48,28 +48,12 @@ namespace genex::views::detail::impl {
       it(std::move(first)) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      return self;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return static_cast<reference>(*it);
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      --self.it;
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return static_cast<reference>(*self.it);
-    }
-
-    GENEX_VIEW_ITER_EQ(as_const_iterator, as_const_iterator) {
-      return self.it == that.it;
-    }
-
-    GENEX_VIEW_ITER_EQ(as_const_iterator, as_const_sentinel<S>) {
+    GENEX_INLINE friend constexpr auto operator==(
+      const as_const_iterator &self, const as_const_sentinel<S> &that) -> bool {
       return self.it == that.st;
     }
   };
@@ -85,20 +69,18 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return as_const_iterator<I, S>(self.it);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return as_const_iterator<I, S>(it);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      if constexpr (std::same_as<I, S>) { return as_const_iterator<I, S>(self.st); }
-      else { return as_const_sentinel<S>{self.st}; }
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      if constexpr (std::same_as<I, S>) { return as_const_iterator<I, S>(st); }
+      else { return as_const_sentinel<S>{st}; }
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return iterators::distance(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return iterators::distance(it, st);
     }
   };
 }

@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.transform;
 export import genex.pipe;
@@ -23,7 +23,7 @@ namespace genex::actions {
   struct transform_fn {
     template <typename Rng, typename F, typename Proj = meta::identity>
       requires detail::concepts::transformable_range<Rng, F, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const -> Rng {
+    constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       for (; first != last; ++first) {
         *first = meta::invoke(f, meta::invoke(proj, *first));

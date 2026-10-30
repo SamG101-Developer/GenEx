@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.clear;
 export import genex.pipe;
@@ -17,7 +17,7 @@ namespace genex::actions::detail::concepts {
 namespace genex::actions {
   struct clear_fn {
     template <typename Rng>
-      requires detail::concepts::clearable_range<Rng>
+    requires detail::concepts::clearable_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> Rng {
       rng.clear();
       return std::forward<Rng>(rng);

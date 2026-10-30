@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.pairwise;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
@@ -28,7 +29,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
     requires concepts::pairwiseable_iters<I, S>
-  struct pairwise_iterator {
+  struct pairwise_iterator : genex::detail::iterator_ops<pairwise_iterator<I, S>> {
     I it;
     I snd;
     S st;
@@ -39,7 +40,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(pairwise_iterator);
 
     GENEX_INLINE constexpr pairwise_iterator() = default;
 
@@ -48,27 +48,21 @@ namespace genex::views::detail::impl {
       snd = iterators::next(it, 1, st);
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      ++self.snd;
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      ++it;
+      ++snd;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete;
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return reference(*self.it, *self.snd);
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return reference(*it, *snd);
     }
 
-    GENEX_VIEW_ITER_EQ(pairwise_iterator, pairwise_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(
+      const pairwise_iterator &self, const pairwise_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(pairwise_iterator, pairwise_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const pairwise_iterator &self, pairwise_sentinel) -> bool {
       return self.snd == self.st;
     }
   };
@@ -84,20 +78,17 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return pairwise_iterator<I, S>(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return pairwise_iterator<I, S>(it, st);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return pairwise_sentinel();
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      const auto len = iterators::distance(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      const auto len = iterators::distance(it, st);
       return len < 2 ? std::ptrdiff_t{0} : len - 1;
     }
   };

@@ -212,6 +212,30 @@ export namespace genex {
   using borrowed_reference_t = std::conditional_t<non_dangling_range<Rng>, range_reference_t<Rng>, range_value_t<Rng>>;
 
   /**
+   * The end of a range with no end of its own, which compares unequal to everything. Having its own type means a loop
+   * over one has no end check at all, and an adaptor that does end it, like @c take, knows exactly how long it is.
+   */
+  struct unreachable_sentinel {
+    template <std::input_or_output_iterator I>
+    constexpr friend auto operator==(const I &, unreachable_sentinel) noexcept -> bool {
+      return false;
+    }
+  };
+
+  /**
+   * A container that can be sized up front and written to directly, with elements that cost nothing to overwrite. A
+   * view's @c append_to can use this to write elements with an indexed loop, which the compiler can vectorize.
+   */
+  template <typename Out, typename Reference>
+  concept overwritable_with =
+    std::is_trivially_copyable_v<typename Out::value_type> and
+    std::assignable_from<typename Out::value_type&, Reference> and
+    requires(Out &out, std::size_t n) {
+      out.resize(n);
+      { out.data() } -> std::same_as<typename Out::value_type*>;
+    };
+
+  /**
    * The strongest tag an iterator models, for an adaptor's @c iterator_concept.
    */
   template <typename I>

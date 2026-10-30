@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.address_of;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -34,7 +35,7 @@ namespace genex::views::detail::impl {
    */
   template <typename I, typename S>
     requires concepts::addressable_iters<I, S>
-  struct address_of_iterator {
+  struct address_of_iterator : genex::detail::adaptor_ops<address_of_iterator<I, S>> {
     I it;
 
     using value_type = std::add_pointer_t<iter_value_t<I>>;
@@ -43,7 +44,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
     using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
-    GENEX_ITER_OPS(address_of_iterator);
 
     GENEX_INLINE constexpr address_of_iterator() noexcept = default;
 
@@ -52,25 +52,8 @@ namespace genex::views::detail::impl {
       it(std::move(first)) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      --self.it;
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return std::addressof(*self.it);
-    }
-
-    GENEX_VIEW_ITER_EQ(address_of_iterator, address_of_iterator) {
-      return self.it == that.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return std::addressof(*it);
     }
   };
 
@@ -85,22 +68,17 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_NODISCARD GENEX_INLINE constexpr auto begin(this Self &&self) noexcept(
-      std::is_nothrow_constructible_v<address_of_view, I>) -> auto {
-      return address_of_iterator<I, S>(self.it);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return address_of_iterator<I, S>(it);
     }
 
-    template <typename Self>
-    GENEX_NODISCARD GENEX_INLINE constexpr auto end(this Self &&self) noexcept(
-      std::is_nothrow_constructible_v<address_of_view, S>) -> auto {
-      return address_of_iterator<I, S>(self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      return address_of_iterator<I, S>(st);
     }
 
-    template <typename Self>
-    GENEX_NODISCARD GENEX_INLINE constexpr auto size(this Self &&self) noexcept(
-      noexcept(iterators::distance(self.it, self.st))) -> auto {
-      return iterators::distance(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return iterators::distance(it, st);
     }
   };
 }

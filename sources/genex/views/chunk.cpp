@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.chunk;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
@@ -30,7 +31,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Int>
     requires concepts::chunkable_iters<I, S, Int>
-  struct chunk_iterator {
+  struct chunk_iterator : genex::detail::iterator_ops<chunk_iterator<I, S, Int>> {
     I it;
     S st;
     Int chunk_size;
@@ -40,7 +41,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::forward_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(chunk_iterator);
 
     GENEX_INLINE constexpr chunk_iterator() = default;
 
@@ -48,35 +48,27 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)), chunk_size(size) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      self.it = iterators::next(self.it, static_cast<iter_difference_t<I>>(self.chunk_size), self.st);
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      it = iterators::next(it, static_cast<iter_difference_t<I>>(chunk_size), st);
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV = delete;
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      auto end_it = self.it;
-      for (Int i = 0; i < self.chunk_size and end_it != self.st; ++i) { ++end_it; }
-      return genex::subrange(self.it, end_it);
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      auto end_it = it;
+      for (Int i = 0; i < chunk_size and end_it != st; ++i) { ++end_it; }
+      return genex::subrange(it, end_it);
     }
 
-    template <typename Self>
-      requires std::random_access_iterator<I> and std::sized_sentinel_for<S, I>
-    GENEX_VIEW_CUSTOM_DEREF {
-      const auto n = std::min(static_cast<iter_difference_t<I>>(self.chunk_size), self.st - self.it);
-      return genex::subrange(self.it, self.it + n);
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto)
+      requires std::random_access_iterator<I> and std::sized_sentinel_for<S, I> {
+      const auto n = std::min(static_cast<iter_difference_t<I>>(chunk_size), st - it);
+      return genex::subrange(it, it + n);
     }
 
-    GENEX_VIEW_ITER_EQ(chunk_iterator, chunk_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(const chunk_iterator &self, const chunk_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_VIEW_ITER_EQ(chunk_iterator, chunk_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const chunk_iterator &self, chunk_sentinel) -> bool {
       return self.it == self.st;
     }
   };
@@ -93,20 +85,17 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)), chunk_size(size) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return chunk_iterator<I, S, Int>(self.it, self.st, self.chunk_size);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return chunk_iterator<I, S, Int>(it, st, chunk_size);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return chunk_sentinel();
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return (iterators::distance(self.it, self.st) + self.chunk_size - 1) / self.chunk_size;
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return (iterators::distance(it, st) + chunk_size - 1) / chunk_size;
     }
   };
 }

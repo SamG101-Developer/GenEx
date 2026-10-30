@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.concat;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.access;
 import genex.iterators.distance;
 import genex.subrange;
@@ -40,7 +41,7 @@ namespace genex::views::detail::impl {
 
   template <typename... Rngs>
     requires concepts::concatable_range<Rngs...>
-  struct concat_iterator {
+  struct concat_iterator : genex::detail::iterator_ops<concat_iterator<Rngs...>> {
     std::tuple<iterator_t<Rngs>...> its;
     std::tuple<sentinel_t<Rngs>...> sts;
     std::size_t active = 0;
@@ -60,42 +61,20 @@ namespace genex::views::detail::impl {
       settle<0>();
     }
 
-    template <typename Self>
-    GENEX_INLINE constexpr auto operator==(this Self &&self, concat_iterator const &that) -> bool {
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return deref_impl<0>();
+    }
+
+    GENEX_INLINE constexpr auto next() -> void {
+      inc_impl<0>();
+    }
+
+    GENEX_INLINE friend constexpr auto operator==(const concat_iterator &self, const concat_iterator &that) -> bool {
       return self.its == that.its;
     }
 
-    template <typename Self>
-    GENEX_INLINE constexpr auto operator==(this Self &&self, concat_sentinel const &) -> bool {
-      return self.is_end_impl();
-    }
-
-    template <typename Self>
-    GENEX_INLINE constexpr auto operator!=(this Self &&self, concat_iterator const &that) -> bool {
-      return not(self == that);
-    }
-
-    template <typename Self>
-    GENEX_INLINE constexpr auto operator!=(this Self &&self, concat_sentinel const &that) -> bool {
-      return not(self == that);
-    }
-
-    template <typename Self>
-    GENEX_INLINE constexpr auto operator*(this Self &&self) -> decltype(auto) {
-      return self.template deref_impl<0>();
-    }
-
-    template <typename Self>
-    GENEX_INLINE constexpr auto operator++(this Self &&self) -> concat_iterator& {
-      self.template inc_impl<0>();
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_INLINE constexpr auto operator++(this Self &&self, int) -> concat_iterator {
-      auto temp = self;
-      ++self;
-      return temp;
+    GENEX_INLINE friend constexpr auto operator==(const concat_iterator &self, const concat_sentinel &) -> bool {
+      return self.active == sizeof...(Rngs);
     }
 
   private:
@@ -131,11 +110,6 @@ namespace genex::views::detail::impl {
         }
       }
     }
-
-    template <typename Self>
-    GENEX_INLINE constexpr auto is_end_impl(this Self &&self) -> bool {
-      return self.active == sizeof...(Rngs);
-    }
   };
 
   template <typename... Rngs>
@@ -150,21 +124,32 @@ namespace genex::views::detail::impl {
       its(std::move(first)), sts(std::move(last)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return concat_iterator<Rngs...>(self.its, self.sts);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return concat_iterator<Rngs...>(its, sts);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return concat_sentinel{};
     }
 
     template <typename Self>
       requires (sized_range<Rngs> and ...)
-    GENEX_NODISCARD GENEX_INLINE constexpr auto size(this Self &&self) -> std::size_t {
+    [[nodiscard]] GENEX_INLINE constexpr auto size(this Self &&self) -> std::size_t {
       return self.template size_impl<0>();
+    }
+
+    // Each range can be inserted in one go, which a single loop stepping between them would have to do one by one.
+    template <typename Out>
+      requires (sized_range<Rngs> and ...)
+      and (std::same_as<iterator_t<Rngs>, sentinel_t<Rngs>> and ...)
+      and (std::derived_from<typename std::iterator_traits<iterator_t<Rngs>>::iterator_category,
+                             std::forward_iterator_tag> and ...)
+      and (requires(Out &out, iterator_t<Rngs> i) { out.insert(out.end(), i, i); } and ...)
+    constexpr auto append_to(Out &out) const -> void {
+      out.reserve(size());
+      [&]<std::size_t... Is>(std::index_sequence<Is...>) -> void {
+        (out.insert(out.end(), std::get<Is>(its), std::get<Is>(sts)), ...);
+      }(std::index_sequence_for<Rngs...>{});
     }
 
   private:

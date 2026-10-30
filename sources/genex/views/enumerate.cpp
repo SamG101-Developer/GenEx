@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.enumerate;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -30,7 +31,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
     requires concepts::enumerable_iters<I, S>
-  struct enumerate_iterator {
+  struct enumerate_iterator : genex::detail::adaptor_ops<enumerate_iterator<I, S>> {
     I it;
     std::size_t index = 0uz;
 
@@ -40,7 +41,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
     using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
-    GENEX_ITER_OPS(enumerate_iterator);
 
     GENEX_INLINE constexpr enumerate_iterator() = default;
 
@@ -48,30 +48,27 @@ namespace genex::views::detail::impl {
       it(std::move(it)) {
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      ++self.index;
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      ++it;
+      ++index;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      --self.it;
-      --self.index;
-      return self;
+    GENEX_INLINE constexpr auto prev() -> void requires std::bidirectional_iterator<decltype(it)> {
+      --it;
+      --index;
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return std::make_pair(self.index, *self.it);
+    GENEX_INLINE constexpr auto advance_by(const difference_type n) -> void requires std::random_access_iterator<I> {
+      it += n;
+      index += static_cast<std::size_t>(n);
     }
 
-    GENEX_VIEW_ITER_EQ(enumerate_iterator, enumerate_iterator) {
-      return self.it == that.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return std::make_pair(index, *it);
     }
 
-    GENEX_VIEW_ITER_EQ(enumerate_iterator, enumerate_sentinel<S>) {
+    GENEX_INLINE friend constexpr auto operator==(
+      const enumerate_iterator &self, const enumerate_sentinel<S> &that) -> bool {
       return self.it == that.st;
     }
   };
@@ -87,24 +84,22 @@ namespace genex::views::detail::impl {
       it(std::move(it)), st(std::move(st)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return enumerate_iterator<I, S>{self.it};
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return enumerate_iterator<I, S>{it};
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       if constexpr (std::same_as<I, S>) {
-        return enumerate_iterator<I, S>{self.st};
+        return enumerate_iterator<I, S>{st};
       }
       else {
-        return enumerate_sentinel<S>{self.st};
+        return enumerate_sentinel<S>{st};
       }
     }
 
-    template <typename Self>
-    GENEX_ITER_SIZE {
-      return iterators::distance(self.it, self.st);
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return iterators::distance(it, st);
     }
   };
 }

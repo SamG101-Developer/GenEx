@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.materialize;
 export import genex.pipe;
@@ -7,6 +7,8 @@ import genex.actions.push_back;
 import genex.concepts;
 import genex.iterators.iter_pair;
 import genex.meta;
+import genex.subrange;
+import genex.to_container;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -27,14 +29,7 @@ namespace genex::views::detail::impl {
   template <template <typename> typename Cache, typename I, typename S>
     requires concepts::materializable_iters<Cache, I, S>
   GENEX_INLINE constexpr auto do_materialize(I first, S last) -> Cache<iter_value_t<I>> {
-    auto out = Cache<iter_value_t<I>>();
-    if constexpr (std::sized_sentinel_for<S, I> and requires { out.reserve(std::size_t{}); }) {
-      out.reserve(static_cast<std::size_t>(last - first));
-    }
-    for (; first != last; ++first) {
-      out |= actions::push_back(*first);
-    }
-    return out;
+    return genex::to_base_fn<Cache>(genex::subrange(std::move(first), std::move(last)));
   }
 }
 

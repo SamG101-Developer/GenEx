@@ -1,9 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.views.take_while;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.iterator_ops;
 import genex.iterators.iter_pair;
 import genex.meta;
 import std;
@@ -27,7 +28,7 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::takeable_while_iters<I, S, Pred, Proj>
-  struct take_while_iterator {
+  struct take_while_iterator : genex::detail::iterator_ops<take_while_iterator<I, S, Pred, Proj>> {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS meta::box<Pred> pred;
@@ -39,7 +40,6 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(take_while_iterator)
 
     GENEX_INLINE constexpr take_while_iterator() = default;
 
@@ -49,38 +49,32 @@ namespace genex::views::detail::impl {
       refresh_done();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_NEXT {
-      ++self.it;
-      self.refresh_done();
-      return self;
+    GENEX_INLINE constexpr auto next() -> void {
+      ++it;
+      refresh_done();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      --self.it;
-      self.refresh_done();
-      return self;
+    GENEX_INLINE constexpr auto prev() -> void requires std::bidirectional_iterator<decltype(it)> {
+      --it;
+      refresh_done();
     }
 
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_DEREF {
-      return *self.it;
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return *it;
     }
 
-    GENEX_VIEW_ITER_EQ(take_while_iterator, take_while_iterator) {
+    GENEX_INLINE friend constexpr auto operator==(
+      const take_while_iterator &self, const take_while_iterator &that) -> bool {
       return self.done == that.done and (self.done or self.it == that.it);
     }
 
-    GENEX_VIEW_ITER_EQ(take_while_iterator, take_while_sentinel) {
-      GENEX_IGNORE(that);
+    GENEX_INLINE friend constexpr auto operator==(const take_while_iterator &self, take_while_sentinel) -> bool {
       return self.done;
     }
 
   private:
-    template <typename Self>
-    GENEX_INLINE constexpr auto refresh_done(this Self &&self) -> void {
-      self.done = self.it == self.st or not meta::invoke(*self.pred, meta::invoke(*self.proj, *self.it));
+    GENEX_INLINE constexpr auto refresh_done() -> void {
+      done = it == st or not meta::invoke(*pred, meta::invoke(*proj, *it));
     }
   };
 
@@ -98,14 +92,11 @@ namespace genex::views::detail::impl {
       pred(std::move(pred)), proj(std::move(proj)) {
     }
 
-    template <typename Self>
-    GENEX_ITER_BEGIN {
-      return take_while_iterator(self.it, self.st, self.pred, self.proj);
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return take_while_iterator(it, st, pred, proj);
     }
 
-    template <typename Self>
-    GENEX_ITER_END {
-      GENEX_IGNORE(self);
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return take_while_sentinel();
     }
   };

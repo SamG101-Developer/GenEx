@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.pipe;
 import genex.concepts;
@@ -65,24 +65,24 @@ namespace genex::detail {
     ~owning_view() = default;
 
     template <typename Self>
-    GENEX_ITER_BEGIN {
+    [[nodiscard]] GENEX_INLINE constexpr auto begin(this Self &&self) {
       return iterators::begin(meta::invoke(self.m_adaptor, self.m_base));
     }
 
     template <typename Self>
-    GENEX_ITER_END {
+    [[nodiscard]] GENEX_INLINE constexpr auto end(this Self &&self) {
       return iterators::end(meta::invoke(self.m_adaptor, self.m_base));
     }
 
     template <typename Self>
       requires requires(Self &s) { meta::invoke(s.m_adaptor, s.m_base).size(); }
-    GENEX_NODISCARD GENEX_INLINE constexpr auto size(this Self &&self) {
+    [[nodiscard]] GENEX_INLINE constexpr auto size(this Self &&self) {
       return meta::invoke(self.m_adaptor, self.m_base).size();
     }
 
     template <typename Self>
       requires requires(Self &s) { meta::invoke(s.m_adaptor, s.m_base).reserve_hint(); }
-    GENEX_NODISCARD GENEX_INLINE constexpr auto reserve_hint(this Self &&self) {
+    [[nodiscard]] GENEX_INLINE constexpr auto reserve_hint(this Self &&self) {
       return meta::invoke(self.m_adaptor, self.m_base).reserve_hint();
     }
 
