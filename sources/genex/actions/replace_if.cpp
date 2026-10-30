@@ -22,7 +22,7 @@ namespace genex::actions {
     template <typename Rng, typename Pred, typename New, typename Proj = meta::identity>
       requires detail::concepts::replaceable_if_range<Rng, Pred, New, Proj>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, New new_val,
-      Proj proj = {}) const -> decltype(auto) {
+      Proj proj = {}) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       for (; first != last; ++first) {
         if (meta::invoke(pred, meta::invoke(proj, *first))) {

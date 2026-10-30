@@ -39,8 +39,8 @@ namespace genex::views::detail::impl {
     using reference = reference_type;
     using pointer = void;
     using difference_type = iter_difference_t<I>;
-    using iterator_category = std::iterator_traits<I>::iterator_category;
-    using iterator_concept = iterator_category;
+    using iterator_concept = iter_strength_t<I>;
+    using iterator_category = legacy_iter_category_t<reference_type, iterator_concept>;
     GENEX_ITER_OPS(as_const_iterator);
 
     GENEX_INLINE constexpr as_const_iterator() = default;

@@ -18,7 +18,7 @@ namespace genex::views::detail::concepts {
   concept droppable_last_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
-    std::weakly_incrementable<Int>;
+    std::integral<Int>;
 
   template <typename Rng, typename Int>
   concept droppable_last_range =
@@ -97,7 +97,7 @@ namespace genex::views {
     }
 
     template <typename Int>
-      requires std::weakly_incrementable<Int>
+      requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int n) const noexcept(
       SAFE_CTOR(drop_last_fn) and SAFE_MOVE(Int)) {
       return meta::bind_back(drop_last_fn{}, n);

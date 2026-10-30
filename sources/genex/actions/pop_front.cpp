@@ -35,7 +35,7 @@ namespace genex::actions {
 
     template <typename Rng>
       requires detail::concepts::front_poppable_select_erase<Rng>
-    GENEX_INLINE auto operator()(Rng &&rng) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
       return actions::erase(rng, iterators::begin(rng));
     }
 

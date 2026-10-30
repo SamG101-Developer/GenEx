@@ -8,8 +8,7 @@ import std;
 namespace genex::iterators::detail::concepts {
   template <typename I>
   concept advancable_iters =
-    std::input_iterator<I> and
-    requires(I &it, iter_difference_t<I> n) { std::advance(it, n); };
+    std::input_or_output_iterator<I>;
 }
 
 namespace genex::iterators {
@@ -17,7 +16,18 @@ namespace genex::iterators {
     template <typename I>
       requires detail::concepts::advancable_iters<I>
     GENEX_INLINE constexpr auto operator()(I &it, const iter_difference_t<I> n = 1) const -> I {
-      std::advance(it, n);
+      if constexpr (std::random_access_iterator<I>) {
+        it += n;
+      }
+      else {
+        if constexpr (std::bidirectional_iterator<I>) {
+          for (auto i = n; i < 0; ++i) { --it; }
+        }
+        else {
+          GENEX_ASSERT(n >= 0);
+        }
+        for (auto i = n; i > 0; --i) { ++it; }
+      }
       return it;
     }
   };

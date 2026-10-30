@@ -16,7 +16,7 @@ namespace genex::views::detail::concepts {
   concept sliceable_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
-    std::weakly_incrementable<Int>;
+    std::integral<Int>;
 
   template <typename Rng, typename Int>
   concept sliceable_range =
@@ -103,7 +103,7 @@ namespace genex::views {
     }
 
     template <typename Int>
-      requires std::weakly_incrementable<Int>
+      requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int n, const Int m) const noexcept(
       SAFE_CTOR(slice_fn) and SAFE_MOVE(Int)) {
       return meta::bind_back(slice_fn{}, n, m);

@@ -98,7 +98,7 @@ namespace genex::views::detail::impl {
 
   private:
     template <typename Self>
-    auto done(this Self &&self) -> bool {
+    GENEX_INLINE constexpr auto done(this Self &&self) -> bool {
       const auto end1 = self.it1 == self.st1;
       const auto end2 = self.it2 == self.st2;
       return self.extend ? (end1 and end2) : (end1 or end2);

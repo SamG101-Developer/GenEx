@@ -37,21 +37,21 @@ namespace genex::actions {
   struct push_back_fn {
     template <typename Rng, typename E>
       requires detail::concepts::back_insertable_select_emplace_back<Rng, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> Rng {
       rng.emplace_back(std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename Rng, typename E>
       requires detail::concepts::back_insertable_select_push_back<Rng, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> Rng {
       rng.push_back(std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename Rng, typename E>
       requires detail::concepts::back_insertable_select_insert<Rng, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> Rng {
       actions::insert(rng, iterators::end(rng), std::move(elem));
       return std::forward<Rng>(rng);
     }

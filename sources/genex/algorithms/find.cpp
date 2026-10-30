@@ -43,7 +43,7 @@ namespace genex {
 
     template <typename Rng, typename E, typename Proj = meta::identity>
       requires algorithms::detail::concepts::findable_range<Rng, E, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> iterator_t<Rng> {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, E &&elem, Proj &&proj = {}) const -> borrowed_iterator_t<Rng> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_find(
         std::move(first), std::move(last), std::forward<E>(elem), std::forward<Proj>(proj));

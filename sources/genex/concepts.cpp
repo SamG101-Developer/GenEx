@@ -200,6 +200,45 @@ export namespace genex {
     std::is_lvalue_reference_v<Rng> or
     enable_view<std::remove_cvref_t<Rng>> or
     enable_borrowed_range<std::remove_cvref_t<Rng>>;
+
+  /**
+   * What an algorithm returns instead of an iterator into an rvalue range that is about to be destroyed. It can't be
+   * dereferenced, so misusing it is a compile error.
+   */
+  struct dangling {
+    constexpr dangling() noexcept = default;
+
+    template <typename... Args>
+    constexpr dangling(Args &&...) noexcept {
+    }
+  };
+
+  template <typename Rng>
+  using borrowed_iterator_t = std::conditional_t<non_dangling_range<Rng>, iterator_t<Rng>, dangling>;
+
+  /**
+   * An element of a range: a reference where the range outlives the call, otherwise a copy.
+   */
+  template <typename Rng>
+  using borrowed_reference_t = std::conditional_t<non_dangling_range<Rng>, range_reference_t<Rng>, range_value_t<Rng>>;
+
+  /**
+   * The strongest tag an iterator models, for an adaptor's @c iterator_concept.
+   */
+  template <typename I>
+  using iter_strength_t =
+    std::conditional_t<std::random_access_iterator<I>, std::random_access_iterator_tag,
+    std::conditional_t<std::bidirectional_iterator<I>, std::bidirectional_iterator_tag,
+    std::conditional_t<std::forward_iterator<I>, std::forward_iterator_tag, std::input_iterator_tag>>>;
+
+  /**
+   * An adaptor's @c iterator_category, which legacy algorithms dispatch on. Legacy forward iterators and above must
+   * return a true reference, so an iterator returning a prvalue can only claim to be an input iterator there, whatever
+   * @c iterator_concept says it models.
+   */
+  template <typename Reference, typename Concept>
+  using legacy_iter_category_t =
+    std::conditional_t<std::is_lvalue_reference_v<Reference>, Concept, std::input_iterator_tag>;
 }
 
 export namespace genex {

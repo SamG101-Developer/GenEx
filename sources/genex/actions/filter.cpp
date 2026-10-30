@@ -21,7 +21,7 @@ namespace genex::actions {
   struct filter_fn {
     template <typename Rng, typename Pred, typename Proj = meta::identity>
       requires detail::concepts::filterable_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
       auto it = iterators::begin(rng);
       while (it != iterators::end(rng)) {
         if (meta::invoke(pred, meta::invoke(proj, *it))) { ++it; }

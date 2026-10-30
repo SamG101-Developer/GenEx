@@ -45,8 +45,8 @@ namespace genex::views::detail::impl {
     using reference = reference_type;
     using pointer = void;
     using difference_type = iter_difference_t<I>;
-    using iterator_category = std::iterator_traits<I>::iterator_category;
-    using iterator_concept = iterator_category;
+    using iterator_concept = iter_strength_t<I>;
+    using iterator_category = legacy_iter_category_t<reference_type, iterator_concept>;
     GENEX_ITER_OPS(transform_iterator)
 
     GENEX_INLINE constexpr transform_iterator() = default;
@@ -82,7 +82,7 @@ namespace genex::views::detail::impl {
 
   private:
     template <typename Self, typename I2, typename S2>
-    auto recursive_eq(this Self &&self, I2 i, S2 s) -> bool {
+    GENEX_INLINE constexpr auto recursive_eq(this Self &&self, I2 i, S2 s) -> bool {
       if constexpr (requires { i == s; }) { return i == s; }
       else { return self.recursive_eq(i.it, s); }
     }

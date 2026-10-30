@@ -60,7 +60,7 @@ namespace genex {
 
     template <typename Rng, typename Pred, typename Proj = meta::identity>
       requires algorithms::detail::concepts::findable_last_if_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> iterator_t<Rng> {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> borrowed_iterator_t<Rng> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_find_last_if(
         std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));

@@ -21,7 +21,7 @@ namespace genex::actions {
   struct drop_while_fn {
     template <typename Rng, typename Pred>
       requires detail::concepts::droppable_while_range<Rng, Pred>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred) const -> Rng {
       actions::erase(
         rng, iterators::begin(rng),
         genex::find_if_not(iterators::begin(rng), iterators::end(rng), std::move(pred)));

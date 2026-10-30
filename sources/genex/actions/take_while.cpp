@@ -21,7 +21,7 @@ namespace genex::actions {
   struct take_while_fn {
     template <typename Rng, typename Pred>
       requires detail::concepts::takeable_while_range<Rng, Pred>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred) const -> Rng {
       actions::erase(rng, genex::find_if_not(iterators::begin(rng), iterators::end(rng), pred), iterators::end(rng));
       return std::forward<Rng>(rng);
     }

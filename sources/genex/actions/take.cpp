@@ -14,14 +14,14 @@ namespace genex::actions::detail::concepts {
   template <typename Rng, typename Int>
   concept takeable_range =
     forward_range<Rng> and
-    std::weakly_incrementable<Int>;
+    std::integral<Int>;
 }
 
 namespace genex::actions {
   struct take_fn {
     template <typename Rng, typename Int>
       requires detail::concepts::takeable_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Int n) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Int n) const -> Rng {
       GENEX_ASSERT(n >= 0);
       actions::erase(
         rng,
@@ -31,7 +31,7 @@ namespace genex::actions {
     }
 
     template <typename Int>
-      requires std::weakly_incrementable<Int>
+      requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int n) const {
       GENEX_ASSERT(n >= 0);
       return meta::bind_back(take_fn{}, n);

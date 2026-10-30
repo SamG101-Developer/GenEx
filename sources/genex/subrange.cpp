@@ -74,7 +74,9 @@ namespace genex {
     GENEX_NODISCARD GENEX_INLINE constexpr auto back() const -> reference
       requires std::bidirectional_iterator<I> and std::same_as<I, S> {
       GENEX_ASSERT(not empty());
-      return *std::prev(m_st);
+      auto last = m_st;
+      --last;
+      return *last;
     }
 
     GENEX_NODISCARD GENEX_INLINE constexpr auto operator[](const difference_type n) const -> reference

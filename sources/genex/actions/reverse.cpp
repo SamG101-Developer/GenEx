@@ -21,7 +21,7 @@ namespace genex::actions {
       requires detail::concepts::reversible_range<Rng>
       and random_access_range<Rng>
 
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       while (first != last and first < --last) {
         std::iter_swap(first++, last);
@@ -31,7 +31,7 @@ namespace genex::actions {
 
     template <typename Rng>
       requires detail::concepts::reversible_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       while (first != last and first != --last) {
         std::iter_swap(first++, last);

@@ -16,14 +16,14 @@ namespace genex::actions::detail::concepts {
   template <typename Rng, typename Int>
   concept sliceable_range =
     forward_range<Rng> and
-    std::weakly_incrementable<Int>;
+    std::integral<Int>;
 }
 
 namespace genex::actions {
   struct slice_fn {
     template <typename Rng, typename Int>
       requires detail::concepts::sliceable_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Int from, Int to) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Int from, Int to) const -> Rng {
       actions::erase(rng, iterators::begin(rng), iterators::next(iterators::begin(rng), from, iterators::end(rng)));
       actions::erase(rng, iterators::next(iterators::begin(rng), to - from), iterators::end(rng));
       return std::forward<Rng>(rng);
@@ -31,19 +31,19 @@ namespace genex::actions {
 
     template <typename Rng, typename Int>
       requires detail::concepts::sliceable_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Int from) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Int from) const -> Rng {
       actions::erase(rng, iterators::begin(rng), iterators::next(iterators::begin(rng), from, iterators::end(rng)));
       return std::forward<Rng>(rng);
     }
 
     template <typename Int>
-      requires std::weakly_incrementable<Int>
+      requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int from, const Int to) const {
       return meta::bind_back(slice_fn{}, from, to);
     }
 
     template <typename Int>
-      requires std::weakly_incrementable<Int>
+      requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int from) const {
       return meta::bind_back(slice_fn{}, from);
     }

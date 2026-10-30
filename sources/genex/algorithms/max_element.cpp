@@ -46,7 +46,7 @@ namespace genex {
     template <typename Rng, typename Comp = operations::gt, typename Proj = meta::identity>
       requires algorithms::detail::concepts::maxable_range<Rng, Comp, Proj>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp &&comp = {},
-      Proj &&proj = {}) const -> range_reference_t<Rng> {
+      Proj &&proj = {}) const -> borrowed_reference_t<Rng> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_max_element(
         std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));

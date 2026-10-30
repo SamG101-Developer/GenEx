@@ -41,10 +41,9 @@ namespace genex::views::detail::impl {
     using value_type = iter_value_t<I>;
     using reference_type = iter_reference_t<I>;
     using difference_type = iter_difference_t<I>;
-    using iterator_category = std::conditional_t<
-      std::bidirectional_iterator<I>, std::bidirectional_iterator_tag,
-      typename std::iterator_traits<I>::iterator_category>;
-    using iterator_concept = iterator_category;
+    using iterator_concept = std::conditional_t<
+      std::bidirectional_iterator<I>, std::bidirectional_iterator_tag, iter_strength_t<I>>;
+    using iterator_category = legacy_iter_category_t<reference_type, iterator_concept>;
     GENEX_ITER_OPS(intersperse_iterator)
 
     GENEX_INLINE constexpr intersperse_iterator() = default;

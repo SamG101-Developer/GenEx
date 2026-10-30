@@ -79,6 +79,18 @@ namespace genex::views {
       return detail::impl::divide_impl<N>(std::move(first), std::move(last));
     }
 
+    template <typename Rng>
+      requires (not non_dangling_range<Rng>) and detail::concepts::divisible_range<N, Rng&>
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+      using part_t = std::vector<range_value_t<Rng>>;
+      auto parts = (*this)(rng);
+      return [&]<std::size_t... Is>(std::index_sequence<Is...>) -> std::array<part_t, N> {
+        return std::array<part_t, N>{
+          part_t(std::make_move_iterator(parts[Is].begin()), std::make_move_iterator(parts[Is].end()))...
+        };
+      }(std::make_index_sequence<N>{});
+    }
+
     GENEX_INLINE constexpr auto operator()() const noexcept(
       SAFE_CTOR(divide_fn)) {
       return meta::bind_back(divide_fn{});

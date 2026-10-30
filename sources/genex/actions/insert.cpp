@@ -48,7 +48,7 @@ namespace genex::actions {
   struct insert_fn {
     template <typename Rng, typename I, typename E>
       requires detail::concepts::insertable_select_emplace<Rng, I, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, E elem) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, E elem) const -> Rng {
       detail::assert_in_range(rng, it);
       rng.emplace(std::move(it), std::move(elem));
       return std::forward<Rng>(rng);
@@ -56,7 +56,7 @@ namespace genex::actions {
 
     template <typename Rng, typename I, typename E>
       requires detail::concepts::insertable_select_push<Rng, I, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, E elem) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, E elem) const -> Rng {
       detail::assert_in_range(rng, it);
       rng.push(std::move(it), std::move(elem));
       return std::forward<Rng>(rng);
@@ -64,7 +64,7 @@ namespace genex::actions {
 
     template <typename Rng, typename I, typename E>
       requires detail::concepts::insertable_select_insert<Rng, I, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, E elem) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, E elem) const -> Rng {
       detail::assert_in_range(rng, it);
       rng.insert(std::move(it), std::move(elem));
       return std::forward<Rng>(rng);

@@ -20,7 +20,7 @@ namespace genex::actions {
   struct concat_fn {
     template <typename Rng1, typename Rng2>
       requires detail::concepts::concatenatable_range<Rng1, Rng2>
-    GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> Rng1 {
       for (auto &&x : rng2) {
         rng1 |= actions::insert(iterators::end(rng1), std::forward<decltype(x)>(x));
       }
@@ -29,7 +29,7 @@ namespace genex::actions {
 
     template <typename Rng1, typename Rng2, typename... Rngs>
       requires (detail::concepts::concatenatable_range<Rng1, Rng2, Rngs...> and sizeof...(Rngs) > 0)
-    GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Rngs &&... rngs) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, Rngs &&... rngs) const -> Rng1 {
       (*this)(rng1, std::forward<Rng2>(rng2));
       return (*this)(std::forward<Rng1>(rng1), std::forward<Rngs>(rngs)...);
     }

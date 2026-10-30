@@ -9,28 +9,36 @@ import genex.iterators.iter_pair;
 import std;
 
 namespace genex {
+  template <typename Out, typename Rng>
+  concept reserve_pushable =
+    has_member_size<Rng> and
+    has_member_reserve<Out> and
+    has_member_push_back<Out>;
+
   export template <template <typename> typename Out, typename Rng>
     requires input_range<Rng>
+    and (not reserve_pushable<Out<range_value_t<Rng>>, Rng>)
     and std::copyable<range_value_t<Rng>> and requires(Rng &&rng)
     {
       Out<range_value_t<Rng>>(iterators::begin(rng), iterators::end(rng));
     }
 
-  GENEX_INLINE auto to_base_fn(Rng &&rng) -> Out<range_value_t<Rng>> {
+  GENEX_INLINE constexpr auto to_base_fn(Rng &&rng) -> Out<range_value_t<Rng>> {
     return Out<range_value_t<Rng>>(iterators::begin(rng), iterators::end(rng));
   }
 
   export template <typename Out, typename Rng>
     requires input_range<Rng>
+    and (not reserve_pushable<Out, Rng>)
     and std::copyable<range_value_t<Rng>> and requires(Rng &&rng) { Out(iterators::begin(rng), iterators::end(rng)); }
 
-  GENEX_INLINE auto to_base_fn(Rng &&rng) -> Out {
+  GENEX_INLINE constexpr auto to_base_fn(Rng &&rng) -> Out {
     return Out(iterators::begin(rng), iterators::end(rng));
   }
 
   export template <template <typename> typename Out, typename Rng>
     requires input_range<Rng>
-  GENEX_INLINE auto to_base_fn(Rng &&rng) -> Out<range_value_t<Rng>> {
+  GENEX_INLINE constexpr auto to_base_fn(Rng &&rng) -> Out<range_value_t<Rng>> {
     Out<range_value_t<Rng>> out;
     auto [first, last] = iterators::iter_pair(rng);
     if constexpr (has_member_size<Rng> and has_member_reserve<Out<range_value_t<Rng>>>) {
@@ -47,7 +55,7 @@ namespace genex {
 
   export template <typename Out, typename Rng>
     requires input_range<Rng>
-  GENEX_INLINE auto to_base_fn(Rng &&rng) -> Out {
+  GENEX_INLINE constexpr auto to_base_fn(Rng &&rng) -> Out {
     Out out;
     auto [first, last] = iterators::iter_pair(rng);
     if constexpr (has_member_size<Rng> and has_member_reserve<Out>) {
@@ -63,14 +71,14 @@ namespace genex {
   }
 
   export template <template <typename...> typename Out>
-  GENEX_INLINE auto to() -> auto {
+  GENEX_INLINE constexpr auto to() -> auto {
     return []<typename Rng> requires input_range<Rng>(Rng &&rng) {
       return to_base_fn<Out>(std::forward<Rng>(rng));
     };
   }
 
   export template <typename Out>
-  GENEX_INLINE auto to() -> auto {
+  GENEX_INLINE constexpr auto to() -> auto {
     return []<typename Rng> requires input_range<Rng>(Rng &&rng) {
       return to_base_fn<Out>(std::forward<Rng>(rng));
     };

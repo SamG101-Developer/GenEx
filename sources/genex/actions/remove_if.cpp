@@ -22,7 +22,7 @@ namespace genex::actions {
   struct remove_if_fn {
     template <typename Rng, typename Pred, typename Proj = meta::identity>
       requires detail::concepts::removable_if_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
       // todo: optimize to prevent multi-passes.
       while (true) {
         auto it = genex::find_if(rng, pred, proj);

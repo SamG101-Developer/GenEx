@@ -38,7 +38,7 @@ namespace genex::views::detail::impl {
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::input_iterator_tag;
     using iterator_concept = iterator_category;
-    GENEX_ITER_OPS(cast_dynamic_iterator);
+    GENEX_ITER_OPS_MINIMAL(cast_dynamic_iterator);
 
     GENEX_INLINE constexpr cast_dynamic_iterator() = default;
 
@@ -51,13 +51,6 @@ namespace genex::views::detail::impl {
     GENEX_VIEW_CUSTOM_NEXT {
       ++self.it;
       self.fwd_to_valid();
-      return self;
-    }
-
-    template <typename Self>
-    GENEX_VIEW_CUSTOM_PREV {
-      --self.it;
-      self.bwd_to_valid();
       return self;
     }
 
@@ -82,15 +75,6 @@ namespace genex::views::detail::impl {
         self.update_cache();
         if (self.cached != nullptr) { break; }
         ++self.it;
-      }
-    }
-
-    template <typename Self>
-    GENEX_INLINE constexpr auto bwd_to_valid(this Self &&self) -> void {
-      while (self.it != self.st) {
-        self.update_cache();
-        if (self.cached != nullptr) { break; }
-        --self.it;
       }
     }
 

@@ -19,7 +19,7 @@ namespace genex::actions {
   struct fill_fn {
     template <typename Rng, typename E>
       requires detail::concepts::fillable_range<Rng, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E value) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, E value) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       for (; first != last; ++first) { *first = value; }
       return std::forward<Rng>(rng);

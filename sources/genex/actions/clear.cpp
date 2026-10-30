@@ -18,7 +18,7 @@ namespace genex::actions {
   struct clear_fn {
     template <typename Rng>
       requires detail::concepts::clearable_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> Rng {
       rng.clear();
       return std::forward<Rng>(rng);
     }

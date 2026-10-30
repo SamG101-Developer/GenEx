@@ -26,7 +26,7 @@ namespace genex::actions {
   struct remove_fn {
     template <typename Rng, typename E, typename Proj = meta::identity>
       requires detail::concepts::removable_range<Rng, E, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem, Proj proj = {}) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem, Proj proj = {}) const -> Rng {
       // todo: optimize to prevent multi-passes.
       while (true) {
         auto it = genex::find(rng, elem, proj);

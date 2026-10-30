@@ -21,7 +21,7 @@ namespace genex::actions {
   struct partition_fn {
     template <typename Rng, typename Pred, typename Proj = meta::identity>
       requires detail::concepts::partitionable_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       auto partitioner = [&]<typename T>(T &&elem) {
         return meta::invoke(pred, meta::invoke(proj, std::forward<T>(elem)));
@@ -40,7 +40,7 @@ namespace genex::actions {
   struct stable_partition_fn {
     template <typename Rng, typename Pred, typename Proj = meta::identity>
       requires detail::concepts::partitionable_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       auto partitioner = [&]<typename T>(T &&elem) {
         return meta::invoke(pred, meta::invoke(proj, std::forward<T>(elem)));

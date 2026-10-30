@@ -22,7 +22,7 @@ namespace genex::actions {
   struct unique_fn {
     template <typename Rng, typename Comp = operations::eq, typename Proj = meta::identity>
       requires detail::concepts::uniqueable_range<Rng, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
       auto it = iterators::begin(rng);
       if (it == iterators::end(rng)) { return std::forward<Rng>(rng); }
 

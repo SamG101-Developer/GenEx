@@ -26,7 +26,7 @@ namespace genex::actions {
     template <typename Rng, typename Old, typename New, typename Proj = meta::identity>
       requires detail::concepts::replaceable_range<Rng, Old, New, Proj>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Old old_val, New new_val,
-      Proj proj = {}) const -> decltype(auto) {
+      Proj proj = {}) const -> Rng {
       for (auto it = iterators::begin(rng); it != iterators::end(rng); ++it) {
         if (operations::eq{}(meta::invoke(proj, *it), old_val)) { *it = new_val; }
       }

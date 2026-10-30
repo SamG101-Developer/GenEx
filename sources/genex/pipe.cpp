@@ -139,21 +139,21 @@ namespace genex::detail {
 
 // Usage: auto range = vector | genex::views::___
 export template <typename T, typename F> requires (not genex::detail::needs_owner<T, F>) and std::invocable<F, T>
-GENEX_INLINE auto operator|(T &&lhs, F &&rhs) -> decltype(auto) {
+GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) -> decltype(auto) {
   return genex::meta::invoke(std::forward<F>(rhs), std::forward<T>(lhs));
 }
 
 // Usage: auto range = make_vector() | genex::views::___
 export template <typename T, typename F>
   requires genex::detail::needs_owner<T, F> and (not genex::detail::is_owning_view_v<T>)
-GENEX_INLINE auto operator|(T &&lhs, F &&rhs) {
+GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) {
   return genex::detail::owning_view<T, std::decay_t<F>>(std::forward<T>(lhs), std::forward<F>(rhs));
 }
 
 // Usage: auto range = make_vector() | genex::views::___ | genex::views::___
 export template <typename T, typename F>
   requires genex::detail::needs_owner<T, F> and genex::detail::is_owning_view_v<T>
-GENEX_INLINE auto operator|(T &&lhs, F &&rhs) {
+GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) {
   using composed_t = genex::detail::composed_adaptor<typename T::adaptor_type, std::decay_t<F>>;
   auto composed = composed_t{std::move(lhs).adaptor(), std::forward<F>(rhs)};
   return genex::detail::owning_view<typename T::base_type, composed_t>(std::move(lhs).base(), std::move(composed));
@@ -161,6 +161,6 @@ GENEX_INLINE auto operator|(T &&lhs, F &&rhs) {
 
 // Usage: vector |= genex::actions::___
 export template <typename T, typename F> requires std::invocable<F, T>
-GENEX_INLINE auto operator|=(T &&lhs, F &&rhs) -> decltype(auto) {
+GENEX_INLINE constexpr auto operator|=(T &&lhs, F &&rhs) -> decltype(auto) {
   return genex::meta::invoke(std::forward<F>(rhs), std::forward<T>(lhs));
 }

@@ -49,11 +49,11 @@ namespace genex::views::detail::impl {
     using value_type = std::tuple<iter_value_t<iterator_t<Rngs>>...>;
     using reference_type = std::tuple<iter_reference_t<iterator_t<Rngs>>...>;
     using difference_type = std::common_type_t<iter_difference_t<iterator_t<Rngs>>...>;
-    using iterator_category = std::conditional_t<
+    using iterator_concept = std::conditional_t<
       (std::random_access_iterator<iterator_t<Rngs>> and ...), std::random_access_iterator_tag, std::conditional_t<
         (std::bidirectional_iterator<iterator_t<Rngs>> and ...), std::bidirectional_iterator_tag, std::conditional_t<
           (std::forward_iterator<iterator_t<Rngs>> and ...), std::forward_iterator_tag, std::input_iterator_tag>>>;
-    using iterator_concept = iterator_category;
+    using iterator_category = legacy_iter_category_t<reference_type, iterator_concept>;
 
     GENEX_INLINE constexpr zip_iterator() = default;
 

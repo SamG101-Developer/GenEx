@@ -3,6 +3,7 @@ module;
 
 export module genex.iterators.next;
 import genex.concepts;
+import genex.iterators.advance;
 import std;
 
 namespace genex::iterators::detail::concepts {
@@ -17,8 +18,7 @@ namespace genex::iterators {
     template <typename I>
       requires detail::concepts::nextable_iters<I> and std::copyable<I>
     GENEX_INLINE constexpr auto operator()(I it, const iter_difference_t<I> n = 1) const -> I {
-      std::advance(it, n);
-      return it;
+      return iterators::advance(it, n);
     }
 
     template <typename I, typename S>

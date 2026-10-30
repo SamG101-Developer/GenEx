@@ -74,9 +74,12 @@
     return not (self == that);                                                                \
   }
 
-#define GENEX_RANDOM_ACCESS_ON_IT(Type)                           \
-  (std::random_access_iterator<decltype(std::declval<Type>().it)> \
-   || std::integral<decltype(std::declval<Type>().it)>)
+// Only for an iterator that says it is random access: a position in `it` isn't always a position in the iterator, as
+// with a stride or a filter, and a reversed iterator runs the other way.
+#define GENEX_RANDOM_ACCESS_ON_IT(Type)                                                \
+  (std::derived_from<typename Type::iterator_concept, std::random_access_iterator_tag> \
+   and (std::random_access_iterator<decltype(std::declval<Type>().it)>                 \
+        or std::integral<decltype(std::declval<Type>().it)>))
 
 #define GENEX_ITER_OPS(Type)                                                                                \
   GENEX_ITER_OPS_MINIMAL(Type)                                                                              \
