@@ -9,7 +9,13 @@ if (NOT GTest_FOUND)
     googletest
     URL https://github.com/google/googletest/archive/refs/tags/v1.18.0.tar.gz
     URL_HASH SHA256=6e3191c1455468b3fc35a417fb565c1c5071aee1b7e7f85e30cf48a98d37d8b5)
-  FetchContent_MakeAvailable(googletest)
+
+  # GoogleTest doesn't use modules, and asks for an older standard than "import std" can be built with.
+  block()
+    set(CMAKE_CXX_MODULE_STD OFF)
+    set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+    FetchContent_MakeAvailable(googletest)
+  endblock()
 endif ()
 
 # Build the test executable.
