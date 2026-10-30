@@ -47,27 +47,27 @@ export namespace genex {
 
 export namespace genex {
   template <typename Rng>
-  concept has_std_begin = requires(Rng &rng)
-  {
+  concept has_std_begin = requires(Rng &rng) {
     { std::begin(std::forward<Rng>(rng)) } -> std::input_or_output_iterator;
   };
 
   template <typename Rng>
-  concept has_std_end = requires(Rng &rng)
-  {
-    { std::end(std::forward<Rng>(rng)) } -> std::sentinel_for<decltype(std::begin(std::forward<Rng>(rng)))>;
+  concept has_std_end = requires(Rng &rng) {
+    {
+      std::end(std::forward<Rng>(rng))
+    } -> std::sentinel_for<decltype(std::begin(std::forward<Rng>(rng)))>;
   };
 
   template <typename Rng>
-  concept has_std_rbegin = requires(Rng &rng)
-  {
+  concept has_std_rbegin = requires(Rng &rng) {
     { std::rbegin(std::forward<Rng>(rng)) } -> std::input_or_output_iterator;
   };
 
   template <typename Rng>
-  concept has_std_rend = requires(Rng &rng)
-  {
-    { std::rend(std::forward<Rng>(rng)) } -> std::sentinel_for<decltype(std::rbegin(std::forward<Rng>(rng)))>;
+  concept has_std_rend = requires(Rng &rng) {
+    {
+      std::rend(std::forward<Rng>(rng))
+    } -> std::sentinel_for<decltype(std::rbegin(std::forward<Rng>(rng)))>;
   };
 
   template <typename Rng>
@@ -89,7 +89,9 @@ export namespace genex {
   concept has_member_size = requires(Rng &rng) { rng.size(); };
 
   template <typename Rng>
-  concept has_member_reserve = requires(Rng &rng) { rng.reserve(std::declval<std::size_t>()); };
+  concept has_member_reserve = requires(Rng &rng) {
+    rng.reserve(std::declval<std::size_t>());
+  };
 
   template <typename Rng>
   concept has_member_reserve_hint = requires(Rng &rng) { rng.reserve_hint(); };
@@ -98,33 +100,41 @@ export namespace genex {
   concept has_member_empty = requires(Rng &rng) { rng.empty(); };
 
   template <typename Rng>
-  concept has_member_push_back = requires(Rng &rng) { rng.push_back(std::declval<range_value_t<Rng>>()); };
-
-  template <typename Rng>
-  concept has_member_emplace_back = requires(Rng &rng) { rng.emplace_back(std::declval<range_value_t<Rng>>()); };
-
-  template <typename Rng>
-  concept has_member_push_front = requires(Rng &rng) { rng.push_front(std::declval<range_value_t<Rng>>()); };
-
-  template <typename Rng>
-  concept has_member_emplace_front = requires(Rng &rng) { rng.emplace_front(std::declval<range_value_t<Rng>>()); };
-
-  template <typename Rng>
-  concept has_member_push = requires(Rng &rng)
-  {
-    rng.push(std::declval<iterator_t<Rng>>(), std::declval<range_value_t<Rng>>());
+  concept has_member_push_back = requires(Rng &rng) {
+    rng.push_back(std::declval<range_value_t<Rng>>());
   };
 
   template <typename Rng>
-  concept has_member_emplace = requires(Rng &rng)
-  {
-    rng.emplace(std::declval<iterator_t<Rng>>(), std::declval<range_value_t<Rng>>());
+  concept has_member_emplace_back = requires(Rng &rng) {
+    rng.emplace_back(std::declval<range_value_t<Rng>>());
   };
 
   template <typename Rng>
-  concept has_member_insert = requires(Rng &rng)
-  {
-    rng.insert(std::declval<iterator_t<Rng>>(), std::declval<range_value_t<Rng>>());
+  concept has_member_push_front = requires(Rng &rng) {
+    rng.push_front(std::declval<range_value_t<Rng>>());
+  };
+
+  template <typename Rng>
+  concept has_member_emplace_front = requires(Rng &rng) {
+    rng.emplace_front(std::declval<range_value_t<Rng>>());
+  };
+
+  template <typename Rng>
+  concept has_member_push = requires(Rng &rng) {
+    rng.push(std::declval<iterator_t<Rng>>(),
+             std::declval<range_value_t<Rng>>());
+  };
+
+  template <typename Rng>
+  concept has_member_emplace = requires(Rng &rng) {
+    rng.emplace(std::declval<iterator_t<Rng>>(),
+                std::declval<range_value_t<Rng>>());
+  };
+
+  template <typename Rng>
+  concept has_member_insert = requires(Rng &rng) {
+    rng.insert(std::declval<iterator_t<Rng>>(),
+               std::declval<range_value_t<Rng>>());
   };
 
   template <typename Rng>
@@ -134,10 +144,14 @@ export namespace genex {
   concept has_member_pop_front = requires(Rng &rng) { rng.pop_front(); };
 
   template <typename Rng>
-  concept has_member_pop = requires(Rng &rng) { rng.pop(std::declval<std::size_t>()); };
+  concept has_member_pop = requires(Rng &rng) {
+    rng.pop(std::declval<std::size_t>());
+  };
 
   template <typename Rng>
-  concept has_member_erase = requires(Rng &rng) { rng.erase(std::declval<iterator_t<Rng>>()); };
+  concept has_member_erase = requires(Rng &rng) {
+    rng.erase(std::declval<iterator_t<Rng>>());
+  };
 
   template <typename Rng>
   concept has_member_clear = requires(Rng &rng) { rng.clear(); };
@@ -184,9 +198,11 @@ export namespace genex {
 export namespace genex {
   template <std::size_t I = 0, typename... Ts, typename... Us>
     requires (I <= sizeof...(Ts) and sizeof...(Ts) == sizeof...(Us))
-  constexpr auto any_iterator_finished(const std::tuple<Ts...> &starts, const std::tuple<Us...> &ends) -> bool {
+  constexpr auto any_iterator_finished(const std::tuple<Ts...> &starts,
+    const std::tuple<Us...> &ends) -> bool {
     if constexpr (I < sizeof...(Ts)) {
-      return std::get<I>(starts) == std::get<I>(ends) or any_iterator_finished<I + 1>(starts, ends);
+      return std::get<I>(starts) == std::get<I>(ends) or any_iterator_finished<I
+        + 1>(starts, ends);
     }
     else {
       return false;
@@ -194,17 +210,22 @@ export namespace genex {
   }
 
   template <typename Tuple, std::size_t... Is>
-  constexpr auto deref_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> auto {
-    return std::tuple<iter_reference_t<std::tuple_element_t<Is, Tuple>>...>{(*std::get<Is>(t))...};
+  constexpr auto
+  deref_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> auto {
+    return std::tuple<iter_reference_t<std::tuple_element_t<Is, Tuple>>...>{
+      (*std::get<Is>(t))...
+    };
   }
 
   template <typename Tuple>
   constexpr auto deref_tuple(Tuple &t) -> auto {
-    return deref_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+    return deref_tuple_impl(
+      t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
   }
 
   template <typename Tuple, std::size_t... Is>
-  constexpr auto advance_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> void {
+  constexpr auto advance_tuple_impl(Tuple &t,
+    std::index_sequence<Is...>) -> void {
     ((++std::get<Is>(t)), ...);
   }
 
@@ -214,17 +235,20 @@ export namespace genex {
   }
 
   template <typename Tuple, typename Diff, std::size_t... Is>
-  constexpr auto advance_tuple_impl(Tuple &t, Diff n, std::index_sequence<Is...>) -> void {
+  constexpr auto advance_tuple_impl(Tuple &t, Diff n,
+    std::index_sequence<Is...>) -> void {
     ((std::get<Is>(t) += n), ...);
   }
 
   template <typename Tuple, typename Diff>
   constexpr auto advance_tuple(Tuple &t, Diff n) -> void {
-    advance_tuple_impl(t, n, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+    advance_tuple_impl(
+      t, n, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
   }
 
   template <typename Tuple, std::size_t... Is>
-  constexpr auto retreat_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> void {
+  constexpr auto retreat_tuple_impl(Tuple &t,
+    std::index_sequence<Is...>) -> void {
     ((--std::get<Is>(t)), ...);
   }
 
@@ -234,13 +258,15 @@ export namespace genex {
   }
 
   template <typename Tuple, typename Diff, std::size_t... Is>
-  constexpr auto retreat_tuple_impl(Tuple &t, Diff n, std::index_sequence<Is...>) -> void {
+  constexpr auto retreat_tuple_impl(Tuple &t, Diff n,
+    std::index_sequence<Is...>) -> void {
     ((std::get<Is>(t) -= n), ...);
   }
 
   template <typename Tuple, typename Diff>
   constexpr auto retreat_tuple(Tuple &t, Diff n) -> void {
-    retreat_tuple_impl(t, n, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+    retreat_tuple_impl(
+      t, n, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
   }
 
   template <typename Tuple>
