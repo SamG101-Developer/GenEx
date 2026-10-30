@@ -1,0 +1,26 @@
+# After a merge to master: build and test GenEx with every
+# compiler again, as the merge result is not what the PR tested
+# if master moved on underneath it. Nothing is shipped.
+
+name: Post-merge
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch: { }
+
+permissions: { }
+
+concurrency:
+  group: post-merge
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    # A dependabot merge only moves action pins, and its PR has
+    # already run them.
+    if: github.event.head_commit.author.name != 'dependabot[bot]'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_build.yaml

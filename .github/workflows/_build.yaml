@@ -1,0 +1,98 @@
+# Build GenEx and run its unit tests with each compiler, on its
+# own runner, in Debug and Release. Called by pr.yaml and
+# post_merge.yaml.
+#
+# Every toolchain is prebuilt, the newest the runner can get:
+# GCC from the toolchain PPA, LLVM from Homebrew, MSVC from the
+# runner image. Ubuntu 26.04 and the VS2026 image already carry
+# CMake and Ninja new enough for "import std".
+#
+# Both configs run because GENEX_ASSERT only exists in Debug.
+# A target with "required: false" may fail without failing the
+# build, so a port's progress shows before it can block a merge.
+
+name: build
+
+on:
+  workflow_call: { }
+
+permissions: { }
+
+jobs:
+  build:
+    name: ${{ matrix.platform.target }} (${{ matrix.config }})
+    runs-on: ${{ matrix.platform.os }}
+    timeout-minutes: 60
+    continue-on-error: ${{ !matrix.platform.required }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [ Debug, Release ]
+        platform:
+          - { target: x86_64-linux-gcc,    os: ubuntu-26.04,        compiler: gcc,  required: true }
+          - { target: aarch64-linux-gcc,   os: ubuntu-26.04-arm,    compiler: gcc,  required: true }
+          - { target: aarch64-macos-llvm,  os: macos-26,            compiler: llvm, required: false }
+          - { target: x86_64-windows-msvc, os: windows-2025-vs2026, compiler: msvc, required: false }
+
+    # Windows otherwise defaults "run" to PowerShell.
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # macOS goes without it. Todo: egress stays on audit until
+      # its endpoints are known. Linux keeps sudo to install GCC.
+      - name: Harden Runner
+        if: runner.os != 'macOS'
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2  # v2.22.2
+        with:
+          egress-policy: audit
+          disable-sudo: ${{ runner.os != 'Linux' }}
+
+      - name: Checkout GenEx
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install gcc
+        if: matrix.platform.compiler == 'gcc'
+        run: |
+          sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+          sudo apt-get install --yes g++-16 libgtest-dev
+          echo "CXX=g++-16" >> "$GITHUB_ENV"
+
+      # Homebrew's clang, not Apple's, which has no "import std".
+      # Its libc++ is not on the default search paths.
+      - name: Install llvm
+        if: matrix.platform.compiler == 'llvm'
+        run: |
+          brew install llvm cmake ninja googletest
+          llvm=$(brew --prefix llvm)
+          echo "CXX=$llvm/bin/clang++" >> "$GITHUB_ENV"
+          echo "LDFLAGS=-L$llvm/lib/c++ -Wl,-rpath,$llvm/lib/c++" >> "$GITHUB_ENV"
+
+      - name: Set up msvc
+        if: matrix.platform.compiler == 'msvc'
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756  # v1.13.0
+
+      - name: Select msvc
+        if: matrix.platform.compiler == 'msvc'
+        run: echo "CXX=cl" >> "$GITHUB_ENV"
+
+      - name: Show the toolchain
+        run: |
+          cmake --version | head -n 1
+          echo "ninja $(ninja --version)"
+          if [ "$CXX" != cl ]; then "$CXX" --version | head -n 1; fi
+
+      # Ninja, as the Visual Studio generators cannot "import std".
+      - name: Build (${{ matrix.config }})
+        env:
+          CONFIG: ${{ matrix.config }}
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE="$CONFIG" -DGENEX_BUILD_TESTS=ON
+          cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure --parallel 4
