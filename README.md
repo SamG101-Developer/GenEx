@@ -39,8 +39,8 @@ auto main() -> int {
 ```
 
 In this example, the range is transformed to double each element and then filtered to only include elements that are
-divisible by 4. That range cannot be reversed, because generators cannot be reversed, so instead, the `materialize` view
-is used, which doesn't immediately unroll the generator into a vector, but will yield into a vector when iterated over,
+divisible by 4. That range cannot be reversed. Generators cannot be reversed, so instead, the `materialize` view is
+used, which doesn't immediately unroll the generator into a vector, but will yield into a vector when iterated over,
 allowing the bidirectional `reverse` view to be applied. Finally, the range is converted to a vector using the `to`
 view.
 
@@ -54,6 +54,18 @@ eagerly evaluated, meaning they perform the operation immediately.
 There are a number of algorithms designed to be used with ranges. Whilst the algorithms are designed to be used with the
 views, they can be used with almost any container. These are effectively functions over ranges that don't return a view,
 such as `any_of` or `fold_left`.
+
+## Parallel
+
+`genex::parallel` holds the threaded counterparts of the sequential algorithms. They are a separate namespace rather
+than an execution-policy argument, because the trade-off is never free and should be opted into explicitly.
+
+```cpp
+vec | genex::parallel::for_each([](auto &x) { x = expensive(x); });
+
+// ... with the defaults overridden.
+vec | genex::parallel::for_each(f, genex::parallel::params{.threads = 4, .threshold = 0});
+```
 
 ## Iterators
 

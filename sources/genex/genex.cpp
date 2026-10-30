@@ -83,6 +83,10 @@ export import genex.operations.cmp;
 export import genex.operations.empty;
 export import genex.operations.size;
 
+// Parallel
+export import genex.parallel.for_each;
+export import genex.parallel.params;
+
 // Strings
 export import genex.strings.cases;
 
