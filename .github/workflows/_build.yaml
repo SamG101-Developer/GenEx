@@ -63,14 +63,18 @@ jobs:
           echo "CXX=g++-16" >> "$GITHUB_ENV"
 
       # Homebrew's clang, not Apple's, which has no "import std".
-      # Its libc++ is not on the default search paths.
+      # Its libc++ is not on the default search paths, which is
+      # also why clang cannot tell CMake where its modules are.
       - name: Install llvm
         if: matrix.platform.compiler == 'llvm'
         run: |
           brew install llvm cmake ninja googletest
           llvm=$(brew --prefix llvm)
+          modules_json=$(find -L "$llvm/lib" -name libc++.modules.json | head -n 1)
+          if [ -z "$modules_json" ]; then echo "::error::libc++.modules.json is not in $llvm/lib"; exit 1; fi
           echo "CXX=$llvm/bin/clang++" >> "$GITHUB_ENV"
           echo "LDFLAGS=-L$llvm/lib/c++ -Wl,-rpath,$llvm/lib/c++" >> "$GITHUB_ENV"
+          echo "LIBCXX_MODULES_JSON=$modules_json" >> "$GITHUB_ENV"
 
       - name: Set up msvc
         if: matrix.platform.compiler == 'msvc'
@@ -91,7 +95,11 @@ jobs:
         env:
           CONFIG: ${{ matrix.config }}
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE="$CONFIG" -DGENEX_BUILD_TESTS=ON
+          flags=()
+          if [ -n "${LIBCXX_MODULES_JSON:-}" ]; then
+            flags+=("-DCMAKE_CXX_STDLIB_MODULES_JSON=$LIBCXX_MODULES_JSON")
+          fi
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE="$CONFIG" -DGENEX_BUILD_TESTS=ON "${flags[@]}"
           cmake --build build --parallel
 
       - name: Test
