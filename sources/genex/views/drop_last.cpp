@@ -4,6 +4,7 @@ module;
 export module genex.views.drop_last;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.counted_iterator;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
 import genex.iterators.prev;
@@ -33,9 +34,9 @@ namespace genex::views::detail::impl {
     auto total = iter_difference_t<I>{0};
     for (auto it = first; it != last; ++it) { ++total; }
     return genex::subrange(
-      std::counted_iterator(
+      genex::detail::counted_iterator(
         std::move(first), std::max(total - n, iter_difference_t<I>{0})),
-      std::default_sentinel);
+      genex::detail::counted_sentinel<unreachable_sentinel>{});
   }
 }
 
@@ -89,7 +90,8 @@ namespace genex::views {
     requires detail::concepts::droppable_last_range<Rng, Int>
       and std::bidirectional_iterator<iterator_t<Rng>>
       and std::same_as<iterator_t<Rng>, sentinel_t<Rng>>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, const Int n) const {
       auto [first, last] = iterators::iter_pair(rng);
       auto stop = iterators::prev(
         std::move(last), static_cast<range_difference_t<Rng>>(n), first);
@@ -99,7 +101,8 @@ namespace genex::views {
 
     template <typename Rng, typename Int>
     requires detail::concepts::droppable_last_range<Rng, Int>
-    [[nodiscard]] constexpr auto operator()(Rng &&rng, const Int n) const {
+    [[nodiscard]] constexpr auto operator()(
+      Rng &&rng, const Int n) const {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::drop_last_counted(
         std::move(first), std::move(last),
@@ -108,7 +111,8 @@ namespace genex::views {
 
     template <typename Int>
     requires std::integral<Int>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(const Int n) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      const Int n) const noexcept(
       SAFE_CTOR(drop_last_fn) and SAFE_MOVE(Int)) {
       return meta::bind_back(drop_last_fn{}, n);
     }

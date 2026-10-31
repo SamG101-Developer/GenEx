@@ -4,6 +4,7 @@ module;
 export module genex.views.slice;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.counted_iterator;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
 import genex.meta;
@@ -23,34 +24,6 @@ namespace genex::views::detail::concepts {
     non_dangling_range<Rng> and
     input_range<Rng> and
     sliceable_iters<iterator_t<Rng>, sentinel_t<Rng>, Int>;
-}
-
-namespace genex::views::detail::impl {
-  template <typename S>
-  struct slice_sentinel {
-    GENEX_NO_UNIQUE_ADDRESS S st;
-
-    template <typename I>
-    GENEX_INLINE friend constexpr auto operator==(
-      const std::counted_iterator<I> &it, const slice_sentinel &self) -> bool {
-      return it.count() == 0 or it.base() == self.st;
-    }
-
-    template <typename I>
-    requires std::sized_sentinel_for<S, I>
-    GENEX_INLINE friend constexpr auto operator-(const slice_sentinel &self,
-      const std::counted_iterator<I> &it) -> std::iter_difference_t<I> {
-      return std::min(it.count(), self.st - it.base());
-    }
-
-    template <typename I>
-    requires std::sized_sentinel_for<S, I>
-    GENEX_INLINE friend constexpr auto operator-(
-      const std::counted_iterator<I> &it,
-      const slice_sentinel &self) -> std::iter_difference_t<I> {
-      return -(self - it);
-    }
-  };
 }
 
 namespace genex::views {
@@ -75,10 +48,10 @@ namespace genex::views {
       const auto lo = static_cast<iter_difference_t<I>>(n);
       const auto hi = static_cast<iter_difference_t<I>>(m);
       return genex::subrange(
-        std::counted_iterator(
+        genex::detail::counted_iterator(
           iterators::next(std::move(first), lo, last),
           std::max(hi - lo, iter_difference_t<I>{0})),
-        detail::impl::slice_sentinel<S>{std::move(last)});
+        genex::detail::counted_sentinel<S>{std::move(last)});
     }
 
     template <typename Rng, typename Int>
@@ -106,10 +79,10 @@ namespace genex::views {
       const auto lo = static_cast<range_difference_t<Rng>>(n);
       const auto hi = static_cast<range_difference_t<Rng>>(m);
       return genex::subrange(
-        std::counted_iterator(
+        genex::detail::counted_iterator(
           iterators::next(std::move(first), lo, last),
           std::max(hi - lo, range_difference_t<Rng>{0})),
-        detail::impl::slice_sentinel<sentinel_t<Rng>>{std::move(last)});
+        genex::detail::counted_sentinel<sentinel_t<Rng>>{std::move(last)});
     }
 
     template <typename Int>

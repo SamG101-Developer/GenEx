@@ -4,6 +4,7 @@ module;
 export module genex.views.take;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.counted_iterator;
 import genex.iterators.iter_pair;
 import genex.meta;
 import genex.span;
@@ -22,38 +23,6 @@ namespace genex::views::detail::concepts {
     non_dangling_range<Rng> and
     input_range<Rng> and
     takeable_iters<iterator_t<Rng>, sentinel_t<Rng>, Int>;
-}
-
-namespace genex::views::detail::impl {
-  template <typename S>
-  struct take_sentinel {
-    GENEX_NO_UNIQUE_ADDRESS S st;
-
-    template <typename I>
-    GENEX_INLINE friend constexpr auto operator==(
-      const std::counted_iterator<I> &it, const take_sentinel &self) -> bool {
-      return it.count() == 0 or it.base() == self.st;
-    }
-
-    template <typename I>
-    requires std::sized_sentinel_for<S, I>
-      or std::same_as<S, unreachable_sentinel>
-    GENEX_INLINE friend constexpr auto operator-(
-      const take_sentinel &self, const std::counted_iterator<I> &it)
-      -> std::iter_difference_t<I> {
-      if constexpr (std::same_as<S, unreachable_sentinel>) { return it.count(); }
-      else { return std::min(it.count(), self.st - it.base()); }
-    }
-
-    template <typename I>
-    requires std::sized_sentinel_for<S, I>
-      or std::same_as<S, unreachable_sentinel>
-    GENEX_INLINE friend constexpr auto operator-(
-      const std::counted_iterator<I> &it, const take_sentinel &self)
-      -> std::iter_difference_t<I> {
-      return -(self - it);
-    }
-  };
 }
 
 namespace genex::views {
@@ -77,9 +46,9 @@ namespace genex::views {
       I first, S last, const Int n) const noexcept(
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
       return genex::subrange(
-        std::counted_iterator(
+        genex::detail::counted_iterator(
           std::move(first), static_cast<iter_difference_t<I>>(n)),
-        detail::impl::take_sentinel<S>{std::move(last)});
+        genex::detail::counted_sentinel<S>{std::move(last)});
     }
 
     template <typename Rng, typename Int>
@@ -106,9 +75,9 @@ namespace genex::views {
       SAFE_MOVE(Int)) {
       auto [first, last] = iterators::iter_pair(rng);
       return genex::subrange(
-        std::counted_iterator(
+        genex::detail::counted_iterator(
           std::move(first), static_cast<range_difference_t<Rng>>(n)),
-        detail::impl::take_sentinel<sentinel_t<Rng>>{std::move(last)});
+        genex::detail::counted_sentinel<sentinel_t<Rng>>{std::move(last)});
     }
 
     template <typename Int>

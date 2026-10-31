@@ -73,7 +73,9 @@ namespace genex::views::detail::impl {
 
   private:
     constexpr auto fwd_to_valid() -> void {
-      while (it != st and operations::eq{}(std::invoke(proj, *it), value)) { ++it; }
+      while (it != st and operations::eq{}(meta::invoke(proj, *it), value)) {
+        ++it;
+      }
     }
   };
 
@@ -131,7 +133,8 @@ namespace genex::views {
     requires closure_value<E>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       E &&value, Proj proj = {}) const noexcept(
-      SAFE_CTOR(remove_fn) and SAFE_CTOR(std::decay_t<E>, E) and SAFE_MOVE(Proj)) {
+      SAFE_CTOR(remove_fn) and SAFE_CTOR(std::decay_t<E>, E) and
+      SAFE_MOVE(Proj)) {
       return meta::bind_back(remove_fn{}, std::forward<E>(value), std::move(proj));
     }
   };
