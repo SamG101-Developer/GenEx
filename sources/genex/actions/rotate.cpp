@@ -3,6 +3,7 @@ module;
 
 export module genex.actions.rotate;
 export import genex.pipe;
+import genex.algorithms.rotate;
 import genex.concepts;
 import genex.iterators.access;
 import genex.iterators.next;
@@ -27,7 +28,7 @@ namespace genex::actions {
       auto first = iterators::begin(rng);
       auto last = iterators::end(rng);
       auto mid = iterators::next(first, static_cast<range_difference_t<Rng>>(n), last);
-      std::rotate(std::move(first), std::move(mid), std::move(last));
+      genex::rotate(std::move(first), std::move(mid), std::move(last));
       return std::forward<Rng>(rng);
     }
 

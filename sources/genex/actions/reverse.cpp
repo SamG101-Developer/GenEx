@@ -3,8 +3,8 @@ module;
 
 export module genex.actions.reverse;
 export import genex.pipe;
+import genex.algorithms.reverse;
 import genex.concepts;
-import genex.iterators.iter_pair;
 import std;
 
 namespace genex::actions::detail::concepts {
@@ -18,25 +18,8 @@ namespace genex::actions {
   struct reverse_fn : pipe_closure {
     template <typename Rng>
     requires detail::concepts::reversible_range<Rng>
-      and random_access_range<Rng>
     constexpr auto operator()(Rng &&rng) const -> Rng {
-      auto [first, last] = iterators::iter_pair(rng);
-      const auto swaps = (last - first) / 2;
-      for (auto i = decltype(swaps){0}; i < swaps; ++i) {
-        --last;
-        std::iter_swap(first, last);
-        ++first;
-      }
-      return std::forward<Rng>(rng);
-    }
-
-    template <typename Rng>
-    requires detail::concepts::reversible_range<Rng>
-    constexpr auto operator()(Rng &&rng) const -> Rng {
-      auto [first, last] = iterators::iter_pair(rng);
-      while (first != last and first != --last) {
-        std::iter_swap(first++, last);
-      }
+      genex::reverse(rng);
       return std::forward<Rng>(rng);
     }
   };

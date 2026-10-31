@@ -59,12 +59,21 @@ export import genex.algorithms.fold_left_first;
 export import genex.algorithms.fold_right;
 export import genex.algorithms.fold_right_first;
 export import genex.algorithms.for_each;
+export import genex.algorithms.lower_bound;
 export import genex.algorithms.max_element;
 export import genex.algorithms.min_element;
 export import genex.algorithms.none_of;
+export import genex.algorithms.partition;
 export import genex.algorithms.position;
 export import genex.algorithms.position_last;
+export import genex.algorithms.reverse;
+export import genex.algorithms.rotate;
+export import genex.algorithms.shuffle;
+export import genex.algorithms.sort;
 export import genex.algorithms.sorted;
+export import genex.algorithms.stable_partition;
+export import genex.algorithms.stable_sort;
+export import genex.algorithms.upper_bound;
 
 // Conditionals
 export import genex.conditional.if_;
@@ -74,6 +83,7 @@ export import genex.iterators.access;
 export import genex.iterators.advance;
 export import genex.iterators.distance;
 export import genex.iterators.iter_pair;
+export import genex.iterators.iter_swap;
 export import genex.iterators.next;
 export import genex.iterators.prev;
 

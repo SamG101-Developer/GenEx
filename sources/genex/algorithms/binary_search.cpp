@@ -2,8 +2,10 @@ module;
 #include <genex/detail/macros.hpp>
 
 export module genex.algorithms.binary_search;
+import genex.algorithms.lower_bound;
 import genex.concepts;
 import genex.iterators.iter_pair;
+import genex.iterators.next;
 import genex.meta;
 import genex.operations.cmp;
 import std;
@@ -27,14 +29,9 @@ namespace genex::algorithms::detail::impl {
   requires concepts::binary_searchable_iters<I, S, E, Comp, Proj>
   GENEX_INLINE constexpr auto do_binary_search(
     I first, S last, E &&elem, Comp comp, Proj proj) -> bool {
-    first = std::lower_bound(
-      std::move(first), std::move(last), elem,
-      [&]<typename T, typename U>(T &&a, U &&b) {
-        return meta::invoke(
-          comp, meta::invoke(proj, std::forward<T>(a)), std::forward<U>(b));
-      });
-
-    return first != last
+    auto end = iterators::next(first, std::move(last));
+    first = genex::lower_bound(first, end, elem, comp, proj);
+    return first != end
       and not meta::invoke(comp, elem, meta::invoke(proj, *first));
   }
 }

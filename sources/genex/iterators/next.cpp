@@ -39,6 +39,22 @@ namespace genex::iterators {
         return it;
       }
     }
+
+    template <typename I, typename S>
+    requires detail::concepts::nextable_iters<I, S> and std::copyable<I>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I it, S bound) const -> I {
+      if constexpr (std::same_as<I, S>) {
+        return bound;
+      }
+      else if constexpr (
+        std::sized_sentinel_for<S, I> and std::random_access_iterator<I>) {
+        return it + (bound - it);
+      }
+      else {
+        for (; it != bound; ++it) {}
+        return it;
+      }
+    }
   };
 
   export inline constexpr next_fn next{};

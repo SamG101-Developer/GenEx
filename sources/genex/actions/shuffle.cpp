@@ -3,8 +3,8 @@ module;
 
 export module genex.actions.shuffle;
 export import genex.pipe;
+import genex.algorithms.shuffle;
 import genex.concepts;
-import genex.iterators.iter_pair;
 import genex.meta;
 import std;
 
@@ -26,22 +26,20 @@ namespace genex::actions {
     requires detail::concepts::shufflable_range<
       Rng, decltype(detail::default_random)&>
     GENEX_INLINE auto operator()(Rng &&rng) const -> Rng {
-      auto [first, last] = iterators::iter_pair(rng);
-      std::shuffle(std::move(first), std::move(last), detail::default_random);
+      genex::shuffle(rng, detail::default_random);
       return std::forward<Rng>(rng);
     }
 
     template <typename Rng, typename Shuffler>
     requires detail::concepts::shufflable_range<Rng, Shuffler>
-    GENEX_INLINE auto operator()(Rng &&rng, Shuffler shuffler) const -> Rng {
-      auto [first, last] = iterators::iter_pair(rng);
-      std::shuffle(std::move(first), std::move(last), std::move(shuffler));
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Shuffler shuffler) const -> Rng {
+      genex::shuffle(rng, shuffler);
       return std::forward<Rng>(rng);
     }
 
     template <typename Shuffler>
     requires std::uniform_random_bit_generator<std::remove_cvref_t<Shuffler>>
-    [[nodiscard]] GENEX_INLINE auto operator()(Shuffler shuffler) const -> auto {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Shuffler shuffler) const -> auto {
       return meta::bind_back(shuffle_fn{}, std::move(shuffler));
     }
   };

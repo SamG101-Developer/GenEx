@@ -3,8 +3,9 @@ module;
 
 export module genex.actions.sort;
 export import genex.pipe;
+import genex.algorithms.sort;
+import genex.algorithms.stable_sort;
 import genex.concepts;
-import genex.iterators.iter_pair;
 import genex.meta;
 import genex.operations.cmp;
 import std;
@@ -21,14 +22,7 @@ namespace genex::actions {
     template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
     requires detail::concepts::sortable_range<Rng, Comp, Proj>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
-      auto [first, last] = iterators::iter_pair(rng);
-      auto sorter = [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
-        return meta::invoke(
-          comp,
-          meta::invoke(proj, std::forward<Lhs>(lhs)),
-          meta::invoke(proj, std::forward<Rhs>(rhs)));
-      };
-      std::sort(std::move(first), std::move(last), std::move(sorter));
+      genex::sort(rng, std::move(comp), std::move(proj));
       return std::forward<Rng>(rng);
     }
 
@@ -43,14 +37,7 @@ namespace genex::actions {
     template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
     requires detail::concepts::sortable_range<Rng, Comp, Proj>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
-      auto [first, last] = iterators::iter_pair(rng);
-      auto sorter = [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
-        return meta::invoke(
-          comp,
-          meta::invoke(proj, std::forward<Lhs>(lhs)),
-          meta::invoke(proj, std::forward<Rhs>(rhs)));
-      };
-      std::stable_sort(std::move(first), std::move(last), std::move(sorter));
+      genex::stable_sort(rng, std::move(comp), std::move(proj));
       return std::forward<Rng>(rng);
     }
 
