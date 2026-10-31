@@ -19,18 +19,18 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct unique_fn {
-    template <typename Rng, typename Comp = operations::eq, typename Proj = meta::identity>
-      requires detail::concepts::uniqueable_range<Rng, Comp, Proj>
-    constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
+  struct unique_fn : pipe_closure {
+    template <
+      typename Rng, typename Comp = operations::eq,
+      typename Proj = meta::identity>
+    requires detail::concepts::uniqueable_range<Rng, Comp, Proj>
+    constexpr auto operator()(
+      Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
       auto first = iterators::begin(rng);
       auto last = iterators::end(rng);
       if (first == last) { return std::forward<Rng>(rng); }
 
-      // Each element is compared to the last one kept, and moved straight to its final place if it's kept too. Erasing
-      // as it goes would shift the whole tail for every duplicate.
       if constexpr (std::permutable<iterator_t<Rng>>) {
-        // Nothing needs to move until the first duplicate, which also rules out moving an element onto itself.
         auto kept = first;
         for (++first; first != last; ++first) {
           if (meta::invoke(comp, meta::invoke(proj, *kept), meta::invoke(proj, *first))) { break; }
@@ -62,8 +62,8 @@ namespace genex::actions {
     }
 
     template <typename Comp = operations::eq, typename Proj = meta::identity>
-      requires (not range<Comp>)
-    GENEX_INLINE constexpr auto operator()(Comp comp = {}, Proj proj = {}) const {
+    requires (not range<Comp>)
+    GENEX_INLINE constexpr auto operator()(Comp comp, Proj proj = {}) const {
       return meta::bind_back(unique_fn{}, std::move(comp), std::move(proj));
     }
   };

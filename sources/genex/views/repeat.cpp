@@ -11,8 +11,9 @@ namespace genex::views::detail::impl {
   struct repeat_sentinel {};
 
   template <typename T, bool Counted>
-    requires std::copyable<T>
-  struct repeat_iterator : genex::detail::iterator_ops<repeat_iterator<T, Counted>> {
+  requires std::copyable<T>
+  struct repeat_iterator :
+    genex::detail::iterator_ops<repeat_iterator<T, Counted>> {
     T value;
     std::ptrdiff_t count = 0;
 
@@ -37,22 +38,25 @@ namespace genex::views::detail::impl {
       return value;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const repeat_iterator &self, const repeat_iterator &that) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const repeat_iterator &self, const repeat_iterator &that) -> bool {
       return self.count == that.count;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const repeat_iterator &self, repeat_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const repeat_iterator &self, repeat_sentinel) -> bool {
       return self.count == 0;
     }
   };
 
   template <typename T, bool Counted>
-    requires std::copyable<T>
+  requires std::copyable<T>
   struct repeat_view : view_base {
     T value;
     std::ptrdiff_t count;
 
-    GENEX_INLINE constexpr repeat_view(T value, const std::ptrdiff_t count) noexcept(
+    GENEX_INLINE constexpr repeat_view(
+      T value, const std::ptrdiff_t count) noexcept(
       SAFE_MOVE(T)) :
       value(std::move(value)), count(count) {
     }
@@ -66,27 +70,34 @@ namespace genex::views::detail::impl {
       else { return unreachable_sentinel(); }
     }
 
-    [[nodiscard]] GENEX_INLINE constexpr auto size() const -> std::size_t requires Counted {
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const -> std::size_t
+    requires Counted {
       return static_cast<std::size_t>(count);
     }
   };
 }
 
 namespace genex::views {
-  struct repeat_fn {
+  struct repeat_fn : pipe_closure {
     template <typename T, typename Int>
-      requires std::copyable<T> and std::integral<Int>
-    GENEX_INLINE constexpr auto operator()(T value, const Int count) const noexcept(
-      SAFE_CTOR(detail::impl::repeat_view<T, true>, T, std::ptrdiff_t) and SAFE_MOVE(T)) {
+    requires std::copyable<T> and std::integral<Int>
+    GENEX_INLINE constexpr auto operator()(
+      T value, const Int count) const noexcept(
+      SAFE_CTOR(detail::impl::repeat_view<T, true>, T, std::ptrdiff_t) and
+      SAFE_MOVE(T)) {
       GENEX_ASSERT(count >= 0);
-      return detail::impl::repeat_view<T, true>(std::move(value), static_cast<std::ptrdiff_t>(count));
+      return detail::impl::repeat_view<T, true>(
+        std::move(value), static_cast<std::ptrdiff_t>(count));
     }
 
     template <typename T>
-      requires std::copyable<T>
-    GENEX_INLINE constexpr auto operator()(T value) const noexcept(
-      SAFE_CTOR(detail::impl::repeat_view<T, false>, T, std::ptrdiff_t) and SAFE_MOVE(T)) {
-      return detail::impl::repeat_view<T, false>(std::move(value), std::ptrdiff_t{0});
+    requires std::copyable<T>
+    GENEX_INLINE constexpr auto operator()(
+      T value) const noexcept(
+      SAFE_CTOR(detail::impl::repeat_view<T, false>, T, std::ptrdiff_t) and
+      SAFE_MOVE(T)) {
+      return detail::impl::repeat_view<T, false>(
+        std::move(value), std::ptrdiff_t{0});
     }
   };
 

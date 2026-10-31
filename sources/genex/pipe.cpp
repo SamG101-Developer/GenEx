@@ -2,49 +2,49 @@ module;
 #include <genex/detail/macros.hpp>
 
 export module genex.pipe;
+export import genex.closure;
 import genex.concepts;
+import genex.detail.range_closure;
 import genex.iterators.access;
 import genex.meta;
-import genex.subrange;
 import std;
 
 namespace genex::detail {
-  /**
-   * A closure holding a range by value. Any view it creates points into that range, so it must outlive the view.
-   */
-  template <typename F>
-  struct retained_closure : F {
-  };
-
-  template <typename F>
-  inline constexpr bool is_retained_closure_v = false;
-
-  template <typename F>
-  inline constexpr bool is_retained_closure_v<retained_closure<F>> = true;
-
-  /**
-   * Applies @c f and then @c g, so that a pipeline over an owned range rebuilds its views once per @c begin or @c end,
-   * rather than once per view per call.
-   */
+  /// Applies "f" and then "g", so that a pipeline over an owned range rebuilds
+  /// its views once per "begin" or "end", rather than once per view per call.
   template <typename F, typename G>
-  struct composed_adaptor {
+  struct composed_adaptor : pipe_closure {
     GENEX_NO_UNIQUE_ADDRESS F f;
     GENEX_NO_UNIQUE_ADDRESS G g;
 
+    // The pipe between them is so that a step producing a container can still
+    // be followed by a view. Directly calling this with an rvalue is the one
+    // way left to get a view into something about to be destroyed, so that's
+    // rejected.
     template <typename Self, typename Rng>
-    GENEX_INLINE constexpr auto operator()(this Self &&self, Rng &rng) -> decltype(auto) {
-      return meta::invoke(self.g, meta::invoke(self.f, rng));
+    GENEX_INLINE constexpr auto operator()(
+      this Self &&self, Rng &&rng) -> decltype(auto) {
+      static_assert(
+        non_dangling_range<Rng> or not enable_view<std::remove_cvref_t<decltype(meta::invoke(self.f, rng) | self.g)>>,
+        "A view would dangle here: pipe an rvalue into this, rather than calling it, so the pipe can keep it alive.");
+      return meta::invoke(self.f, rng) | self.g;
     }
   };
 
-  /**
-   * A view that keeps alive the storage another view points into. @c Base is the piped range: held by value when it is
-   * an rvalue, and by reference otherwise. The inner view is rebuilt from @c Base
-   * for each @c begin and @c end, because moving a container can invalidate its iterators (a small @c std::string, for
-   * example). Nothing else about a view has to change to be owned, as genex iterators hold copies of what they use.
-   *
-   * It deliberately has no @c view_base: piping one treats it like an rvalue container, and it is move-only.
-   */
+  /// Keeping a composition alive keeps alive everything in it.
+  template <typename F, typename G>
+  inline constexpr bool is_retained_closure_v<composed_adaptor<F, G>> =
+    is_retained_closure_v<F> or is_retained_closure_v<G>;
+
+  /// A view that keeps alive the storage another view points into. "Base" is
+  /// the piped range: held by value when it is an rvalue, and by reference
+  /// otherwise. The inner view is rebuilt from "Base" for each "begin" and
+  /// "end", because moving a container can invalidate its iterators (a small
+  /// "std::string", for example). Nothing else about a view has to change to be
+  /// owned, as genex iterators hold copies of what they use.
+  ///
+  /// It deliberately has no @c view_base: piping one treats it like an rvalue
+  /// container, and it is move-only.
   template <typename Base, typename Adaptor>
   class owning_view {
     GENEX_NO_UNIQUE_ADDRESS Base m_base;
@@ -96,71 +96,70 @@ namespace genex::detail {
   };
 
   template <typename T>
-  inline constexpr bool is_owning_view_v = false;
+  inline constexpr auto is_owning_view_v = false;
 
   template <typename Base, typename Adaptor>
-  inline constexpr bool is_owning_view_v<owning_view<Base, Adaptor>> = true;
+  inline constexpr auto is_owning_view_v<owning_view<Base, Adaptor>> = true;
 
   template <typename T>
   concept rvalue_container =
     not non_dangling_range<T> and
     input_range<std::remove_reference_t<T>&>;
 
-  /**
-   * Whether piping @c T into @c F returns a view that needs storage kept alive. The result decides it, so only views
-   * are ever wrapped: a pipeline ending in an action, an algorithm, @c to or @c materialize is called as normal.
-   */
+  /// Whether piping "T" into "F" returns a view that needs storage kept alive.
+  /// The result decides it, so only views are ever wrapped: a pipeline ending
+  /// in an action, an algorithm, @c to or @c materialize is called as normal.
   template <typename T, typename F>
   concept needs_owner =
     (rvalue_container<T> or is_retained_closure_v<std::remove_cvref_t<F>>) and
     std::invocable<std::decay_t<F>&, std::remove_reference_t<T>&> and
     enable_view<
       std::remove_cvref_t<std::invoke_result_t<std::decay_t<F>&, std::remove_reference_t<T>&>>>;
+}
 
-  /**
-   * Binds a second range to a closure without a dangling iterator. An lvalue is referred to rather than copied, a view
-   * or a borrowed range is safe to hold as is, and any other rvalue is moved into a closure the pipe will keep alive.
-   */
-  export template <typename Fn, typename Rng, typename... Args>
-  GENEX_INLINE constexpr auto bind_range_back(Fn fn, Rng &&rng, Args &&... args) {
-    if constexpr (std::is_lvalue_reference_v<Rng>) {
-      return meta::bind_back(
-        std::move(fn), genex::subrange(iterators::begin(rng), iterators::end(rng)), std::forward<Args>(args)...);
-    }
-    else if constexpr (non_dangling_range<Rng>) {
-      return meta::bind_back(std::move(fn), std::forward<Rng>(rng), std::forward<Args>(args)...);
-    }
-    else {
-      auto closure = meta::bind_back(std::move(fn), std::forward<Rng>(rng), std::forward<Args>(args)...);
-      return retained_closure<decltype(closure)>{std::move(closure)};
-    }
+namespace genex {
+  // Usage: auto range = vector | genex::views::___
+  export template <typename T, pipeable F>
+    requires (not pipeable<T>)
+    and (not detail::needs_owner<T, F>)
+    and std::invocable<F, T>
+  GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) -> decltype(auto) {
+    return meta::invoke(
+      std::forward<F>(rhs), std::forward<T>(lhs));
   }
-}
 
-// Usage: auto range = vector | genex::views::___
-export template <typename T, typename F> requires (not genex::detail::needs_owner<T, F>) and std::invocable<F, T>
-GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) -> decltype(auto) {
-  return genex::meta::invoke(std::forward<F>(rhs), std::forward<T>(lhs));
-}
+  // Usage: auto range = make_vector() | genex::views::___
+  export template <typename T, pipeable F>
+    requires (not pipeable<T>)
+    and detail::needs_owner<T, F>
+    and (not detail::is_owning_view_v<T>)
+  GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) {
+    return detail::owning_view<T, std::decay_t<F>>(
+      std::forward<T>(lhs), std::forward<F>(rhs));
+  }
 
-// Usage: auto range = make_vector() | genex::views::___
-export template <typename T, typename F>
-  requires genex::detail::needs_owner<T, F> and (not genex::detail::is_owning_view_v<T>)
-GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) {
-  return genex::detail::owning_view<T, std::decay_t<F>>(std::forward<T>(lhs), std::forward<F>(rhs));
-}
+  // Usage: auto range = make_vector() | genex::views::___ | genex::views::___
+  export template <typename T, pipeable F>
+    requires (not pipeable<T>)
+    and detail::needs_owner<T, F>
+    and detail::is_owning_view_v<T>
+  GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) {
+    using composed_t = detail::composed_adaptor<typename T::adaptor_type, std::decay_t<F>>;
+    auto composed = composed_t{{}, std::move(lhs).adaptor(), std::forward<F>(rhs)};
+    return detail::owning_view<typename T::base_type, composed_t>(
+      std::move(lhs).base(), std::move(composed));
+  }
 
-// Usage: auto range = make_vector() | genex::views::___ | genex::views::___
-export template <typename T, typename F>
-  requires genex::detail::needs_owner<T, F> and genex::detail::is_owning_view_v<T>
-GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) {
-  using composed_t = genex::detail::composed_adaptor<typename T::adaptor_type, std::decay_t<F>>;
-  auto composed = composed_t{std::move(lhs).adaptor(), std::forward<F>(rhs)};
-  return genex::detail::owning_view<typename T::base_type, composed_t>(std::move(lhs).base(), std::move(composed));
-}
+  // Usage: auto step = genex::views::___ | genex::views::___
+  export template <pipeable T, pipeable F>
+  GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) {
+    return detail::composed_adaptor<std::decay_t<T>, std::decay_t<F>>{
+      {}, std::forward<T>(lhs), std::forward<F>(rhs)};
+  }
 
-// Usage: vector |= genex::actions::___
-export template <typename T, typename F> requires std::invocable<F, T>
-GENEX_INLINE constexpr auto operator|=(T &&lhs, F &&rhs) -> decltype(auto) {
-  return genex::meta::invoke(std::forward<F>(rhs), std::forward<T>(lhs));
+  // Usage: vector |= genex::actions::___
+  export template <typename T, pipeable F> requires std::invocable<F, T>
+  GENEX_INLINE constexpr auto operator|=(T &&lhs, F &&rhs) -> decltype(auto) {
+    return meta::invoke(std::forward<F>(rhs), std::forward<T>(lhs));
+  }
 }

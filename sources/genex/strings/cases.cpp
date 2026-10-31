@@ -4,7 +4,6 @@ module;
 export module genex.strings.cases;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.views.transform;
 import std;
 
@@ -25,9 +24,11 @@ namespace genex::strings::detail::concepts {
 namespace genex::strings::detail::impl {
   struct to_upper_fn {
     template <typename C>
-      requires char_like<C>
+    requires char_like<C>
     GENEX_INLINE constexpr auto operator()(C c) const -> C {
-      if constexpr (wide_char_like<C>) { return static_cast<C>(std::towupper(static_cast<std::wint_t>(c))); }
+      if constexpr (wide_char_like<C>) {
+        return static_cast<C>(std::towupper(static_cast<std::wint_t>(c)));
+      }
       else if constexpr (strict_char_like<C>) {
         return static_cast<C>(std::toupper(static_cast<unsigned char>(c)));
       }
@@ -37,9 +38,11 @@ namespace genex::strings::detail::impl {
 
   struct to_lower_fn {
     template <typename C>
-      requires char_like<C>
+    requires char_like<C>
     GENEX_INLINE constexpr auto operator()(C c) const -> C {
-      if constexpr (wide_char_like<C>) { return static_cast<C>(std::towlower(static_cast<std::wint_t>(c))); }
+      if constexpr (wide_char_like<C>) {
+        return static_cast<C>(std::towlower(static_cast<std::wint_t>(c)));
+      }
       else if constexpr (strict_char_like<C>) {
         return static_cast<C>(std::tolower(static_cast<unsigned char>(c)));
       }
@@ -49,39 +52,35 @@ namespace genex::strings::detail::impl {
 }
 
 namespace genex::strings {
-  struct upper_case_fn {
+  struct upper_case_fn : pipe_closure {
     template <typename I, typename S>
-      requires detail::concepts::can_case_iters<I, S>
+    requires detail::concepts::can_case_iters<I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const {
-      return views::transform(std::move(first), std::move(last), detail::impl::to_upper_fn{});
+      return views::transform(
+        std::move(first), std::move(last), detail::impl::to_upper_fn{});
     }
 
     template <typename Rng>
-      requires detail::concepts::can_case_range<Rng>
+    requires detail::concepts::can_case_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
-      return views::transform(std::forward<Rng>(rng), detail::impl::to_upper_fn{});
-    }
-
-    GENEX_INLINE constexpr auto operator()() const {
-      return meta::bind_back(upper_case_fn{});
+      return views::transform(
+        std::forward<Rng>(rng), detail::impl::to_upper_fn{});
     }
   };
 
-  struct lower_case_fn {
+  struct lower_case_fn : pipe_closure {
     template <typename I, typename S>
-      requires detail::concepts::can_case_iters<I, S>
+    requires detail::concepts::can_case_iters<I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const {
-      return views::transform(std::move(first), std::move(last), detail::impl::to_lower_fn{});
+      return views::transform(
+        std::move(first), std::move(last), detail::impl::to_lower_fn{});
     }
 
     template <typename Rng>
-      requires detail::concepts::can_case_range<Rng>
+    requires detail::concepts::can_case_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
-      return views::transform(std::forward<Rng>(rng), detail::impl::to_lower_fn{});
-    }
-
-    GENEX_INLINE constexpr auto operator()() const {
-      return meta::bind_back(lower_case_fn{});
+      return views::transform(
+        std::forward<Rng>(rng), detail::impl::to_lower_fn{});
     }
   };
 

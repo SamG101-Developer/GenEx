@@ -19,8 +19,9 @@ namespace genex::conditional::detail::concepts {
 
 namespace genex::conditional::detail::impl {
   template <typename Rng, typename Pred, typename Then>
-    requires concepts::conditionally_range<Rng, Pred, Then>
-  GENEX_INLINE constexpr auto do_if(Rng &&rng, Pred &&pred, Then &&then) -> decltype(auto) {
+  requires concepts::conditionally_range<Rng, Pred, Then>
+  GENEX_INLINE constexpr auto do_if(
+    Rng &&rng, Pred &&pred, Then &&then) -> decltype(auto) {
     if (meta::invoke(std::forward<Pred>(pred), std::forward<Rng>(rng))) {
       meta::invoke(std::forward<Then>(then));
     }
@@ -28,24 +29,27 @@ namespace genex::conditional::detail::impl {
   }
 
   template <typename Rng, typename Pred, typename Then>
-    requires concepts::conditionally_range<Rng, Pred, Then>
-  GENEX_INLINE constexpr auto do_if_not(Rng &&rng, Pred &&pred, Then &&then) -> decltype(auto) {
+  requires concepts::conditionally_range<Rng, Pred, Then>
+  GENEX_INLINE constexpr auto do_if_not(
+    Rng &&rng, Pred &&pred, Then &&then) -> decltype(auto) {
     if (not meta::invoke(std::forward<Pred>(pred), std::forward<Rng>(rng))) {
       meta::invoke(std::forward<Then>(then));
     }
     return std::forward<Rng>(rng);
   }
 
-  template <typename Rng, typename Then>
-  GENEX_INLINE constexpr auto do_if_empty(Rng &&rng, Then &&then) -> decltype(auto) {
+  template <typename Rng, typename Then> // constraint?
+  GENEX_INLINE constexpr auto do_if_empty(
+    Rng &&rng, Then &&then) -> decltype(auto) {
     if (operations::empty(std::forward<Rng>(rng))) {
       meta::invoke(std::forward<Then>(then));
     }
     return std::forward<Rng>(rng);
   }
 
-  template <typename Rng, typename Then>
-  GENEX_INLINE constexpr auto do_if_not_empty(Rng &&rng, Then &&then) -> decltype(auto) {
+  template <typename Rng, typename Then> // constraint?
+  GENEX_INLINE constexpr auto do_if_not_empty(
+    Rng &&rng, Then &&then) -> decltype(auto) {
     if (not operations::empty(std::forward<Rng>(rng))) {
       meta::invoke(std::forward<Then>(then));
     }
@@ -56,53 +60,69 @@ namespace genex::conditional::detail::impl {
 namespace genex {
   struct if_fn {
     template <typename Rng, typename Pred, typename Then>
-      requires conditional::detail::concepts::conditionally_range<Rng, Pred, Then>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Then &&then) const -> decltype(auto) {
-      return conditional::detail::impl::do_if(std::forward<Rng>(rng), std::move(pred), std::forward<Then>(then));
+    requires conditional::detail::concepts::conditionally_range<Rng, Pred, Then>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Pred &&pred, Then &&then) const -> decltype(auto) {
+      return conditional::detail::impl::do_if(
+        std::forward<Rng>(rng), std::move(pred), std::forward<Then>(then));
     }
 
     template <typename Pred, typename Then>
-      requires (not range<Pred>)
-    GENEX_INLINE constexpr auto operator()(Pred &&pred, Then &&then) const -> auto {
-      return meta::bind_back(if_fn{}, std::forward<Pred>(pred), std::forward<Then>(then));
+    requires (not range<Pred>)
+    GENEX_INLINE constexpr auto operator()(
+      Pred &&pred, Then &&then) const -> auto {
+      return meta::bind_back(
+        if_fn{}, std::forward<Pred>(pred), std::forward<Then>(then));
     }
   };
 
   struct if_not_fn {
     template <typename Rng, typename Pred, typename Then>
-      requires conditional::detail::concepts::conditionally_range<Rng, Pred, Then>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Then &&then) const -> decltype(auto) {
-      return conditional::detail::impl::do_if_not(std::forward<Rng>(rng), std::move(pred), std::forward<Then>(then));
+    requires conditional::detail::concepts::conditionally_range<Rng, Pred, Then>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Pred &&pred, Then &&then) const -> decltype(auto) {
+      return conditional::detail::impl::do_if_not(
+        std::forward<Rng>(rng), std::move(pred), std::forward<Then>(then));
     }
 
     template <typename Pred, typename Then>
-      requires (not range<Pred>)
-    GENEX_INLINE constexpr auto operator()(Pred &&pred, Then &&then) const -> auto {
-      return meta::bind_back(if_not_fn{}, std::forward<Pred>(pred), std::forward<Then>(then));
+    requires (not range<Pred>)
+    GENEX_INLINE constexpr auto operator()(
+      Pred &&pred, Then &&then) const -> auto {
+      return meta::bind_back(
+        if_not_fn{}, std::forward<Pred>(pred), std::forward<Then>(then));
     }
   };
 
   struct if_empty_fn {
     template <typename Rng, typename Then>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Then &&then) const -> decltype(auto) {
-      return conditional::detail::impl::do_if_empty(std::forward<Rng>(rng), std::forward<Then>(then));
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Then &&then) const -> decltype(auto) {
+      return conditional::detail::impl::do_if_empty(
+        std::forward<Rng>(rng), std::forward<Then>(then));
     }
 
     template <typename Then>
-    GENEX_INLINE constexpr auto operator()(Then &&then) const -> auto {
-      return meta::bind_back(if_empty_fn{}, std::forward<Then>(then));
+    GENEX_INLINE constexpr auto operator()(
+      Then &&then) const -> auto {
+      return meta::bind_back(
+        if_empty_fn{}, std::forward<Then>(then));
     }
   };
 
   struct if_not_empty_fn {
     template <typename Rng, typename Then>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Then &&then) const -> decltype(auto) {
-      return conditional::detail::impl::do_if_not_empty(std::forward<Rng>(rng), std::forward<Then>(then));
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Then &&then) const -> decltype(auto) {
+      return conditional::detail::impl::do_if_not_empty(
+        std::forward<Rng>(rng), std::forward<Then>(then));
     }
 
     template <typename Then>
-    GENEX_INLINE constexpr auto operator()(Then &&then) const -> auto {
-      return meta::bind_back(if_not_empty_fn{}, std::forward<Then>(then));
+    GENEX_INLINE constexpr auto operator()(
+      Then &&then) const -> auto {
+      return meta::bind_back(
+        if_not_empty_fn{}, std::forward<Then>(then));
     }
   };
 

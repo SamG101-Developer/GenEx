@@ -30,7 +30,7 @@ namespace genex::views::detail::impl {
   struct split_sentinel {};
 
   template <typename I, typename S, typename E>
-    requires detail::concepts::splittable_iters<I, S, E>
+  requires detail::concepts::splittable_iters<I, S, E>
   struct split_iterator : genex::detail::iterator_ops<split_iterator<I, S, E>> {
     I it;
     I field_end;
@@ -60,23 +60,27 @@ namespace genex::views::detail::impl {
       return genex::subrange(it, field_end);
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const split_iterator &self, const split_iterator &that) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const split_iterator &self, const split_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const split_iterator &self, split_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const split_iterator &self, split_sentinel) -> bool {
       return self.it == self.st;
     }
 
   private:
     constexpr auto seek_field_end() -> void {
       field_end = it;
-      while (field_end != st and not operations::eq{}(*field_end, elem)) { ++field_end; }
+      while (field_end != st and not operations::eq{}(*field_end, elem)) {
+        ++field_end;
+      }
     }
   };
 
   template <typename I, typename S, typename E>
-    requires detail::concepts::splittable_iters<I, S, E>
+  requires detail::concepts::splittable_iters<I, S, E>
   struct split_view : view_base {
     I it;
     S st;
@@ -97,7 +101,6 @@ namespace genex::views::detail::impl {
 
     [[nodiscard]] GENEX_INLINE constexpr auto size() const
       requires requires { iterators::distance(it, st); } {
-      // Every separator ends a field, and anything after the last one is a field of its own.
       auto fields = 0z;
       auto in_field = false;
       for (auto cur = it; cur != st; ++cur) {
@@ -110,23 +113,27 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct split_fn {
+  struct split_fn : pipe_closure {
     template <typename I, typename S, typename E>
-      requires detail::concepts::splittable_iters<I, S, E>
-    GENEX_INLINE constexpr auto operator()(I first, S last, E elem) const noexcept(
+    requires detail::concepts::splittable_iters<I, S, E>
+    GENEX_INLINE constexpr auto operator()(
+      I first, S last, E elem) const noexcept(
       SAFE_IMPL_CTOR(split_view, I, S, E) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(E)) {
-      return detail::impl::split_view(std::move(first), std::move(last), std::move(elem));
+      return detail::impl::split_view(
+        std::move(first), std::move(last), std::move(elem));
     }
 
     template <typename Rng, typename E>
-      requires detail::concepts::splittable_range<Rng, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const noexcept(
+    requires detail::concepts::splittable_range<Rng, E>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, E elem) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(split_view, iterator_t<Rng>, sentinel_t<Rng>, E) and
       SAFE_MOVE(E)) {
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::split_view(std::move(first), std::move(last), std::move(elem));
+      return detail::impl::split_view(
+        std::move(first), std::move(last), std::move(elem));
     }
 
     template <typename E>

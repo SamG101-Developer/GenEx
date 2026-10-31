@@ -27,9 +27,9 @@ namespace genex::views::detail::concepts {
 
 namespace genex::views {
   template <std::size_t N>
-  struct tuple_nth_fn {
+  struct tuple_nth_fn : pipe_closure {
     template <typename I, typename S>
-      requires detail::concepts::tuple_indexable_iters<N, I, S>
+    requires detail::concepts::tuple_indexable_iters<N, I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
       SAFE_CALL(decltype(transform), I, S, meta::identity) and
       SAFE_MOVE(I) and SAFE_MOVE(S)) {
@@ -37,17 +37,12 @@ namespace genex::views {
     }
 
     template <typename Rng>
-      requires detail::concepts::tuple_indexable_range<N, Rng>
+    requires detail::concepts::tuple_indexable_range<N, Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CALL(decltype(transform), iterator_t<Rng>, sentinel_t<Rng>, meta::identity)) {
       auto [first, last] = iterators::iter_pair(rng);
       return transform(std::move(first), std::move(last), genex::get<N>);
-    }
-
-    GENEX_INLINE constexpr auto operator()() const noexcept(
-      SAFE_CTOR(tuple_nth_fn)) {
-      return meta::bind_back(tuple_nth_fn{});
     }
   };
 

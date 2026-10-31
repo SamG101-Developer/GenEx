@@ -20,9 +20,9 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct slice_fn {
+  struct slice_fn : pipe_closure {
     template <typename Rng, typename Int>
-      requires detail::concepts::sliceable_range<Rng, Int>
+    requires detail::concepts::sliceable_range<Rng, Int>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Int from, Int to) const -> Rng {
       actions::erase(rng, iterators::begin(rng), iterators::next(iterators::begin(rng), from, iterators::end(rng)));
       actions::erase(rng, iterators::next(iterators::begin(rng), to - from), iterators::end(rng));
@@ -30,20 +30,20 @@ namespace genex::actions {
     }
 
     template <typename Rng, typename Int>
-      requires detail::concepts::sliceable_range<Rng, Int>
+    requires detail::concepts::sliceable_range<Rng, Int>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Int from) const -> Rng {
       actions::erase(rng, iterators::begin(rng), iterators::next(iterators::begin(rng), from, iterators::end(rng)));
       return std::forward<Rng>(rng);
     }
 
     template <typename Int>
-      requires std::integral<Int>
+    requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int from, const Int to) const {
       return meta::bind_back(slice_fn{}, from, to);
     }
 
     template <typename Int>
-      requires std::integral<Int>
+    requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int from) const {
       return meta::bind_back(slice_fn{}, from);
     }

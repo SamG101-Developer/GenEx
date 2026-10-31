@@ -19,9 +19,9 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct rotate_fn {
+  struct rotate_fn : pipe_closure {
     template <typename Rng, typename Int>
-      requires detail::concepts::rotatable_range<Rng, Int>
+    requires detail::concepts::rotatable_range<Rng, Int>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const -> Rng {
       GENEX_ASSERT(n >= 0);
       auto first = iterators::begin(rng);
@@ -32,7 +32,7 @@ namespace genex::actions {
     }
 
     template <typename Int>
-      requires std::integral<Int>
+    requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int n) const {
       GENEX_ASSERT(n >= 0);
       return meta::bind_back(rotate_fn{}, n);

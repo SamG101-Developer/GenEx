@@ -152,12 +152,10 @@ export namespace genex {
     (has_std_begin<Rng> or has_member_begin<Rng>) and
     (has_std_end<Rng> or has_member_end<Rng>);
 
-  /**
-   * The base of every view. A view is cheap to move, and the iterators it hands out hold copies of what they use, so
-   * they stay valid after the view itself is gone.
-   */
-  struct view_base {
-  };
+  /// The base of every view. A view is cheap to move, and the iterators it
+  /// hands out hold copies of what they use, so they stay valid after the view
+  /// itself is gone.
+  struct view_base {};
 
   template <typename T>
   inline constexpr bool enable_view = std::derived_from<T, view_base>;
@@ -168,9 +166,8 @@ export namespace genex {
   template <typename T, std::size_t Extent>
   inline constexpr bool enable_view<std::span<T, Extent>> = true;
 
-  /**
-   * Whether a range's iterators stay valid after the range itself is gone, because it does not own what they point to.
-   */
+  /// Whether a range's iterators stay valid after the range itself is gone,
+  /// because it does not own what they point to.
   template <typename T>
   inline constexpr bool enable_borrowed_range = false;
 
@@ -180,20 +177,19 @@ export namespace genex {
   template <typename T, std::size_t Extent>
   inline constexpr bool enable_borrowed_range<std::span<T, Extent>> = true;
 
-  /**
-   * A range a view can safely point into: an lvalue, or a range whose iterators do not depend on it staying alive. Any
-   * other rvalue would dangle, so a view takes one through the pipe operator, which keeps it alive.
-   */
+  /// A range a view can safely point into: an lvalue, or a range whose
+  /// iterators do not depend on it staying alive. Any other rvalue would
+  /// dangle, so a view takes one through the pipe operator, which keeps it
+  /// alive.
   template <typename Rng>
   concept non_dangling_range =
     std::is_lvalue_reference_v<Rng> or
     enable_view<std::remove_cvref_t<Rng>> or
     enable_borrowed_range<std::remove_cvref_t<Rng>>;
 
-  /**
-   * What an algorithm returns instead of an iterator into an rvalue range that is about to be destroyed. It can't be
-   * dereferenced, so misusing it is a compile error.
-   */
+  /// What an algorithm returns instead of an iterator into an rvalue range that
+  /// is about to be destroyed. It can't be dereferenced, so misusing it is a
+  /// compile error.
   struct dangling {
     constexpr dangling() noexcept = default;
 
@@ -203,29 +199,30 @@ export namespace genex {
   };
 
   template <typename Rng>
-  using borrowed_iterator_t = std::conditional_t<non_dangling_range<Rng>, iterator_t<Rng>, dangling>;
+  using borrowed_iterator_t = std::conditional_t<
+    non_dangling_range<Rng>, iterator_t<Rng>, dangling>;
 
-  /**
-   * An element of a range: a reference where the range outlives the call, otherwise a copy.
-   */
+  /// An element of a range: a reference where the range outlives the call,
+  /// otherwise a copy.
   template <typename Rng>
-  using borrowed_reference_t = std::conditional_t<non_dangling_range<Rng>, range_reference_t<Rng>, range_value_t<Rng>>;
+  using borrowed_reference_t = std::conditional_t<
+    non_dangling_range<Rng>, range_reference_t<Rng>, range_value_t<Rng>>;
 
-  /**
-   * The end of a range with no end of its own, which compares unequal to everything. Having its own type means a loop
-   * over one has no end check at all, and an adaptor that does end it, like @c take, knows exactly how long it is.
-   */
+  /// The end of a range with no end of its own, which compares unequal to
+  /// everything. Having its own type means a loop over one has no end check at
+  /// all, and an adaptor that does end it, like "take", knows exactly how long
+  /// it is.
   struct unreachable_sentinel {
     template <std::input_or_output_iterator I>
-    constexpr friend auto operator==(const I &, unreachable_sentinel) noexcept -> bool {
+    constexpr friend auto operator==(
+      const I &, unreachable_sentinel) noexcept -> bool {
       return false;
     }
   };
 
-  /**
-   * A container that can be sized up front and written to directly, with elements that cost nothing to overwrite. A
-   * view's @c append_to can use this to write elements with an indexed loop, which the compiler can vectorize.
-   */
+  /// A container that can be sized up front and written to directly, with
+  /// elements that cost nothing to overwrite. A view's "append_to" can use this
+  /// to write elements with an indexed loop, which the compiler can vectorize.
   template <typename Out, typename Reference>
   concept overwritable_with =
     std::is_trivially_copyable_v<typename Out::value_type> and
@@ -235,20 +232,17 @@ export namespace genex {
       { out.data() } -> std::same_as<typename Out::value_type*>;
     };
 
-  /**
-   * The strongest tag an iterator models, for an adaptor's @c iterator_concept.
-   */
+  /// The strongest tag an iterator models, for an adaptor's "iterator_concept".
   template <typename I>
   using iter_strength_t =
     std::conditional_t<std::random_access_iterator<I>, std::random_access_iterator_tag,
     std::conditional_t<std::bidirectional_iterator<I>, std::bidirectional_iterator_tag,
     std::conditional_t<std::forward_iterator<I>, std::forward_iterator_tag, std::input_iterator_tag>>>;
 
-  /**
-   * An adaptor's @c iterator_category, which legacy algorithms dispatch on. Legacy forward iterators and above must
-   * return a true reference, so an iterator returning a prvalue can only claim to be an input iterator there, whatever
-   * @c iterator_concept says it models.
-   */
+  /// An adaptor's "iterator_category", which legacy algorithms dispatch on.
+  /// Legacy forward iterators and above must return a true reference, so an
+  /// iterator returning a prvalue can only claim to be an input iterator there,
+  /// whatever "iterator_concept" says it models.
   template <typename Reference, typename Concept>
   using legacy_iter_category_t =
     std::conditional_t<std::is_lvalue_reference_v<Reference>, Concept, std::input_iterator_tag>;

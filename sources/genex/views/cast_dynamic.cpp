@@ -6,7 +6,6 @@ export import genex.pipe;
 import genex.concepts;
 import genex.detail.iterator_ops;
 import genex.iterators.iter_pair;
-import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -28,7 +27,7 @@ namespace genex::views::detail::impl {
   struct cast_dynamic_sentinel {};
 
   template <typename To, typename I, typename S>
-    requires concepts::dynamic_castable_iters<To, I, S>
+  requires concepts::dynamic_castable_iters<To, I, S>
   struct cast_dynamic_iterator : genex::detail::iterator_ops<cast_dynamic_iterator<To, I, S>> {
     I it;
     S st;
@@ -57,11 +56,14 @@ namespace genex::views::detail::impl {
     }
 
     GENEX_INLINE friend constexpr auto operator==(
-      const cast_dynamic_iterator &self, const cast_dynamic_iterator &that) -> bool {
+      const cast_dynamic_iterator &self,
+      const cast_dynamic_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const cast_dynamic_iterator &self, cast_dynamic_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const cast_dynamic_iterator &self,
+      cast_dynamic_sentinel) -> bool {
       return self.it == self.st;
     }
 
@@ -81,7 +83,7 @@ namespace genex::views::detail::impl {
   };
 
   template <typename To, typename I, typename S>
-    requires concepts::dynamic_castable_iters<To, I, S>
+  requires concepts::dynamic_castable_iters<To, I, S>
   struct cast_dynamic_view : view_base {
     I it;
     S st;
@@ -103,28 +105,27 @@ namespace genex::views::detail::impl {
 
 namespace genex::views {
   template <typename To>
-  struct cast_dynamic_fn {
+  struct cast_dynamic_fn : pipe_closure {
     template <typename I, typename S>
-      requires detail::concepts::dynamic_castable_iters<To, I, S>
+    requires detail::concepts::dynamic_castable_iters<To, I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
-      SAFE_CTOR(detail::impl::cast_dynamic_view<To, I, S>, I, S) and SAFE_MOVE(I) and SAFE_MOVE(S)) {
-      return detail::impl::cast_dynamic_view<To, I, S>(std::move(first), std::move(last));
+      SAFE_CTOR(detail::impl::cast_dynamic_view<To, I, S>, I, S) and
+      SAFE_MOVE(I) and SAFE_MOVE(S)) {
+      return detail::impl::cast_dynamic_view<To, I, S>(
+        std::move(first), std::move(last));
     }
 
     template <typename Rng>
-      requires detail::concepts::dynamic_castable_range<To, Rng>
+    requires detail::concepts::dynamic_castable_range<To, Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(
         detail::impl::cast_dynamic_view<To, iterator_t<Rng>, sentinel_t<Rng>>,
         iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::cast_dynamic_view<To, iterator_t<Rng>, sentinel_t<Rng>>(std::move(first), std::move(last));
-    }
-
-    GENEX_INLINE constexpr auto operator()() const noexcept(
-      SAFE_CTOR(cast_dynamic_fn)) {
-      return meta::bind_back(cast_dynamic_fn{});
+      return detail::impl::cast_dynamic_view<
+        To, iterator_t<Rng>, sentinel_t<Rng>>(
+        std::move(first), std::move(last));
     }
   };
 

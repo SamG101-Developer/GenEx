@@ -22,21 +22,26 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct replace_fn {
-    template <typename Rng, typename Old, typename New, typename Proj = meta::identity>
-      requires detail::concepts::replaceable_range<Rng, Old, New, Proj>
-    constexpr auto operator()(Rng &&rng, Old old_val, New new_val,
-      Proj proj = {}) const -> Rng {
+  struct replace_fn : pipe_closure {
+    template <
+      typename Rng, typename Old, typename New, typename Proj = meta::identity>
+    requires detail::concepts::replaceable_range<Rng, Old, New, Proj>
+    constexpr auto operator()(
+      Rng &&rng, Old old_val, New new_val, Proj proj = {}) const -> Rng {
       for (auto it = iterators::begin(rng); it != iterators::end(rng); ++it) {
-        if (operations::eq{}(meta::invoke(proj, *it), old_val)) { *it = new_val; }
+        if (operations::eq{}(meta::invoke(proj, *it), old_val)) {
+          *it = new_val;
+        }
       }
       return std::forward<Rng>(rng);
     }
 
     template <typename Old, typename New, typename Proj = meta::identity>
-      requires (not range<Old>)
-    GENEX_INLINE constexpr auto operator()(Old old_val, New new_val, Proj proj = {}) const {
-      return meta::bind_back(replace_fn{}, std::move(old_val), std::move(new_val), std::move(proj));
+    requires (not range<Old>)
+    GENEX_INLINE constexpr auto operator()(
+      Old old_val, New new_val, Proj proj = {}) const {
+      return meta::bind_back(
+        replace_fn{}, std::move(old_val), std::move(new_val), std::move(proj));
     }
   };
 

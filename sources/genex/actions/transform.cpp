@@ -20,9 +20,9 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct transform_fn {
+  struct transform_fn : pipe_closure {
     template <typename Rng, typename F, typename Proj = meta::identity>
-      requires detail::concepts::transformable_range<Rng, F, Proj>
+    requires detail::concepts::transformable_range<Rng, F, Proj>
     constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       for (; first != last; ++first) {
@@ -32,7 +32,7 @@ namespace genex::actions {
     }
 
     template <typename F, typename Proj = meta::identity>
-      requires (not range<F>)
+    requires (not range<F>)
     GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const {
       return meta::bind_back(transform_fn{}, std::move(f), std::move(proj));
     }

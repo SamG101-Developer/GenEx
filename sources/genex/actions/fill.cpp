@@ -16,9 +16,9 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct fill_fn {
+  struct fill_fn : pipe_closure {
     template <typename Rng, typename E>
-      requires detail::concepts::fillable_range<Rng, E>
+    requires detail::concepts::fillable_range<Rng, E>
     constexpr auto operator()(Rng &&rng, E value) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       for (; first != last; ++first) { *first = value; }
@@ -26,7 +26,7 @@ namespace genex::actions {
     }
 
     template <typename E>
-      requires (not range<E>)
+    requires (not range<E>)
     GENEX_INLINE constexpr auto operator()(E value) const {
       return meta::bind_back(fill_fn{}, std::move(value));
     }

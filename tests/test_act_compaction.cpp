@@ -76,7 +76,7 @@ TEST(GenexActionsCompaction, Unique) {
          {{}, {}}, {{1}, {1}}, {{1, 1}, {1}}, {{1, 2}, {1, 2}}, {{1, 1, 2, 2, 1, 1}, {1, 2, 1}}, {{1, 2, 2, 3}, {1, 2, 3}}
        }) {
     auto vec = in;
-    vec |= genex::actions::unique();
+    vec |= genex::actions::unique;
     EXPECT_EQ(vec, exp);
   }
 }
@@ -86,7 +86,7 @@ TEST(GenexActionsCompaction, ReverseOddAndEven) {
          {{}, {}}, {{1}, {1}}, {{1, 2}, {2, 1}}, {{1, 2, 3}, {3, 2, 1}}, {{1, 2, 3, 4}, {4, 3, 2, 1}}
        }) {
     auto vec = in;
-    vec |= genex::actions::reverse();
+    vec |= genex::actions::reverse;
     EXPECT_EQ(vec, exp);
   }
 }

@@ -3,8 +3,8 @@ module;
 
 export module genex.actions.filter;
 export import genex.pipe;
-import genex.actions.erase;
 import genex.concepts;
+import genex.detail.keep_if;
 import genex.meta;
 import std;
 
@@ -17,9 +17,9 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct filter_fn {
+  struct filter_fn : pipe_closure {
     template <typename Rng, typename Pred, typename Proj = meta::identity>
-      requires detail::concepts::filterable_range<Rng, Pred, Proj>
+    requires detail::concepts::filterable_range<Rng, Pred, Proj>
     constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
       detail::keep_if(rng, [&]<typename T>(T &&elem) -> bool {
         return meta::invoke(pred, meta::invoke(proj, std::forward<T>(elem)));
@@ -28,7 +28,7 @@ namespace genex::actions {
     }
 
     template <typename Pred, typename Proj = meta::identity>
-      requires (not range<Pred>)
+    requires (not range<Pred>)
     GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const {
       return meta::bind_back(filter_fn{}, std::move(pred), std::move(proj));
     }

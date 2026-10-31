@@ -7,7 +7,6 @@ import genex.actions.erase;
 import genex.concepts;
 import genex.iterators.access;
 import genex.iterators.prev;
-import genex.meta;
 
 namespace genex::actions::detail::concepts {
   template <typename Rng>
@@ -28,21 +27,17 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct pop_back_fn {
+  struct pop_back_fn : pipe_closure {
     template <typename Rng>
-      requires detail::concepts::back_poppable_select_pop_back<Rng>
+    requires detail::concepts::back_poppable_select_pop_back<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
       return rng.pop_back();
     }
 
     template <typename Rng>
-      requires detail::concepts::back_poppable_select_erase<Rng>
+    requires detail::concepts::back_poppable_select_erase<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
       return actions::erase(rng, iterators::prev(iterators::end(rng)));
-    }
-
-    GENEX_INLINE constexpr auto operator()() const {
-      return meta::bind_back(pop_back_fn{});
     }
   };
 

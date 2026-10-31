@@ -78,7 +78,7 @@ GENEX_BENCH_VIEW(AsConst, bench::ascending, ranges::views::const_, genex::views:
 GENEX_BENCH_VIEW(
   CastStatic, bench::ascending,
   ranges::views::transform([](auto b) { return static_cast<double>(b); }),
-  genex::views::cast_static<double>());
+  genex::views::cast_static<double>);
 
 GENEX_BENCH_VIEW(Indirect, unique_pointers, ranges::views::indirect, genex::views::indirect);
 GENEX_BENCH_VIEW(Ptr_UniquePtr, unique_pointers, ranges::views::transform(get_pointer), genex::views::ptr);

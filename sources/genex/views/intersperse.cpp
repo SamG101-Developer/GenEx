@@ -31,8 +31,9 @@ namespace genex::views::detail::impl {
   struct intersperse_sentinel {};
 
   template <typename I, typename S, typename New>
-    requires concepts::interspersable_iters<I, S, New>
-  struct intersperse_iterator : genex::detail::iterator_ops<intersperse_iterator<I, S, New>> {
+  requires concepts::interspersable_iters<I, S, New>
+  struct intersperse_iterator :
+    genex::detail::iterator_ops<intersperse_iterator<I, S, New>> {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS New new_value;
@@ -42,7 +43,9 @@ namespace genex::views::detail::impl {
     using reference = iter_reference_t<I>;
     using difference_type = iter_difference_t<I>;
     using iterator_concept = std::conditional_t<
-      std::bidirectional_iterator<I>, std::bidirectional_iterator_tag, iter_strength_t<I>>;
+      std::bidirectional_iterator<I>,
+      std::bidirectional_iterator_tag,
+      iter_strength_t<I>>;
     using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
 
     GENEX_INLINE constexpr intersperse_iterator() = default;
@@ -51,7 +54,6 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)),
       new_value(std::move(new_val)) {
     }
-
 
     GENEX_INLINE constexpr auto next() -> void {
       if (yield_new) {
@@ -66,7 +68,8 @@ namespace genex::views::detail::impl {
       }
     }
 
-    GENEX_INLINE constexpr auto prev() -> void requires std::bidirectional_iterator<decltype(it)> {
+    GENEX_INLINE constexpr auto prev() -> void
+    requires std::bidirectional_iterator<decltype(it)> {
       if (yield_new) {
         yield_new = false;
         return;
@@ -83,24 +86,27 @@ namespace genex::views::detail::impl {
     }
 
     GENEX_INLINE friend constexpr auto operator==(
-      const intersperse_iterator &self, const intersperse_iterator &that) -> bool {
-      // `yield_new` is part of the position: the same base element is two distinct items.
+      const intersperse_iterator &self,
+      const intersperse_iterator &that) -> bool {
       return self.it == that.it and self.yield_new == that.yield_new;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const intersperse_iterator &self, intersperse_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const intersperse_iterator &self,
+      intersperse_sentinel) -> bool {
       return self.it == self.st;
     }
   };
 
   template <typename I, typename S, typename New>
-    requires concepts::interspersable_iters<I, S, New>
+  requires concepts::interspersable_iters<I, S, New>
   struct intersperse_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS New new_value;
 
-    GENEX_INLINE constexpr intersperse_view(I first, S last, New new_val) noexcept(
+    GENEX_INLINE constexpr intersperse_view(
+      I first, S last, New new_val) noexcept(
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(New)) :
       it(std::move(first)), st(std::move(last)),
       new_value(std::move(new_val)) {
@@ -114,9 +120,8 @@ namespace genex::views::detail::impl {
       return intersperse_sentinel();
     }
 
-    // Writes each element and separator as a pair, which a loop over the iterator would have to branch between.
     template <overwritable_with<iter_reference_t<I>> Out>
-      requires requires { iterators::distance(it, st); }
+    requires requires { iterators::distance(it, st); }
     constexpr auto append_to(Out &out) const -> void {
       const auto count = static_cast<std::size_t>(iterators::distance(it, st));
       if (count == 0) { return; }
@@ -141,29 +146,34 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct intersperse_fn {
+  struct intersperse_fn : pipe_closure {
     template <typename I, typename S, typename New>
-      requires detail::concepts::interspersable_iters<I, S, New>
-    GENEX_INLINE constexpr auto operator()(I first, S last, New sep) const noexcept(
+    requires detail::concepts::interspersable_iters<I, S, New>
+    GENEX_INLINE constexpr auto operator()(
+      I first, S last, New sep) const noexcept(
       SAFE_IMPL_CTOR(intersperse_view, I, S, New) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(New)) {
-      return detail::impl::intersperse_view(std::move(first), std::move(last), std::move(sep));
+      return detail::impl::intersperse_view(
+        std::move(first), std::move(last), std::move(sep));
     }
 
     template <typename Rng, typename New>
-      requires detail::concepts::interspersable_range<Rng, New>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, New sep) const noexcept(
+    requires detail::concepts::interspersable_range<Rng, New>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, New sep) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(intersperse_view, iterator_t<Rng>, sentinel_t<Rng>, New) and
       SAFE_MOVE(New)) {
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::intersperse_view(std::move(first), std::move(last), std::move(sep));
+      return detail::impl::intersperse_view(
+        std::move(first), std::move(last), std::move(sep));
     }
 
     template <typename New>
     GENEX_INLINE constexpr auto operator()(New sep) const noexcept(
       SAFE_CTOR(intersperse_fn) and SAFE_MOVE(New)) {
-      return meta::bind_back(intersperse_fn{}, std::move(sep));
+      return meta::bind_back(
+        intersperse_fn{}, std::move(sep));
     }
   };
 

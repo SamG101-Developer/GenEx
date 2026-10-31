@@ -4,7 +4,6 @@ module;
 export module genex.actions.clear;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import std;
 
 namespace genex::actions::detail::concepts {
@@ -15,16 +14,12 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct clear_fn {
+  struct clear_fn : pipe_closure {
     template <typename Rng>
     requires detail::concepts::clearable_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> Rng {
       rng.clear();
       return std::forward<Rng>(rng);
-    }
-
-    GENEX_INLINE constexpr auto operator()() const {
-      return meta::bind_back(clear_fn{});
     }
   };
 

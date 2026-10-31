@@ -22,8 +22,9 @@ namespace genex::iterators::detail::concepts {
 namespace genex::iterators {
   struct distance_fn {
     template <typename I, typename S>
-      requires detail::concepts::distancable_iters<I, S>
-    GENEX_INLINE constexpr auto operator()(I first, S last) const -> std::ptrdiff_t {
+    requires detail::concepts::distancable_iters<I, S>
+    GENEX_INLINE constexpr auto operator()(
+      I first, S last) const -> std::ptrdiff_t {
       if constexpr (std::sized_sentinel_for<S, I>) {
         return static_cast<std::ptrdiff_t>(last - first);
       }
@@ -35,8 +36,9 @@ namespace genex::iterators {
     }
 
     template <typename Rng>
-      requires detail::concepts::distancable_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> std::ptrdiff_t {
+    requires detail::concepts::distancable_range<Rng>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const -> std::ptrdiff_t {
       auto [first, last] = iterators::iter_pair(rng);
       return (*this)(std::move(first), std::move(last));
     }

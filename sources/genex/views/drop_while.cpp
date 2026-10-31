@@ -24,25 +24,26 @@ namespace genex::views::detail::concepts {
 
 namespace genex::views::detail::impl {
   template <typename I, typename S, typename Pred, typename Proj>
-    requires concepts::droppable_while_iters<I, S, Pred, Proj>
+  requires concepts::droppable_while_iters<I, S, Pred, Proj>
   struct drop_while_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS Pred pred;
     GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
-    GENEX_INLINE constexpr drop_while_view(I first, S last, Pred pred, Proj proj) noexcept(
+    GENEX_INLINE constexpr drop_while_view(
+      I first, S last, Pred pred, Proj proj) noexcept(
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) :
       it(std::move(first)), st(std::move(last)),
       pred(std::move(pred)), proj(std::move(proj)) {
     }
 
-    // Once the leading elements are gone, what's left is just the rest of the range, with all of its strengths.
     [[nodiscard]] constexpr auto begin() const -> I {
       auto first = it;
       auto keep_dropping = pred;
       auto project = proj;
-      while (first != st and meta::invoke(keep_dropping, meta::invoke(project, *first))) { ++first; }
+      while (first != st and meta::invoke(
+        keep_dropping, meta::invoke(project, *first))) { ++first; }
       return first;
     }
 
@@ -58,28 +59,33 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct drop_while_fn {
+  struct drop_while_fn : pipe_closure {
     template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-      requires detail::concepts::droppable_while_iters<I, S, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const noexcept(
+    requires detail::concepts::droppable_while_iters<I, S, Pred, Proj>
+    GENEX_INLINE constexpr auto operator()(
+      I first, S last, Pred pred, Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(drop_while_view, I, S, Pred, Proj) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
-      return detail::impl::drop_while_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
+      return detail::impl::drop_while_view(
+        std::move(first), std::move(last), std::move(pred), std::move(proj));
     }
 
     template <typename Rng, typename Pred, typename Proj = meta::identity>
-      requires detail::concepts::droppable_while_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const noexcept(
+    requires detail::concepts::droppable_while_range<Rng, Pred, Proj>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Pred pred, Proj proj = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(drop_while_view, iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj) and
       SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::drop_while_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
+      return detail::impl::drop_while_view(
+        std::move(first), std::move(last), std::move(pred), std::move(proj));
     }
 
     template <typename Pred, typename Proj = meta::identity>
-      requires (not range<Pred>)
-    GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const noexcept(
+    requires (not range<Pred>)
+    GENEX_INLINE constexpr auto operator()(
+      Pred pred, Proj proj = {}) const noexcept(
       SAFE_CTOR(drop_while_fn) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
       return meta::bind_back(drop_while_fn{}, std::move(pred), std::move(proj));
     }

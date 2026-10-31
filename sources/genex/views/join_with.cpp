@@ -30,8 +30,9 @@ namespace genex::views::detail::impl {
   struct join_with_sentinel {};
 
   template <typename I, typename S, typename New>
-    requires concepts::joinable_with_iters<I, S, New>
-  struct join_with_iterator : genex::detail::iterator_ops<join_with_iterator<I, S, New>> {
+  requires concepts::joinable_with_iters<I, S, New>
+  struct join_with_iterator :
+    genex::detail::iterator_ops<join_with_iterator<I, S, New>> {
     I it;
     S st;
     New new_value;
@@ -40,7 +41,8 @@ namespace genex::views::detail::impl {
     sentinel_t<iter_value_t<I>> inner_st;
 
     using value_type = range_value_t<iter_value_t<I>>;
-    using reference = std::common_reference_t<range_reference_t<iter_value_t<I>>, const New&>;
+    using reference = std::common_reference_t<
+      range_reference_t<iter_value_t<I>>, const New&>;
     using difference_type = iter_difference_t<I>;
     using iterator_category = std::conditional_t<
       std::forward_iterator<I>,
@@ -50,7 +52,8 @@ namespace genex::views::detail::impl {
 
     GENEX_INLINE constexpr join_with_iterator() = default;
 
-    GENEX_INLINE constexpr join_with_iterator(I first, S last, New new_val) :
+    GENEX_INLINE constexpr join_with_iterator(
+      I first, S last, New new_val) :
       it(std::move(first)), st(std::move(last)), new_value(std::move(new_val)) {
       fwd_to_valid();
     }
@@ -81,7 +84,8 @@ namespace genex::views::detail::impl {
       return self.it == that.it;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const join_with_iterator &self, join_with_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const join_with_iterator &self, join_with_sentinel) -> bool {
       if (self.it == self.st) { return true; }
 
       if (self.use_new) {
@@ -107,13 +111,14 @@ namespace genex::views::detail::impl {
   };
 
   template <typename I, typename S, typename New>
-    requires concepts::joinable_with_iters<I, S, New>
+  requires concepts::joinable_with_iters<I, S, New>
   struct join_with_view : view_base {
     I it;
     S st;
     New new_value;
 
-    GENEX_INLINE constexpr join_with_view(I first, S last, New new_val) noexcept(
+    GENEX_INLINE constexpr join_with_view(
+      I first, S last, New new_val) noexcept(
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(New)) :
       it(std::move(first)), st(std::move(last)), new_value(std::move(new_val)) {
     }
@@ -142,23 +147,25 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct join_with_fn {
+  struct join_with_fn : pipe_closure {
     template <typename I, typename S, typename New>
-      requires detail::concepts::joinable_with_iters<I, S, New>
+    requires detail::concepts::joinable_with_iters<I, S, New>
     GENEX_INLINE constexpr auto operator()(I first, S last, New new_value) const noexcept(
       SAFE_IMPL_CTOR(join_with_view, I, S, New) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(New)) {
-      return detail::impl::join_with_view(std::move(first), std::move(last), std::move(new_value));
+      return detail::impl::join_with_view(
+        std::move(first), std::move(last), std::move(new_value));
     }
 
     template <typename Rng, typename New>
-      requires detail::concepts::joinable_with_range<Rng, New>
+    requires detail::concepts::joinable_with_range<Rng, New>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, New new_value) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(join_with_view, iterator_t<Rng>, sentinel_t<Rng>, New) and
       SAFE_MOVE(New)) {
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::join_with_view(std::move(first), std::move(last), std::move(new_value));
+      return detail::impl::join_with_view(
+        std::move(first), std::move(last), std::move(new_value));
     }
 
     template <typename New>

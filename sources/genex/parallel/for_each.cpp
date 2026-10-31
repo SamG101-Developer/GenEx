@@ -5,6 +5,7 @@ export module genex.parallel.for_each;
 export import genex.parallel.params;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.worker_count;
 import genex.iterators.iter_pair;
 import genex.meta;
 import std;

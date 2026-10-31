@@ -24,7 +24,7 @@ TEST(GenexViewsDivide, VecInputUneven) {
 TEST(GenexViewsDivide, VecInputCall) {
   auto vec = std::vector{0, 1, 2, 3};
 
-  const auto [a, b] = vec | genex::views::divide<2>();
+  const auto [a, b] = vec | genex::views::divide<2>;
   EXPECT_EQ(a | genex::to<std::vector>(), (std::vector{0, 1}));
   EXPECT_EQ(b | genex::to<std::vector>(), (std::vector{2, 3}));
 }

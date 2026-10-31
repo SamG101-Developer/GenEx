@@ -31,22 +31,26 @@ namespace genex::views::detail::impl {
     S st;
   };
 
-  export template <typename I, typename S, typename F, typename Proj>
-    requires concepts::transformable_iters<I, S, F, Proj>
-  struct transform_iterator : genex::detail::adaptor_ops<transform_iterator<I, S, F, Proj>> {
+  template <typename I, typename S, typename F, typename Proj>
+  requires concepts::transformable_iters<I, S, F, Proj>
+  struct transform_iterator :
+    genex::detail::adaptor_ops<transform_iterator<I, S, F, Proj>> {
     I it;
     GENEX_NO_UNIQUE_ADDRESS meta::box<F> f;
     GENEX_NO_UNIQUE_ADDRESS meta::box<Proj> proj;
 
-    using projected_reference_type = std::invoke_result_t<Proj&, iter_reference_t<I>>;
-    using transformed_reference_type = std::invoke_result_t<F&, projected_reference_type>;
+    using projected_reference_type = std::invoke_result_t<
+      Proj&, iter_reference_t<I>>;
+    using transformed_reference_type = std::invoke_result_t<
+      F&, projected_reference_type>;
 
     using value_type = std::remove_cvref_t<transformed_reference_type>;
     using reference = transformed_reference_type;
     using pointer = void;
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
-    using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
+    using iterator_category = legacy_iter_category_t<
+      reference, iterator_concept>;
 
     GENEX_INLINE constexpr transform_iterator() = default;
     GENEX_INLINE constexpr transform_iterator(I it, F f, Proj proj = {}) :
@@ -58,21 +62,23 @@ namespace genex::views::detail::impl {
     }
 
     template <typename S2>
-    GENEX_INLINE friend constexpr auto operator==(const transform_iterator &self, const transform_sentinel<S2> &that)
-      -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const transform_iterator &self,
+      const transform_sentinel<S2> &that)-> bool {
       return self.recursive_eq(self.it, that.st);
     }
 
   private:
     template <typename Self, typename I2, typename S2>
-    GENEX_INLINE constexpr auto recursive_eq(this Self &&self, I2 i, S2 s) -> bool {
+    GENEX_INLINE constexpr auto recursive_eq(
+      this Self &&self, I2 i, S2 s) -> bool {
       if constexpr (requires { i == s; }) { return i == s; }
       else { return self.recursive_eq(i.it, s); }
     }
   };
 
   template <typename I, typename S, typename F, typename Proj>
-    requires concepts::transformable_iters<I, S, F, Proj>
+  requires concepts::transformable_iters<I, S, F, Proj>
   struct transform_view : view_base {
     I it;
     S st;
@@ -105,27 +111,31 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct transform_fn {
+  struct transform_fn : pipe_closure {
     template <typename I, typename S, typename F, typename Proj = meta::identity>
-      requires detail::concepts::transformable_iters<I, S, F, Proj>
-    GENEX_INLINE constexpr auto operator()(I first, S last, F f, Proj proj = {}) const noexcept(
+    requires detail::concepts::transformable_iters<I, S, F, Proj>
+    GENEX_INLINE constexpr auto operator()(
+      I first, S last, F f, Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(transform_view, I, S, F, Proj) and SAFE_MOVE(I) and
       SAFE_MOVE(S) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
-      return detail::impl::transform_view(std::move(first), std::move(last), std::move(f), std::move(proj));
+      return detail::impl::transform_view(
+        std::move(first), std::move(last), std::move(f), std::move(proj));
     }
 
     template <typename Rng, typename F, typename Proj = meta::identity>
-      requires detail::concepts::transformable_range<Rng, F, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const noexcept(
+    requires detail::concepts::transformable_range<Rng, F, Proj>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, F f, Proj proj = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(transform_view, iterator_t<Rng>, sentinel_t<Rng>, F, Proj) and
       SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::transform_view(std::move(first), std::move(last), std::move(f), std::move(proj));
+      return detail::impl::transform_view(
+        std::move(first), std::move(last), std::move(f), std::move(proj));
     }
 
     template <typename F, typename Proj = meta::identity>
-      requires (not range<F>)
+    requires (not range<F>)
     GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const noexcept(
       SAFE_CTOR(transform_fn) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
       return meta::bind_back(transform_fn{}, std::move(f), std::move(proj));

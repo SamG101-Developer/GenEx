@@ -7,7 +7,6 @@ import genex.concepts;
 import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
-import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -26,16 +25,10 @@ namespace genex::views::detail::concepts {
 }
 
 namespace genex::views::detail::impl {
-  /**
-   * The @c address_of_iterator yields the addresses of the elements pointed to by the underlying iterator. Note that
-   * there is no special "sentinel" type for the @c address_of_iterator, because the end is always known from the
-   * underlying range.
-   * @tparam I The type of the underlying iterator.
-   * @tparam S The type of the underlying sentinel.
-   */
   template <typename I, typename S>
-    requires concepts::addressable_iters<I, S>
-  struct address_of_iterator : genex::detail::adaptor_ops<address_of_iterator<I, S>> {
+  requires concepts::addressable_iters<I, S>
+  struct address_of_iterator :
+    genex::detail::adaptor_ops<address_of_iterator<I, S>> {
     I it;
 
     using value_type = std::add_pointer_t<iter_value_t<I>>;
@@ -43,7 +36,8 @@ namespace genex::views::detail::impl {
     using pointer = void;
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
-    using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
+    using iterator_category = legacy_iter_category_t<
+      reference, iterator_concept>;
 
     GENEX_INLINE constexpr address_of_iterator() noexcept = default;
 
@@ -58,7 +52,7 @@ namespace genex::views::detail::impl {
   };
 
   template <typename I, typename S>
-    requires concepts::addressable_iters<I, S>
+  requires concepts::addressable_iters<I, S>
   struct address_of_view : view_base {
     I it;
     S st;
@@ -84,27 +78,22 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct address_of_fn {
+  struct address_of_fn : pipe_closure {
 
     template <typename I, typename S>
-      requires detail::concepts::addressable_iters<I, S>
+    requires detail::concepts::addressable_iters<I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
       SAFE_IMPL_CTOR(address_of_view, I, S) and SAFE_MOVE(I) and SAFE_MOVE(S)) {
       return detail::impl::address_of_view(std::move(first), std::move(last));
     }
 
     template <typename Rng>
-      requires detail::concepts::addressable_range<Rng>
+    requires detail::concepts::addressable_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(address_of_view, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::address_of_view(std::move(first), std::move(last));
-    }
-
-    GENEX_INLINE constexpr auto operator()() const noexcept(
-      SAFE_CTOR(address_of_fn)) {
-      return meta::bind_back(address_of_fn{});
     }
   };
 

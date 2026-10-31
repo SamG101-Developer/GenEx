@@ -85,14 +85,14 @@ GENEX_BENCH_ACTION(Drop, ascending, drop(500), drop(500));
 GENEX_BENCH_ACTION(DropWhile, ascending, drop_while(is_small), drop_while(is_small));
 GENEX_BENCH_ACTION(Remove, runs, remove(50), remove(50));
 GENEX_BENCH_ACTION(RemoveIf, shuffled, remove_if(is_even), remove_if(is_even));
-GENEX_BENCH_ACTION(Reverse, ascending, reverse, reverse());
+GENEX_BENCH_ACTION(Reverse, ascending, reverse, reverse);
 GENEX_BENCH_ACTION(Slice, ascending, slice(250, 750), slice(250, 750));
-GENEX_BENCH_ACTION(Sort, shuffled, sort, sort());
-GENEX_BENCH_ACTION(StableSort, shuffled, stable_sort, stable_sort());
+GENEX_BENCH_ACTION(Sort, shuffled, sort, sort);
+GENEX_BENCH_ACTION(StableSort, shuffled, stable_sort, stable_sort);
 GENEX_BENCH_ACTION(Take, ascending, take(500), take(500));
 GENEX_BENCH_ACTION(TakeWhile, ascending, take_while(is_small), take_while(is_small));
 GENEX_BENCH_ACTION(Transform, ascending, transform(twice), transform(twice));
-GENEX_BENCH_ACTION(Unique, runs, unique, unique());
+GENEX_BENCH_ACTION(Unique, runs, unique, unique);
 
 static void BM_StdRanges_ActionConcat(benchmark::State &state) {
   const auto lhs = ascending();

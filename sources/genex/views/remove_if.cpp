@@ -10,7 +10,8 @@ import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
-  template <typename I, typename S, typename Pred, typename Proj = meta::identity>
+  template <
+    typename I, typename S, typename Pred, typename Proj = meta::identity>
   concept removable_if_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
@@ -27,7 +28,7 @@ namespace genex::views::detail::impl {
   struct remove_if_sentinel {};
 
   template <typename I, typename S, typename Pred, typename Proj>
-    requires concepts::removable_if_iters<I, S, Pred, Proj>
+  requires concepts::removable_if_iters<I, S, Pred, Proj>
   struct remove_if_iterator : genex::detail::iterator_ops<remove_if_iterator<I, S, Pred, Proj>> {
     I it;
     S st;
@@ -42,7 +43,8 @@ namespace genex::views::detail::impl {
 
     GENEX_INLINE constexpr remove_if_iterator() = default;
 
-    GENEX_INLINE constexpr remove_if_iterator(I first, S last, Pred p, Proj proj) :
+    GENEX_INLINE constexpr remove_if_iterator(
+      I first, S last, Pred p, Proj proj) :
       it(std::move(first)), st(std::move(last)),
       pred(std::move(p)), proj(std::move(proj)) {
       fwd_to_valid();
@@ -62,25 +64,29 @@ namespace genex::views::detail::impl {
       return self.it == that.it;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const remove_if_iterator &self, remove_if_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const remove_if_iterator &self, remove_if_sentinel) -> bool {
       return self.it == self.st;
     }
 
   private:
     constexpr auto fwd_to_valid() -> void {
-      while (it != st and meta::invoke(*pred, meta::invoke(*proj, *it))) { ++it; }
+      while (it != st and meta::invoke(*pred, meta::invoke(*proj, *it))) {
+        ++it;
+      }
     }
   };
 
   template <typename I, typename S, typename Pred, typename Proj>
-    requires concepts::removable_if_iters<I, S, Pred, Proj>
+  requires concepts::removable_if_iters<I, S, Pred, Proj>
   struct remove_if_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS Pred pred;
     GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
-    GENEX_INLINE constexpr remove_if_view(I first, S last, Pred p, Proj prj = {}) noexcept(
+    GENEX_INLINE constexpr remove_if_view(
+      I first, S last, Pred p, Proj prj = {}) noexcept(
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) :
       it(std::move(first)), st(std::move(last)),
       pred(std::move(p)), proj(std::move(prj)) {
@@ -97,18 +103,22 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct remove_if_fn {
-    template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-      requires detail::concepts::removable_if_iters<I, S, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred, Proj proj = {}) const noexcept(
+  struct remove_if_fn : pipe_closure {
+    template <
+      typename I, typename S, typename Pred, typename Proj = meta::identity>
+    requires detail::concepts::removable_if_iters<I, S, Pred, Proj>
+    GENEX_INLINE constexpr auto operator()(
+      I first, S last, Pred pred, Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(remove_if_view, I, S, Pred, Proj) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
       return detail::impl::remove_if_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
     }
 
-    template <typename Rng, typename Pred, typename Proj = meta::identity>
-      requires detail::concepts::removable_if_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const noexcept(
+    template <
+      typename Rng, typename Pred, typename Proj = meta::identity>
+    requires detail::concepts::removable_if_range<Rng, Pred, Proj>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Pred pred, Proj proj = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(remove_if_view, iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj) and
       SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
@@ -117,8 +127,9 @@ namespace genex::views {
     }
 
     template <typename Pred, typename Proj = meta::identity>
-      requires (not range<Pred>)
-    GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const noexcept(
+    requires (not range<Pred>)
+    GENEX_INLINE constexpr auto operator()(
+      Pred pred, Proj proj = {}) const noexcept(
       SAFE_CTOR(remove_if_fn) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
       return meta::bind_back(remove_if_fn{}, std::move(pred), std::move(proj));
     }

@@ -27,23 +27,25 @@ namespace genex::views::detail::concepts {
 }
 
 namespace genex::views::detail::impl {
-  // A forward range can only find its length by walking it. Knowing that, there is no need to walk to where it stops
-  // as well: the result already knows how many elements it has, and whoever reads it only walks those.
   template <typename I, typename S>
-  constexpr auto drop_last_counted(I first, const S last, const iter_difference_t<I> n) {
+  constexpr auto drop_last_counted(
+    I first, const S last, const iter_difference_t<I> n) {
     auto total = iter_difference_t<I>{0};
     for (auto it = first; it != last; ++it) { ++total; }
-    return genex::subrange(std::counted_iterator(std::move(first), std::max(total - n, iter_difference_t<I>{0})),
-                           std::default_sentinel);
+    return genex::subrange(
+      std::counted_iterator(
+        std::move(first), std::max(total - n, iter_difference_t<I>{0})),
+      std::default_sentinel);
   }
 }
 
 namespace genex::views {
-  struct drop_last_fn {
+  struct drop_last_fn : pipe_closure {
     template <typename I, typename S, typename Int>
-      requires detail::concepts::droppable_last_iters<I, S, Int>
+    requires detail::concepts::droppable_last_iters<I, S, Int>
       and std::contiguous_iterator<I> and std::same_as<I, S>
-    GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const noexcept(
+    GENEX_INLINE constexpr auto operator()(
+      I first, S last, const Int n) const noexcept(
       SAFE_CTOR(genex::span<iter_element_t<I>>, I, I) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
       const auto size = last - first;
@@ -52,22 +54,26 @@ namespace genex::views {
     }
 
     template <typename I, typename S, typename Int>
-      requires detail::concepts::droppable_last_iters<I, S, Int>
+    requires detail::concepts::droppable_last_iters<I, S, Int>
       and std::bidirectional_iterator<I> and std::same_as<I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const {
-      auto stop = iterators::prev(std::move(last), static_cast<iter_difference_t<I>>(n), first);
+      auto stop = iterators::prev(
+        std::move(last), static_cast<iter_difference_t<I>>(n), first);
       return genex::subrange<I, S>(std::move(first), std::move(stop));
     }
 
     template <typename I, typename S, typename Int>
-      requires detail::concepts::droppable_last_iters<I, S, Int>
+    requires detail::concepts::droppable_last_iters<I, S, Int>
     constexpr auto operator()(I first, S last, const Int n) const {
-      return detail::impl::drop_last_counted(std::move(first), std::move(last), static_cast<iter_difference_t<I>>(n));
+      return detail::impl::drop_last_counted(
+        std::move(first), std::move(last),
+        static_cast<iter_difference_t<I>>(n));
     }
 
     template <typename Rng, typename Int>
-      requires detail::concepts::droppable_last_range<Rng, Int>
-      and std::contiguous_iterator<iterator_t<Rng>> and std::same_as<iterator_t<Rng>, sentinel_t<Rng>>
+    requires detail::concepts::droppable_last_range<Rng, Int>
+      and std::contiguous_iterator<iterator_t<Rng>>
+      and std::same_as<iterator_t<Rng>, sentinel_t<Rng>>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(genex::span<range_element_t<Rng>>, iterator_t<Rng>, iterator_t<Rng>) and
@@ -75,27 +81,33 @@ namespace genex::views {
       auto [first, last] = iterators::iter_pair(rng);
       const auto size = last - first;
       const auto count = std::min(static_cast<range_difference_t<Rng>>(n), size);
-      return genex::span<range_element_t<Rng>>(first, first + (size - count));
+      return genex::span<range_element_t<Rng>>(
+        first, first + (size - count));
     }
 
     template <typename Rng, typename Int>
-      requires detail::concepts::droppable_last_range<Rng, Int>
-      and std::bidirectional_iterator<iterator_t<Rng>> and std::same_as<iterator_t<Rng>, sentinel_t<Rng>>
+    requires detail::concepts::droppable_last_range<Rng, Int>
+      and std::bidirectional_iterator<iterator_t<Rng>>
+      and std::same_as<iterator_t<Rng>, sentinel_t<Rng>>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const {
       auto [first, last] = iterators::iter_pair(rng);
-      auto stop = iterators::prev(std::move(last), static_cast<range_difference_t<Rng>>(n), first);
-      return genex::subrange<iterator_t<Rng>, iterator_t<Rng>>(std::move(first), std::move(stop));
+      auto stop = iterators::prev(
+        std::move(last), static_cast<range_difference_t<Rng>>(n), first);
+      return genex::subrange<iterator_t<Rng>, iterator_t<Rng>>(
+        std::move(first), std::move(stop));
     }
 
     template <typename Rng, typename Int>
-      requires detail::concepts::droppable_last_range<Rng, Int>
+    requires detail::concepts::droppable_last_range<Rng, Int>
     constexpr auto operator()(Rng &&rng, const Int n) const {
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::drop_last_counted(std::move(first), std::move(last), static_cast<range_difference_t<Rng>>(n));
+      return detail::impl::drop_last_counted(
+        std::move(first), std::move(last),
+        static_cast<range_difference_t<Rng>>(n));
     }
 
     template <typename Int>
-      requires std::integral<Int>
+    requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int n) const noexcept(
       SAFE_CTOR(drop_last_fn) and SAFE_MOVE(Int)) {
       return meta::bind_back(drop_last_fn{}, n);

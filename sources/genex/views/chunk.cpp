@@ -30,7 +30,7 @@ namespace genex::views::detail::impl {
   struct chunk_sentinel {};
 
   template <typename I, typename S, typename Int>
-    requires concepts::chunkable_iters<I, S, Int>
+  requires concepts::chunkable_iters<I, S, Int>
   struct chunk_iterator : genex::detail::iterator_ops<chunk_iterator<I, S, Int>> {
     I it;
     S st;
@@ -49,7 +49,8 @@ namespace genex::views::detail::impl {
     }
 
     GENEX_INLINE constexpr auto next() -> void {
-      it = iterators::next(it, static_cast<iter_difference_t<I>>(chunk_size), st);
+      it = iterators::next(
+        it, static_cast<iter_difference_t<I>>(chunk_size), st);
     }
 
     GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
@@ -59,22 +60,28 @@ namespace genex::views::detail::impl {
     }
 
     GENEX_INLINE constexpr auto deref() const -> decltype(auto)
-      requires std::random_access_iterator<I> and std::sized_sentinel_for<S, I> {
-      const auto n = std::min(static_cast<iter_difference_t<I>>(chunk_size), st - it);
+      requires std::random_access_iterator<I> and
+      std::sized_sentinel_for<S, I> {
+      const auto n = std::min(
+        static_cast<iter_difference_t<I>>(chunk_size), st - it);
       return genex::subrange(it, it + n);
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const chunk_iterator &self, const chunk_iterator &that) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const chunk_iterator &self,
+      const chunk_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const chunk_iterator &self, chunk_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const chunk_iterator &self,
+      chunk_sentinel) -> bool {
       return self.it == self.st;
     }
   };
 
   template <typename I, typename S, typename Int>
-    requires concepts::chunkable_iters<I, S, Int>
+  requires concepts::chunkable_iters<I, S, Int>
   struct chunk_view : view_base {
     I it;
     S st;
@@ -101,25 +108,29 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct chunk_fn {
+  struct chunk_fn : pipe_closure {
     template <typename I, typename S, typename Int>
-      requires detail::concepts::chunkable_iters<I, S, Int>
-    GENEX_INLINE constexpr auto operator()(I first, S last, const Int size) const noexcept(
-      SAFE_IMPL_CTOR(chunk_view, I, S, Int) and SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
+    requires detail::concepts::chunkable_iters<I, S, Int>
+    GENEX_INLINE constexpr auto operator()(
+      I first, S last, const Int size) const noexcept(
+      SAFE_IMPL_CTOR(chunk_view, I, S, Int) and
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
       return detail::impl::chunk_view(std::move(first), std::move(last), size);
     }
 
     template <typename Rng, typename Int>
-      requires detail::concepts::chunkable_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int size) const noexcept(
+    requires detail::concepts::chunkable_range<Rng, Int>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, const Int size) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
-      SAFE_IMPL_CTOR(chunk_view, iterator_t<Rng>, sentinel_t<Rng>, Int) and SAFE_MOVE(Int)) {
+      SAFE_IMPL_CTOR(chunk_view, iterator_t<Rng>, sentinel_t<Rng>, Int) and
+      SAFE_MOVE(Int)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::chunk_view(std::move(first), std::move(last), size);
     }
 
     template <typename Int>
-      requires std::integral<Int>
+    requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int n) const noexcept(
       SAFE_CTOR(chunk_fn) and SAFE_MOVE(Int)) {
       return meta::bind_back(chunk_fn{}, n);

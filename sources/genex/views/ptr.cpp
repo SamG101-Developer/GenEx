@@ -24,27 +24,26 @@ namespace genex::views::detail::concepts {
 }
 
 namespace genex::views {
-  struct ptr_fn {
+  struct ptr_fn : pipe_closure {
     template <typename I, typename S>
-      requires detail::concepts::ptr_gettable_iters<I, S>
+    requires detail::concepts::ptr_gettable_iters<I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
       SAFE_CALL(decltype(transform), I, S, meta::identity) and
       SAFE_MOVE(I) and SAFE_MOVE(S)) {
-      return transform(std::move(first), std::move(last), [](auto &&ptr) { return ptr.get(); });
+      return transform(
+        std::move(first), std::move(last),
+        [](auto &&ptr) { return ptr.get(); });
     }
 
     template <typename Rng>
-      requires detail::concepts::ptr_gettable_range<Rng>
+    requires detail::concepts::ptr_gettable_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CALL(decltype(transform), iterator_t<Rng>, sentinel_t<Rng>, meta::identity)) {
       auto [first, last] = iterators::iter_pair(rng);
-      return transform(std::move(first), std::move(last), [](auto &&ptr) { return ptr.get(); });
-    }
-
-    GENEX_INLINE constexpr auto operator()() const noexcept(
-      SAFE_CTOR(ptr_fn)) {
-      return meta::bind_back(ptr_fn{});
+      return transform(
+        std::move(first), std::move(last),
+        [](auto &&ptr) { return ptr.get(); });
     }
   };
 

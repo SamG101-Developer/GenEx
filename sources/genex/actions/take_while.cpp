@@ -18,16 +18,16 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct take_while_fn {
+  struct take_while_fn : pipe_closure {
     template <typename Rng, typename Pred>
-      requires detail::concepts::takeable_while_range<Rng, Pred>
+    requires detail::concepts::takeable_while_range<Rng, Pred>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred) const -> Rng {
       actions::erase(rng, genex::find_if_not(iterators::begin(rng), iterators::end(rng), pred), iterators::end(rng));
       return std::forward<Rng>(rng);
     }
 
     template <typename Pred>
-      requires (not range<Pred>)
+    requires (not range<Pred>)
     GENEX_INLINE constexpr auto operator()(Pred pred) const {
       return meta::bind_back(take_while_fn{}, std::forward<Pred>(pred));
     }

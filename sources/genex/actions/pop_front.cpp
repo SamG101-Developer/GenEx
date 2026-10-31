@@ -6,7 +6,6 @@ export import genex.pipe;
 import genex.actions.erase;
 import genex.concepts;
 import genex.iterators.access;
-import genex.meta;
 
 namespace genex::actions::detail::concepts {
   template <typename Rng>
@@ -26,21 +25,17 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct pop_front_fn {
+  struct pop_front_fn : pipe_closure {
     template <typename Rng>
-      requires detail::concepts::front_poppable_select_pop_front<Rng>
+    requires detail::concepts::front_poppable_select_pop_front<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
       return rng.pop_front();
     }
 
     template <typename Rng>
-      requires detail::concepts::front_poppable_select_erase<Rng>
+    requires detail::concepts::front_poppable_select_erase<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
       return actions::erase(rng, iterators::begin(rng));
-    }
-
-    GENEX_INLINE constexpr auto operator()() const {
-      return meta::bind_back(pop_front_fn{});
     }
   };
 

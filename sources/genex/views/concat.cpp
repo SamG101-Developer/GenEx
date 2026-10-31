@@ -33,29 +33,36 @@ namespace genex::views::detail::concepts {
   concept concatable_range =
     (non_dangling_range<Rngs> and ...) and
     (input_range<Rngs> and ...) and
-    concatable_iters<std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>>;
+    concatable_iters<
+      std::tuple<iterator_t<Rngs>...>, std::tuple<sentinel_t<Rngs>...>>;
 }
 
 namespace genex::views::detail::impl {
   struct concat_sentinel {};
 
   template <typename... Rngs>
-    requires concepts::concatable_range<Rngs...>
-  struct concat_iterator : genex::detail::iterator_ops<concat_iterator<Rngs...>> {
+  requires concepts::concatable_range<Rngs...>
+  struct concat_iterator :
+    genex::detail::iterator_ops<concat_iterator<Rngs...>> {
     std::tuple<iterator_t<Rngs>...> its;
     std::tuple<sentinel_t<Rngs>...> sts;
     std::size_t active = 0;
 
-    using value_type = std::common_type_t<iter_value_t<iterator_t<Rngs>>...>;
-    using reference = std::common_reference_t<iter_reference_t<iterator_t<Rngs>>...>;
-    using difference_type = std::common_type_t<iter_difference_t<iterator_t<Rngs>>...>;
+    using value_type = std::common_type_t<
+      iter_value_t<iterator_t<Rngs>>...>;
+    using reference = std::common_reference_t<
+      iter_reference_t<iterator_t<Rngs>>...>;
+    using difference_type = std::common_type_t<
+      iter_difference_t<iterator_t<Rngs>>...>;
     using iterator_category = std::conditional_t<
-      (std::forward_iterator<iterator_t<Rngs>> and ...), std::forward_iterator_tag, std::input_iterator_tag>;
+      (std::forward_iterator<iterator_t<Rngs>> and ...),
+      std::forward_iterator_tag, std::input_iterator_tag>;
     using iterator_concept = iterator_category;
 
     GENEX_INLINE constexpr concat_iterator() = default;
 
-    GENEX_INLINE constexpr concat_iterator(std::tuple<iterator_t<Rngs>...> first,
+    GENEX_INLINE constexpr concat_iterator(
+      std::tuple<iterator_t<Rngs>...> first,
       std::tuple<sentinel_t<Rngs>...> last) :
       its(std::move(first)), sts(std::move(last)) {
       settle<0>();
@@ -69,11 +76,13 @@ namespace genex::views::detail::impl {
       inc_impl<0>();
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const concat_iterator &self, const concat_iterator &that) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const concat_iterator &self, const concat_iterator &that) -> bool {
       return self.its == that.its;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const concat_iterator &self, const concat_sentinel &) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const concat_iterator &self, const concat_sentinel &) -> bool {
       return self.active == sizeof...(Rngs);
     }
 
@@ -113,7 +122,7 @@ namespace genex::views::detail::impl {
   };
 
   template <typename... Rngs>
-    requires concepts::concatable_range<Rngs...>
+  requires concepts::concatable_range<Rngs...>
   struct concat_view : view_base {
     std::tuple<iterator_t<Rngs>...> its;
     std::tuple<sentinel_t<Rngs>...> sts;
@@ -138,9 +147,10 @@ namespace genex::views::detail::impl {
       return self.template size_impl<0>();
     }
 
-    // Each range can be inserted in one go, which a single loop stepping between them would have to do one by one.
+    /// Each range can be inserted in one go, which a single loop stepping
+    /// between them would have to do one by one.
     template <typename Out>
-      requires (sized_range<Rngs> and ...)
+    requires (sized_range<Rngs> and ...)
       and (std::same_as<iterator_t<Rngs>, sentinel_t<Rngs>> and ...)
       and (std::derived_from<iter_category_t<iterator_t<Rngs>>, std::forward_iterator_tag> and ...)
       and (requires(Out &out, iterator_t<Rngs> i) { out.insert(out.end(), i, i); } and ...)
@@ -153,7 +163,7 @@ namespace genex::views::detail::impl {
 
   private:
     template <std::size_t I, typename Self>
-      requires (sized_range<Rngs> and ...)
+    requires (sized_range<Rngs> and ...)
     GENEX_INLINE constexpr auto size_impl(this Self &&self) -> std::size_t {
       if constexpr (I >= sizeof...(Rngs)) { return 0; }
       else {
@@ -166,21 +176,24 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct concat_fn {
+  struct concat_fn : pipe_closure {
     template <typename... Is, typename... Ss>
-      requires detail::concepts::concatable_iters<std::tuple<Is...>, std::tuple<Ss...>>
-    GENEX_INLINE constexpr auto operator()(std::tuple<Is...> first, std::tuple<Ss...> last) const noexcept(
+    requires detail::concepts::concatable_iters<std::tuple<Is...>, std::tuple<Ss...>>
+    GENEX_INLINE constexpr auto operator()(
+      std::tuple<Is...> first, std::tuple<Ss...> last) const noexcept(
       SAFE_CTOR(detail::impl::concat_view<genex::subrange<Is, Ss>...>, std::tuple<Is...>, std::tuple<Ss...>) and
       SAFE_MOVE(std::tuple<Is...>) and SAFE_MOVE(std::tuple<Ss...>)) {
-      return detail::impl::concat_view<genex::subrange<Is, Ss>...>(std::move(first), std::move(last));
+      return detail::impl::concat_view<genex::subrange<Is, Ss>...>(
+        std::move(first), std::move(last));
     }
 
     template <typename... Rngs>
-      requires (detail::concepts::concatable_range<Rngs...> and sizeof...(Rngs) > 1)
+    requires (detail::concepts::concatable_range<Rngs...> and sizeof...(Rngs) > 1)
     GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const noexcept(
       (SAFE_CALL(decltype(iterators::begin), Rngs&) and ...) and
       (SAFE_CALL(decltype(iterators::end), Rngs&) and ...) and
-      SAFE_MOVE(std::tuple<iterator_t<Rngs>...>) and SAFE_MOVE(std::tuple<sentinel_t<Rngs>...>)) {
+      SAFE_MOVE(std::tuple<iterator_t<Rngs>...>) and
+      SAFE_MOVE(std::tuple<sentinel_t<Rngs>...>)) {
       return detail::impl::concat_view<Rngs...>(
         std::make_tuple(iterators::begin(ranges)...),
         std::make_tuple(iterators::end(ranges)...));

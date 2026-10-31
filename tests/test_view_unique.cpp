@@ -7,7 +7,7 @@ import genex.views.unique;
 TEST(GenexViewsUnique, VecInput) {
   auto vec = std::vector{1, 1, 2, 2, 2, 3, 1, 1};
   const auto rng = vec
-    | genex::views::unique()
+    | genex::views::unique
     | genex::to<std::vector>();
   const auto exp = std::vector{1, 2, 3, 1};
   EXPECT_EQ(rng, exp);
@@ -16,7 +16,7 @@ TEST(GenexViewsUnique, VecInput) {
 TEST(GenexViewsUnique, NoAdjacentDuplicates) {
   auto vec = std::vector{1, 2, 3};
   const auto rng = vec
-    | genex::views::unique()
+    | genex::views::unique
     | genex::to<std::vector>();
   EXPECT_EQ(rng, vec);
 }
@@ -33,7 +33,7 @@ TEST(GenexViewsUnique, ProjectedInput) {
 TEST(GenexViewsUnique, EmptyInput) {
   auto vec = std::vector<int>{};
   const auto rng = vec
-    | genex::views::unique()
+    | genex::views::unique
     | genex::to<std::vector>();
   EXPECT_TRUE(rng.empty());
 }

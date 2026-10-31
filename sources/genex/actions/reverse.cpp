@@ -5,7 +5,6 @@ export module genex.actions.reverse;
 export import genex.pipe;
 import genex.concepts;
 import genex.iterators.iter_pair;
-import genex.meta;
 import std;
 
 namespace genex::actions::detail::concepts {
@@ -16,14 +15,12 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct reverse_fn {
+  struct reverse_fn : pipe_closure {
     template <typename Rng>
-      requires detail::concepts::reversible_range<Rng>
+    requires detail::concepts::reversible_range<Rng>
       and random_access_range<Rng>
-
     constexpr auto operator()(Rng &&rng) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
-      // A counted loop, as checking two moving iterators against each other stops it being vectorized.
       const auto swaps = (last - first) / 2;
       for (auto i = decltype(swaps){0}; i < swaps; ++i) {
         --last;
@@ -34,17 +31,13 @@ namespace genex::actions {
     }
 
     template <typename Rng>
-      requires detail::concepts::reversible_range<Rng>
+    requires detail::concepts::reversible_range<Rng>
     constexpr auto operator()(Rng &&rng) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       while (first != last and first != --last) {
         std::iter_swap(first++, last);
       }
       return std::forward<Rng>(rng);
-    }
-
-    GENEX_INLINE constexpr auto operator()() const {
-      return meta::bind_back(reverse_fn{});
     }
   };
 

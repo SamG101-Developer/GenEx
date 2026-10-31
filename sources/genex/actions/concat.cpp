@@ -5,6 +5,7 @@ export module genex.actions.concat;
 export import genex.pipe;
 import genex.actions.insert;
 import genex.concepts;
+import genex.detail.range_closure;
 import genex.iterators.access;
 import genex.meta;
 import std;
@@ -17,7 +18,7 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct concat_fn {
+  struct concat_fn : pipe_closure {
     template <typename Rng1, typename Rng2>
     requires detail::concepts::concatenatable_range<Rng1, Rng2>
     constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> Rng1 {
@@ -40,10 +41,12 @@ namespace genex::actions {
       else {
         for (auto &&x : rng2) {
           if constexpr (moves_elems) {
-            rng1 |= actions::insert(iterators::end(rng1), std::move(x));
+            rng1 |= actions::insert(
+              iterators::end(rng1), std::move(x));
           }
           else {
-            rng1 |= actions::insert(iterators::end(rng1), std::forward<decltype(x)>(x));
+            rng1 |= actions::insert(
+              iterators::end(rng1), std::forward<decltype(x)>(x));
           }
         }
       }
@@ -67,5 +70,8 @@ namespace genex::actions {
     }
   };
 
+  /// The "concat" action concatenates from another range into this one. Used as
+  /// "genex::actions::concat(self, that)". The ranges themselves must be an
+  /// input range with common element types.
   export inline constexpr concat_fn concat{};
 }

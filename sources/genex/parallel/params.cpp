@@ -1,6 +1,3 @@
-module;
-#include <genex/detail/macros.hpp>
-
 export module genex.parallel.params;
 import std;
 
@@ -19,17 +16,4 @@ namespace genex::parallel {
     std::size_t threads = 0;
     std::size_t threshold = 1uz << 14;
   };
-
-  namespace detail {
-    export GENEX_INLINE auto worker_count(const std::size_t total, const params &p) noexcept -> std::size_t {
-      if (p.threads == 1 or total < 2 or total < p.threshold) { return 1; }
-
-      auto n = p.threads;
-      if (n == 0) {
-        n = static_cast<std::size_t>(std::thread::hardware_concurrency());
-        if (n == 0) { n = 1; }
-      }
-      return n < total ? n : total;
-    }
-  }
 }

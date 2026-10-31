@@ -2,9 +2,10 @@ module;
 #include <genex/detail/macros.hpp>
 
 export module genex.meta;
+import genex.closure;
 import std;
 
-export namespace genex::meta::detail::concepts {
+namespace genex::meta::detail::concepts {
   template <typename T>
   concept dereferenceable = requires(T &&t)
   {
@@ -15,14 +16,16 @@ export namespace genex::meta::detail::concepts {
 namespace genex::meta {
   struct deref_fn {
     template <typename T>
-      requires detail::concepts::dereferenceable<T>
-    GENEX_INLINE constexpr auto operator()(T &&t) const -> decltype(*std::declval<T&>()) {
+    requires detail::concepts::dereferenceable<T>
+    GENEX_INLINE constexpr auto operator()(
+      T &&t) const -> decltype(*std::declval<T&>()) {
       return *std::forward<T>(t);
     }
 
     template <typename T>
-      requires (not detail::concepts::dereferenceable<T>)
-    GENEX_INLINE constexpr auto operator()(T &&t) const -> T&& {
+    requires (not detail::concepts::dereferenceable<T>)
+    GENEX_INLINE constexpr auto operator()(
+      T &&t) const -> T&& {
       return std::forward<T>(t);
     }
   };
@@ -37,32 +40,29 @@ namespace genex::meta {
   };
 
   struct invoke_fn {
-    /**
-     * Regular invoke function that perfectly forwards its arguments to the callable:
-     * f(args...).
-     */
+    /// Regular invoke function that perfectly forwards its arguments to the
+    /// callable: f(args...).
     template <typename F, typename... Args>
-    GENEX_INLINE constexpr auto operator()(F &&f, Args &&... args) const
+    GENEX_INLINE constexpr auto operator()(
+      F &&f, Args &&... args) const
       -> decltype(std::forward<F>(f)(std::forward<Args>(args)...)) {
       return std::forward<F>(f)(std::forward<Args>(args)...);
     }
 
-    /**
-     * Member pointer invoke function that invokes a member function pointer on an object:
-     * obj.*mp(args...) or obj->*mp(args...).
-     */
+    /// Member pointer invoke function that invokes a member function pointer on
+    /// an object: obj.*mp(args...) or obj->*mp(args...).
     template <typename T, typename C, typename Obj>
-    GENEX_INLINE constexpr auto operator()(T C::*f, Obj &&obj) const
-      -> decltype(deref(std::forward<Obj>(obj)).*f) {
+    GENEX_INLINE constexpr auto operator()(
+      T C::*f, Obj &&obj) const -> decltype(deref(std::forward<Obj>(obj)).*f) {
       return deref(std::forward<Obj>(obj)).*f;
     }
 
-    /**
-     * Member function pointer invoke function that invokes a member function pointer on an object with arguments:
-     * (obj.*mp)(args...) or (mp->*obj)(args...).
-     */
+    /// Member function pointer invoke function that invokes a member function
+    /// pointer on an object with arguments: (obj.*mp)(args...) or
+    /// (mp->*obj)(args...).
     template <typename R, typename C, typename Obj, typename... Args>
-    GENEX_INLINE constexpr auto operator()(R C::*f, Obj &&obj, Args &&... args) const
+    GENEX_INLINE constexpr auto operator()(
+      R C::*f, Obj &&obj, Args &&... args) const
       -> decltype((deref(std::forward<Obj>(obj)).*f)(std::forward<Args>(args)...)) {
       return (deref(std::forward<Obj>(obj)).*f)(std::forward<Args>(args)...);
     }
@@ -70,25 +70,33 @@ namespace genex::meta {
 
   export inline constexpr invoke_fn invoke{};
 
-  /**
-   * A minimal movable-box: wraps a value so it can be stored as a member while keeping the enclosing type assignable
-   * and default-constructible, even when @c T is neither. Two problems it solves for a capturing lambda (whose
-   * assignment operators are deleted and which has no default constructor):
-   *
-   *  - Assignability: storing @c T directly would delete the enclosing iterator's assignment and stop it modelling
-   *    @c std::movable / @c std::input_iterator. Assignment is emulated via destroy-then-reconstruct of the whole
-   *    storage object, which only needs @c T (copy/move)-constructible.
-   *  - Default-constructibility: when @c T is not default-constructible we store it in an @c std::optional so the box
-   *    stays default-constructible (defaulting to an empty/singular state). Without this the iterator is not
-   *    @c std::semiregular, which cascades into it failing @c forward_iterator / @c sentinel_for and makes views such
-   *    as @c intersperse, @c zip and @c enumerate reject any capturing-lambda @c transform. When @c T is already
-   *    default-constructible we store it directly, keeping the box trivial and @c operator* always valid.
-   *
-   * A @c T that can throw while being reconstructed is always stored in the @c std::optional, which is left empty if
-   * the reconstruction throws. Storing it directly would leave a destroyed value for the destructor to destroy again.
-   *
-   * Access the value with @c operator* (undefined on an empty box, exactly as dereferencing a singular iterator is).
-   */
+  /// A minimal movable-box: wraps a value so it can be stored as a member while
+  /// keeping the enclosing type assignable and default-constructible, even when
+  /// "T" is neither. Two problems it solves for a capturing lambda (whose
+  /// assignment operators are deleted and which has no default constructor):
+  ///
+  ///  - Assignability: storing "T" directly would delete the enclosing
+  ///    iterator's assignment and stop it modelling "std::movable" /
+  ///    "std::input_iterator". Assignment is emulated via destroy-then-
+  ///    reconstruct of the whole storage object, which only needs "T"
+  ///    (copy/move)-constructible.
+  ///
+  ///  - Default-constructibility: when "T" is not default-constructible we
+  ///    store it in an "std::optional" so the box stays default-constructible
+  ///    (defaulting to an empty/singular state). Without this the iterator is
+  ///    not "std::semiregular", which cascades into it failing
+  ///    "forward_iterator" / "sentinel_for" and makes views such as
+  ///    "intersperse", "zip" and "enumerate" reject any capturing-lambda
+  ///    "transform". When "T" is already default-constructible we store it
+  ///    directly, keeping the box trivial and "operator*" always valid.
+  ///
+  /// A "T" that can throw while being reconstructed is always stored in the
+  /// "std::optional", which is left empty if the reconstruction throws. Storing
+  /// it directly would leave a destroyed value for the destructor to destroy
+  /// again.
+  ///
+  /// Access the value with "operator*" (undefined on an empty box, exactly as
+  /// dereferencing a singular iterator is).
   export template <typename T>
   class box {
     static constexpr bool store_direct =
@@ -101,7 +109,8 @@ namespace genex::meta {
   public:
     box() = default;
 
-    GENEX_INLINE constexpr box(T value) noexcept(std::is_nothrow_move_constructible_v<T>) :
+    GENEX_INLINE constexpr box(T value) noexcept(
+      std::is_nothrow_move_constructible_v<T>) :
       m_value(std::move(value)) {
     }
 
@@ -109,7 +118,8 @@ namespace genex::meta {
     box(box &&) = default;
     ~box() = default;
 
-    GENEX_INLINE constexpr auto operator=(const box &that) noexcept(std::is_nothrow_copy_constructible_v<T>) -> box&
+    GENEX_INLINE constexpr auto operator=(const box &that) noexcept(
+      std::is_nothrow_copy_constructible_v<T>) -> box&
       requires std::copy_constructible<T> {
       if (this != std::addressof(that)) {
         if constexpr (store_direct) {
@@ -124,7 +134,8 @@ namespace genex::meta {
       return *this;
     }
 
-    GENEX_INLINE constexpr auto operator=(box &&that) noexcept(std::is_nothrow_move_constructible_v<T>) -> box& requires
+    GENEX_INLINE constexpr auto operator=(box &&that) noexcept(
+      std::is_nothrow_move_constructible_v<T>) -> box& requires
       std::move_constructible<T> {
       if (this != std::addressof(that)) {
         if constexpr (store_direct) {
@@ -140,7 +151,8 @@ namespace genex::meta {
     }
 
     template <typename Self>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator*(this Self &&self) noexcept -> decltype(auto) {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator*(
+      this Self &&self) noexcept -> decltype(auto) {
       if constexpr (store_direct) { return (std::forward<Self>(self).m_value); }
       else { return (*std::forward<Self>(self).m_value); }
     }
@@ -150,83 +162,102 @@ namespace genex::meta {
 namespace genex::meta::detail {
   // N-arg general implementation
   template <typename F, typename... BoundArgs>
-  struct bind_back_impl_fn {
+  struct bind_back_impl_fn : pipe_closure {
     std::tuple<F, BoundArgs...> func_and_args;
 
     template <typename... CallArgs>
-    GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) && -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      CallArgs &&... call_args) && -> decltype(auto) {
       return std::apply([&](F &&f, BoundArgs &&... bound_args) -> decltype(auto) {
-        return meta::invoke(std::forward<F>(f), std::forward<CallArgs>(call_args)...,
-                            std::forward<BoundArgs>(bound_args)...);
+        return meta::invoke(
+          std::forward<F>(f),
+          std::forward<CallArgs>(call_args)...,
+          std::forward<BoundArgs>(bound_args)...);
       }, std::move(func_and_args));
     }
 
     template <typename... CallArgs>
-    GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) & -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      CallArgs &&... call_args) & -> decltype(auto) {
       return std::apply([&](F &f, BoundArgs &... bound_args) -> decltype(auto) {
-        return meta::invoke(f, std::forward<CallArgs>(call_args)..., bound_args...);
+        return meta::invoke(
+          f, std::forward<CallArgs>(call_args)..., bound_args...);
       }, func_and_args);
     }
 
     template <typename... CallArgs>
-    GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) const & -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      CallArgs &&... call_args) const & -> decltype(auto) {
       return std::apply([&](F const &f, BoundArgs const &... bound_args) -> decltype(auto) {
-        return meta::invoke(f, std::forward<CallArgs>(call_args)..., bound_args...);
+        return meta::invoke(
+          f, std::forward<CallArgs>(call_args)..., bound_args...);
       }, func_and_args);
     }
   };
 
   // 0-arg optimization
   template <typename F>
-  struct bind_back_impl_fn<F> {
+  struct bind_back_impl_fn<F> : pipe_closure {
     F func;
 
     template <typename... CallArgs>
-    GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) && -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      CallArgs &&... call_args) && -> decltype(auto) {
       return meta::invoke(std::move(func), std::forward<CallArgs>(call_args)...);
     }
 
     template <typename... CallArgs>
-    GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) & -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      CallArgs &&... call_args) & -> decltype(auto) {
       return meta::invoke(func, std::forward<CallArgs>(call_args)...);
     }
 
     template <typename... CallArgs>
-    GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) const & -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      CallArgs &&... call_args) const & -> decltype(auto) {
       return meta::invoke(func, std::forward<CallArgs>(call_args)...);
     }
   };
 
   // 1-arg optimization
   template <typename F, typename BoundArg>
-  struct bind_back_impl_fn<F, BoundArg> {
+  struct bind_back_impl_fn<F, BoundArg> : pipe_closure {
     struct func_and_arg {
       F func;
       BoundArg arg;
     } func_and_arg;
 
     template <typename... CallArgs>
-    GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) && -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      CallArgs &&... call_args) && -> decltype(auto) {
       return meta::invoke(
-        std::move(func_and_arg.func), std::forward<CallArgs>(call_args)..., std::move(func_and_arg.arg));
+        std::move(func_and_arg.func),
+        std::forward<CallArgs>(call_args)...,
+        std::move(func_and_arg.arg));
     }
 
     template <typename... CallArgs>
-    GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) & -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      CallArgs &&... call_args) & -> decltype(auto) {
       return meta::invoke(
-        func_and_arg.func, std::forward<CallArgs>(call_args)..., func_and_arg.arg);
+        func_and_arg.func,
+        std::forward<CallArgs>(call_args)...,
+        func_and_arg.arg);
     }
 
     template <typename... CallArgs>
-    GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) const & -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      CallArgs &&... call_args) const & -> decltype(auto) {
       return meta::invoke(
-        func_and_arg.func, std::forward<CallArgs>(call_args)..., func_and_arg.arg);
+        func_and_arg.func,
+        std::forward<CallArgs>(call_args)...,
+        func_and_arg.arg);
     }
   };
 
   // 2-arg optimization
   template <typename F, typename BoundArg1, typename BoundArg2>
-  struct bind_back_impl_fn<F, BoundArg1, BoundArg2> {
+  struct bind_back_impl_fn<F, BoundArg1, BoundArg2> : pipe_closure {
     struct func_and_args {
       F func;
       BoundArg1 arg1;
@@ -234,22 +265,33 @@ namespace genex::meta::detail {
     } func_and_args;
 
     template <typename... CallArgs>
-    GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) && -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      CallArgs &&... call_args) && -> decltype(auto) {
       return meta::invoke(
-        std::move(func_and_args.func), std::forward<CallArgs>(call_args)..., std::move(func_and_args.arg1),
+        std::move(func_and_args.func),
+        std::forward<CallArgs>(call_args)...,
+        std::move(func_and_args.arg1),
         std::move(func_and_args.arg2));
     }
 
     template <typename... CallArgs>
-    GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) & -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      CallArgs &&... call_args) & -> decltype(auto) {
       return meta::invoke(
-        func_and_args.func, std::forward<CallArgs>(call_args)..., func_and_args.arg1, func_and_args.arg2);
+        func_and_args.func,
+        std::forward<CallArgs>(call_args)...,
+        func_and_args.arg1,
+        func_and_args.arg2);
     }
 
     template <typename... CallArgs>
-    GENEX_INLINE constexpr auto operator()(CallArgs &&... call_args) const & -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      CallArgs &&... call_args) const & -> decltype(auto) {
       return meta::invoke(
-        func_and_args.func, std::forward<CallArgs>(call_args)..., func_and_args.arg1, func_and_args.arg2);
+        func_and_args.func,
+        std::forward<CallArgs>(call_args)...,
+        func_and_args.arg1,
+        func_and_args.arg2);
     }
   };
 }
@@ -257,9 +299,10 @@ namespace genex::meta::detail {
 namespace genex::meta {
   struct bind_back_fn {
     template <typename F, typename... BoundArgs>
-    GENEX_INLINE constexpr auto operator()(F &&f, BoundArgs &&... bound_args) const
+    GENEX_INLINE constexpr auto operator()(
+      F &&f, BoundArgs &&... bound_args) const
       -> detail::bind_back_impl_fn<std::decay_t<F>, std::decay_t<BoundArgs>...> {
-      return {{std::forward<F>(f), std::forward<BoundArgs>(bound_args)...}};
+      return {{}, {std::forward<F>(f), std::forward<BoundArgs>(bound_args)...}};
     }
   };
 
@@ -272,14 +315,16 @@ namespace genex::meta {
     F func;
 
     template <typename... Args>
-    GENEX_INLINE constexpr auto operator()(Args &&... args) const -> bool {
+    GENEX_INLINE constexpr auto operator()(
+      Args &&... args) const -> bool {
       return not meta::invoke(func, std::forward<Args>(args)...);
     }
   };
 
   struct not_fn {
     template <typename F>
-    GENEX_INLINE constexpr auto operator()(F &&f) const -> not_impl_fn<std::decay_t<F>> {
+    GENEX_INLINE constexpr auto operator()(
+      F &&f) const -> not_impl_fn<std::decay_t<F>> {
       return {std::forward<F>(f)};
     }
   };

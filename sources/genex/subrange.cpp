@@ -7,7 +7,7 @@ import std;
 
 namespace genex {
   export template <typename I, typename S = I>
-    requires std::input_or_output_iterator<I> and std::sentinel_for<S, I>
+  requires std::input_or_output_iterator<I> and std::sentinel_for<S, I>
   class subrange {
     GENEX_NO_UNIQUE_ADDRESS I m_it{};
     GENEX_NO_UNIQUE_ADDRESS S m_st{};
@@ -21,7 +21,7 @@ namespace genex {
     using size_type = std::make_unsigned_t<difference_type>;
 
     subrange()
-      requires std::default_initializable<I> and std::default_initializable<S>
+    requires std::default_initializable<I> and std::default_initializable<S>
     = default;
 
     GENEX_INLINE constexpr subrange(I first, S last) noexcept(
@@ -60,7 +60,8 @@ namespace genex {
       return static_cast<size_type>(m_it.count());
     }
 
-    [[nodiscard]] GENEX_INLINE constexpr auto data() const noexcept -> std::add_pointer_t<iter_element_t<I>>
+    [[nodiscard]] GENEX_INLINE constexpr auto data() const noexcept
+      -> std::add_pointer_t<iter_element_t<I>>
       requires std::contiguous_iterator<I> {
       return std::to_address(m_it);
     }
@@ -79,7 +80,8 @@ namespace genex {
       return *last;
     }
 
-    [[nodiscard]] GENEX_INLINE constexpr auto operator[](const difference_type n) const -> reference
+    [[nodiscard]] GENEX_INLINE constexpr auto operator[](
+      const difference_type n) const -> reference
       requires std::random_access_iterator<I> {
       return m_it[n];
     }
@@ -90,7 +92,7 @@ namespace genex {
 }
 
 template <typename I, typename S>
-inline constexpr bool genex::enable_borrowed_range<genex::subrange<I, S>> = true;
+inline constexpr auto genex::enable_borrowed_range<genex::subrange<I, S>> = true;
 
 template <typename I, typename S>
-inline constexpr bool genex::enable_view<genex::subrange<I, S>> = true;
+inline constexpr auto genex::enable_view<genex::subrange<I, S>> = true;

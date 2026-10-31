@@ -12,7 +12,8 @@ import std;
 
 namespace genex::views::detail::concepts {
   template <typename I, typename F, typename Init>
-  using scan_acc_t = std::remove_cvref_t<std::invoke_result_t<F&, Init, iter_reference_t<I>>>;
+  using scan_acc_t = std::remove_cvref_t<
+    std::invoke_result_t<F&, Init, iter_reference_t<I>>>;
 
   template <typename I, typename S, typename F, typename Init>
   concept scannable_iters =
@@ -45,8 +46,9 @@ namespace genex::views::detail::impl {
   struct scan_sentinel {};
 
   template <typename I, typename S, typename F, typename Acc>
-    requires std::input_iterator<I> and std::sentinel_for<S, I>
-  struct scan_iterator : genex::detail::iterator_ops<scan_iterator<I, S, F, Acc>> {
+  requires std::input_iterator<I> and std::sentinel_for<S, I>
+  struct scan_iterator :
+    genex::detail::iterator_ops<scan_iterator<I, S, F, Acc>> {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS meta::box<F> op;
@@ -61,8 +63,10 @@ namespace genex::views::detail::impl {
 
     GENEX_INLINE constexpr scan_iterator() = default;
 
-    GENEX_INLINE constexpr scan_iterator(I first, S last, F op, std::optional<Acc> seed) :
-      it(std::move(first)), st(std::move(last)), op(std::move(op)), acc(std::move(seed)) {
+    GENEX_INLINE constexpr scan_iterator(
+      I first, S last, F op, std::optional<Acc> seed) :
+      it(std::move(first)), st(std::move(last)),
+      op(std::move(op)), acc(std::move(seed)) {
       if (this->it == this->st) { this->acc.reset(); }
       else if (this->acc.has_value()) { this->acc = meta::invoke(*this->op, *this->acc, *this->it); }
       else { this->acc.emplace(*this->it); }
@@ -78,26 +82,31 @@ namespace genex::views::detail::impl {
       return *acc;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const scan_iterator &self, const scan_iterator &that) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const scan_iterator &self, const scan_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const scan_iterator &self, scan_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const scan_iterator &self, scan_sentinel) -> bool {
       return self.it == self.st;
     }
   };
 
   template <typename I, typename S, typename F, typename Acc>
-    requires std::input_iterator<I> and std::sentinel_for<S, I>
+  requires std::input_iterator<I> and std::sentinel_for<S, I>
   struct scan_view : view_base {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS F op;
     std::optional<Acc> seed;
 
-    GENEX_INLINE constexpr scan_view(I first, S last, F op, std::optional<Acc> seed) noexcept(
-      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(F) and SAFE_MOVE(std::optional<Acc>)) :
-      it(std::move(first)), st(std::move(last)), op(std::move(op)), seed(std::move(seed)) {
+    GENEX_INLINE constexpr scan_view(
+      I first, S last, F op, std::optional<Acc> seed) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(F) and
+      SAFE_MOVE(std::optional<Acc>)) :
+      it(std::move(first)), st(std::move(last)),
+      op(std::move(op)), seed(std::move(seed)) {
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
@@ -116,9 +125,9 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct scan_fn {
+  struct scan_fn : pipe_closure {
     template <typename I, typename S, typename Init, typename F = std::plus<>>
-      requires detail::concepts::scannable_iters<I, S, F, Init>
+    requires detail::concepts::scannable_iters<I, S, F, Init>
     GENEX_INLINE constexpr auto operator()(I first, S last, Init init, F op = {}) const noexcept(
       SAFE_CTOR(
         detail::impl::scan_view<I, S, F, detail::concepts::scan_acc_t<I, F, Init>>, I, S, F,
@@ -131,7 +140,7 @@ namespace genex::views {
     }
 
     template <typename Rng, typename Init, typename F = std::plus<>>
-      requires detail::concepts::scannable_range<Rng, F, Init>
+    requires detail::concepts::scannable_range<Rng, F, Init>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Init init, F op = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(
@@ -148,16 +157,16 @@ namespace genex::views {
     }
 
     template <typename Init, typename F = std::plus<>>
-      requires (not range<Init>)
+    requires (not range<Init>)
     GENEX_INLINE constexpr auto operator()(Init init, F op = {}) const noexcept(
       SAFE_CTOR(scan_fn) and SAFE_MOVE(Init) and SAFE_MOVE(F)) {
       return meta::bind_back(scan_fn{}, std::move(init), std::move(op));
     }
   };
 
-  struct partial_sum_fn {
+  struct partial_sum_fn : pipe_closure {
     template <typename I, typename S, typename F = std::plus<>>
-      requires detail::concepts::summable_iters<I, S, F>
+    requires detail::concepts::summable_iters<I, S, F>
     GENEX_INLINE constexpr auto operator()(I first, S last, F op = {}) const noexcept(
       SAFE_CTOR(
         detail::impl::scan_view<I, S, F, iter_value_t<I>>, I, S, F, std::optional<iter_value_t<I>>) and
@@ -167,7 +176,7 @@ namespace genex::views {
     }
 
     template <typename Rng, typename F = std::plus<>>
-      requires detail::concepts::summable_range<Rng, F>
+    requires detail::concepts::summable_range<Rng, F>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, F op = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(
@@ -179,9 +188,9 @@ namespace genex::views {
         std::move(first), std::move(last), std::move(op), std::nullopt);
     }
 
-    template <typename F = std::plus<>>
-      requires (not range<F>)
-    GENEX_INLINE constexpr auto operator()(F op = {}) const noexcept(
+    template <typename F>
+    requires (not range<F>)
+    GENEX_INLINE constexpr auto operator()(F op) const noexcept(
       SAFE_CTOR(partial_sum_fn) and SAFE_MOVE(F)) {
       return meta::bind_back(partial_sum_fn{}, std::move(op));
     }

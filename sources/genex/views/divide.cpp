@@ -7,7 +7,6 @@ import genex.concepts;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
-import genex.meta;
 import genex.span;
 import genex.subrange;
 import std;
@@ -34,8 +33,10 @@ namespace genex::views::detail::impl {
     genex::subrange<I, I>>;
 
   template <std::size_t N, typename I, typename S>
-    requires concepts::divisible_iters<N, I, S>
-  constexpr auto divide_impl(I first, const iter_difference_t<I> total) -> std::array<divide_part_t<I, S>, N> {
+  requires concepts::divisible_iters<N, I, S>
+  constexpr auto divide_impl(
+    I first,
+    const iter_difference_t<I> total) -> std::array<divide_part_t<I, S>, N> {
     using part_t = divide_part_t<I, S>;
     using diff_t = iter_difference_t<I>;
 
@@ -62,16 +63,17 @@ namespace genex::views::detail::impl {
 
 namespace genex::views {
   template <std::size_t N>
-  struct divide_fn {
+  struct divide_fn : pipe_closure {
     template <typename I, typename S>
-      requires detail::concepts::divisible_iters<N, I, S>
+    requires detail::concepts::divisible_iters<N, I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const {
-      const auto total = static_cast<iter_difference_t<I>>(iterators::distance(first, last));
+      const auto total = static_cast<iter_difference_t<I>>(
+        iterators::distance(first, last));
       return detail::impl::divide_impl<N, I, S>(std::move(first), total);
     }
 
     template <typename Rng>
-      requires detail::concepts::divisible_range<N, Rng>
+    requires detail::concepts::divisible_range<N, Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       auto [first, last] = iterators::iter_pair(rng);
       const auto total = [&] -> range_difference_t<Rng> {
@@ -82,7 +84,7 @@ namespace genex::views {
     }
 
     template <typename Rng>
-      requires (not non_dangling_range<Rng>) and detail::concepts::divisible_range<N, Rng&>
+    requires (not non_dangling_range<Rng>) and detail::concepts::divisible_range<N, Rng&>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       using part_t = std::vector<range_value_t<Rng>>;
       auto parts = (*this)(rng);
@@ -91,11 +93,6 @@ namespace genex::views {
           part_t(std::make_move_iterator(parts[Is].begin()), std::make_move_iterator(parts[Is].end()))...
         };
       }(std::make_index_sequence<N>{});
-    }
-
-    GENEX_INLINE constexpr auto operator()() const noexcept(
-      SAFE_CTOR(divide_fn)) {
-      return meta::bind_back(divide_fn{});
     }
   };
 

@@ -8,7 +8,6 @@ import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.iterators.next;
-import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -28,8 +27,9 @@ namespace genex::views::detail::impl {
   struct pairwise_sentinel {};
 
   template <typename I, typename S>
-    requires concepts::pairwiseable_iters<I, S>
-  struct pairwise_iterator : genex::detail::iterator_ops<pairwise_iterator<I, S>> {
+  requires concepts::pairwiseable_iters<I, S>
+  struct pairwise_iterator :
+    genex::detail::iterator_ops<pairwise_iterator<I, S>> {
     I it;
     I snd;
     S st;
@@ -58,17 +58,20 @@ namespace genex::views::detail::impl {
     }
 
     GENEX_INLINE friend constexpr auto operator==(
-      const pairwise_iterator &self, const pairwise_iterator &that) -> bool {
+      const pairwise_iterator &self,
+      const pairwise_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const pairwise_iterator &self, pairwise_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const pairwise_iterator &self,
+      pairwise_sentinel) -> bool {
       return self.snd == self.st;
     }
   };
 
   template <typename I, typename S>
-    requires concepts::pairwiseable_iters<I, S>
+  requires concepts::pairwiseable_iters<I, S>
   struct pairwise_view : view_base {
     I it;
     S st;
@@ -95,9 +98,9 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct pairwise_fn {
+  struct pairwise_fn : pipe_closure {
     template <typename I, typename S>
-      requires detail::concepts::pairwiseable_iters<I, S>
+    requires detail::concepts::pairwiseable_iters<I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
       SAFE_IMPL_CTOR(pairwise_view, I, S) and
       SAFE_MOVE(I) and SAFE_MOVE(S)) {
@@ -105,17 +108,12 @@ namespace genex::views {
     }
 
     template <typename Rng>
-      requires detail::concepts::pairwiseable_range<Rng>
+    requires detail::concepts::pairwiseable_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(pairwise_view, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::pairwise_view(std::move(first), std::move(last));
-    }
-
-    GENEX_INLINE constexpr auto operator()() const noexcept(
-      SAFE_CTOR(pairwise_fn)) {
-      return meta::bind_back(pairwise_fn{});
     }
   };
 

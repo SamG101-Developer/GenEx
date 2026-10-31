@@ -31,7 +31,7 @@ namespace genex {
     }
 
     template <typename It, typename St>
-      requires std::contiguous_iterator<It> and std::sized_sentinel_for<St, It>
+    requires std::contiguous_iterator<It> and std::sized_sentinel_for<St, It>
     GENEX_INLINE constexpr span(It begin, St end) noexcept :
       m_ptr(std::to_address(begin)),
       m_size(static_cast<std::size_t>(end - begin)) {
@@ -51,7 +51,7 @@ namespace genex {
 
     /// A span of "U" as a span of "T", e.g. "U" to "U const".
     template <typename U>
-      requires (not std::same_as<U, T>) and std::convertible_to<U(*)[], T(*)[]>
+    requires (not std::same_as<U, T>) and std::convertible_to<U(*)[], T(*)[]>
     GENEX_INLINE constexpr span(span<U> const &other) noexcept :
       m_ptr(other.data()), m_size(other.size()) {
     }
@@ -113,7 +113,7 @@ namespace genex {
 }
 
 template <typename T>
-inline constexpr bool genex::enable_borrowed_range<genex::span<T>> = true;
+inline constexpr auto genex::enable_borrowed_range<genex::span<T>> = true;
 
 template <typename T>
-inline constexpr bool genex::enable_view<genex::span<T>> = true;
+inline constexpr auto genex::enable_view<genex::span<T>> = true;

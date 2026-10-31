@@ -4,6 +4,7 @@ module;
 export module genex.views.zip_with;
 export import genex.pipe;
 import genex.concepts;
+import genex.detail.range_closure;
 import genex.views.transform;
 import genex.views.zip;
 import std;
@@ -31,19 +32,22 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct zip_with_fn {
+  struct zip_with_fn : pipe_closure {
     template <typename Rng1, typename Rng2, typename F>
-      requires detail::concepts::zip_withable_range<Rng1, Rng2, F>
-    GENEX_INLINE constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2, F f) const {
+    requires detail::concepts::zip_withable_range<Rng1, Rng2, F>
+    GENEX_INLINE constexpr auto operator()(
+      Rng1 &&rng1, Rng2 &&rng2, F f) const {
       return transform(
         zip(rng1, rng2),
         detail::impl::zip_applier<F>{std::move(f)});
     }
 
     template <typename Rng2, typename F>
-      requires (input_range<Rng2> and not range<F>)
-    GENEX_INLINE constexpr auto operator()(Rng2 &&rng2, F f) const {
-      return genex::detail::bind_range_back(zip_with_fn{}, std::forward<Rng2>(rng2), std::move(f));
+    requires (input_range<Rng2> and not range<F>)
+    GENEX_INLINE constexpr auto operator()(
+      Rng2 &&rng2, F f) const {
+      return genex::detail::bind_range_back(
+        zip_with_fn{}, std::forward<Rng2>(rng2), std::move(f));
     }
   };
 

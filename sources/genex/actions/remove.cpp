@@ -3,8 +3,8 @@ module;
 
 export module genex.actions.remove;
 export import genex.pipe;
-import genex.actions.erase;
 import genex.concepts;
+import genex.detail.keep_if;
 import genex.meta;
 import genex.operations.cmp;
 import std;
@@ -21,9 +21,9 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct remove_fn {
+  struct remove_fn : pipe_closure {
     template <typename Rng, typename E, typename Proj = meta::identity>
-      requires detail::concepts::removable_range<Rng, E, Proj>
+    requires detail::concepts::removable_range<Rng, E, Proj>
     constexpr auto operator()(Rng &&rng, E elem, Proj proj = {}) const -> Rng {
       detail::keep_if(rng, [&]<typename T>(T &&x) -> bool {
         return not (meta::invoke(proj, std::forward<T>(x)) == elem);
@@ -32,7 +32,7 @@ namespace genex::actions {
     }
 
     template <typename E, typename Proj = meta::identity>
-      requires (not range<E>)
+    requires (not range<E>)
     GENEX_INLINE constexpr auto operator()(E &&elem, Proj &&proj = {}) const {
       return meta::bind_back(remove_fn{}, std::move(elem), std::move(proj));
     }

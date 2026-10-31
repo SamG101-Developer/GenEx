@@ -20,25 +20,23 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct take_last_fn {
-    /**
-     * Keeps the final @c n elements, erasing everything before them. Asking for more elements than the
-     * range holds keeps the whole range.
-     */
+  struct take_last_fn : pipe_closure {
     template <typename Rng, typename Int>
-      requires detail::concepts::takeable_last_range<Rng, Int>
+    requires detail::concepts::takeable_last_range<Rng, Int>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const -> Rng {
       GENEX_ASSERT(n >= 0);
-      const auto len = iterators::distance(iterators::begin(rng), iterators::end(rng));
+      const auto len = iterators::distance(
+        iterators::begin(rng), iterators::end(rng));
       const auto count = std::min(static_cast<std::ptrdiff_t>(n), len);
+      const auto m = static_cast<range_difference_t<Rng>>(len - count);
       actions::erase(
         rng, iterators::begin(rng),
-        iterators::next(iterators::begin(rng), static_cast<range_difference_t<Rng>>(len - count)));
+        iterators::next(iterators::begin(rng), m));
       return std::forward<Rng>(rng);
     }
 
     template <typename Int>
-      requires std::integral<Int>
+    requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int n) const {
       GENEX_ASSERT(n >= 0);
       return meta::bind_back(take_last_fn{}, n);

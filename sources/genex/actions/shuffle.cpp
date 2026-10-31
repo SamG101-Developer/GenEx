@@ -21,9 +21,10 @@ namespace genex::actions::detail {
 }
 
 namespace genex::actions {
-  struct shuffle_fn {
+  struct shuffle_fn : pipe_closure {
     template <typename Rng>
-      requires detail::concepts::shufflable_range<Rng, decltype(detail::default_random)&>
+    requires detail::concepts::shufflable_range<
+      Rng, decltype(detail::default_random)&>
     GENEX_INLINE auto operator()(Rng &&rng) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       std::shuffle(std::move(first), std::move(last), detail::default_random);
@@ -31,19 +32,15 @@ namespace genex::actions {
     }
 
     template <typename Rng, typename Shuffler>
-      requires detail::concepts::shufflable_range<Rng, Shuffler>
+    requires detail::concepts::shufflable_range<Rng, Shuffler>
     GENEX_INLINE auto operator()(Rng &&rng, Shuffler shuffler) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       std::shuffle(std::move(first), std::move(last), std::move(shuffler));
       return std::forward<Rng>(rng);
     }
 
-    GENEX_INLINE auto operator()() const -> auto {
-      return meta::bind_back(shuffle_fn{});
-    }
-
     template <typename Shuffler>
-      requires std::uniform_random_bit_generator<std::remove_cvref_t<Shuffler>>
+    requires std::uniform_random_bit_generator<std::remove_cvref_t<Shuffler>>
     GENEX_INLINE auto operator()(Shuffler shuffler) const -> auto {
       return meta::bind_back(shuffle_fn{}, std::move(shuffler));
     }

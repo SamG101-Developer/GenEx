@@ -7,7 +7,6 @@ import genex.concepts;
 import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
-import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -27,7 +26,7 @@ namespace genex::views::detail::impl {
   struct cycle_sentinel {};
 
   template <typename I, typename S>
-    requires concepts::cyclable_iters<I, S>
+  requires concepts::cyclable_iters<I, S>
   struct cycle_iterator : genex::detail::iterator_ops<cycle_iterator<I, S>> {
     I it;
     I begin;
@@ -36,8 +35,10 @@ namespace genex::views::detail::impl {
     using value_type = iter_value_t<I>;
     using reference = iter_reference_t<I>;
     using difference_type = iter_difference_t<I>;
-    using iterator_category =
-      std::conditional_t<std::bidirectional_iterator<I>, std::bidirectional_iterator_tag, std::forward_iterator_tag>;
+    using iterator_category = std::conditional_t<
+      std::bidirectional_iterator<I>,
+      std::bidirectional_iterator_tag,
+      std::forward_iterator_tag>;
     using iterator_concept = iterator_category;
 
     GENEX_INLINE constexpr cycle_iterator() = default;
@@ -50,7 +51,8 @@ namespace genex::views::detail::impl {
       if (it == st) { it = begin; }
     }
 
-    GENEX_INLINE constexpr auto prev() -> void requires std::bidirectional_iterator<decltype(it)> {
+    GENEX_INLINE constexpr auto prev() -> void
+    requires std::bidirectional_iterator<decltype(it)> {
       if (it == begin) { it = st; }
       --it;
     }
@@ -59,17 +61,19 @@ namespace genex::views::detail::impl {
       return *it;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const cycle_iterator &self, const cycle_iterator &that) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const cycle_iterator &self, const cycle_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const cycle_iterator &, cycle_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const cycle_iterator &, cycle_sentinel) -> bool {
       return false;
     }
   };
 
   template <typename I, typename S>
-    requires concepts::cyclable_iters<I, S>
+  requires concepts::cyclable_iters<I, S>
   struct cycle_view : view_base {
     I it;
     I it_cpy;
@@ -91,9 +95,9 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct cycle_fn {
+  struct cycle_fn : pipe_closure {
     template <typename I, typename S>
-      requires detail::concepts::cyclable_iters<I, S>
+    requires detail::concepts::cyclable_iters<I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
       SAFE_IMPL_CTOR(cycle_view, I, S) and
       SAFE_MOVE(I) and SAFE_MOVE(S)) {
@@ -101,18 +105,13 @@ namespace genex::views {
     }
 
     template <typename Rng>
-      requires detail::concepts::cyclable_range<Rng>
+    requires detail::concepts::cyclable_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(cycle_view, iterator_t<Rng>, sentinel_t<Rng>) and
       SAFE_MOVE(iterator_t<Rng>) and SAFE_MOVE(sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::cycle_view(std::move(first), std::move(last));
-    }
-
-    GENEX_INLINE constexpr auto operator()() const noexcept(
-      SAFE_CTOR(cycle_fn)) {
-      return meta::bind_back(cycle_fn{});
     }
   };
 

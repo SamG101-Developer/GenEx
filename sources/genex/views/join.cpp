@@ -8,7 +8,6 @@ import genex.detail.iterator_ops;
 import genex.iterators.access;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
-import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -29,13 +28,8 @@ namespace genex::views::detail::impl {
   struct join_sentinel {};
 
   template <typename I, typename S>
-    requires concepts::joinable_iters<I, S>
+  requires concepts::joinable_iters<I, S>
   struct join_iterator : genex::detail::iterator_ops<join_iterator<I, S>> {
-    // When the outer iterator dereferences to a prvalue range (e.g. transform/intersperse
-    // that yield elements by value), the inner range is a temporary and its iterators would
-    // dangle. In that case we cache the current inner range inside the iterator itself. The
-    // cache is boxed on the heap because `inner_it`/`inner_st` point into it: copying or
-    // moving the iterator must not change where the cached range lives.
     static constexpr bool ref_is_glvalue = std::is_reference_v<iter_reference_t<I>>;
     using inner_cache_t = std::conditional_t<
       ref_is_glvalue, std::monostate, std::shared_ptr<iter_value_t<I>>>;
@@ -76,11 +70,13 @@ namespace genex::views::detail::impl {
       return *inner_it;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const join_iterator &self, const join_iterator &that) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const join_iterator &self, const join_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const join_iterator &self, join_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const join_iterator &self, join_sentinel) -> bool {
       return self.it == self.st;
     }
 
@@ -109,7 +105,7 @@ namespace genex::views::detail::impl {
   };
 
   template <typename I, typename S>
-    requires concepts::joinable_iters<I, S>
+  requires concepts::joinable_iters<I, S>
   struct join_view : view_base {
     I it;
     S st;
@@ -140,9 +136,9 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct join_fn {
+  struct join_fn : pipe_closure {
     template <typename I, typename S>
-      requires detail::concepts::joinable_iters<I, S>
+    requires detail::concepts::joinable_iters<I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
       SAFE_IMPL_CTOR(join_view, I, S) and
       SAFE_MOVE(I) and SAFE_MOVE(S)) {
@@ -150,17 +146,12 @@ namespace genex::views {
     }
 
     template <typename Rng>
-      requires detail::concepts::joinable_range<Rng>
+    requires detail::concepts::joinable_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(join_view, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::join_view(std::move(first), std::move(last));
-    }
-
-    GENEX_INLINE constexpr auto operator()() const noexcept(
-      SAFE_CTOR(join_fn)) {
-      return meta::bind_back(join_fn{});
     }
   };
 

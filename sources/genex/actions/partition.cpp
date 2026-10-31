@@ -18,41 +18,50 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct partition_fn {
+  struct partition_fn : pipe_closure {
     template <typename Rng, typename Pred, typename Proj = meta::identity>
-      requires detail::concepts::partitionable_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
+    requires detail::concepts::partitionable_range<Rng, Pred, Proj>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       auto partitioner = [&]<typename T>(T &&elem) {
         return meta::invoke(pred, meta::invoke(proj, std::forward<T>(elem)));
       };
-      std::partition(std::move(first), std::move(last), std::move(partitioner));
+
+      std::partition(
+        std::move(first), std::move(last), std::move(partitioner));
       return std::forward<Rng>(rng);
     }
 
     template <typename Pred, typename Proj = meta::identity>
-      requires (not range<Pred>)
-    GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const {
+    requires (not range<Pred>)
+    GENEX_INLINE constexpr auto operator()(
+      Pred pred, Proj proj = {}) const {
       return meta::bind_back(partition_fn{}, std::move(pred), std::move(proj));
     }
   };
 
-  struct stable_partition_fn {
+  struct stable_partition_fn : pipe_closure {
     template <typename Rng, typename Pred, typename Proj = meta::identity>
-      requires detail::concepts::partitionable_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
+    requires detail::concepts::partitionable_range<Rng, Pred, Proj>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       auto partitioner = [&]<typename T>(T &&elem) {
         return meta::invoke(pred, meta::invoke(proj, std::forward<T>(elem)));
       };
-      std::stable_partition(std::move(first), std::move(last), std::move(partitioner));
+
+      std::stable_partition(
+        std::move(first), std::move(last), std::move(partitioner));
       return std::forward<Rng>(rng);
     }
 
     template <typename Pred, typename Proj = meta::identity>
-      requires (not range<Pred>)
-    GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const {
-      return meta::bind_back(stable_partition_fn{}, std::move(pred), std::move(proj));
+    requires (not range<Pred>)
+    GENEX_INLINE constexpr auto operator()(
+      Pred pred, Proj proj = {}) const {
+      return meta::bind_back(
+        stable_partition_fn{}, std::move(pred), std::move(proj));
     }
   };
 

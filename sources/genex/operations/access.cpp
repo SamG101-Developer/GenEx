@@ -24,24 +24,27 @@ namespace genex::operations::detail::concepts {
 namespace genex::operations {
   struct at_fn {
     template <typename Rng>
-      requires detail::concepts::randomly_access_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, const std::size_t n) const -> borrowed_reference_t<Rng> {
+    requires detail::concepts::randomly_access_range<Rng>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, const std::size_t n) const -> borrowed_reference_t<Rng> {
       return rng[n];
     }
   };
 
   struct front_fn {
     template <typename Rng>
-      requires detail::concepts::frontable_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> borrowed_reference_t<Rng> {
+    requires detail::concepts::frontable_range<Rng>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const -> borrowed_reference_t<Rng> {
       return *iterators::begin(rng);
     }
   };
 
   struct back_fn {
     template <typename Rng>
-      requires detail::concepts::backable_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> borrowed_reference_t<Rng> {
+    requires detail::concepts::backable_range<Rng>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const -> borrowed_reference_t<Rng> {
       return *iterators::prev(iterators::end(rng));
     }
   };

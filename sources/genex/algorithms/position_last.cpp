@@ -25,7 +25,6 @@ namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::positionable_last_iters<I, S, Pred, Proj>
     and std::bidirectional_iterator<I>
-
   constexpr auto do_position_last(I first, S last, Pred &&pred, Proj &&proj)
     -> std::optional<std::size_t> {
     auto pos = static_cast<std::size_t>(iterators::distance(first, last));
@@ -38,7 +37,7 @@ namespace genex::algorithms::detail::impl {
   }
 
   template <typename I, typename S, typename Pred, typename Proj>
-    requires concepts::positionable_last_iters<I, S, Pred, Proj>
+  requires concepts::positionable_last_iters<I, S, Pred, Proj>
   constexpr auto do_position_last(I first, S last, Pred &&pred, Proj &&proj)
     -> std::optional<std::size_t> {
     auto pos = std::optional<std::size_t>();
@@ -51,21 +50,28 @@ namespace genex::algorithms::detail::impl {
 
 namespace genex {
   struct position_last_fn {
-    template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-      requires algorithms::detail::concepts::positionable_last_iters<I, S, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const
+    template <
+      typename I, typename S, typename Pred, typename Proj = meta::identity>
+    requires algorithms::detail::concepts::positionable_last_iters<
+      I, S, Pred, Proj>
+    GENEX_INLINE constexpr auto operator()(
+      I first, S last, Pred &&pred, Proj &&proj = {}) const
       -> std::optional<std::size_t> {
       return algorithms::detail::impl::do_position_last(
-        std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+        std::move(first), std::move(last),
+        std::forward<Pred>(pred), std::forward<Proj>(proj));
     }
 
     template <typename Rng, typename Pred, typename Proj = meta::identity>
-      requires algorithms::detail::concepts::positionable_last_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const
+    requires algorithms::detail::concepts::positionable_last_range<
+      Rng, Pred, Proj>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Pred &&pred, Proj &&proj = {}) const
       -> std::optional<std::size_t> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_position_last(
-        std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+        std::move(first), std::move(last),
+        std::forward<Pred>(pred), std::forward<Proj>(proj));
     }
   };
 

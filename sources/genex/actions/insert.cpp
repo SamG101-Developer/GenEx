@@ -35,7 +35,8 @@ namespace genex::actions::detail::concepts {
 
 namespace genex::actions::detail {
   template <typename Rng, typename I>
-  GENEX_INLINE constexpr auto assert_in_range([[maybe_unused]] Rng &&rng, [[maybe_unused]] const I &it) -> void {
+  GENEX_INLINE constexpr auto assert_in_range(
+    [[maybe_unused]] Rng &&rng, [[maybe_unused]] const I &it) -> void {
     if constexpr (std::random_access_iterator<std::remove_cvref_t<I>>) {
       GENEX_ASSERT(it >= std::begin(rng) and it <= std::end(rng));
     }
@@ -43,34 +44,38 @@ namespace genex::actions::detail {
 }
 
 namespace genex::actions {
-  struct insert_fn {
+  struct insert_fn : pipe_closure {
     template <typename Rng, typename I, typename E>
-      requires detail::concepts::insertable_select_emplace<Rng, I, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, E elem) const -> Rng {
+    requires detail::concepts::insertable_select_emplace<Rng, I, E>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, I it, E elem) const -> Rng {
       detail::assert_in_range(rng, it);
       rng.emplace(std::move(it), std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename Rng, typename I, typename E>
-      requires detail::concepts::insertable_select_push<Rng, I, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, E elem) const -> Rng {
+    requires detail::concepts::insertable_select_push<Rng, I, E>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, I it, E elem) const -> Rng {
       detail::assert_in_range(rng, it);
       rng.push(std::move(it), std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename Rng, typename I, typename E>
-      requires detail::concepts::insertable_select_insert<Rng, I, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, E elem) const -> Rng {
+    requires detail::concepts::insertable_select_insert<Rng, I, E>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, I it, E elem) const -> Rng {
       detail::assert_in_range(rng, it);
       rng.insert(std::move(it), std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename I, typename E>
-      requires (not range<I>)
-    GENEX_INLINE constexpr auto operator()(I it, E elem) const {
+    requires (not range<I>)
+    GENEX_INLINE constexpr auto operator()(
+      I it, E elem) const {
       return meta::bind_back(insert_fn{}, std::move(it), std::move(elem));
     }
   };

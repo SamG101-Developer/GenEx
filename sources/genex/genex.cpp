@@ -1,6 +1,7 @@
 export module genex;
 
 // Core modules
+export import genex.closure;
 export import genex.concepts;
 export import genex.meta;
 export import genex.pipe;
@@ -42,7 +43,6 @@ export import genex.actions.unique;
 export import genex.algorithms.all_of;
 export import genex.algorithms.any_of;
 export import genex.algorithms.binary_search;
-export import genex.algorithms.concepts;
 export import genex.algorithms.contains;
 export import genex.algorithms.contains_if;
 export import genex.algorithms.count;

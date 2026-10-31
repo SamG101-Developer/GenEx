@@ -45,14 +45,14 @@ TEST(GenexDangling, ElementOfRvalueOutlivesTheCall) {
 }
 
 TEST(GenexDangling, ActionOnRvalueOutlivesTheStatement) {
-  auto &&sorted = make_vec() | genex::actions::sort();
+  auto &&sorted = make_vec() | genex::actions::sort;
   const auto exp = vec_t{1, 2, 3};
   EXPECT_EQ(sorted, exp);
 }
 
 TEST(GenexDangling, ActionOnLvalueSortsInPlace) {
   auto vec = make_vec();
-  auto &sorted = vec | genex::actions::sort();
+  auto &sorted = vec | genex::actions::sort;
   EXPECT_EQ(&sorted, &vec);
   EXPECT_EQ(vec[0], 1);
 }
@@ -64,7 +64,7 @@ TEST(GenexDangling, DivideRvalueOwnsItsParts) {
 }
 
 TEST(GenexDangling, DivideRvalueWithCallSyntax) {
-  const auto [a, b] = vec_t{1, 2, 3} | genex::views::divide<2>();
+  const auto [a, b] = vec_t{1, 2, 3} | genex::views::divide<2>;
   EXPECT_EQ(a, (vec_t{1, 2}));
   EXPECT_EQ(b, (vec_t{3}));
 }

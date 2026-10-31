@@ -18,10 +18,11 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct drop_fn {
+  struct drop_fn : pipe_closure {
     template <typename Rng, typename Int>
-      requires detail::concepts::droppable_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const -> Rng {
+    requires detail::concepts::droppable_range<Rng, Int>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, const Int n) const -> Rng {
       GENEX_ASSERT(n >= 0);
       actions::erase(
         rng, iterators::begin(rng),
@@ -33,12 +34,16 @@ namespace genex::actions {
     }
 
     template <typename Int>
-      requires std::integral<Int>
+    requires std::integral<Int>
     GENEX_INLINE constexpr auto operator()(const Int n) const {
       GENEX_ASSERT(n >= 0);
       return meta::bind_back(drop_fn{}, n);
     }
   };
 
+  /// The "drop" action drops n elements from the range being applied to.
+  /// Used as "range |= genex::actions::drop(1)" or
+  /// "genex:actions::drop(range, 1)". The range itself must be a forward range
+  /// and an integral index.
   export inline constexpr drop_fn drop{};
 }

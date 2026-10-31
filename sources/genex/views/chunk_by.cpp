@@ -28,7 +28,7 @@ namespace genex::views::detail::impl {
   struct chunk_by_sentinel {};
 
   template <typename I, typename S, typename Pred>
-    requires concepts::chunkable_by_iters<I, S, Pred>
+  requires concepts::chunkable_by_iters<I, S, Pred>
   struct chunk_by_iterator : genex::detail::iterator_ops<chunk_by_iterator<I, S, Pred>> {
     I it;
     I nxt;
@@ -81,7 +81,7 @@ namespace genex::views::detail::impl {
   };
 
   template <typename I, typename S, typename Pred>
-    requires concepts::chunkable_by_iters<I, S, Pred>
+  requires concepts::chunkable_by_iters<I, S, Pred>
   struct chunk_by_view : view_base {
     I it;
     S st;
@@ -103,27 +103,31 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct chunk_by_fn {
+  struct chunk_by_fn : pipe_closure {
     template <typename I, typename S, typename Pred>
-      requires detail::concepts::chunkable_by_iters<I, S, Pred>
-    GENEX_INLINE constexpr auto operator()(I first, S last, Pred pred) const noexcept(
+    requires detail::concepts::chunkable_by_iters<I, S, Pred>
+    GENEX_INLINE constexpr auto operator()(
+      I first, S last, Pred pred) const noexcept(
       SAFE_IMPL_CTOR(chunk_by_view, I, S, Pred) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred)) {
-      return detail::impl::chunk_by_view(std::move(first), std::move(last), std::move(pred));
+      return detail::impl::chunk_by_view(
+        std::move(first), std::move(last), std::move(pred));
     }
 
     template <typename Rng, typename Pred>
-      requires detail::concepts::chunkable_by_range<Rng, Pred>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred pred) const noexcept(
+    requires detail::concepts::chunkable_by_range<Rng, Pred>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Pred pred) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(chunk_by_view, iterator_t<Rng>, sentinel_t<Rng>, Pred) and
       SAFE_MOVE(Pred)) {
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::chunk_by_view(std::move(first), std::move(last), std::move(pred));
+      return detail::impl::chunk_by_view(
+        std::move(first), std::move(last), std::move(pred));
     }
 
     template <typename Pred>
-      requires (not range<Pred>)
+    requires (not range<Pred>)
     GENEX_INLINE constexpr auto operator()(Pred pred) const noexcept(
       SAFE_CTOR(chunk_by_fn) and SAFE_MOVE(Pred)) {
       return meta::bind_back(chunk_by_fn{}, std::move(pred));

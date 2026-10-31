@@ -14,7 +14,9 @@ namespace genex::algorithms::detail::concepts {
     std::sentinel_for<S, I> and
     std::movable<iter_value_t<I>> and
     std::invocable<F, iter_value_t<I>, iter_reference_t<I>> and
-    std::convertible_to<std::invoke_result_t<F, iter_value_t<I>, iter_reference_t<I>>, iter_value_t<I>>;
+    std::convertible_to<
+      std::invoke_result_t<F, iter_value_t<I>, iter_reference_t<I>>,
+      iter_value_t<I>>;
 
   template <typename Rng, typename F>
   concept left_foldable_first_range =
@@ -24,7 +26,7 @@ namespace genex::algorithms::detail::concepts {
 
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename F>
-    requires concepts::left_foldable_first_iters<I, S, F>
+  requires concepts::left_foldable_first_iters<I, S, F>
   constexpr auto do_fold_left_first(I first, S last, F &&f) -> iter_value_t<I> {
     GENEX_ASSERT(first != last);
     auto acc = *first;
@@ -39,16 +41,18 @@ namespace genex::algorithms::detail::impl {
 namespace genex {
   struct fold_left_first_fn {
     template <typename I, typename S, typename F>
-      requires algorithms::detail::concepts::left_foldable_first_iters<I, S, F>
+    requires algorithms::detail::concepts::left_foldable_first_iters<I, S, F>
     GENEX_INLINE constexpr auto operator()(I first, S last, F &&f) const {
-      return algorithms::detail::impl::do_fold_left_first(std::move(first), std::move(last), std::forward<F>(f));
+      return algorithms::detail::impl::do_fold_left_first(
+        std::move(first), std::move(last), std::forward<F>(f));
     }
 
     template <typename Rng, typename F>
-      requires algorithms::detail::concepts::left_foldable_first_range<Rng, F>
+    requires algorithms::detail::concepts::left_foldable_first_range<Rng, F>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, F &&f) const {
       auto [first, last] = iterators::iter_pair(rng);
-      return algorithms::detail::impl::do_fold_left_first(std::move(first), std::move(last), std::forward<F>(f));
+      return algorithms::detail::impl::do_fold_left_first(
+        std::move(first), std::move(last), std::forward<F>(f));
     }
   };
 

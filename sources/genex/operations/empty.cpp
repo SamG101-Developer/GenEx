@@ -24,13 +24,13 @@ namespace genex::operations::detail::concepts {
 namespace genex::operations {
   struct empty_fn {
     template <typename Rng>
-      requires detail::concepts::emptyable_select_empty<Rng>
+    requires detail::concepts::emptyable_select_empty<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&r) const -> bool {
       return r.empty();
     }
 
     template <typename Rng>
-      requires detail::concepts::emptyable_select_size<Rng>
+    requires detail::concepts::emptyable_select_size<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> bool {
       return operations::size(rng) == 0;
     }

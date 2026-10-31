@@ -20,7 +20,7 @@ namespace genex::views::detail::impl {
   struct generate_sentinel {};
 
   template <typename F, bool Counted>
-    requires concepts::generatable_fn<F>
+  requires concepts::generatable_fn<F>
   struct generate_iterator : genex::detail::iterator_ops<generate_iterator<F, Counted>> {
     GENEX_NO_UNIQUE_ADDRESS meta::box<F> f;
     std::ptrdiff_t count = 0;
@@ -60,18 +60,20 @@ namespace genex::views::detail::impl {
       return self.count == that.count;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const generate_iterator &self, generate_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const generate_iterator &self, generate_sentinel) -> bool {
       return self.count == 0;
     }
   };
 
   template <typename F, bool Counted>
-    requires concepts::generatable_fn<F>
+  requires concepts::generatable_fn<F>
   struct generate_view : view_base {
     GENEX_NO_UNIQUE_ADDRESS F f;
     std::ptrdiff_t count;
 
-    GENEX_INLINE constexpr generate_view(F f, const std::ptrdiff_t count) noexcept(
+    GENEX_INLINE constexpr generate_view(
+      F f, const std::ptrdiff_t count) noexcept(
       SAFE_MOVE(F)) :
       f(std::move(f)), count(count) {
     }
@@ -92,22 +94,26 @@ namespace genex::views::detail::impl {
 }
 
 namespace genex::views {
-  struct generate_fn {
+  struct generate_fn : pipe_closure {
     template <typename F>
-      requires detail::concepts::generatable_fn<F>
+    requires detail::concepts::generatable_fn<F>
     GENEX_INLINE constexpr auto operator()(F f) const noexcept(
-      SAFE_CTOR(detail::impl::generate_view<F, false>, F, std::ptrdiff_t) and SAFE_MOVE(F)) {
-      return detail::impl::generate_view<F, false>(std::move(f), std::ptrdiff_t{0});
+      SAFE_CTOR(detail::impl::generate_view<F, false>, F, std::ptrdiff_t) and
+      SAFE_MOVE(F)) {
+      return detail::impl::generate_view<F, false>(
+        std::move(f), std::ptrdiff_t{0});
     }
   };
 
-  struct generate_n_fn {
+  struct generate_n_fn : pipe_closure {
     template <typename F, typename Int>
-      requires detail::concepts::generatable_fn<F> and std::integral<Int>
+    requires detail::concepts::generatable_fn<F> and std::integral<Int>
     GENEX_INLINE constexpr auto operator()(F f, const Int count) const noexcept(
-      SAFE_CTOR(detail::impl::generate_view<F, true>, F, std::ptrdiff_t) and SAFE_MOVE(F)) {
+      SAFE_CTOR(detail::impl::generate_view<F, true>, F, std::ptrdiff_t) and
+      SAFE_MOVE(F)) {
       GENEX_ASSERT(count >= 0);
-      return detail::impl::generate_view<F, true>(std::move(f), static_cast<std::ptrdiff_t>(count));
+      return detail::impl::generate_view<F, true>(
+        std::move(f), static_cast<std::ptrdiff_t>(count));
     }
   };
 

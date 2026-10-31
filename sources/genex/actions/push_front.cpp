@@ -35,23 +35,23 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct push_front_fn {
+  struct push_front_fn : pipe_closure {
     template <typename Rng, typename E>
-      requires detail::concepts::front_insertable_select_emplace_front<Rng, E>
+    requires detail::concepts::front_insertable_select_emplace_front<Rng, E>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> Rng {
       rng.emplace_front(std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename Rng, typename E>
-      requires detail::concepts::front_insertable_select_push_front<Rng, E>
+    requires detail::concepts::front_insertable_select_push_front<Rng, E>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> Rng {
       rng.push_front(std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename Rng, typename E>
-      requires detail::concepts::front_insertable_select_insert<Rng, E>
+    requires detail::concepts::front_insertable_select_insert<Rng, E>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> Rng {
       actions::insert(rng, iterators::begin(rng), std::move(elem));
       return std::forward<Rng>(rng);

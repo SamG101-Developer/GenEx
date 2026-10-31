@@ -7,7 +7,6 @@ import genex.concepts;
 import genex.detail.iterator_ops;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
-import genex.meta;
 import std;
 
 namespace genex::views::detail::concepts {
@@ -26,15 +25,17 @@ namespace genex::views::detail::concepts {
 
 namespace genex::views::detail::impl {
   template <typename To, typename I, typename S>
-    requires concepts::static_castable_iters<To, I, S>
-  struct cast_static_iterator : genex::detail::adaptor_ops<cast_static_iterator<To, I, S>> {
+  requires concepts::static_castable_iters<To, I, S>
+  struct cast_static_iterator :
+    genex::detail::adaptor_ops<cast_static_iterator<To, I, S>> {
     I it;
 
     using value_type = To;
     using reference = To;
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
-    using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
+    using iterator_category = legacy_iter_category_t<
+      reference, iterator_concept>;
 
     using pointer = void;
 
@@ -77,28 +78,27 @@ namespace genex::views::detail::impl {
 
 namespace genex::views {
   template <typename To>
-  struct cast_static_fn {
+  struct cast_static_fn : pipe_closure {
     template <typename I, typename S>
-      requires detail::concepts::static_castable_iters<To, I, S>
+    requires detail::concepts::static_castable_iters<To, I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
-      SAFE_CTOR(detail::impl::cast_static_view<To, I, S>, I, S) and SAFE_MOVE(I) and SAFE_MOVE(S)) {
-      return detail::impl::cast_static_view<To, I, S>(std::move(first), std::move(last));
+      SAFE_CTOR(detail::impl::cast_static_view<To, I, S>, I, S) and
+      SAFE_MOVE(I) and SAFE_MOVE(S)) {
+      return detail::impl::cast_static_view<To, I, S>(
+        std::move(first), std::move(last));
     }
 
     template <typename Rng>
-      requires detail::concepts::static_castable_range<To, Rng>
+    requires detail::concepts::static_castable_range<To, Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(
         detail::impl::cast_static_view<To, iterator_t<Rng>, sentinel_t<Rng>>,
         iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::cast_static_view<To, iterator_t<Rng>, sentinel_t<Rng>>(std::move(first), std::move(last));
-    }
-
-    GENEX_INLINE constexpr auto operator()() const noexcept(
-      SAFE_CTOR(cast_static_fn)) {
-      return meta::bind_back(cast_static_fn{});
+      return detail::impl::cast_static_view<
+        To, iterator_t<Rng>, sentinel_t<Rng>>(
+        std::move(first), std::move(last));
     }
   };
 

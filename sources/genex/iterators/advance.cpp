@@ -14,8 +14,9 @@ namespace genex::iterators::detail::concepts {
 namespace genex::iterators {
   struct advance_fn {
     template <typename I>
-      requires detail::concepts::advancable_iters<I>
-    GENEX_INLINE constexpr auto operator()(I &it, const iter_difference_t<I> n = 1) const -> I {
+    requires detail::concepts::advancable_iters<I>
+    GENEX_INLINE constexpr auto operator()(
+      I &it, const iter_difference_t<I> n = 1) const -> I {
       if constexpr (std::random_access_iterator<I>) {
         it += n;
       }

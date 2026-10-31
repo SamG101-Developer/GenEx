@@ -10,7 +10,7 @@ import std;
 
 namespace genex::views::detail::impl {
   template <typename Int>
-    requires std::weakly_incrementable<Int>
+  requires std::weakly_incrementable<Int>
   struct iota_iterator : genex::detail::iterator_ops<iota_iterator<Int>> {
     Int lo;
     Int hi;
@@ -43,29 +43,34 @@ namespace genex::views::detail::impl {
       return it;
     }
 
-    GENEX_INLINE constexpr auto advance_by(const difference_type n) -> void requires std::integral<Int> {
-      it = static_cast<Int>(static_cast<difference_type>(it) + n * static_cast<difference_type>(step));
+    GENEX_INLINE constexpr auto advance_by(
+      const difference_type n) -> void requires std::integral<Int> {
+      it = static_cast<Int>(static_cast<difference_type>(it)
+        + n * static_cast<difference_type>(step));
     }
 
-    GENEX_INLINE constexpr auto distance_to(const iota_iterator &that) const -> difference_type
+    GENEX_INLINE constexpr auto distance_to(
+      const iota_iterator &that) const -> difference_type
       requires std::integral<Int> {
       return (static_cast<difference_type>(that.it) - static_cast<difference_type>(it)) / static_cast<difference_type>(step);
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const iota_iterator &self, const iota_iterator &that) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const iota_iterator &self, const iota_iterator &that) -> bool {
       if constexpr (std::integral<Int>) { return self.it == that.it; }
       else { return self.it == that.it or (self.it >= self.hi and that.it >= that.hi); }
     }
   };
 
   template <typename Int>
-    requires std::weakly_incrementable<Int>
+  requires std::weakly_incrementable<Int>
   struct iota_view : view_base {
     Int lo;
     Int hi;
     Int step;
 
-    GENEX_INLINE constexpr iota_view(const Int lo, const Int hi, const Int step) noexcept(
+    GENEX_INLINE constexpr iota_view(
+      const Int lo, const Int hi, const Int step) noexcept(
       SAFE_CTOR(Int, const Int&))
       : lo(lo), hi(hi), step(step) {
     }
@@ -76,7 +81,8 @@ namespace genex::views::detail::impl {
 
     [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       if constexpr (std::integral<Int>) {
-        const auto last = static_cast<Int>(static_cast<std::ptrdiff_t>(lo) + static_cast<std::ptrdiff_t>(size()) * static_cast<std::ptrdiff_t>(step));
+        const auto last = static_cast<Int>(
+          static_cast<std::ptrdiff_t>(lo) + static_cast<std::ptrdiff_t>(size()) * static_cast<std::ptrdiff_t>(step));
         return iota_iterator<Int>(last, last, step);
       }
       else { return iota_iterator<Int>(hi, hi, step); }
@@ -85,36 +91,40 @@ namespace genex::views::detail::impl {
     [[nodiscard]] GENEX_INLINE constexpr auto size() const -> std::size_t
       requires std::integral<Int> {
       if (step <= 0 or hi <= lo) { return 0; }
-      return (static_cast<std::size_t>(hi - lo) + static_cast<std::size_t>(step) - 1) / static_cast<std::size_t>(step);
+      return (
+        static_cast<std::size_t>(hi - lo) + static_cast<std::size_t>(step) - 1) / static_cast<std::size_t>(step);
     }
   };
 }
 
 namespace genex::views {
-  struct iota_fn {
+  struct iota_fn : pipe_closure {
     template <typename Int>
-      requires std::weakly_incrementable<Int>
-    GENEX_INLINE constexpr auto operator()(const Int lo, const Int hi, const Int step = 1) const noexcept(
+    requires std::weakly_incrementable<Int>
+    GENEX_INLINE constexpr auto operator()(
+      const Int lo, const Int hi, const Int step = 1) const noexcept(
       SAFE_CTOR(detail::impl::iota_view<Int>, Int, Int, Int) and
       SAFE_MOVE(Int)) {
       return detail::impl::iota_view(lo, hi, step);
     }
 
     template <typename Int>
-      requires std::weakly_incrementable<Int>
+    requires std::weakly_incrementable<Int>
     GENEX_INLINE constexpr auto operator()(const Int hi) const noexcept(
       SAFE_CTOR(detail::impl::iota_view<Int>, Int, Int, Int) and
       SAFE_MOVE(Int)) {
-      return detail::impl::iota_view(static_cast<Int>(0), hi, static_cast<Int>(1));
+      return detail::impl::iota_view(
+        static_cast<Int>(0), hi, static_cast<Int>(1));
     }
 
     template <typename Int>
-      requires std::weakly_incrementable<Int>
+    requires std::weakly_incrementable<Int>
       and std::numeric_limits<Int>::is_specialized
     GENEX_INLINE constexpr auto operator()() const noexcept(
       SAFE_CTOR(detail::impl::iota_view<Int>, Int, Int, Int) and
       SAFE_MOVE(Int)) {
-      return detail::impl::iota_view(static_cast<Int>(0), std::numeric_limits<Int>::max(), static_cast<Int>(1));
+      return detail::impl::iota_view(
+        static_cast<Int>(0), std::numeric_limits<Int>::max(), static_cast<Int>(1));
     }
   };
 
