@@ -26,6 +26,10 @@ jobs:
     continue-on-error: ${{ !matrix.platform.required }}
     permissions:
       contents: read
+    # Benchmarks only compile here, to stop them from going out of
+    # date. They run in _benchmarks.yaml, where timing means something.
+    env:
+      BUILD_BENCHMARKS: ${{ matrix.platform.target == 'x86_64-linux-gcc' && matrix.config == 'Release' && 'ON' || 'OFF' }}
     strategy:
       fail-fast: false
       matrix:
@@ -60,6 +64,7 @@ jobs:
         run: |
           sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
           sudo apt-get install --yes g++-16 libgtest-dev
+          if [ "$BUILD_BENCHMARKS" = ON ]; then sudo apt-get install --yes libbenchmark-dev librange-v3-dev; fi
           echo "CXX=g++-16" >> "$GITHUB_ENV"
 
       # Homebrew's clang, not Apple's, which has no "import std".
@@ -99,7 +104,8 @@ jobs:
           if [ -n "${LIBCXX_MODULES_JSON:-}" ]; then
             flags+=("-DCMAKE_CXX_STDLIB_MODULES_JSON=$LIBCXX_MODULES_JSON")
           fi
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE="$CONFIG" -DGENEX_BUILD_TESTS=ON "${flags[@]}"
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE="$CONFIG" -DGENEX_BUILD_TESTS=ON \
+            -DGENEX_BUILD_BENCHMARKS="$BUILD_BENCHMARKS" "${flags[@]}"
           cmake --build build --parallel
 
       - name: Test

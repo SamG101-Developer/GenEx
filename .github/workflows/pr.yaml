@@ -24,6 +24,14 @@ jobs:
       contents: read
     uses: ./.github/workflows/_build.yaml
 
+  # Not one of ci-success's needs, so this can't block a merge
+  # while its thresholds are still being tuned against real runs.
+  benchmarks:
+    name: Benchmarks
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_benchmarks.yaml
+
   # One of the two required status checks for branch
   # protection, the other being "PR Title Format" from
   # pr_title.yaml. A target with "required: false" shows red on
