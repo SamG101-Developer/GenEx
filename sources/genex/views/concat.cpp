@@ -142,8 +142,7 @@ namespace genex::views::detail::impl {
     template <typename Out>
       requires (sized_range<Rngs> and ...)
       and (std::same_as<iterator_t<Rngs>, sentinel_t<Rngs>> and ...)
-      and (std::derived_from<typename std::iterator_traits<iterator_t<Rngs>>::iterator_category,
-                             std::forward_iterator_tag> and ...)
+      and (std::derived_from<iter_category_t<iterator_t<Rngs>>, std::forward_iterator_tag> and ...)
       and (requires(Out &out, iterator_t<Rngs> i) { out.insert(out.end(), i, i); } and ...)
     constexpr auto append_to(Out &out) const -> void {
       out.reserve(size());

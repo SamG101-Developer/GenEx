@@ -63,7 +63,7 @@ namespace genex {
   template <typename Rng>
   concept range_constructor_sizes =
     std::same_as<iterator_t<Rng>, sentinel_t<Rng>> and
-    std::derived_from<typename std::iterator_traits<iterator_t<Rng>>::iterator_category, std::forward_iterator_tag>;
+    std::derived_from<iter_category_t<iterator_t<Rng>>, std::forward_iterator_tag>;
 
   template <typename Out, typename Rng>
   concept reserve_pushable =

@@ -28,5 +28,8 @@ namespace genex::actions {
     }
   };
 
+  /// The "clear" action removes all elements from the range being applied to.
+  /// Used as "range |= genex::actions::clear" or "genex:actions::clear(range)".
+  /// The range itself must be an input range with a "clear" member.
   export inline constexpr clear_fn clear{};
 }

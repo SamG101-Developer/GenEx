@@ -252,6 +252,9 @@ export namespace genex {
   template <typename Reference, typename Concept>
   using legacy_iter_category_t =
     std::conditional_t<std::is_lvalue_reference_v<Reference>, Concept, std::input_iterator_tag>;
+
+  template <typename I>
+  using iter_category_t = std::iterator_traits<I>::iterator_category;
 }
 
 export namespace genex {

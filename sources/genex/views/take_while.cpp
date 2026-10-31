@@ -93,7 +93,7 @@ namespace genex::views::detail::impl {
 
     // Finding where to stop first means the rest can be copied in one go, with each element only being tested once.
     template <typename Out>
-      requires std::derived_from<typename std::iterator_traits<I>::iterator_category, std::forward_iterator_tag>
+      requires std::derived_from<iter_category_t<I>, std::forward_iterator_tag>
       and requires(Out &out, I i) { out.insert(out.end(), i, i); }
     constexpr auto append_to(Out &out) const -> void {
       auto stop = it;
