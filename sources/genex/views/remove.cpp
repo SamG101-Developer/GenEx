@@ -15,8 +15,8 @@ namespace genex::views::detail::concepts {
   concept removable_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirect_equivalence_relation<
-      operations::eq, std::projected<I, Proj>, std::remove_cvref_t<E> const*> and
+    indirect_equivalence_relation<
+      operations::eq, projected<I, Proj>, std::remove_cvref_t<E> const*> and
     std::move_constructible<Proj>;
 
   template <typename Rng, typename E, typename Proj>

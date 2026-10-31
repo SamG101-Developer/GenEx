@@ -17,7 +17,7 @@ namespace genex::views::detail::concepts {
   concept splittable_iters =
     std::forward_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirect_equivalence_relation<operations::eq, I, std::remove_cvref_t<E> const*>;
+    indirect_equivalence_relation<operations::eq, I, std::remove_cvref_t<E> const*>;
 
   template <typename Rng, typename E>
   concept splittable_range =

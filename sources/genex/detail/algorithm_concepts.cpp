@@ -18,8 +18,8 @@ namespace genex::algorithms::detail::concepts {
   concept findable_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirect_equivalence_relation<
-      operations::eq, std::projected<I, Proj>, std::remove_cvref_t<E> const*>;
+    indirect_equivalence_relation<
+      operations::eq, projected<I, Proj>, std::remove_cvref_t<E> const*>;
 
   export template <typename I, typename S, typename Pred, typename Proj>
   concept findable_if_iters =

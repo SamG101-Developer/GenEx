@@ -12,9 +12,9 @@ namespace genex::actions::detail::concepts {
   template <typename Rng, typename Pred, typename Proj>
   concept partitionable_range =
     forward_range<Rng> and
-    std::permutable<iterator_t<Rng>> and
+    permutable<iterator_t<Rng>> and
     std::same_as<iterator_t<Rng>, sentinel_t<Rng>> and
-    std::indirect_unary_predicate<Pred, std::projected<iterator_t<Rng>, Proj>>;
+    indirect_unary_predicate<Pred, projected<iterator_t<Rng>, Proj>>;
 }
 
 namespace genex::actions {

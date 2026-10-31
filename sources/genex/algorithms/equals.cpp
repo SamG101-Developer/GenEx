@@ -17,8 +17,8 @@ namespace genex::algorithms::detail::concepts {
     std::input_iterator<I2> and
     std::sentinel_for<S1, I1> and
     std::sentinel_for<S2, I2> and
-    std::indirect_equivalence_relation<
-      Comp, std::projected<I1, Proj1>, std::projected<I2, Proj2>>;
+    indirect_equivalence_relation<
+      Comp, projected<I1, Proj1>, projected<I2, Proj2>>;
 
   template <
     typename Rng1, typename Rng2, typename Comp, typename Proj1, typename Proj2>

@@ -13,10 +13,10 @@ namespace genex::actions::detail::concepts {
   template <typename Rng, typename Old, typename New, typename Proj>
   concept replaceable_range =
     forward_range<Rng> and
-    std::permutable<iterator_t<Rng>> and
-    std::indirect_equivalence_relation<
+    permutable<iterator_t<Rng>> and
+    indirect_equivalence_relation<
       operations::eq,
-      std::projected<iterator_t<Rng>, Proj>,
+      projected<iterator_t<Rng>, Proj>,
       std::remove_cvref_t<Old> const*> and
     std::convertible_to<New, range_value_t<Rng>>;
 }

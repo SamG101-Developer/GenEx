@@ -14,7 +14,7 @@ namespace genex::algorithms::detail::concepts {
   concept positionable_last_iters =
     std::forward_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
+    indirect_unary_predicate<Pred, projected<I, Proj>>;
 
   template <typename Rng, typename Pred, typename Proj>
   concept positionable_last_range =

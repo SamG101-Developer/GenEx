@@ -12,7 +12,7 @@ namespace genex::actions::detail::concepts {
   template <typename Rng, typename Shuffler>
   concept shufflable_range =
     random_access_range<Rng> and
-    std::permutable<iterator_t<Rng>> and
+    permutable<iterator_t<Rng>> and
     std::uniform_random_bit_generator<std::remove_reference_t<Shuffler>>;
 }
 

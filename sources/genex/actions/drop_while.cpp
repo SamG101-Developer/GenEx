@@ -14,7 +14,7 @@ namespace genex::actions::detail::concepts {
   template <typename Rng, typename Pred>
   concept droppable_while_range =
     forward_range<Rng> and
-    std::indirect_unary_predicate<Pred, iterator_t<Rng>>;
+    indirect_unary_predicate<Pred, iterator_t<Rng>>;
 }
 
 namespace genex::actions {

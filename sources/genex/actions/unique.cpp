@@ -15,7 +15,7 @@ namespace genex::actions::detail::concepts {
   concept uniqueable_range =
     forward_range<Rng> and
     has_member_erase<Rng> and
-    std::indirectly_comparable<iterator_t<Rng>, iterator_t<Rng>, Comp, Proj, Proj>;
+    indirectly_comparable<iterator_t<Rng>, iterator_t<Rng>, Comp, Proj, Proj>;
 }
 
 namespace genex::actions {
@@ -30,7 +30,7 @@ namespace genex::actions {
       auto last = iterators::end(rng);
       if (first == last) { return std::forward<Rng>(rng); }
 
-      if constexpr (std::permutable<iterator_t<Rng>>) {
+      if constexpr (permutable<iterator_t<Rng>>) {
         auto kept = first;
         for (++first; first != last; ++first) {
           if (meta::invoke(comp, meta::invoke(proj, *kept), meta::invoke(proj, *first))) { break; }

@@ -15,7 +15,7 @@ namespace genex::algorithms::detail::concepts {
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
     algorithms::detail::concepts::findable_if_iters<I, S, Pred, Proj> and
-    std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
+    indirect_unary_predicate<Pred, projected<I, Proj>>;
 
   template <typename Rng, typename Pred, typename Proj>
   concept containable_if_range =

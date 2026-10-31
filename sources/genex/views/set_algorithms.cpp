@@ -18,7 +18,7 @@ namespace genex::views::detail::concepts {
     std::input_iterator<I2> and
     std::sentinel_for<S1, I1> and
     std::sentinel_for<S2, I2> and
-    std::indirectly_comparable<I1, I2, Comp, Proj1, Proj2> and
+    indirectly_comparable<I1, I2, Comp, Proj1, Proj2> and
     std::move_constructible<Comp> and
     std::move_constructible<Proj1> and
     std::move_constructible<Proj2>;

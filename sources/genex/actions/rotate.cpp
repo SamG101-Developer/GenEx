@@ -13,7 +13,7 @@ namespace genex::actions::detail::concepts {
   template <typename Rng, typename Int>
   concept rotatable_range =
     forward_range<Rng> and
-    std::permutable<iterator_t<Rng>> and
+    permutable<iterator_t<Rng>> and
     std::same_as<iterator_t<Rng>, sentinel_t<Rng>> and
     std::integral<Int>;
 }

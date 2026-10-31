@@ -12,8 +12,8 @@ namespace genex::actions::detail::concepts {
   template <typename Rng, typename Pred, typename Proj>
   concept removable_if_range =
     forward_range<Rng> and
-    std::permutable<iterator_t<Rng>> and
-    std::indirect_unary_predicate<Pred, std::projected<iterator_t<Rng>, Proj>>;
+    permutable<iterator_t<Rng>> and
+    indirect_unary_predicate<Pred, projected<iterator_t<Rng>, Proj>>;
 }
 
 namespace genex::actions {

@@ -15,8 +15,8 @@ namespace genex::views::detail::concepts {
   concept transformable_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirectly_unary_invocable<Proj, I> and
-    std::indirectly_unary_invocable<F, std::projected<I, Proj>> and
+    indirectly_unary_invocable<Proj, I> and
+    indirectly_unary_invocable<F, projected<I, Proj>> and
     std::move_constructible<F> and
     std::move_constructible<Proj>;
 

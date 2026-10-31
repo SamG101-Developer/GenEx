@@ -15,7 +15,7 @@ namespace genex::views::detail::concepts {
   concept uniqueable_iters =
     std::forward_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirectly_comparable<I, I, Comp, Proj, Proj> and
+    indirectly_comparable<I, I, Comp, Proj, Proj> and
     std::move_constructible<Comp> and
     std::move_constructible<Proj>;
 

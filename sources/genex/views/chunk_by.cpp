@@ -15,7 +15,7 @@ namespace genex::views::detail::concepts {
   concept chunkable_by_iters =
     std::forward_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirect_binary_predicate<Pred, I, I> and
+    indirect_binary_predicate<Pred, I, I> and
     std::move_constructible<Pred>;
 
   template <typename Rng, typename Pred>

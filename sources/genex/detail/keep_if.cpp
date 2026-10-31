@@ -13,7 +13,7 @@ namespace genex::actions::detail {
   constexpr auto keep_if(Rng &rng, Keep keep) -> void {
     auto first = iterators::begin(rng);
     auto last = iterators::end(rng);
-    if constexpr (std::permutable<iterator_t<Rng>>) {
+    if constexpr (permutable<iterator_t<Rng>>) {
       while (first != last and keep(*first)) { ++first; }
       if (first == last) { return; }
 

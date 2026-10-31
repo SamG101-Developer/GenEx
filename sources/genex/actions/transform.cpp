@@ -12,7 +12,7 @@ namespace genex::actions::detail::concepts {
   template <typename Rng, typename F, typename Proj>
   concept transformable_range =
     input_range<Rng> and
-    std::indirectly_unary_invocable<Proj, iterator_t<Rng>> and
+    indirectly_unary_invocable<Proj, iterator_t<Rng>> and
     std::invocable<F&, std::invoke_result_t<Proj&, range_reference_t<Rng>>> and
     std::assignable_from<
       range_reference_t<Rng>,

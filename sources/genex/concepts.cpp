@@ -386,3 +386,109 @@ template <typename Rng>
 struct genex::sentinel<Rng> {
   using type = decltype(std::declval<Rng&>().end());
 };
+
+export namespace genex {
+  /// What a callable taking a copy of an iterator's element is given, as opposed
+  /// to what dereferencing the iterator gives it. A callable has to accept both.
+  template <typename I>
+  struct indirect_value {
+    using type = iter_value_t<I>&;
+  };
+
+  template <typename I>
+  requires requires { typename I::indirect_value_type; }
+  struct indirect_value<I> {
+    using type = I::indirect_value_type;
+  };
+
+  template <typename I>
+  using indirect_value_t = indirect_value<I>::type;
+
+  template <typename F, typename I>
+  concept indirectly_unary_invocable =
+    std::indirectly_readable<I> and
+    std::copy_constructible<F> and
+    std::invocable<F&, indirect_value_t<I>> and
+    std::invocable<F&, iter_reference_t<I>> and
+    std::common_reference_with<
+      std::invoke_result_t<F&, indirect_value_t<I>>,
+      std::invoke_result_t<F&, iter_reference_t<I>>>;
+
+  template <typename F, typename I>
+  concept indirectly_regular_unary_invocable =
+    indirectly_unary_invocable<F, I> and
+    std::regular_invocable<F&, indirect_value_t<I>> and
+    std::regular_invocable<F&, iter_reference_t<I>>;
+
+  /// Nested so that it doesn't have "I" and "Proj" as template arguments. If it
+  /// did, argument dependent lookup through it would look inside them, which
+  /// needs them complete and can find their friends.
+  template <typename I, typename Proj>
+  struct projected_impl {
+    struct type {
+      using value_type = std::remove_cvref_t<std::invoke_result_t<Proj&, iter_reference_t<I>>>;
+      using indirect_value_type = std::invoke_result_t<Proj&, indirect_value_t<I>>;
+      auto operator*() const -> std::invoke_result_t<Proj&, iter_reference_t<I>>;
+    };
+  };
+
+  /// Stands in for "I" with "Proj" applied to what it reads, for a concept to
+  /// check a callable against. It's never actually dereferenced.
+  template <typename I, typename Proj>
+  requires std::indirectly_readable<I> and indirectly_regular_unary_invocable<Proj, I>
+  using projected = projected_impl<I, Proj>::type;
+
+  template <typename F, typename I>
+  concept indirect_unary_predicate =
+    std::indirectly_readable<I> and
+    std::copy_constructible<F> and
+    std::predicate<F&, indirect_value_t<I>> and
+    std::predicate<F&, iter_reference_t<I>>;
+
+  template <typename F, typename I1, typename I2>
+  concept indirect_binary_predicate =
+    std::indirectly_readable<I1> and
+    std::indirectly_readable<I2> and
+    std::copy_constructible<F> and
+    std::predicate<F&, indirect_value_t<I1>, indirect_value_t<I2>> and
+    std::predicate<F&, indirect_value_t<I1>, iter_reference_t<I2>> and
+    std::predicate<F&, iter_reference_t<I1>, indirect_value_t<I2>> and
+    std::predicate<F&, iter_reference_t<I1>, iter_reference_t<I2>>;
+
+  template <typename F, typename I1, typename I2 = I1>
+  concept indirect_equivalence_relation =
+    std::indirectly_readable<I1> and
+    std::indirectly_readable<I2> and
+    std::copy_constructible<F> and
+    std::equivalence_relation<F&, indirect_value_t<I1>, indirect_value_t<I2>> and
+    std::equivalence_relation<F&, indirect_value_t<I1>, iter_reference_t<I2>> and
+    std::equivalence_relation<F&, iter_reference_t<I1>, indirect_value_t<I2>> and
+    std::equivalence_relation<F&, iter_reference_t<I1>, iter_reference_t<I2>>;
+
+  template <typename F, typename I1, typename I2 = I1>
+  concept indirect_strict_weak_order =
+    std::indirectly_readable<I1> and
+    std::indirectly_readable<I2> and
+    std::copy_constructible<F> and
+    std::strict_weak_order<F&, indirect_value_t<I1>, indirect_value_t<I2>> and
+    std::strict_weak_order<F&, indirect_value_t<I1>, iter_reference_t<I2>> and
+    std::strict_weak_order<F&, iter_reference_t<I1>, indirect_value_t<I2>> and
+    std::strict_weak_order<F&, iter_reference_t<I1>, iter_reference_t<I2>>;
+
+  template <typename I1, typename I2, typename Comp, typename Proj1, typename Proj2>
+  concept indirectly_comparable =
+    indirect_binary_predicate<Comp, projected<I1, Proj1>, projected<I2, Proj2>>;
+
+  /// Elements can be moved and swapped between positions, without changing what
+  /// they are. A @c std::set 's can't, as they can't be assigned to.
+  template <typename I>
+  concept permutable =
+    std::forward_iterator<I> and
+    std::indirectly_movable_storable<I, I> and
+    std::indirectly_swappable<I, I>;
+
+  template <typename I, typename Comp, typename Proj>
+  concept sortable =
+    permutable<I> and
+    indirect_strict_weak_order<Comp, projected<I, Proj>>;
+}

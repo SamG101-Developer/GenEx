@@ -16,7 +16,7 @@ namespace genex::algorithms::detail::concepts {
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
     std::copy_constructible<iter_value_t<I>> and
-    std::sortable<typename std::vector<iter_value_t<I>>::iterator, Comp, Proj>;
+    sortable<typename std::vector<iter_value_t<I>>::iterator, Comp, Proj>;
 
   template <typename Rng, typename Comp, typename Proj>
   concept sortable_range =

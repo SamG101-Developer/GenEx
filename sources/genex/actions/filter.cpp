@@ -13,7 +13,7 @@ namespace genex::actions::detail::concepts {
   concept filterable_range =
     forward_range<Rng> and
     has_member_erase<Rng> and
-    std::indirect_unary_predicate<Pred, std::projected<iterator_t<Rng>, Proj>>;
+    indirect_unary_predicate<Pred, projected<iterator_t<Rng>, Proj>>;
 }
 
 namespace genex::actions {

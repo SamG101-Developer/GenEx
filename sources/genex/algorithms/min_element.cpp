@@ -13,7 +13,7 @@ namespace genex::algorithms::detail::concepts {
   concept minable_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirect_strict_weak_order<Comp, std::projected<I, Proj>>;
+    indirect_strict_weak_order<Comp, projected<I, Proj>>;
 
   template <typename Rng, typename Comp, typename Proj>
   concept minable_range =

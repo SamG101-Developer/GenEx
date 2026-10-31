@@ -1,4 +1,5 @@
 export module genex.detail.predicate_iters;
+import genex.concepts;
 import std;
 
 export namespace genex::detail {
@@ -9,5 +10,5 @@ export namespace genex::detail {
   concept predicate_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
+    indirect_unary_predicate<Pred, projected<I, Proj>>;
 }

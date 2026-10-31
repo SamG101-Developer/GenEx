@@ -16,8 +16,8 @@ namespace genex::views::detail::concepts {
   concept replaceable_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirect_equivalence_relation<
-      operations::eq, std::projected<I, Proj>, std::remove_cvref_t<Old> const*> and
+    indirect_equivalence_relation<
+      operations::eq, projected<I, Proj>, std::remove_cvref_t<Old> const*> and
     std::convertible_to<New, iter_value_t<I>> and
     std::move_constructible<Proj>;
 
