@@ -24,7 +24,8 @@ namespace genex::actions {
   struct remove_fn : pipe_closure {
     template <typename Rng, typename E, typename Proj = meta::identity>
     requires detail::concepts::removable_range<Rng, E, Proj>
-    constexpr auto operator()(Rng &&rng, E elem, Proj proj = {}) const -> Rng {
+    constexpr auto operator()(
+      Rng &&rng, E elem, Proj proj = {}) const -> Rng {
       detail::keep_if(rng, [&]<typename T>(T &&x) -> bool {
         return not (meta::invoke(proj, std::forward<T>(x)) == elem);
       });
@@ -33,8 +34,10 @@ namespace genex::actions {
 
     template <typename E, typename Proj = meta::identity>
     requires closure_value<E>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(E &&elem, Proj proj = {}) const {
-      return meta::bind_back(remove_fn{}, std::forward<E>(elem), std::move(proj));
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      E &&elem, Proj proj = {}) const {
+      return meta::bind_back(
+        remove_fn{}, std::forward<E>(elem), std::move(proj));
     }
   };
 

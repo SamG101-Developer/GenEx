@@ -15,9 +15,12 @@ namespace genex::actions::detail::concepts {
 
 namespace genex::actions {
   struct clear_fn : pipe_closure {
+    /// Overload for ranges that have a "clear" method on, simplifying chaining
+    /// of different actions.
     template <typename Rng>
     requires detail::concepts::clearable_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> Rng {
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const -> Rng {
       rng.clear();
       return std::forward<Rng>(rng);
     }

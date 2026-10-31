@@ -20,7 +20,8 @@ namespace genex::actions {
   struct filter_fn : pipe_closure {
     template <typename Rng, typename Pred, typename Proj = meta::identity>
     requires detail::concepts::filterable_range<Rng, Pred, Proj>
-    constexpr auto operator()(Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
+    constexpr auto operator()(
+      Rng &&rng, Pred pred, Proj proj = {}) const -> Rng {
       detail::keep_if(rng, [&]<typename T>(T &&elem) -> bool {
         return meta::invoke(pred, meta::invoke(proj, std::forward<T>(elem)));
       });
@@ -29,7 +30,8 @@ namespace genex::actions {
 
     template <typename Pred, typename Proj = meta::identity>
     requires closure_callable<Pred>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Pred pred, Proj proj = {}) const {
       return meta::bind_back(filter_fn{}, std::move(pred), std::move(proj));
     }
   };

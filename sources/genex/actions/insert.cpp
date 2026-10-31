@@ -15,9 +15,17 @@ namespace genex::actions::detail::concepts {
     std::constructible_from<range_value_t<Rng>, E&&>;
 
   template <typename Rng, typename I, typename E>
+  concept insertable_select_emplace_hint =
+    insertable_range<Rng, I, E> and
+    requires(Rng &rng, I it, E &&elem) {
+      rng.emplace_hint(std::move(it), std::forward<E>(elem));
+    };
+
+  template <typename Rng, typename I, typename E>
   concept insertable_select_emplace =
     insertable_range<Rng, I, E> and
-    has_member_emplace<Rng>;
+    has_member_emplace<Rng> and
+    not insertable_select_emplace_hint<Rng, I, E>;
 
   template <typename Rng, typename I, typename E>
   concept insertable_select_push =
@@ -45,6 +53,14 @@ namespace genex::actions::detail {
 
 namespace genex::actions {
   struct insert_fn : pipe_closure {
+    template <typename Rng, typename I, typename E>
+    requires detail::concepts::insertable_select_emplace_hint<Rng, I, E>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, I it, E elem) const -> Rng {
+      rng.emplace_hint(std::move(it), std::move(elem));
+      return std::forward<Rng>(rng);
+    }
+
     template <typename Rng, typename I, typename E>
     requires detail::concepts::insertable_select_emplace<Rng, I, E>
     GENEX_INLINE constexpr auto operator()(

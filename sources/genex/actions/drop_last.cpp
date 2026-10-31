@@ -23,7 +23,8 @@ namespace genex::actions {
   struct drop_last_fn : pipe_closure {
     template <typename Rng, typename Int>
     requires detail::concepts::droppable_last_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const -> Rng {
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, const Int n) const -> Rng {
       GENEX_ASSERT(n >= 0);
       const auto len = iterators::distance(
         iterators::begin(rng), iterators::end(rng));
@@ -38,7 +39,8 @@ namespace genex::actions {
 
     template <typename Int>
     requires std::integral<Int>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(const Int n) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      const Int n) const {
       GENEX_ASSERT(n >= 0);
       return meta::bind_back(drop_last_fn{}, n);
     }

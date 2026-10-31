@@ -16,14 +16,16 @@ namespace genex::actions::detail::concepts {
     std::invocable<F&, std::invoke_result_t<Proj&, range_reference_t<Rng>>> and
     std::assignable_from<
       range_reference_t<Rng>,
-      std::invoke_result_t<F&, std::invoke_result_t<Proj&, range_reference_t<Rng>>>>;
+      std::invoke_result_t<
+        F&, std::invoke_result_t<Proj&, range_reference_t<Rng>>>>;
 }
 
 namespace genex::actions {
   struct transform_fn : pipe_closure {
     template <typename Rng, typename F, typename Proj = meta::identity>
     requires detail::concepts::transformable_range<Rng, F, Proj>
-    constexpr auto operator()(Rng &&rng, F f, Proj proj = {}) const -> Rng {
+    constexpr auto operator()(
+      Rng &&rng, F f, Proj proj = {}) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       for (; first != last; ++first) {
         *first = meta::invoke(f, meta::invoke(proj, *first));
@@ -33,7 +35,8 @@ namespace genex::actions {
 
     template <typename F, typename Proj = meta::identity>
     requires closure_callable<F>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      F f, Proj proj = {}) const {
       return meta::bind_back(transform_fn{}, std::move(f), std::move(proj));
     }
   };

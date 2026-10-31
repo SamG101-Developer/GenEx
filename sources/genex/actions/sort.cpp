@@ -19,32 +19,41 @@ namespace genex::actions::detail::concepts {
 
 namespace genex::actions {
   struct sort_fn : pipe_closure {
-    template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
+    template <
+      typename Rng, typename Comp = operations::lt,
+      typename Proj = meta::identity>
     requires detail::concepts::sortable_range<Rng, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
       genex::sort(rng, std::move(comp), std::move(proj));
       return std::forward<Rng>(rng);
     }
 
     template <typename Comp = operations::lt, typename Proj = meta::identity>
     requires closure_callable<Comp>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Comp comp, Proj proj = {}) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Comp comp, Proj proj = {}) const {
       return meta::bind_back(sort_fn{}, std::move(comp), std::move(proj));
     }
   };
 
   struct stable_sort_fn : pipe_closure {
-    template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
+    template <
+      typename Rng, typename Comp = operations::lt,
+      typename Proj = meta::identity>
     requires detail::concepts::sortable_range<Rng, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
       genex::stable_sort(rng, std::move(comp), std::move(proj));
       return std::forward<Rng>(rng);
     }
 
     template <typename Comp = operations::lt, typename Proj = meta::identity>
     requires closure_callable<Comp>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Comp comp, Proj proj = {}) const {
-      return meta::bind_back(stable_sort_fn{}, std::move(comp), std::move(proj));
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Comp comp, Proj proj = {}) const {
+      return meta::bind_back(
+        stable_sort_fn{}, std::move(comp), std::move(proj));
     }
   };
 

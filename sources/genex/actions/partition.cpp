@@ -32,7 +32,8 @@ namespace genex::actions {
     requires closure_callable<Pred>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Pred pred, Proj proj = {}) const {
-      return meta::bind_back(partition_fn{}, std::move(pred), std::move(proj));
+      return meta::bind_back(
+        partition_fn{}, std::move(pred), std::move(proj));
     }
   };
 

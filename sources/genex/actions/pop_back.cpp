@@ -30,13 +30,15 @@ namespace genex::actions {
   struct pop_back_fn : pipe_closure {
     template <typename Rng>
     requires detail::concepts::back_poppable_select_pop_back<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const -> decltype(auto) {
       return rng.pop_back();
     }
 
     template <typename Rng>
     requires detail::concepts::back_poppable_select_erase<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const -> decltype(auto) {
       return actions::erase(rng, iterators::prev(iterators::end(rng)));
     }
   };

@@ -30,8 +30,10 @@ namespace genex::actions {
 
     template <typename Pred, typename Proj = meta::identity>
     requires closure_callable<Pred>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Pred pred, Proj proj = {}) const {
-      return meta::bind_back(remove_if_fn{}, std::move(pred), std::move(proj));
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Pred pred, Proj proj = {}) const {
+      return meta::bind_back(
+        remove_if_fn{}, std::move(pred), std::move(proj));
     }
   };
 

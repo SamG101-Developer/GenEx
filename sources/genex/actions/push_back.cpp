@@ -38,27 +38,31 @@ namespace genex::actions {
   struct push_back_fn : pipe_closure {
     template <typename Rng, typename E>
     requires detail::concepts::back_insertable_select_emplace_back<Rng, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> Rng {
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, E elem) const -> Rng {
       rng.emplace_back(std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename Rng, typename E>
     requires detail::concepts::back_insertable_select_push_back<Rng, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> Rng {
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, E elem) const -> Rng {
       rng.push_back(std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename Rng, typename E>
     requires detail::concepts::back_insertable_select_insert<Rng, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> Rng {
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, E elem) const -> Rng {
       actions::insert(rng, iterators::end(rng), std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename E>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(E elem) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      E elem) const {
       return meta::bind_back(push_back_fn{}, std::move(elem));
     }
   };
