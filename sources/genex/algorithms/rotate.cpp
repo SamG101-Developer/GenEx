@@ -136,14 +136,14 @@ namespace genex::algorithms::detail::impl {
         auto *const mid_ptr = std::to_address(mid);
 
         if (left <= right and left * sizeof(T) <= stack_buffer_bytes) {
-          std::byte stack[stack_buffer_bytes] [[indeterminate]];
+          std::byte stack [[indeterminate]][stack_buffer_bytes];
           copy_bytes_forwards(stack, begin_ptr, left * sizeof(T));
           copy_bytes_forwards(begin_ptr, mid_ptr, right * sizeof(T));
           copy_bytes_forwards(begin_ptr + right, stack, left * sizeof(T));
           return first + static_cast<iter_difference_t<I>>(right);
         }
         if (right < left and right * sizeof(T) <= stack_buffer_bytes) {
-          std::byte stack[stack_buffer_bytes] [[indeterminate]];
+          std::byte stack [[indeterminate]][stack_buffer_bytes];
           copy_bytes_forwards(stack, mid_ptr, right * sizeof(T));
           copy_bytes_backwards(begin_ptr + right, begin_ptr, left * sizeof(T));
           copy_bytes_forwards(begin_ptr, stack, right * sizeof(T));

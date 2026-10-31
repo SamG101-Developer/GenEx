@@ -146,10 +146,10 @@ export namespace genex::algorithms::detail {
       return;
     }
 
-    alignas(largest_cheap_element) std::byte input_storage[
-      largest_cheap_element * small_sort_limit] [[indeterminate]];
-    alignas(largest_cheap_element) std::byte scratch_storage[
-      largest_cheap_element * small_sort_limit] [[indeterminate]];
+    alignas(largest_cheap_element) std::byte input_storage [[indeterminate]][
+      largest_cheap_element * small_sort_limit];
+    alignas(largest_cheap_element) std::byte scratch_storage [[indeterminate]][
+      largest_cheap_element * small_sort_limit];
     auto *const input = std::launder(reinterpret_cast<T*>(input_storage));
     auto *const scratch = std::launder(reinterpret_cast<T*>(scratch_storage));
 
@@ -160,7 +160,8 @@ export namespace genex::algorithms::detail {
     const auto half = count / 2;
     auto presorted = std::ptrdiff_t{4};
     if (count >= 16) {
-      alignas(largest_cheap_element) std::byte runs_storage[largest_cheap_element * 8] [[indeterminate]];
+      alignas(largest_cheap_element) std::byte runs_storage [[indeterminate]][
+        largest_cheap_element * 8];
       auto *const runs = std::launder(reinterpret_cast<T*>(runs_storage));
       sort_four(input, runs, less);
       sort_four(input + 4, runs + 4, less);
