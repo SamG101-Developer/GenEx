@@ -31,40 +31,44 @@ namespace genex::algorithms::detail::impl {
   }
 
   template <typename I, typename E, typename Comp, typename Proj>
+  requires std::forward_iterator<I>
   constexpr auto do_lower_bound(
     I first, I last, const E &elem, Comp &comp, Proj &proj) -> I {
     using diff_t = iter_difference_t<I>;
-    if constexpr (std::random_access_iterator<I>) {
-      auto count = last - first;
-      if (count == 0) { return first; }
+    auto count = diff_t{0};
+    for (auto it = first; it != last; ++it) { ++count; }
 
-      // The answer steps along by arithmetic, not a branch. A binary search's
-      // branches go each way at random, so they'd be mispredicted half the time.
-      while (count > 1) {
-        const auto half = count / 2;
-        const auto go_right = lower_bound_goes_after(first + (half - 1), elem, comp, proj);
-        first += half & -static_cast<diff_t>(go_right);
-        count -= half;
+    while (count > 0) {
+      const auto half = count / 2;
+      auto mid = iterators::next(first, half);
+      if (lower_bound_goes_after(mid, elem, comp, proj)) {
+        first = std::move(++mid);
+        count -= half + 1;
       }
-      return first + static_cast<diff_t>(lower_bound_goes_after(first, elem, comp, proj));
+      else {
+        count = half;
+      }
     }
-    else {
-      auto count = diff_t{0};
-      for (auto it = first; it != last; ++it) { ++count; }
+    return first;
+  }
 
-      while (count > 0) {
-        const auto half = count / 2;
-        auto mid = iterators::next(first, half);
-        if (lower_bound_goes_after(mid, elem, comp, proj)) {
-          first = std::move(++mid);
-          count -= half + 1;
-        }
-        else {
-          count = half;
-        }
-      }
-      return first;
+  template <typename I, typename E, typename Comp, typename Proj>
+  requires std::random_access_iterator<I>
+  constexpr auto do_lower_bound(
+    I first, I last, const E &elem, Comp &comp, Proj &proj) -> I {
+    using diff_t = iter_difference_t<I>;
+    auto count = last - first;
+    if (count == 0) { return first; }
+
+    // The answer steps along by arithmetic, not a branch. A binary search's
+    // branches go each way at random, so they'd be mispredicted half the time.
+    while (count > 1) {
+      const auto half = count / 2;
+      const auto go_right = lower_bound_goes_after(first + (half - 1), elem, comp, proj);
+      first += half & -static_cast<diff_t>(go_right);
+      count -= half;
     }
+    return first + static_cast<diff_t>(lower_bound_goes_after(first, elem, comp, proj));
   }
 }
 
