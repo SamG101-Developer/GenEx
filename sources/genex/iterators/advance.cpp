@@ -17,18 +17,25 @@ namespace genex::iterators {
     requires detail::concepts::advancable_iters<I>
     GENEX_INLINE constexpr auto operator()(
       I &it, const iter_difference_t<I> n = 1) const -> I {
-      if constexpr (std::random_access_iterator<I>) {
-        it += n;
-      }
-      else {
-        if constexpr (std::bidirectional_iterator<I>) {
-          for (auto i = n; i < 0; ++i) { --it; }
-        }
-        else {
-          GENEX_ASSERT(n >= 0);
-        }
-        for (auto i = n; i > 0; --i) { ++it; }
-      }
+      GENEX_ASSERT(n >= 0);
+      for (auto i = n; i > 0; --i) { ++it; }
+      return it;
+    }
+
+    template <typename I>
+    requires std::bidirectional_iterator<I>
+    GENEX_INLINE constexpr auto operator()(
+      I &it, const iter_difference_t<I> n = 1) const -> I {
+      for (auto i = n; i < 0; ++i) { --it; }
+      for (auto i = n; i > 0; --i) { ++it; }
+      return it;
+    }
+
+    template <typename I>
+    requires std::random_access_iterator<I>
+    GENEX_INLINE constexpr auto operator()(
+      I &it, const iter_difference_t<I> n = 1) const -> I {
+      it += n;
       return it;
     }
   };

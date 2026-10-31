@@ -87,15 +87,20 @@ export namespace genex::algorithms::detail {
   }
 
   template <typename I, typename Pred>
+  requires std::forward_iterator<I>
   GENEX_INLINE constexpr auto partition_any(I first, I last, Pred &pred) -> I {
-    if constexpr (cheap_elements<I>) {
-      return partition_branchless(std::move(first), std::move(last), pred);
-    }
-    else if constexpr (std::bidirectional_iterator<I>) {
-      return partition_from_both_ends(std::move(first), std::move(last), pred);
-    }
-    else {
-      return partition_forward(std::move(first), std::move(last), pred);
-    }
+    return partition_forward(std::move(first), std::move(last), pred);
+  }
+
+  template <typename I, typename Pred>
+  requires std::bidirectional_iterator<I>
+  GENEX_INLINE constexpr auto partition_any(I first, I last, Pred &pred) -> I {
+    return partition_from_both_ends(std::move(first), std::move(last), pred);
+  }
+
+  template <typename I, typename Pred>
+  requires cheap_elements<I>
+  GENEX_INLINE constexpr auto partition_any(I first, I last, Pred &pred) -> I {
+    return partition_branchless(std::move(first), std::move(last), pred);
   }
 }

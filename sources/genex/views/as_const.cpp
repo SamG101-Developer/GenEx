@@ -77,12 +77,16 @@ namespace genex::views::detail::impl {
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto end() const {
-      if constexpr (std::same_as<I, S>) { return as_const_iterator<I, S>(st); }
-      else { return as_const_sentinel<S>{st}; }
+      return as_const_sentinel<S>{st};
+    }
+
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const
+    requires std::same_as<I, S> {
+      return as_const_iterator<I, S>(st);
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto size() const
-      requires requires { iterators::distance(it, st); } {
+    requires requires { iterators::distance(it, st); } {
       return iterators::distance(it, st);
     }
   };

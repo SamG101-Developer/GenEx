@@ -11,6 +11,27 @@ namespace genex::iterators::detail::concepts {
   concept nextable_iters =
     std::input_or_output_iterator<I> and
     std::sentinel_for<S, I>;
+
+  template <typename I, typename S>
+  concept boundedly_nextable_iters =
+    nextable_iters<I, S> and
+    std::copyable<I>;
+
+  template <typename I, typename S>
+  concept commonly_nextable_iters =
+    boundedly_nextable_iters<I, S> and
+    std::same_as<I, S>;
+
+  template <typename I, typename S>
+  concept randomly_nextable_iters =
+    boundedly_nextable_iters<I, S> and
+    std::sized_sentinel_for<S, I> and
+    std::random_access_iterator<I>;
+
+  template <typename I, typename S>
+  concept sized_nextable_iters =
+    randomly_nextable_iters<I, S> and
+    (not std::same_as<I, S>);
 }
 
 namespace genex::iterators {
@@ -23,37 +44,42 @@ namespace genex::iterators {
     }
 
     template <typename I, typename S>
-    requires detail::concepts::nextable_iters<I, S> and std::copyable<I>
+    requires detail::concepts::boundedly_nextable_iters<I, S>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I it, const iter_difference_t<I> n, const S bound) const -> I {
       if (n <= 0) { return it; }
-      if constexpr (
-        std::sized_sentinel_for<S, I> and std::random_access_iterator<I>) {
-        if (n < bound - it) [[likely]] { return it + n; }
-        return it + (bound - it);
+      for (auto i = iter_difference_t<I>{0}; i < n and it != bound; ++i) {
+        ++it;
       }
-      else {
-        for (auto i = iter_difference_t<I>{0}; i < n and it != bound; ++i) {
-          ++it;
-        }
-        return it;
-      }
+      return it;
     }
 
     template <typename I, typename S>
-    requires detail::concepts::nextable_iters<I, S> and std::copyable<I>
+    requires detail::concepts::randomly_nextable_iters<I, S>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I it, const iter_difference_t<I> n, const S bound) const -> I {
+      if (n <= 0) { return it; }
+      if (n < bound - it) [[likely]] { return it + n; }
+      return it + (bound - it);
+    }
+
+    template <typename I, typename S>
+    requires detail::concepts::boundedly_nextable_iters<I, S>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(I it, S bound) const -> I {
-      if constexpr (std::same_as<I, S>) {
-        return bound;
-      }
-      else if constexpr (
-        std::sized_sentinel_for<S, I> and std::random_access_iterator<I>) {
-        return it + (bound - it);
-      }
-      else {
-        for (; it != bound; ++it) {}
-        return it;
-      }
+      for (; it != bound; ++it) {}
+      return it;
+    }
+
+    template <typename I, typename S>
+    requires detail::concepts::commonly_nextable_iters<I, S>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I, S bound) const -> I {
+      return bound;
+    }
+
+    template <typename I, typename S>
+    requires detail::concepts::sized_nextable_iters<I, S>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I it, S bound) const -> I {
+      return it + (bound - it);
     }
   };
 

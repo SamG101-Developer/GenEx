@@ -26,16 +26,19 @@ namespace genex::iterators {
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I it, const iter_difference_t<I> n, const I bound) const -> I {
       if (n <= 0) { return it; }
-      if constexpr (std::random_access_iterator<I>) {
-        const auto remaining = it - bound;
-        return it - (n < remaining ? n : remaining);
+      for (auto i = iter_difference_t<I>{0}; i < n and it != bound; ++i) {
+        --it;
       }
-      else {
-        for (auto i = iter_difference_t<I>{0}; i < n and it != bound; ++i) {
-          --it;
-        }
-        return it;
-      }
+      return it;
+    }
+
+    template <typename I>
+    requires std::random_access_iterator<I>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I it, const iter_difference_t<I> n, const I bound) const -> I {
+      if (n <= 0) { return it; }
+      const auto remaining = it - bound;
+      return it - (n < remaining ? n : remaining);
     }
   };
 

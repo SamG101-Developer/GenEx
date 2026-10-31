@@ -94,12 +94,12 @@ namespace genex::views::detail::impl {
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto end() const {
-      if constexpr (std::same_as<I, S>) {
-        return enumerate_iterator<I, S>{st};
-      }
-      else {
-        return enumerate_sentinel<S>{st};
-      }
+      return enumerate_sentinel<S>{st};
+    }
+
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const
+      requires std::same_as<I, S> {
+      return enumerate_iterator<I, S>{st};
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto size() const

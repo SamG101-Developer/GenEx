@@ -13,6 +13,11 @@ namespace genex::iterators::detail::concepts {
     std::sentinel_for<S, I> and
     (std::same_as<I, S> or std::sized_sentinel_for<S, I>);
 
+  template <typename I, typename S>
+  concept sized_distancable_iters =
+    distancable_iters<I, S> and
+    std::sized_sentinel_for<S, I>;
+
   template <typename Rng>
   concept distancable_range =
     input_range<Rng> and
@@ -25,14 +30,16 @@ namespace genex::iterators {
     requires detail::concepts::distancable_iters<I, S>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last) const -> std::ptrdiff_t {
-      if constexpr (std::sized_sentinel_for<S, I>) {
-        return static_cast<std::ptrdiff_t>(last - first);
-      }
-      else {
-        auto count = std::ptrdiff_t{0};
-        for (; first != last; ++first) { ++count; }
-        return count;
-      }
+      auto count = std::ptrdiff_t{0};
+      for (; first != last; ++first) { ++count; }
+      return count;
+    }
+
+    template <typename I, typename S>
+    requires detail::concepts::sized_distancable_iters<I, S>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last) const -> std::ptrdiff_t {
+      return static_cast<std::ptrdiff_t>(last - first);
     }
 
     template <typename Rng>

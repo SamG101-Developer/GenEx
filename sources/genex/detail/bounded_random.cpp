@@ -12,31 +12,34 @@ export namespace genex::detail {
   /// perhaps a redraw.
   template <typename G>
   class bounded_random {
-    static constexpr std::uint64_t range =
-      static_cast<std::uint64_t>(G::max()) - static_cast<std::uint64_t>(G::min());
+    static constexpr auto range =
+      static_cast<std::uint64_t>(G::max()) -
+      static_cast<std::uint64_t>(G::min());
 
     G &m_generator;
     std::uint32_t m_spare = 0;
     bool m_has_spare = false;
 
     GENEX_INLINE constexpr auto draw() -> std::uint64_t {
-      return static_cast<std::uint64_t>(m_generator()) - static_cast<std::uint64_t>(G::min());
+      return
+        static_cast<std::uint64_t>(m_generator()) -
+        static_cast<std::uint64_t>(G::min());
     }
 
     GENEX_INLINE constexpr auto draw_32() -> std::uint32_t {
-      if constexpr (range == std::numeric_limits<std::uint32_t>::max()) {
-        return static_cast<std::uint32_t>(draw());
+      if (m_has_spare) {
+        m_has_spare = false;
+        return m_spare;
       }
-      else {
-        if (m_has_spare) {
-          m_has_spare = false;
-          return m_spare;
-        }
-        const auto value = draw();
-        m_spare = static_cast<std::uint32_t>(value);
-        m_has_spare = true;
-        return static_cast<std::uint32_t>(value >> 32);
-      }
+      const auto value = draw();
+      m_spare = static_cast<std::uint32_t>(value);
+      m_has_spare = true;
+      return static_cast<std::uint32_t>(value >> 32);
+    }
+
+    GENEX_INLINE constexpr auto draw_32() -> std::uint32_t
+    requires (range == std::numeric_limits<std::uint32_t>::max()) {
+      return static_cast<std::uint32_t>(draw());
     }
 
     constexpr auto below_by_multiply(const std::uint32_t n) -> std::uint32_t {
