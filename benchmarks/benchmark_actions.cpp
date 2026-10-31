@@ -56,12 +56,15 @@ namespace {
   }
 }
 
-// Each iteration acts on a fresh copy, as actions change what they're given. Both libraries pay for that equally.
+// Each iteration acts on a fresh copy, as actions change what they're given. It reuses one buffer, as otherwise the time
+// spent in malloc and free swamps the action, and depends on what else happens to be on the heap: a 4000 byte block is
+// past glibc's fast path, which made unique look 60% slower depending only on which other benchmarks were registered.
 #define GENEX_BENCH_ACTION(Name, Data, RangesAction, GenexAction)  \
   static void BM_StdRanges_Action##Name(benchmark::State &state) { \
     const auto data = Data();                                      \
+    auto copy = data;                                              \
     for (auto _ : state) {                                         \
-      auto copy = data;                                            \
+      copy.assign(data.begin(), data.end());                       \
       copy |= ranges::actions::RangesAction;                       \
       benchmark::DoNotOptimize(copy);                              \
     }                                                              \
@@ -69,8 +72,9 @@ namespace {
   BENCHMARK(BM_StdRanges_Action##Name);                            \
   static void BM_Genex_V2_Action##Name(benchmark::State &state) {  \
     const auto data = Data();                                      \
+    auto copy = data;                                              \
     for (auto _ : state) {                                         \
-      auto copy = data;                                            \
+      copy.assign(data.begin(), data.end());                       \
       copy |= genex::actions::GenexAction;                         \
       benchmark::DoNotOptimize(copy);                              \
     }                                                              \
@@ -93,8 +97,10 @@ GENEX_BENCH_ACTION(Unique, runs, unique, unique());
 static void BM_StdRanges_ActionConcat(benchmark::State &state) {
   const auto lhs = ascending();
   const auto rhs = ascending();
+  auto copy = lhs;
+  copy.reserve(lhs.size() + rhs.size());
   for (auto _ : state) {
-    auto copy = lhs;
+    copy.assign(lhs.begin(), lhs.end());
     copy |= ranges::actions::push_back(rhs);
     benchmark::DoNotOptimize(copy);
   }
@@ -105,8 +111,10 @@ BENCHMARK(BM_StdRanges_ActionConcat);
 static void BM_Genex_V2_ActionConcat(benchmark::State &state) {
   const auto lhs = ascending();
   const auto rhs = ascending();
+  auto copy = lhs;
+  copy.reserve(lhs.size() + rhs.size());
   for (auto _ : state) {
-    auto copy = lhs;
+    copy.assign(lhs.begin(), lhs.end());
     copy |= genex::actions::concat(rhs);
     benchmark::DoNotOptimize(copy);
   }

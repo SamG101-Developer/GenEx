@@ -105,6 +105,13 @@ TEST(GenexIteratorOps, IotaStepsPastTheEndStillEnd) {
   EXPECT_EQ(count, 3);
 }
 
+TEST(GenexIteratorOps, IotaThatCannotReachItsEndIsEmpty) {
+  for (auto rng : {genex::views::iota(5, 0), genex::views::iota(0, 0), genex::views::iota(0, 5, 0), genex::views::iota(5, 0, -1)}) {
+    EXPECT_EQ(rng.size(), 0uz);
+    EXPECT_EQ(rng.begin(), rng.end());
+  }
+}
+
 TEST(GenexIteratorOps, IotaDecrements) {
   auto rng = genex::views::iota(0, 10, 2);
   auto it = rng.begin() + 2;

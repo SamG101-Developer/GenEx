@@ -31,9 +31,8 @@ namespace genex::views::detail::impl {
   struct take_while_iterator : genex::detail::iterator_ops<take_while_iterator<I, S, Pred, Proj>> {
     I it;
     S st;
-    GENEX_NO_UNIQUE_ADDRESS meta::box<Pred> pred;
-    GENEX_NO_UNIQUE_ADDRESS meta::box<Proj> proj;
-    bool done = true;
+    GENEX_NO_UNIQUE_ADDRESS mutable meta::box<Pred> pred;
+    GENEX_NO_UNIQUE_ADDRESS mutable meta::box<Proj> proj;
 
     using value_type = iter_value_t<I>;
     using reference = iter_reference_t<I>;
@@ -46,17 +45,14 @@ namespace genex::views::detail::impl {
     GENEX_INLINE constexpr take_while_iterator(I it, S st, Pred pred, Proj proj) :
       it(std::move(it)), st(std::move(st)),
       pred(std::move(pred)), proj(std::move(proj)) {
-      refresh_done();
     }
 
     GENEX_INLINE constexpr auto next() -> void {
       ++it;
-      refresh_done();
     }
 
     GENEX_INLINE constexpr auto prev() -> void requires std::bidirectional_iterator<decltype(it)> {
       --it;
-      refresh_done();
     }
 
     GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
@@ -65,16 +61,11 @@ namespace genex::views::detail::impl {
 
     GENEX_INLINE friend constexpr auto operator==(
       const take_while_iterator &self, const take_while_iterator &that) -> bool {
-      return self.done == that.done and (self.done or self.it == that.it);
+      return self.it == that.it;
     }
 
     GENEX_INLINE friend constexpr auto operator==(const take_while_iterator &self, take_while_sentinel) -> bool {
-      return self.done;
-    }
-
-  private:
-    GENEX_INLINE constexpr auto refresh_done() -> void {
-      done = it == st or not meta::invoke(*pred, meta::invoke(*proj, *it));
+      return self.it == self.st or not meta::invoke(*self.pred, meta::invoke(*self.proj, *self.it));
     }
   };
 
@@ -98,6 +89,18 @@ namespace genex::views::detail::impl {
 
     [[nodiscard]] GENEX_INLINE constexpr auto end() const {
       return take_while_sentinel();
+    }
+
+    // Finding where to stop first means the rest can be copied in one go, with each element only being tested once.
+    template <typename Out>
+      requires std::derived_from<typename std::iterator_traits<I>::iterator_category, std::forward_iterator_tag>
+      and requires(Out &out, I i) { out.insert(out.end(), i, i); }
+    constexpr auto append_to(Out &out) const -> void {
+      auto stop = it;
+      auto keep_taking = pred;
+      auto project = proj;
+      while (stop != st and meta::invoke(keep_taking, meta::invoke(project, *stop))) { ++stop; }
+      out.insert(out.end(), it, stop);
     }
   };
 }

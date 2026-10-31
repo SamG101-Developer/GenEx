@@ -26,6 +26,7 @@ import genex.views.slide;
 import genex.views.split;
 import genex.views.stride;
 import genex.views.take;
+import genex.views.take_while;
 import genex.views.transform;
 import genex.views.zip;
 
@@ -205,4 +206,50 @@ TEST(GenexToRoutes, NonTrivialElements) {
   auto vec = std::vector<std::string>{"a", "b"};
   const auto out = vec | genex::views::intersperse(std::string("-")) | genex::to<std::vector>();
   EXPECT_EQ(out, (std::vector<std::string>{"a", "-", "b"}));
+}
+
+// The predicate runs at the end test now, so the iterator has to see each element exactly as a filter would.
+TEST(GenexTakeWhile, StopsAtTheFirstFailure) {
+  auto vec = std::vector{1, 2, 3, 1};
+  const auto out = vec | genex::views::take_while([](const int x) { return x < 3; }) | genex::to<std::vector>();
+  EXPECT_EQ(out, (std::vector{1, 2}));
+}
+
+TEST(GenexTakeWhile, StatefulPredicate) {
+  auto vec = std::vector{1, 2, 3, 4};
+  auto rng = vec | genex::views::take_while([calls = 0](int) mutable { return ++calls < 100; });
+  auto count = 0;
+  for (auto first = rng.begin(); first != rng.end(); ++first) { ++count; }
+  EXPECT_EQ(count, 4);
+}
+
+TEST(GenexTakeWhile, EmptyAndAllPass) {
+  auto empty = std::vector<int>{};
+  EXPECT_TRUE((empty | genex::views::take_while([](int) { return true; }) | genex::to<std::vector>()).empty());
+
+  auto vec = std::vector{1, 2};
+  EXPECT_EQ(vec | genex::views::take_while([](int) { return true; }) | genex::to<std::vector>(), vec);
+}
+
+TEST(GenexTakeWhile, TestsEachElementOnceWhenCollecting) {
+  auto vec = std::vector{1, 2, 3, 4};
+  auto calls = 0;
+  const auto out = vec
+    | genex::views::take_while([&calls](const int x) {
+      ++calls;
+      return x < 3;
+    })
+    | genex::to<std::vector>();
+
+  EXPECT_EQ(out, (std::vector{1, 2}));
+  EXPECT_EQ(calls, 3);
+}
+
+TEST(GenexTakeWhile, OverATransform) {
+  auto vec = std::vector{1, 2, 3, 4, 5, 6};
+  const auto out = vec
+    | genex::views::transform(twice)
+    | genex::views::take_while([](const int x) { return x < 7; })
+    | genex::to<std::vector>();
+  EXPECT_EQ(out, (std::vector{2, 4, 6}));
 }
