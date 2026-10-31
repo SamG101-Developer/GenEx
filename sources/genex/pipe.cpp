@@ -126,7 +126,21 @@ namespace genex {
     requires (not pipeable<T>)
     and (not detail::needs_owner<T, F>)
     and std::invocable<F, T>
-  GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) -> decltype(auto) {
+    and std::is_object_v<std::invoke_result_t<F, T>>
+  [[nodiscard]] GENEX_INLINE constexpr auto operator|(
+    T &&lhs, F &&rhs) -> decltype(auto) {
+    return meta::invoke(
+      std::forward<F>(rhs), std::forward<T>(lhs));
+  }
+
+  // Usage: vector | genex::actions::___
+  export template <typename T, pipeable F>
+    requires (not pipeable<T>)
+    and (not detail::needs_owner<T, F>)
+    and std::invocable<F, T>
+    and (not std::is_object_v<std::invoke_result_t<F, T>>)
+  GENEX_INLINE constexpr auto operator|(
+    T &&lhs, F &&rhs) -> decltype(auto) {
     return meta::invoke(
       std::forward<F>(rhs), std::forward<T>(lhs));
   }
@@ -136,7 +150,8 @@ namespace genex {
     requires (not pipeable<T>)
     and detail::needs_owner<T, F>
     and (not detail::is_owning_view_v<T>)
-  GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) {
+  [[nodiscard]] GENEX_INLINE constexpr auto operator|(
+    T &&lhs, F &&rhs) {
     return detail::owning_view<T, std::decay_t<F>>(
       std::forward<T>(lhs), std::forward<F>(rhs));
   }
@@ -146,7 +161,8 @@ namespace genex {
     requires (not pipeable<T>)
     and detail::needs_owner<T, F>
     and detail::is_owning_view_v<T>
-  GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) {
+  [[nodiscard]] GENEX_INLINE constexpr auto operator|(
+    T &&lhs, F &&rhs) {
     using composed_t = detail::composed_adaptor<typename T::adaptor_type, std::decay_t<F>>;
     auto composed = composed_t{{}, std::move(lhs).adaptor(), std::forward<F>(rhs)};
     return detail::owning_view<typename T::base_type, composed_t>(
@@ -155,7 +171,8 @@ namespace genex {
 
   // Usage: auto step = genex::views::___ | genex::views::___
   export template <pipeable T, pipeable F>
-  GENEX_INLINE constexpr auto operator|(T &&lhs, F &&rhs) {
+  [[nodiscard]] GENEX_INLINE constexpr auto operator|(
+    T &&lhs, F &&rhs) {
     return detail::composed_adaptor<std::decay_t<T>, std::decay_t<F>>{
       {}, std::forward<T>(lhs), std::forward<F>(rhs)};
   }

@@ -107,7 +107,7 @@ namespace genex::views {
     template <
       typename I, typename S, typename E, typename Proj = meta::identity>
     requires detail::concepts::removable_iters<I, S, E, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, E value, Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(remove_view, I, S, E, Proj) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(E) and SAFE_MOVE(Proj)) {
@@ -117,7 +117,7 @@ namespace genex::views {
 
     template <typename Rng, typename E, typename Proj = meta::identity>
     requires detail::concepts::removable_range<Rng, E, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, E value, Proj proj = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(remove_view, iterator_t<Rng>, sentinel_t<Rng>, E, Proj) and
@@ -129,7 +129,7 @@ namespace genex::views {
 
     template <typename E, typename Proj = meta::identity>
     requires closure_value<E>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       E &&value, Proj proj = {}) const noexcept(
       SAFE_CTOR(remove_fn) and SAFE_CTOR(std::decay_t<E>, E) and SAFE_MOVE(Proj)) {
       return meta::bind_back(remove_fn{}, std::forward<E>(value), std::move(proj));

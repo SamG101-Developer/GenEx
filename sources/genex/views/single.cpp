@@ -11,7 +11,8 @@ namespace genex::views {
   struct single_fn : pipe_closure {
     template <typename T>
     requires std::copyable<T>
-    GENEX_INLINE constexpr auto operator()(T value) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      T value) const noexcept(
       SAFE_CALL(decltype(repeat), T, std::ptrdiff_t) and SAFE_MOVE(T)) {
       return repeat(std::move(value), std::ptrdiff_t{1});
     }

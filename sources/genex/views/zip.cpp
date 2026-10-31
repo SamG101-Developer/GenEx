@@ -153,7 +153,7 @@ namespace genex::views {
   struct zip_fn : pipe_closure {
     template <typename... Is, typename... Ss>
     requires detail::concepts::zippable_iters<std::tuple<Is...>, std::tuple<Ss...>>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       std::tuple<Is...> first, std::tuple<Ss...> last) const noexcept(
       SAFE_CTOR(detail::impl::zip_view<genex::subrange<Is, Ss>...>, std::tuple<Is...>, std::tuple<Ss...>) and
       SAFE_MOVE(std::tuple<Is...>) and SAFE_MOVE(std::tuple<Ss...>)) {
@@ -162,7 +162,7 @@ namespace genex::views {
 
     template <typename... Rngs>
     requires (detail::concepts::zippable_range<Rngs...> and sizeof...(Rngs) > 1)
-    GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const noexcept(
       (SAFE_CALL(decltype(iterators::begin), Rngs&) and ...) and
       (SAFE_CALL(decltype(iterators::end), Rngs&) and ...) and
       SAFE_MOVE(std::tuple<iterator_t<Rngs>...>) and SAFE_MOVE(std::tuple<sentinel_t<Rngs>...>)) {
@@ -173,7 +173,7 @@ namespace genex::views {
 
     template <typename Rng2>
     requires input_range<Rng2>
-    GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
       return genex::detail::bind_range_back(zip_fn{}, std::forward<Rng2>(rng2));
     }
   };

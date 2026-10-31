@@ -26,7 +26,7 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS F f;
 
     template <typename Tup>
-    GENEX_INLINE constexpr auto operator()(Tup &&tup) const -> decltype(auto) {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Tup &&tup) const -> decltype(auto) {
       return std::apply(f, std::forward<Tup>(tup));
     }
   };
@@ -36,7 +36,7 @@ namespace genex::views {
   struct zip_with_fn : pipe_closure {
     template <typename Rng1, typename Rng2, typename F>
     requires detail::concepts::zip_withable_range<Rng1, Rng2, F>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng1 &&rng1, Rng2 &&rng2, F f) const {
       return transform(
         zip(rng1, rng2),
@@ -45,7 +45,7 @@ namespace genex::views {
 
     template <typename Rng2, typename F>
     requires (input_range<Rng2> and not range<F>)
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng2 &&rng2, F f) const {
       return genex::detail::bind_range_back(
         zip_with_fn{}, std::forward<Rng2>(rng2), std::move(f));

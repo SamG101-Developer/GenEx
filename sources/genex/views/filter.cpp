@@ -107,7 +107,7 @@ namespace genex::views {
     template <
       typename I, typename S, typename Pred, typename Proj = meta::identity>
     requires detail::concepts::filterable_iters<I, S, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, Pred pred, Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(filter_view, I, S, Pred, Proj) and
       SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
@@ -117,7 +117,7 @@ namespace genex::views {
 
     template <typename Rng, typename Pred, typename Proj = meta::identity>
     requires detail::concepts::filterable_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, Pred pred, Proj proj = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(filter_view, iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj) and
@@ -129,7 +129,7 @@ namespace genex::views {
 
     template <typename Pred, typename Proj = meta::identity>
     requires closure_callable<Pred>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Pred pred, Proj proj = {}) const noexcept(
       SAFE_CTOR(filter_fn) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
       return meta::bind_back(

@@ -108,7 +108,7 @@ namespace genex::views {
       typename I, typename S, typename Comp = operations::eq,
       typename Proj = meta::identity>
     requires detail::concepts::uniqueable_iters<I, S, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, Comp comp = {}, Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(unique_view, I, S, Comp, Proj) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {
@@ -120,7 +120,7 @@ namespace genex::views {
       typename Rng, typename Comp = operations::eq,
       typename Proj = meta::identity>
     requires detail::concepts::uniqueable_range<Rng, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, Comp comp = {}, Proj proj = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(unique_view, iterator_t<Rng>, sentinel_t<Rng>, Comp, Proj) and
@@ -132,7 +132,7 @@ namespace genex::views {
 
     template <typename Comp = operations::eq, typename Proj = meta::identity>
     requires closure_callable<Comp>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Comp comp, Proj proj = {}) const noexcept(
       SAFE_CTOR(unique_fn) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {
       return meta::bind_back(unique_fn{}, std::move(comp), std::move(proj));

@@ -129,7 +129,8 @@ namespace genex::views {
   struct scan_fn : pipe_closure {
     template <typename I, typename S, typename Init, typename F = std::plus<>>
     requires detail::concepts::scannable_iters<I, S, F, Init>
-    GENEX_INLINE constexpr auto operator()(I first, S last, Init init, F op = {}) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last, Init init, F op = {}) const noexcept(
       SAFE_CTOR(
         detail::impl::scan_view<I, S, F, detail::concepts::scan_acc_t<I, F, Init>>, I, S, F,
         std::optional<detail::concepts::scan_acc_t<I, F, Init>>) and
@@ -142,7 +143,8 @@ namespace genex::views {
 
     template <typename Rng, typename Init, typename F = std::plus<>>
     requires detail::concepts::scannable_range<Rng, F, Init>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Init init, F op = {}) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Init init, F op = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(
         detail::impl::scan_view<
@@ -159,7 +161,8 @@ namespace genex::views {
 
     template <typename Init, typename F = std::plus<>>
     requires closure_value<Init>
-    GENEX_INLINE constexpr auto operator()(Init &&init, F op = {}) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Init &&init, F op = {}) const noexcept(
       SAFE_CTOR(scan_fn) and SAFE_CTOR(std::decay_t<Init>, Init) and SAFE_MOVE(F)) {
       return meta::bind_back(scan_fn{}, std::forward<Init>(init), std::move(op));
     }
@@ -168,7 +171,8 @@ namespace genex::views {
   struct partial_sum_fn : pipe_closure {
     template <typename I, typename S, typename F = std::plus<>>
     requires detail::concepts::summable_iters<I, S, F>
-    GENEX_INLINE constexpr auto operator()(I first, S last, F op = {}) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last, F op = {}) const noexcept(
       SAFE_CTOR(
         detail::impl::scan_view<I, S, F, iter_value_t<I>>, I, S, F, std::optional<iter_value_t<I>>) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(F)) {
@@ -178,7 +182,8 @@ namespace genex::views {
 
     template <typename Rng, typename F = std::plus<>>
     requires detail::concepts::summable_range<Rng, F>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, F op = {}) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, F op = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(
         detail::impl::scan_view<iterator_t<Rng>, sentinel_t<Rng>, F, range_value_t<Rng>>,
@@ -191,7 +196,8 @@ namespace genex::views {
 
     template <typename F>
     requires closure_callable<F>
-    GENEX_INLINE constexpr auto operator()(F op) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      F op) const noexcept(
       SAFE_CTOR(partial_sum_fn) and SAFE_MOVE(F)) {
       return meta::bind_back(partial_sum_fn{}, std::move(op));
     }

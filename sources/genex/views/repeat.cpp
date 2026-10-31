@@ -81,7 +81,7 @@ namespace genex::views {
   struct repeat_fn : pipe_closure {
     template <typename T, typename Int>
     requires std::copyable<T> and std::integral<Int>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       T value, const Int count) const noexcept(
       SAFE_CTOR(detail::impl::repeat_view<T, true>, T, std::ptrdiff_t) and
       SAFE_MOVE(T)) {
@@ -92,7 +92,7 @@ namespace genex::views {
 
     template <typename T>
     requires std::copyable<T>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       T value) const noexcept(
       SAFE_CTOR(detail::impl::repeat_view<T, false>, T, std::ptrdiff_t) and
       SAFE_MOVE(T)) {

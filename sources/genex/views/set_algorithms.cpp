@@ -242,8 +242,9 @@ namespace genex::views {
       typename Proj2 = meta::identity>
     requires detail::concepts::set_algorithmicable_iters<
       I1, S1, I2, S2, Comp, Proj1, Proj2>
-    GENEX_INLINE constexpr auto operator()(I1 first1, S1 last1, I2 first2, S2 last2, Comp comp = {}, Proj1 proj1 = {},
-      Proj2 proj2 = {}) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I1 first1, S1 last1, I2 first2, S2 last2, Comp comp = {},
+      Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
       SAFE_CTOR(
         detail::impl::set_algorithm_view<Op, I1, S1, I2, S2, Comp, Proj1, Proj2>,
         I1, S1, I2, S2, Comp, Proj1, Proj2) and
@@ -259,7 +260,7 @@ namespace genex::views {
       typename Proj1 = meta::identity, typename Proj2 = meta::identity>
     requires detail::concepts::set_algorithmicable_range<
       Rng1, Rng2, Comp, Proj1, Proj2>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng1 &&rng1, Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {},
       Proj2 proj2 = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng1&) and
@@ -284,7 +285,7 @@ namespace genex::views {
       typename Rng2, typename Comp = operations::lt,
       typename Proj1 = meta::identity, typename Proj2 =meta::identity>
     requires (range<Rng2> and not range<Comp>)
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {},
       Proj2 proj2 = {}) const {
       return genex::detail::bind_range_back(

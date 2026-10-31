@@ -66,7 +66,8 @@ namespace genex::views {
   struct divide_fn : pipe_closure {
     template <typename I, typename S>
     requires detail::concepts::divisible_iters<N, I, S>
-    GENEX_INLINE constexpr auto operator()(I first, S last) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last) const {
       const auto total = static_cast<iter_difference_t<I>>(
         iterators::distance(first, last));
       return detail::impl::divide_impl<N, I, S>(std::move(first), total);
@@ -74,7 +75,8 @@ namespace genex::views {
 
     template <typename Rng>
     requires detail::concepts::divisible_range<N, Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const {
       auto [first, last] = iterators::iter_pair(rng);
       const auto total = [&] -> range_difference_t<Rng> {
         if constexpr (has_member_size<Rng>) { return static_cast<range_difference_t<Rng>>(rng.size()); }
@@ -85,7 +87,8 @@ namespace genex::views {
 
     template <typename Rng>
     requires (not non_dangling_range<Rng>) and detail::concepts::divisible_range<N, Rng&>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const {
       using part_t = std::vector<range_value_t<Rng>>;
       auto parts = (*this)(rng);
       return [&]<std::size_t... Is>(std::index_sequence<Is...>) -> std::array<part_t, N> {

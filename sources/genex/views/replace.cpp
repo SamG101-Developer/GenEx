@@ -96,32 +96,43 @@ namespace genex::views::detail::impl {
 
 namespace genex::views {
   struct replace_fn : pipe_closure {
-    template <typename I, typename S, typename Old, typename New, typename Proj = meta::identity>
+    template <
+      typename I, typename S, typename Old, typename New,
+      typename Proj = meta::identity>
     requires detail::concepts::replaceable_iters<I, S, Old, New, Proj>
-    GENEX_INLINE constexpr auto operator()(I first, S last, Old old_value, New new_value,
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last, Old old_value, New new_value,
       Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(replace_view, I, S, Old, New, Proj) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Old) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
       return detail::impl::replace_view(
-        std::move(first), std::move(last), std::move(old_value), std::move(new_value), std::move(proj));
+        std::move(first), std::move(last),
+        std::move(old_value), std::move(new_value), std::move(proj));
     }
 
-    template <typename Rng, typename Old, typename New, typename Proj = meta::identity>
+    template <
+      typename Rng, typename Old, typename New,
+      typename Proj = meta::identity>
     requires detail::concepts::replaceable_range<Rng, Old, New, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Old old_value, New new_value, Proj proj = {}) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Old old_value, New new_value, Proj proj = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(replace_view, iterator_t<Rng>, sentinel_t<Rng>, Old, New, Proj) and
       SAFE_MOVE(Old) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::replace_view(
-        std::move(first), std::move(last), std::move(old_value), std::move(new_value), std::move(proj));
+        std::move(first), std::move(last),
+        std::move(old_value), std::move(new_value), std::move(proj));
     }
 
     template <typename Old, typename New, typename Proj = meta::identity>
     requires closure_value<Old>
-    GENEX_INLINE constexpr auto operator()(Old &&old_value, New new_value, Proj proj = {}) const noexcept(
-      SAFE_CTOR(replace_fn) and SAFE_CTOR(std::decay_t<Old>, Old) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
-      return meta::bind_back(replace_fn{}, std::forward<Old>(old_value), std::move(new_value), std::move(proj));
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Old &&old_value, New new_value, Proj proj = {}) const noexcept(
+      SAFE_CTOR(replace_fn) and SAFE_CTOR(std::decay_t<Old>, Old) and
+      SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
+      return meta::bind_back(
+        replace_fn{}, std::forward<Old>(old_value), std::move(new_value), std::move(proj));
     }
   };
 

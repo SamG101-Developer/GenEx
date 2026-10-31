@@ -116,7 +116,7 @@ namespace genex::views {
   struct split_fn : pipe_closure {
     template <typename I, typename S, typename E>
     requires detail::concepts::splittable_iters<I, S, E>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, E elem) const noexcept(
       SAFE_IMPL_CTOR(split_view, I, S, E) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(E)) {
@@ -126,7 +126,7 @@ namespace genex::views {
 
     template <typename Rng, typename E>
     requires detail::concepts::splittable_range<Rng, E>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, E elem) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(split_view, iterator_t<Rng>, sentinel_t<Rng>, E) and
@@ -137,7 +137,8 @@ namespace genex::views {
     }
 
     template <typename E>
-    GENEX_INLINE constexpr auto operator()(E elem) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      E elem) const noexcept(
       SAFE_CTOR(split_fn) and SAFE_MOVE(E)) {
       return meta::bind_back(split_fn{}, std::move(elem));
     }

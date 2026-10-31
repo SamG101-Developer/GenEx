@@ -96,7 +96,7 @@ namespace genex::views {
       typename I, typename S, typename Pred, typename New,
       typename Proj = meta::identity>
     requires detail::concepts::replaceable_if_iters<I, S, Pred, New, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, Pred pred, New new_value, Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(replace_view, I, S, Pred, New, Proj) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred) and
@@ -109,7 +109,7 @@ namespace genex::views {
     template <
       typename Rng, typename Pred, typename New, typename Proj = meta::identity>
     requires detail::concepts::replaceable_if_range<Rng, Pred, New, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, Pred pred, New new_value, Proj proj = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(replace_view, iterator_t<Rng>, sentinel_t<Rng>, Pred, New, Proj) and
@@ -122,7 +122,7 @@ namespace genex::views {
 
     template <typename Pred, typename New, typename Proj = meta::identity>
     requires closure_callable<Pred>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Pred pred, New new_value, Proj proj = {}) const noexcept(
       SAFE_CTOR(replace_if_fn) and SAFE_MOVE(Pred) and
       SAFE_MOVE(New) and SAFE_MOVE(Proj)) {

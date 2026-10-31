@@ -179,7 +179,7 @@ namespace genex::views {
   struct concat_fn : pipe_closure {
     template <typename... Is, typename... Ss>
     requires detail::concepts::concatable_iters<std::tuple<Is...>, std::tuple<Ss...>>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       std::tuple<Is...> first, std::tuple<Ss...> last) const noexcept(
       SAFE_CTOR(detail::impl::concat_view<genex::subrange<Is, Ss>...>, std::tuple<Is...>, std::tuple<Ss...>) and
       SAFE_MOVE(std::tuple<Is...>) and SAFE_MOVE(std::tuple<Ss...>)) {
@@ -189,7 +189,8 @@ namespace genex::views {
 
     template <typename... Rngs>
     requires (detail::concepts::concatable_range<Rngs...> and sizeof...(Rngs) > 1)
-    GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rngs &&... ranges) const noexcept(
       (SAFE_CALL(decltype(iterators::begin), Rngs&) and ...) and
       (SAFE_CALL(decltype(iterators::end), Rngs&) and ...) and
       SAFE_MOVE(std::tuple<iterator_t<Rngs>...>) and

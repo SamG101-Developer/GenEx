@@ -102,7 +102,7 @@ namespace genex::views {
   struct slide_fn : pipe_closure {
     template <typename I, typename S, typename Int>
     requires detail::concepts::slideable_iters<I, S, Int>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, const Int window) const noexcept(
       SAFE_IMPL_CTOR(slide_view, I, S, Int) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
@@ -113,7 +113,7 @@ namespace genex::views {
 
     template <typename Rng, typename Int>
     requires detail::concepts::slideable_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, const Int window) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(slide_view, iterator_t<Rng>, sentinel_t<Rng>, Int) and
@@ -126,7 +126,8 @@ namespace genex::views {
 
     template <typename Int>
     requires std::integral<Int>
-    GENEX_INLINE constexpr auto operator()(const Int window) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      const Int window) const noexcept(
       SAFE_CTOR(slide_fn) and SAFE_MOVE(Int)) {
       GENEX_ASSERT(window > 0);
       return meta::bind_back(slide_fn{}, window);

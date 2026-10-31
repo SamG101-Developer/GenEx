@@ -82,14 +82,14 @@ namespace genex::views {
 
     template <typename I, typename S>
     requires detail::concepts::addressable_iters<I, S>
-    GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
       SAFE_IMPL_CTOR(address_of_view, I, S) and SAFE_MOVE(I) and SAFE_MOVE(S)) {
       return detail::impl::address_of_view(std::move(first), std::move(last));
     }
 
     template <typename Rng>
     requires detail::concepts::addressable_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(address_of_view, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);

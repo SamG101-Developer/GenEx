@@ -30,7 +30,7 @@ namespace genex::views {
     template <typename I, typename S, typename Int>
     requires detail::concepts::takeable_last_iters<I, S, Int>
       and std::contiguous_iterator<I> and std::same_as<I, S>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, const Int n) const noexcept(
       SAFE_CTOR(genex::span<iter_element_t<I>>, I, S) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
@@ -41,7 +41,8 @@ namespace genex::views {
 
     template <typename I, typename S, typename Int>
     requires detail::concepts::takeable_last_iters<I, S, Int>
-    constexpr auto operator()(I first, S last, const Int n) const {
+    [[nodiscard]] constexpr auto operator()(
+      I first, S last, const Int n) const {
       auto probe = iterators::next(first, static_cast<iter_difference_t<I>>(n), last);
       auto start = first;
       while (probe != last) {
@@ -55,7 +56,7 @@ namespace genex::views {
     requires detail::concepts::takeable_last_range<Rng, Int>
       and std::contiguous_iterator<iterator_t<Rng>>
       and std::same_as<iterator_t<Rng>, sentinel_t<Rng>>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, const Int n) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(genex::span<range_element_t<Rng>>, iterator_t<Rng>, sentinel_t<Rng>) and
@@ -68,7 +69,8 @@ namespace genex::views {
 
     template <typename Rng, typename Int>
     requires detail::concepts::takeable_last_range<Rng, Int>
-    constexpr auto operator()(Rng &&rng, const Int n) const {
+    [[nodiscard]] constexpr auto operator()(
+      Rng &&rng, const Int n) const {
       auto [first, last] = iterators::iter_pair(rng);
       auto probe = iterators::next(
         first, static_cast<range_difference_t<Rng>>(n), last);
@@ -83,7 +85,8 @@ namespace genex::views {
 
     template <typename Int>
     requires std::integral<Int>
-    GENEX_INLINE constexpr auto operator()(const Int n) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      const Int n) const noexcept(
       SAFE_CTOR(take_last_fn) and SAFE_MOVE(Int)) {
       return meta::bind_back(take_last_fn{}, n);
     }

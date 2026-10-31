@@ -132,12 +132,15 @@ namespace genex::views::detail::impl {
     }
 
     [[nodiscard]] constexpr auto size() const
-      requires std::forward_iterator<I> and requires { iterators::distance(it, st); } {
-      // Empty ranges are skipped, along with the separator they'd have had, and the last range has none after it.
+      requires std::forward_iterator<I> and
+      requires { iterators::distance(it, st); } {
+      // Empty ranges are skipped, along with the separator they'd have had, and
+      // the last range has none after it.
       auto total_size = 0z;
       auto last_is_empty = true;
       for (auto cur = it; cur != st; ++cur) {
-        const auto inner_size = iterators::distance(iterators::begin(*cur), iterators::end(*cur));
+        const auto inner_size = iterators::distance(
+          iterators::begin(*cur), iterators::end(*cur));
         last_is_empty = inner_size == 0;
         if (not last_is_empty) { total_size += inner_size + 1z; }
       }
@@ -150,7 +153,8 @@ namespace genex::views {
   struct join_with_fn : pipe_closure {
     template <typename I, typename S, typename New>
     requires detail::concepts::joinable_with_iters<I, S, New>
-    GENEX_INLINE constexpr auto operator()(I first, S last, New new_value) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last, New new_value) const noexcept(
       SAFE_IMPL_CTOR(join_with_view, I, S, New) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(New)) {
       return detail::impl::join_with_view(
@@ -159,7 +163,8 @@ namespace genex::views {
 
     template <typename Rng, typename New>
     requires detail::concepts::joinable_with_range<Rng, New>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, New new_value) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, New new_value) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(join_with_view, iterator_t<Rng>, sentinel_t<Rng>, New) and
       SAFE_MOVE(New)) {
@@ -169,7 +174,8 @@ namespace genex::views {
     }
 
     template <typename New>
-    GENEX_INLINE constexpr auto operator()(New new_value) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      New new_value) const noexcept(
       SAFE_CTOR(join_with_fn) and SAFE_MOVE(New)) {
       return meta::bind_back(join_with_fn{}, std::move(new_value));
     }

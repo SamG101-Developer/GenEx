@@ -149,7 +149,7 @@ namespace genex::views {
   struct intersperse_fn : pipe_closure {
     template <typename I, typename S, typename New>
     requires detail::concepts::interspersable_iters<I, S, New>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, New sep) const noexcept(
       SAFE_IMPL_CTOR(intersperse_view, I, S, New) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(New)) {
@@ -159,7 +159,7 @@ namespace genex::views {
 
     template <typename Rng, typename New>
     requires detail::concepts::interspersable_range<Rng, New>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, New sep) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(intersperse_view, iterator_t<Rng>, sentinel_t<Rng>, New) and
@@ -170,7 +170,7 @@ namespace genex::views {
     }
 
     template <typename New>
-    GENEX_INLINE constexpr auto operator()(New sep) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(New sep) const noexcept(
       SAFE_CTOR(intersperse_fn) and SAFE_MOVE(New)) {
       return meta::bind_back(
         intersperse_fn{}, std::move(sep));

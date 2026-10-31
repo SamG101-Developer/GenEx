@@ -31,7 +31,7 @@ namespace genex::views {
     requires detail::concepts::droppable_iters<I, S, Int>
       and std::contiguous_iterator<I>
       and std::sized_sentinel_for<S, I>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, const Int n) const noexcept(
       SAFE_CTOR(genex::span<iter_element_t<I>>, I, S) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
@@ -42,7 +42,8 @@ namespace genex::views {
 
     template <typename I, typename S, typename Int>
     requires detail::concepts::droppable_iters<I, S, Int>
-    GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last, const Int n) const {
       return genex::subrange<I, S>(
         iterators::next(
           std::move(first), static_cast<iter_difference_t<I>>(n), last),
@@ -53,7 +54,8 @@ namespace genex::views {
     requires detail::concepts::droppable_range<Rng, Int>
       and std::contiguous_iterator<iterator_t<Rng>>
       and std::sized_sentinel_for<sentinel_t<Rng>, iterator_t<Rng>>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, const Int n) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(genex::span<range_element_t<Rng>>, iterator_t<Rng>, sentinel_t<Rng>) and
       SAFE_MOVE(Int)) {
@@ -65,7 +67,8 @@ namespace genex::views {
 
     template <typename Rng, typename Int>
     requires detail::concepts::droppable_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, const Int n) const {
       auto [first, last] = iterators::iter_pair(rng);
       return genex::subrange<iterator_t<Rng>, sentinel_t<Rng>>(
         iterators::next(
@@ -75,7 +78,8 @@ namespace genex::views {
 
     template <typename Int>
     requires std::integral<Int>
-    GENEX_INLINE constexpr auto operator()(const Int n) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      const Int n) const noexcept(
       SAFE_CTOR(drop_fn) and SAFE_MOVE(Int)) {
       return meta::bind_back(drop_fn{}, n);
     }

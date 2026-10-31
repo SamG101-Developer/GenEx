@@ -107,7 +107,7 @@ namespace genex::views {
   struct chunk_by_fn : pipe_closure {
     template <typename I, typename S, typename Pred>
     requires detail::concepts::chunkable_by_iters<I, S, Pred>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, Pred pred) const noexcept(
       SAFE_IMPL_CTOR(chunk_by_view, I, S, Pred) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred)) {
@@ -117,7 +117,7 @@ namespace genex::views {
 
     template <typename Rng, typename Pred>
     requires detail::concepts::chunkable_by_range<Rng, Pred>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, Pred pred) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(chunk_by_view, iterator_t<Rng>, sentinel_t<Rng>, Pred) and
@@ -129,7 +129,7 @@ namespace genex::views {
 
     template <typename Pred>
     requires closure_callable<Pred>
-    GENEX_INLINE constexpr auto operator()(Pred pred) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Pred pred) const noexcept(
       SAFE_CTOR(chunk_by_fn) and SAFE_MOVE(Pred)) {
       return meta::bind_back(chunk_by_fn{}, std::move(pred));
     }

@@ -153,7 +153,7 @@ namespace genex::views {
   struct chunk_fn : pipe_closure {
     template <typename I, typename S, typename Int>
     requires detail::concepts::chunkable_iters<I, S, Int>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, const Int size) const noexcept(
       SAFE_IMPL_CTOR(chunk_view, I, S, Int) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
@@ -162,7 +162,7 @@ namespace genex::views {
 
     template <typename Rng, typename Int>
     requires detail::concepts::chunkable_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, const Int size) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(chunk_view, iterator_t<Rng>, sentinel_t<Rng>, Int) and
@@ -173,7 +173,8 @@ namespace genex::views {
 
     template <typename Int>
     requires std::integral<Int>
-    GENEX_INLINE constexpr auto operator()(const Int n) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      const Int n) const noexcept(
       SAFE_CTOR(chunk_fn) and SAFE_MOVE(Int)) {
       return meta::bind_back(chunk_fn{}, n);
     }

@@ -116,7 +116,7 @@ namespace genex::views {
   struct transform_fn : pipe_closure {
     template <typename I, typename S, typename F, typename Proj = meta::identity>
     requires detail::concepts::transformable_iters<I, S, F, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, F f, Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(transform_view, I, S, F, Proj) and SAFE_MOVE(I) and
       SAFE_MOVE(S) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
@@ -126,7 +126,7 @@ namespace genex::views {
 
     template <typename Rng, typename F, typename Proj = meta::identity>
     requires detail::concepts::transformable_range<Rng, F, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, F f, Proj proj = {}) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(transform_view, iterator_t<Rng>, sentinel_t<Rng>, F, Proj) and
@@ -138,7 +138,8 @@ namespace genex::views {
 
     template <typename F, typename Proj = meta::identity>
     requires closure_callable<F>
-    GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      F f, Proj proj = {}) const noexcept(
       SAFE_CTOR(transform_fn) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
       return meta::bind_back(transform_fn{}, std::move(f), std::move(proj));
     }
