@@ -25,6 +25,22 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
   inline constexpr auto stack_buffer_bytes = 256uz;
 
+  // Plain loops, which optimizers turn into calls to memcpy and memmove anyway.
+  // Calling those directly gave GCC 16 an internal compiler error in Release, in
+  // files that both "import std" and use this, on what looks to be the fortified
+  // memmove that glibc's headers define inline.
+  GENEX_INLINE auto copy_bytes_forwards(void *const to, const void *const from, const std::size_t count) -> void {
+    auto *const out = static_cast<std::byte*>(to);
+    const auto *const in = static_cast<const std::byte*>(from);
+    for (auto i = 0uz; i < count; ++i) { out[i] = in[i]; }
+  }
+
+  GENEX_INLINE auto copy_bytes_backwards(void *const to, const void *const from, const std::size_t count) -> void {
+    auto *const out = static_cast<std::byte*>(to);
+    const auto *const in = static_cast<const std::byte*>(from);
+    for (auto i = count; i > 0; --i) { out[i - 1] = in[i - 1]; }
+  }
+
   template <typename I>
   concept bytewise_rotatable =
     std::contiguous_iterator<I> and
@@ -121,16 +137,16 @@ namespace genex::algorithms::detail::impl {
 
         if (left <= right and left * sizeof(T) <= stack_buffer_bytes) {
           std::byte stack[stack_buffer_bytes] [[indeterminate]];
-          std::memcpy(stack, begin_ptr, left * sizeof(T));
-          std::memmove(begin_ptr, mid_ptr, right * sizeof(T));
-          std::memcpy(begin_ptr + right, stack, left * sizeof(T));
+          copy_bytes_forwards(stack, begin_ptr, left * sizeof(T));
+          copy_bytes_forwards(begin_ptr, mid_ptr, right * sizeof(T));
+          copy_bytes_forwards(begin_ptr + right, stack, left * sizeof(T));
           return first + static_cast<iter_difference_t<I>>(right);
         }
         if (right < left and right * sizeof(T) <= stack_buffer_bytes) {
           std::byte stack[stack_buffer_bytes] [[indeterminate]];
-          std::memcpy(stack, mid_ptr, right * sizeof(T));
-          std::memmove(begin_ptr + right, begin_ptr, left * sizeof(T));
-          std::memcpy(begin_ptr, stack, right * sizeof(T));
+          copy_bytes_forwards(stack, mid_ptr, right * sizeof(T));
+          copy_bytes_backwards(begin_ptr + right, begin_ptr, left * sizeof(T));
+          copy_bytes_forwards(begin_ptr, stack, right * sizeof(T));
           return first + static_cast<iter_difference_t<I>>(right);
         }
       }
