@@ -14,8 +14,11 @@ namespace genex::detail {
   /// its views once per "begin" or "end", rather than once per view per call.
   template <typename F, typename G>
   struct composed_adaptor : pipe_closure {
-    GENEX_NO_UNIQUE_ADDRESS F f;
-    GENEX_NO_UNIQUE_ADDRESS G g;
+    // Not "GENEX_NO_UNIQUE_ADDRESS". Both of these and this struct share the
+    // "pipe_closure" base, and overlapping them gave MSVC a corrupted "g" when
+    // "f" was empty.
+    F f;
+    G g;
 
     // The pipe between them is so that a step producing a container can still
     // be followed by a view. Directly calling this with an rvalue is the one

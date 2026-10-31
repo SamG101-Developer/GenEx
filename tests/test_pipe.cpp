@@ -78,6 +78,9 @@ TEST(GenexPipeComposition, IncludingBareObjects) {
   auto vec = make_vec();
   const auto backwards = genex::views::reverse | genex::views::take(2);
   EXPECT_EQ(vec | backwards | genex::to<std::vector>(), (std::vector{6, 5}));
+
+  const auto frontwards = genex::views::take(2) | genex::views::reverse;
+  EXPECT_EQ(vec | frontwards | genex::to<std::vector>(), (std::vector{2, 1}));
 }
 
 TEST(GenexPipeComposition, EndingInAContainer) {
