@@ -9,7 +9,8 @@ namespace genex::iterators {
   struct iter_swap_fn {
     template <typename I1, typename I2>
     requires std::indirectly_swappable<I1, I2>
-    GENEX_INLINE constexpr auto operator()(const I1 &a, const I2 &b) const -> void {
+    GENEX_INLINE constexpr auto operator()(
+      const I1 &a, const I2 &b) const -> void {
       using std::swap;
       swap(*a, *b);
     }
