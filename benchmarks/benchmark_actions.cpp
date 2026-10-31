@@ -1,0 +1,115 @@
+#include <benchmark/benchmark.h>
+
+#include <range/v3/action/drop.hpp>
+#include <range/v3/action/drop_while.hpp>
+#include <range/v3/action/push_back.hpp>
+#include <range/v3/action/remove.hpp>
+#include <range/v3/action/remove_if.hpp>
+#include <range/v3/action/reverse.hpp>
+#include <range/v3/action/slice.hpp>
+#include <range/v3/action/sort.hpp>
+#include <range/v3/action/stable_sort.hpp>
+#include <range/v3/action/take.hpp>
+#include <range/v3/action/take_while.hpp>
+#include <range/v3/action/transform.hpp>
+#include <range/v3/action/unique.hpp>
+
+import genex.actions.concat;
+import genex.actions.drop;
+import genex.actions.drop_while;
+import genex.actions.remove;
+import genex.actions.remove_if;
+import genex.actions.reverse;
+import genex.actions.slice;
+import genex.actions.sort;
+import genex.actions.take;
+import genex.actions.take_while;
+import genex.actions.transform;
+import genex.actions.unique;
+import std;
+
+namespace {
+  constexpr auto is_even = [](const int x) { return x % 2 == 0; };
+  constexpr auto is_small = [](const int x) { return x < 500; };
+  constexpr auto twice = [](const int x) { return x * 2; };
+
+  // Shuffled with a fixed seed, so a sort has real work to do and each run sees the same data.
+  auto shuffled() -> std::vector<int> {
+    auto data = std::vector<int>(1000);
+    std::iota(data.begin(), data.end(), 0);
+    auto engine = std::mt19937(42);
+    std::shuffle(data.begin(), data.end(), engine);
+    return data;
+  }
+
+  auto ascending() -> std::vector<int> {
+    auto data = std::vector<int>(1000);
+    std::iota(data.begin(), data.end(), 0);
+    return data;
+  }
+
+  // Runs of ten equal values, for unique to collapse.
+  auto runs() -> std::vector<int> {
+    auto data = std::vector<int>(1000);
+    for (auto i = 0uz; i < data.size(); ++i) { data[i] = static_cast<int>(i / 10); }
+    return data;
+  }
+}
+
+// Each iteration acts on a fresh copy, as actions change what they're given. Both libraries pay for that equally.
+#define GENEX_BENCH_ACTION(Name, Data, RangesAction, GenexAction)  \
+  static void BM_StdRanges_Action##Name(benchmark::State &state) { \
+    const auto data = Data();                                      \
+    for (auto _ : state) {                                         \
+      auto copy = data;                                            \
+      copy |= ranges::actions::RangesAction;                       \
+      benchmark::DoNotOptimize(copy);                              \
+    }                                                              \
+  }                                                                \
+  BENCHMARK(BM_StdRanges_Action##Name);                            \
+  static void BM_Genex_V2_Action##Name(benchmark::State &state) {  \
+    const auto data = Data();                                      \
+    for (auto _ : state) {                                         \
+      auto copy = data;                                            \
+      copy |= genex::actions::GenexAction;                         \
+      benchmark::DoNotOptimize(copy);                              \
+    }                                                              \
+  }                                                                \
+  BENCHMARK(BM_Genex_V2_Action##Name)
+
+GENEX_BENCH_ACTION(Drop, ascending, drop(500), drop(500));
+GENEX_BENCH_ACTION(DropWhile, ascending, drop_while(is_small), drop_while(is_small));
+GENEX_BENCH_ACTION(Remove, runs, remove(50), remove(50));
+GENEX_BENCH_ACTION(RemoveIf, shuffled, remove_if(is_even), remove_if(is_even));
+GENEX_BENCH_ACTION(Reverse, ascending, reverse, reverse());
+GENEX_BENCH_ACTION(Slice, ascending, slice(250, 750), slice(250, 750));
+GENEX_BENCH_ACTION(Sort, shuffled, sort, sort());
+GENEX_BENCH_ACTION(StableSort, shuffled, stable_sort, stable_sort());
+GENEX_BENCH_ACTION(Take, ascending, take(500), take(500));
+GENEX_BENCH_ACTION(TakeWhile, ascending, take_while(is_small), take_while(is_small));
+GENEX_BENCH_ACTION(Transform, ascending, transform(twice), transform(twice));
+GENEX_BENCH_ACTION(Unique, runs, unique, unique());
+
+static void BM_StdRanges_ActionConcat(benchmark::State &state) {
+  const auto lhs = ascending();
+  const auto rhs = ascending();
+  for (auto _ : state) {
+    auto copy = lhs;
+    copy |= ranges::actions::push_back(rhs);
+    benchmark::DoNotOptimize(copy);
+  }
+}
+
+BENCHMARK(BM_StdRanges_ActionConcat);
+
+static void BM_Genex_V2_ActionConcat(benchmark::State &state) {
+  const auto lhs = ascending();
+  const auto rhs = ascending();
+  for (auto _ : state) {
+    auto copy = lhs;
+    copy |= genex::actions::concat(rhs);
+    benchmark::DoNotOptimize(copy);
+  }
+}
+
+BENCHMARK(BM_Genex_V2_ActionConcat);
