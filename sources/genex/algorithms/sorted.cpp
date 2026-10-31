@@ -12,23 +12,23 @@ import std;
 
 namespace genex::algorithms::detail::concepts {
   template <typename I, typename S, typename Comp, typename Proj>
-  concept sortabled_iters =
+  concept sortable_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
     std::copy_constructible<iter_value_t<I>> and
     std::sortable<typename std::vector<iter_value_t<I>>::iterator, Comp, Proj>;
 
   template <typename Rng, typename Comp, typename Proj>
-  concept sortabled_range =
+  concept sortable_range =
     input_range<Rng> and
-    sortabled_iters<iterator_t<Rng>, sentinel_t<Rng>, Comp, Proj>;
+    sortable_iters<iterator_t<Rng>, sentinel_t<Rng>, Comp, Proj>;
 }
 
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Comp, typename Proj>
-  requires concepts::sortabled_iters<I, S, Comp, Proj>
+  requires concepts::sortable_iters<I, S, Comp, Proj>
   constexpr auto do_sorted(
-    I first, S last, Comp &&comp, Proj &&proj) -> std::vector<iter_value_t<I>> {
+    I first, S last, Comp comp, Proj proj) -> std::vector<iter_value_t<I>> {
     auto vec = genex::to<std::vector>()(
       genex::subrange(std::move(first), std::move(last)));
     std::sort(
@@ -48,24 +48,24 @@ namespace genex {
     template <
       typename I, typename S, typename Comp = operations::lt,
       typename Proj = meta::identity>
-    requires algorithms::detail::concepts::sortabled_iters<I, S, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(I first, S last, Comp &&comp = {},
-      Proj &&proj = {}) const -> std::vector<iter_value_t<I>> {
+    requires algorithms::detail::concepts::sortable_iters<I, S, Comp, Proj>
+    GENEX_INLINE constexpr auto operator()(I first, S last, Comp comp = {},
+      Proj proj = {}) const -> std::vector<iter_value_t<I>> {
       return algorithms::detail::impl::do_sorted(
         std::move(first), std::move(last),
-        std::forward<Comp>(comp), std::forward<Proj>(proj));
+        std::move(comp), std::move(proj));
     }
 
     template <
       typename Rng, typename Comp = operations::lt,
       typename Proj = meta::identity>
-    requires algorithms::detail::concepts::sortabled_range<Rng, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp &&comp = {},
-      Proj &&proj = {}) const -> std::vector<range_value_t<Rng>> {
+    requires algorithms::detail::concepts::sortable_range<Rng, Comp, Proj>
+    GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {},
+      Proj proj = {}) const -> std::vector<range_value_t<Rng>> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_sorted(
         std::move(first), std::move(last),
-        std::forward<Comp>(comp), std::forward<Proj>(proj));
+        std::move(comp), std::move(proj));
     }
   };
 

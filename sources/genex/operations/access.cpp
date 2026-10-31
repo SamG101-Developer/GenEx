@@ -9,7 +9,7 @@ import std;
 
 namespace genex::operations::detail::concepts {
   template <typename Rng>
-  concept randomly_access_range =
+  concept accessible_range =
     random_access_range<Rng>;
 
   template <typename Rng>
@@ -24,7 +24,7 @@ namespace genex::operations::detail::concepts {
 namespace genex::operations {
   struct at_fn {
     template <typename Rng>
-    requires detail::concepts::randomly_access_range<Rng>
+    requires detail::concepts::accessible_range<Rng>
     GENEX_INLINE constexpr auto operator()(
       Rng &&rng, const std::size_t n) const -> borrowed_reference_t<Rng> {
       return rng[n];

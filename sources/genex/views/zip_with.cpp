@@ -16,7 +16,8 @@ namespace genex::views::detail::concepts {
     non_dangling_range<Rng2> and
     input_range<Rng1> and
     input_range<Rng2> and
-    std::invocable<F&, range_reference_t<Rng1>, range_reference_t<Rng2>>;
+    std::invocable<F&, range_reference_t<Rng1>, range_reference_t<Rng2>> and
+    std::move_constructible<F>;
 }
 
 namespace genex::views::detail::impl {

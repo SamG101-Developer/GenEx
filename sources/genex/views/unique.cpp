@@ -15,7 +15,9 @@ namespace genex::views::detail::concepts {
   concept uniqueable_iters =
     std::forward_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirectly_comparable<I, I, Comp, Proj, Proj>;
+    std::indirectly_comparable<I, I, Comp, Proj, Proj> and
+    std::move_constructible<Comp> and
+    std::move_constructible<Proj>;
 
   template <typename Rng, typename Comp, typename Proj>
   concept uniqueable_range =
@@ -129,7 +131,7 @@ namespace genex::views {
     }
 
     template <typename Comp = operations::eq, typename Proj = meta::identity>
-    requires (not range<Comp>)
+    requires closure_callable<Comp>
     GENEX_INLINE constexpr auto operator()(
       Comp comp, Proj proj = {}) const noexcept(
       SAFE_CTOR(unique_fn) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {

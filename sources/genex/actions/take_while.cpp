@@ -27,7 +27,7 @@ namespace genex::actions {
     }
 
     template <typename Pred>
-    requires (not range<Pred>)
+    requires closure_callable<Pred>
     GENEX_INLINE constexpr auto operator()(Pred pred) const {
       return meta::bind_back(take_while_fn{}, std::forward<Pred>(pred));
     }

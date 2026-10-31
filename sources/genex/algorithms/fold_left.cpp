@@ -9,28 +9,28 @@ import std;
 
 namespace genex::algorithms::detail::concepts {
   template <
-    typename I, typename S, typename E, typename F,
-    typename Acc = std::remove_cvref_t<E>>
+    typename I, typename S, typename Init, typename F,
+    typename Acc = std::remove_cvref_t<Init>>
   concept left_foldable_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
     std::movable<Acc> and
-    std::constructible_from<Acc, E> and
+    std::constructible_from<Acc, Init> and
     std::invocable<F, Acc, iter_reference_t<I>> and
     std::convertible_to<std::invoke_result_t<F, Acc, iter_reference_t<I>>, Acc>;
 
-  template <typename Rng, typename E, typename F>
-  concept can_fold_left_range =
+  template <typename Rng, typename Init, typename F>
+  concept left_foldable_range =
     input_range<Rng> and
-    left_foldable_iters<iterator_t<Rng>, sentinel_t<Rng>, E, F>;
+    left_foldable_iters<iterator_t<Rng>, sentinel_t<Rng>, Init, F>;
 }
 
 namespace genex::algorithms::detail::impl {
-  template <typename I, typename S, typename E, typename F>
-  requires concepts::left_foldable_iters<I, S, E, F>
+  template <typename I, typename S, typename Init, typename F>
+  requires concepts::left_foldable_iters<I, S, Init, F>
   constexpr auto do_fold_left(
-    I first, S last, E &&init, F &&f) -> std::remove_cvref_t<E> {
-    auto acc = std::remove_cvref_t<E>(std::forward<E>(init));
+    I first, S last, Init &&init, F f) -> std::remove_cvref_t<Init> {
+    auto acc = std::remove_cvref_t<Init>(std::forward<Init>(init));
     for (; first != last; ++first) {
       acc = meta::invoke(f, std::move(acc), *first);
     }
@@ -40,23 +40,23 @@ namespace genex::algorithms::detail::impl {
 
 namespace genex {
   struct fold_left_fn {
-    template <typename I, typename S, typename E, typename F>
-    requires algorithms::detail::concepts::left_foldable_iters<I, S, E, F>
+    template <typename I, typename S, typename Init, typename F>
+    requires algorithms::detail::concepts::left_foldable_iters<I, S, Init, F>
     GENEX_INLINE constexpr auto operator()(
-      I first, S last, E &&init, F &&f) const {
+      I first, S last, Init &&init, F f) const {
       return algorithms::detail::impl::do_fold_left(
         std::move(first), std::move(last),
-        std::forward<E>(init), std::forward<F>(f));
+        std::forward<Init>(init), std::move(f));
     }
 
-    template <typename Rng, typename E, typename F>
-    requires algorithms::detail::concepts::can_fold_left_range<Rng, E, F>
+    template <typename Rng, typename Init, typename F>
+    requires algorithms::detail::concepts::left_foldable_range<Rng, Init, F>
     GENEX_INLINE constexpr auto operator()(
-      Rng &&rng, E &&init, F &&f) const {
+      Rng &&rng, Init &&init, F f) const {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_fold_left(
         std::move(first), std::move(last),
-        std::forward<E>(init), std::forward<F>(f));
+        std::forward<Init>(init), std::move(f));
     }
   };
 

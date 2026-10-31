@@ -32,9 +32,9 @@ namespace genex::actions {
     }
 
     template <typename E, typename Proj = meta::identity>
-    requires (not range<E>)
-    GENEX_INLINE constexpr auto operator()(E &&elem, Proj &&proj = {}) const {
-      return meta::bind_back(remove_fn{}, std::move(elem), std::move(proj));
+    requires closure_value<E>
+    GENEX_INLINE constexpr auto operator()(E &&elem, Proj proj = {}) const {
+      return meta::bind_back(remove_fn{}, std::forward<E>(elem), std::move(proj));
     }
   };
 

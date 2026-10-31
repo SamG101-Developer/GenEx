@@ -21,7 +21,9 @@ namespace genex::views::detail::concepts {
     std::forward_iterator<I2> and
     std::sentinel_for<S1, I1> and
     std::sentinel_for<S2, I2> and
-    std::indirectly_comparable<I1, I2, operations::eq, Proj1, Proj2>;
+    std::indirectly_comparable<I1, I2, operations::eq, Proj1, Proj2> and
+    std::move_constructible<Proj1> and
+    std::move_constructible<Proj2>;
 
   template <typename Rng1, typename Rng2, typename Proj1, typename Proj2>
   concept inable_range =

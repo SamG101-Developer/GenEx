@@ -5,6 +5,7 @@ export module genex.views.remove_if;
 export import genex.pipe;
 import genex.concepts;
 import genex.detail.iterator_ops;
+import genex.detail.predicate_iters;
 import genex.iterators.iter_pair;
 import genex.meta;
 import std;
@@ -13,9 +14,9 @@ namespace genex::views::detail::concepts {
   template <
     typename I, typename S, typename Pred, typename Proj = meta::identity>
   concept removable_if_iters =
-    std::input_iterator<I> and
-    std::sentinel_for<S, I> and
-    std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
+    genex::detail::predicate_iters<I, S, Pred, Proj> and
+    std::move_constructible<Pred> and
+    std::move_constructible<Proj>;
 
   template <typename Rng, typename Pred, typename Proj = meta::identity>
   concept removable_if_range =
@@ -127,7 +128,7 @@ namespace genex::views {
     }
 
     template <typename Pred, typename Proj = meta::identity>
-    requires (not range<Pred>)
+    requires closure_callable<Pred>
     GENEX_INLINE constexpr auto operator()(
       Pred pred, Proj proj = {}) const noexcept(
       SAFE_CTOR(remove_if_fn) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {

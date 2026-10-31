@@ -35,7 +35,7 @@ namespace genex::actions {
     }
 
     template <typename Pred, typename New, typename Proj = meta::identity>
-    requires (not range<Pred>)
+    requires closure_callable<Pred>
     GENEX_INLINE constexpr auto operator()(
       Pred pred, New new_val, Proj proj = {}) const {
       return meta::bind_back(

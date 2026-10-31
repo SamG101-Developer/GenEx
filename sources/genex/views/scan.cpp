@@ -22,7 +22,8 @@ namespace genex::views::detail::concepts {
     std::invocable<F&, Init, iter_reference_t<I>> and
     std::movable<scan_acc_t<I, F, Init>> and
     std::constructible_from<scan_acc_t<I, F, Init>, Init> and
-    std::invocable<F&, scan_acc_t<I, F, Init>&, iter_reference_t<I>>;
+    std::invocable<F&, scan_acc_t<I, F, Init>&, iter_reference_t<I>> and
+    std::move_constructible<F>;
 
   template <typename Rng, typename F, typename Init>
   concept scannable_range =
@@ -157,10 +158,10 @@ namespace genex::views {
     }
 
     template <typename Init, typename F = std::plus<>>
-    requires (not range<Init>)
-    GENEX_INLINE constexpr auto operator()(Init init, F op = {}) const noexcept(
-      SAFE_CTOR(scan_fn) and SAFE_MOVE(Init) and SAFE_MOVE(F)) {
-      return meta::bind_back(scan_fn{}, std::move(init), std::move(op));
+    requires closure_value<Init>
+    GENEX_INLINE constexpr auto operator()(Init &&init, F op = {}) const noexcept(
+      SAFE_CTOR(scan_fn) and SAFE_CTOR(std::decay_t<Init>, Init) and SAFE_MOVE(F)) {
+      return meta::bind_back(scan_fn{}, std::forward<Init>(init), std::move(op));
     }
   };
 
@@ -189,7 +190,7 @@ namespace genex::views {
     }
 
     template <typename F>
-    requires (not range<F>)
+    requires closure_callable<F>
     GENEX_INLINE constexpr auto operator()(F op) const noexcept(
       SAFE_CTOR(partial_sum_fn) and SAFE_MOVE(F)) {
       return meta::bind_back(partial_sum_fn{}, std::move(op));

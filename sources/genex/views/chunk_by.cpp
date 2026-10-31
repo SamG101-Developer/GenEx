@@ -15,7 +15,8 @@ namespace genex::views::detail::concepts {
   concept chunkable_by_iters =
     std::forward_iterator<I> and
     std::sentinel_for<S, I> and
-    std::indirect_binary_predicate<Pred, I, I>;
+    std::indirect_binary_predicate<Pred, I, I> and
+    std::move_constructible<Pred>;
 
   template <typename Rng, typename Pred>
   concept chunkable_by_range =
@@ -127,7 +128,7 @@ namespace genex::views {
     }
 
     template <typename Pred>
-    requires (not range<Pred>)
+    requires closure_callable<Pred>
     GENEX_INLINE constexpr auto operator()(Pred pred) const noexcept(
       SAFE_CTOR(chunk_by_fn) and SAFE_MOVE(Pred)) {
       return meta::bind_back(chunk_by_fn{}, std::move(pred));

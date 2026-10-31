@@ -32,7 +32,7 @@ namespace genex::actions {
     }
 
     template <typename F, typename Proj = meta::identity>
-    requires (not range<F>)
+    requires closure_callable<F>
     GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const {
       return meta::bind_back(transform_fn{}, std::move(f), std::move(proj));
     }

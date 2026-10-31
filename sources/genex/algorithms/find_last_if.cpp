@@ -3,6 +3,7 @@ module;
 
 export module genex.algorithms.find_last_if;
 import genex.concepts;
+import genex.detail.predicate_iters;
 import genex.iterators.iter_pair;
 import genex.iterators.prev;
 import genex.meta;
@@ -11,14 +12,12 @@ import std;
 namespace genex::algorithms::detail::concepts {
   template <typename I, typename S, typename Pred, typename Proj>
   concept findable_last_if_iters =
-    std::input_iterator<I> and
-    std::sentinel_for<S, I> and
-    std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
+    genex::detail::predicate_iters<I, S, Pred, Proj>;
 
-  template <typename Rng, typename E, typename Proj>
+  template <typename Rng, typename Pred, typename Proj>
   concept findable_last_if_range =
     input_range<Rng> and
-    findable_last_if_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
+    findable_last_if_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj>;
 }
 
 namespace genex::algorithms::detail::impl {
@@ -26,7 +25,7 @@ namespace genex::algorithms::detail::impl {
   requires concepts::findable_last_if_iters<I, S, Pred, Proj>
     and std::bidirectional_iterator<I> and std::convertible_to<S, I>
   constexpr auto do_find_last_if(
-    I first, S last, Pred &&pred, Proj &&proj) -> I {
+    I first, S last, Pred pred, Proj proj) -> I {
     auto end = static_cast<I>(std::move(last));
     for (auto it = end; it != first; --it) {
       if (meta::invoke(pred, meta::invoke(proj, *iterators::prev(it)))) {
@@ -39,7 +38,7 @@ namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Pred, typename Proj>
   requires concepts::findable_last_if_iters<I, S, Pred, Proj>
   constexpr auto do_find_last_if(
-    I first, S last, Pred &&pred, Proj &&proj) -> I {
+    I first, S last, Pred pred, Proj proj) -> I {
     auto result = first;
     auto found = false;
     for (; first != last; ++first) {
@@ -59,10 +58,10 @@ namespace genex {
     requires algorithms::detail::concepts::findable_last_if_iters<
       I, S, Pred, Proj>
     GENEX_INLINE constexpr auto operator()(
-      I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
+      I first, S last, Pred pred, Proj proj = {}) const -> I {
       return algorithms::detail::impl::do_find_last_if(
         std::move(first), std::move(last),
-        std::forward<Pred>(pred), std::forward<Proj>(proj));
+        std::move(pred), std::move(proj));
     }
 
     template <
@@ -70,11 +69,11 @@ namespace genex {
     requires algorithms::detail::concepts::findable_last_if_range<
       Rng, Pred, Proj>
     GENEX_INLINE constexpr auto operator()(
-      Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> borrowed_iterator_t<Rng> {
+      Rng &&rng, Pred pred, Proj proj = {}) const -> borrowed_iterator_t<Rng> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_find_last_if(
         std::move(first), std::move(last),
-        std::forward<Pred>(pred), std::forward<Proj>(proj));
+        std::move(pred), std::move(proj));
     }
   };
 

@@ -16,7 +16,8 @@ namespace genex::views::detail::concepts {
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
     std::indirect_equivalence_relation<
-      operations::eq, std::projected<I, Proj>, std::remove_cvref_t<E> const*>;
+      operations::eq, std::projected<I, Proj>, std::remove_cvref_t<E> const*> and
+    std::move_constructible<Proj>;
 
   template <typename Rng, typename E, typename Proj>
   concept removable_range =
@@ -127,11 +128,11 @@ namespace genex::views {
     }
 
     template <typename E, typename Proj = meta::identity>
-    requires (not range<E>)
+    requires closure_value<E>
     GENEX_INLINE constexpr auto operator()(
-      E value, Proj proj = {}) const noexcept(
-      SAFE_CTOR(remove_fn) and SAFE_MOVE(E) and SAFE_MOVE(Proj)) {
-      return meta::bind_back(remove_fn{}, std::move(value), std::move(proj));
+      E &&value, Proj proj = {}) const noexcept(
+      SAFE_CTOR(remove_fn) and SAFE_CTOR(std::decay_t<E>, E) and SAFE_MOVE(Proj)) {
+      return meta::bind_back(remove_fn{}, std::forward<E>(value), std::move(proj));
     }
   };
 

@@ -36,8 +36,8 @@ namespace genex::algorithms::detail::impl {
     typename Proj1, typename Proj2>
   requires concepts::equatable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
   constexpr auto do_equals(
-    I1 first1, S1 last1, I2 first2, S2 last2, Comp &&comp,
-    Proj1 &&proj1, Proj2 &&proj2) -> bool {
+    I1 first1, S1 last1, I2 first2, S2 last2, Comp comp,
+    Proj1 proj1, Proj2 proj2) -> bool {
     for (; first1 != last1 and first2 != last2; ++first1, ++first2) {
       if (not meta::invoke(comp, meta::invoke(proj1, *first1), meta::invoke(proj2, *first2))) { return false; }
     }
@@ -54,15 +54,15 @@ namespace genex {
     requires algorithms::detail::concepts::equatable_ranges<
       Rng1, Rng2, Comp, Proj1, Proj2>
     GENEX_INLINE constexpr auto operator()(
-      Rng1 &&rng1, Rng2 &&rng2, Comp &&comp = {}, Proj1 &&proj1 = {},
-      Proj2 &&proj2 = {}) const -> bool {
+      Rng1 &&rng1, Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {},
+      Proj2 proj2 = {}) const -> bool {
       auto [first1, last1] = iterators::iter_pair(rng1);
       auto [first2, last2] = iterators::iter_pair(rng2);
       return algorithms::detail::impl::do_equals(
         std::move(first1), std::move(last1),
         std::move(first2), std::move(last2),
-        std::forward<Comp>(comp),
-        std::forward<Proj1>(proj1), std::forward<Proj2>(proj2));
+        std::move(comp),
+        std::move(proj1), std::move(proj2));
     }
   };
 

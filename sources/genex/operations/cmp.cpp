@@ -31,7 +31,7 @@ namespace genex::operations {
     template <typename T, typename U, typename Proj>
     requires detail::concepts::comparable_with<T, U, Proj>
     GENEX_INLINE constexpr auto operator()(
-      T &&a, U &&b, Proj &&proj) const -> bool {
+      T &&a, U &&b, Proj proj) const -> bool {
       return meta::invoke(
         proj, std::forward<T>(a)) == meta::invoke(proj, std::forward<U>(b));
     }
@@ -48,7 +48,7 @@ namespace genex::operations {
     template <typename T, typename U, typename Proj>
     requires detail::concepts::comparable_with<T, U, Proj>
     GENEX_INLINE constexpr auto operator()(
-      T &&a, U &&b, Proj &&proj) const -> bool {
+      T &&a, U &&b, Proj proj) const -> bool {
       return meta::invoke(
         proj, std::forward<T>(a)) != meta::invoke(proj, std::forward<U>(b));
     }
@@ -65,7 +65,7 @@ namespace genex::operations {
     template <typename T, typename U, typename Proj>
     requires detail::concepts::orderable_with<T, U, Proj>
     GENEX_INLINE constexpr auto operator()(
-      T &&a, U &&b, Proj &&proj) const -> bool {
+      T &&a, U &&b, Proj proj) const -> bool {
       return meta::invoke(
         proj, std::forward<T>(a)) < meta::invoke(proj, std::forward<U>(b));
     }
@@ -82,7 +82,7 @@ namespace genex::operations {
     template <typename T, typename U, typename Proj>
     requires detail::concepts::orderable_with<T, U, Proj>
     GENEX_INLINE constexpr auto operator()(
-      T &&a, U &&b, Proj &&proj) const -> bool {
+      T &&a, U &&b, Proj proj) const -> bool {
       return meta::invoke(
         proj, std::forward<T>(a)) <= meta::invoke(proj, std::forward<U>(b));
     }
@@ -99,7 +99,7 @@ namespace genex::operations {
     template <typename T, typename U, typename Proj>
     requires detail::concepts::orderable_with<T, U, Proj>
     GENEX_INLINE constexpr auto operator()(
-      T &&a, U &&b, Proj &&proj) const -> bool {
+      T &&a, U &&b, Proj proj) const -> bool {
       return meta::invoke(
         proj, std::forward<T>(a)) > meta::invoke(proj, std::forward<U>(b));
     }
@@ -116,7 +116,7 @@ namespace genex::operations {
     template <typename T, typename U, typename Proj>
     requires detail::concepts::orderable_with<T, U, Proj>
     GENEX_INLINE constexpr auto operator()(
-      T &&a, U &&b, Proj &&proj) const -> bool {
+      T &&a, U &&b, Proj proj) const -> bool {
       return meta::invoke(
         proj, std::forward<T>(a)) >= meta::invoke(proj, std::forward<U>(b));
     }
@@ -137,9 +137,9 @@ namespace genex::operations {
     template <typename U, typename Proj>
     requires detail::concepts::comparable_with<T, U, Proj>
     GENEX_INLINE constexpr auto operator()(
-      U &&rhs, Proj &&proj) const -> bool {
+      U &&rhs, Proj proj) const -> bool {
       return meta::invoke(
-        eq{}, lhs, std::forward<U>(rhs), std::forward<Proj>(proj));
+        eq{}, lhs, std::forward<U>(rhs), std::move(proj));
     }
   };
 
@@ -158,9 +158,9 @@ namespace genex::operations {
     template <typename U, typename Proj>
     requires detail::concepts::comparable_with<T, U, Proj>
     GENEX_INLINE constexpr auto operator()(
-      U &&rhs, Proj &&proj) const -> bool {
+      U &&rhs, Proj proj) const -> bool {
       return meta::invoke(
-        ne{}, lhs, std::forward<U>(rhs), std::forward<Proj>(proj));
+        ne{}, lhs, std::forward<U>(rhs), std::move(proj));
     }
   };
 
@@ -179,9 +179,9 @@ namespace genex::operations {
     template <typename U, typename Proj>
     requires detail::concepts::orderable_with<T, U, Proj>
     GENEX_INLINE constexpr auto operator()(
-      U &&rhs, Proj &&proj) const -> bool {
+      U &&rhs, Proj proj) const -> bool {
       return meta::invoke(
-        gt{}, lhs, std::forward<U>(rhs), std::forward<Proj>(proj));
+        gt{}, lhs, std::forward<U>(rhs), std::move(proj));
     }
   };
 
@@ -200,9 +200,9 @@ namespace genex::operations {
     template <typename U, typename Proj>
     requires detail::concepts::orderable_with<T, U, Proj>
     GENEX_INLINE constexpr auto operator()(
-      U &&rhs, Proj &&proj) const -> bool {
+      U &&rhs, Proj proj) const -> bool {
       return meta::invoke(
-        lt{}, lhs, std::forward<U>(rhs), std::forward<Proj>(proj));
+        lt{}, lhs, std::forward<U>(rhs), std::move(proj));
     }
   };
 
@@ -219,9 +219,9 @@ namespace genex::operations {
 
     template <typename U, typename Proj>
     requires detail::concepts::orderable_with<T, U, Proj>
-    GENEX_INLINE constexpr auto operator()(U &&rhs, Proj &&proj) const -> bool {
+    GENEX_INLINE constexpr auto operator()(U &&rhs, Proj proj) const -> bool {
       return meta::invoke(
-        ge{}, lhs, std::forward<U>(rhs), std::forward<Proj>(proj));
+        ge{}, lhs, std::forward<U>(rhs), std::move(proj));
     }
   };
 
@@ -238,9 +238,9 @@ namespace genex::operations {
 
     template <typename U, typename Proj>
     requires detail::concepts::orderable_with<T, U, Proj>
-    GENEX_INLINE constexpr auto operator()(U &&rhs, Proj &&proj) const -> bool {
+    GENEX_INLINE constexpr auto operator()(U &&rhs, Proj proj) const -> bool {
       return meta::invoke(
-        le{}, lhs, std::forward<U>(rhs), std::forward<Proj>(proj));
+        le{}, lhs, std::forward<U>(rhs), std::move(proj));
     }
   };
 }

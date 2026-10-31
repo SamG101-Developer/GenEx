@@ -5,6 +5,7 @@ export module genex.views.replace_if;
 export import genex.pipe;
 import genex.concepts;
 import genex.detail.iterator_ops;
+import genex.detail.predicate_iters;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -13,10 +14,10 @@ import std;
 namespace genex::views::detail::concepts {
   template <typename I, typename S, typename Pred, typename New, typename Proj>
   concept replaceable_if_iters =
-    std::input_iterator<I> and
-    std::sentinel_for<S, I> and
-    std::indirect_unary_predicate<Pred, std::projected<I, Proj>> and
-    std::convertible_to<New, iter_value_t<I>>;
+    genex::detail::predicate_iters<I, S, Pred, Proj> and
+    std::convertible_to<New, iter_value_t<I>> and
+    std::move_constructible<Pred> and
+    std::move_constructible<Proj>;
 
   template <typename Rng, typename Pred, typename New, typename Proj>
   concept replaceable_if_range =
@@ -120,7 +121,7 @@ namespace genex::views {
     }
 
     template <typename Pred, typename New, typename Proj = meta::identity>
-    requires (not range<Pred>)
+    requires closure_callable<Pred>
     GENEX_INLINE constexpr auto operator()(
       Pred pred, New new_value, Proj proj = {}) const noexcept(
       SAFE_CTOR(replace_if_fn) and SAFE_MOVE(Pred) and

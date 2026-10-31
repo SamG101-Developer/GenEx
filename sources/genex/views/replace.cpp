@@ -18,7 +18,8 @@ namespace genex::views::detail::concepts {
     std::sentinel_for<S, I> and
     std::indirect_equivalence_relation<
       operations::eq, std::projected<I, Proj>, std::remove_cvref_t<Old> const*> and
-    std::convertible_to<New, iter_value_t<I>>;
+    std::convertible_to<New, iter_value_t<I>> and
+    std::move_constructible<Proj>;
 
   template <typename Rng, typename Old, typename New, typename Proj>
   concept replaceable_range =
@@ -117,10 +118,10 @@ namespace genex::views {
     }
 
     template <typename Old, typename New, typename Proj = meta::identity>
-    requires (not range<Old>)
-    GENEX_INLINE constexpr auto operator()(Old old_value, New new_value, Proj proj = {}) const noexcept(
-      SAFE_CTOR(replace_fn) and SAFE_MOVE(Old) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
-      return meta::bind_back(replace_fn{}, std::move(old_value), std::move(new_value), std::move(proj));
+    requires closure_value<Old>
+    GENEX_INLINE constexpr auto operator()(Old &&old_value, New new_value, Proj proj = {}) const noexcept(
+      SAFE_CTOR(replace_fn) and SAFE_CTOR(std::decay_t<Old>, Old) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
+      return meta::bind_back(replace_fn{}, std::forward<Old>(old_value), std::move(new_value), std::move(proj));
     }
   };
 

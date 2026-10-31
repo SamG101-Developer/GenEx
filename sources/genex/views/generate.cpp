@@ -13,7 +13,8 @@ namespace genex::views::detail::concepts {
   concept generatable_fn =
     std::invocable<F&> and
     not std::is_void_v<std::invoke_result_t<F&>> and
-    std::movable<std::remove_cvref_t<std::invoke_result_t<F&>>>;
+    std::movable<std::remove_cvref_t<std::invoke_result_t<F&>>> and
+    std::move_constructible<F>;
 }
 
 namespace genex::views::detail::impl {

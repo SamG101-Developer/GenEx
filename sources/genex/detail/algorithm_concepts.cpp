@@ -1,14 +1,13 @@
 export module genex.detail.algorithm_concepts;
 import genex.concepts;
+import genex.detail.predicate_iters;
 import genex.operations.cmp;
 import std;
 
 namespace genex::algorithms::detail::concepts {
   export template <typename I, typename S, typename Pred, typename Proj>
   concept quantifiable_iters =
-    std::input_iterator<I> and
-    std::sentinel_for<S, I> and
-    std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
+    genex::detail::predicate_iters<I, S, Pred, Proj>;
 
   export template <typename Rng, typename Pred, typename Proj>
   concept quantifiable_range =
@@ -24,7 +23,5 @@ namespace genex::algorithms::detail::concepts {
 
   export template <typename I, typename S, typename Pred, typename Proj>
   concept findable_if_iters =
-    std::input_iterator<I> and
-    std::sentinel_for<S, I> and
-    std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
+    genex::detail::predicate_iters<I, S, Pred, Proj>;
 }

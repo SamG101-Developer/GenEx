@@ -9,16 +9,16 @@ import std;
 
 namespace genex::strings::detail::concepts {
   template <typename I, typename S>
-  concept can_case_iters =
+  concept casable_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
     char_like<iter_value_t<I>>;
 
   template <typename Rng>
-  concept can_case_range =
+  concept casable_range =
     non_dangling_range<Rng> and
     input_range<Rng> and
-    can_case_iters<iterator_t<Rng>, sentinel_t<Rng>>;
+    casable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
 namespace genex::strings::detail::impl {
@@ -54,14 +54,14 @@ namespace genex::strings::detail::impl {
 namespace genex::strings {
   struct upper_case_fn : pipe_closure {
     template <typename I, typename S>
-    requires detail::concepts::can_case_iters<I, S>
+    requires detail::concepts::casable_iters<I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const {
       return views::transform(
         std::move(first), std::move(last), detail::impl::to_upper_fn{});
     }
 
     template <typename Rng>
-    requires detail::concepts::can_case_range<Rng>
+    requires detail::concepts::casable_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       return views::transform(
         std::forward<Rng>(rng), detail::impl::to_upper_fn{});
@@ -70,14 +70,14 @@ namespace genex::strings {
 
   struct lower_case_fn : pipe_closure {
     template <typename I, typename S>
-    requires detail::concepts::can_case_iters<I, S>
+    requires detail::concepts::casable_iters<I, S>
     GENEX_INLINE constexpr auto operator()(I first, S last) const {
       return views::transform(
         std::move(first), std::move(last), detail::impl::to_lower_fn{});
     }
 
     template <typename Rng>
-    requires detail::concepts::can_case_range<Rng>
+    requires detail::concepts::casable_range<Rng>
     GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       return views::transform(
         std::forward<Rng>(rng), detail::impl::to_lower_fn{});

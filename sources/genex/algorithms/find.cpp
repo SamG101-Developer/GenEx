@@ -19,7 +19,7 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename E, typename Proj>
   requires concepts::findable_iters<I, S, E, Proj>
-  constexpr auto do_find(I first, S last, E &&elem, Proj &&proj) -> I {
+  constexpr auto do_find(I first, S last, E &&elem, Proj proj) -> I {
     for (; first != last; ++first) {
       if (meta::invoke(proj, *first) == elem) { break; }
     }
@@ -32,20 +32,20 @@ namespace genex {
     template <typename I, typename S, typename E, typename Proj = meta::identity>
     requires algorithms::detail::concepts::findable_iters<I, S, E, Proj>
     GENEX_INLINE constexpr auto operator()(
-      I first, S last, E &&elem, Proj &&proj = {}) const -> I {
+      I first, S last, E &&elem, Proj proj = {}) const -> I {
       return algorithms::detail::impl::do_find(
         std::move(first), std::move(last),
-        std::forward<E>(elem), std::forward<Proj>(proj));
+        std::forward<E>(elem), std::move(proj));
     }
 
     template <typename Rng, typename E, typename Proj = meta::identity>
     requires algorithms::detail::concepts::findable_range<Rng, E, Proj>
     GENEX_INLINE constexpr auto operator()(
-      Rng &&rng, E &&elem, Proj &&proj = {}) const -> borrowed_iterator_t<Rng> {
+      Rng &&rng, E &&elem, Proj proj = {}) const -> borrowed_iterator_t<Rng> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_find(
         std::move(first), std::move(last),
-        std::forward<E>(elem), std::forward<Proj>(proj));
+        std::forward<E>(elem), std::move(proj));
     }
   };
 

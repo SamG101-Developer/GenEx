@@ -152,6 +152,24 @@ export namespace genex {
     (has_std_begin<Rng> or has_member_begin<Rng>) and
     (has_std_end<Rng> or has_member_end<Rng>);
 
+  /**
+   * What a closure can take as its callable. A parameter by value decays an array, so without the check on pointers,
+   * calling @c views::transform(array,f) directly would also match the closure taking @c f as a projection.
+   */
+  template <typename F>
+  concept closure_callable =
+    (not range<F>) and
+    (not std::is_pointer_v<F> or std::is_function_v<std::remove_pointer_t<F>>);
+
+  /**
+   * What a closure can take as a value, which it has to see before any decay as a pointer is a perfectly good value. An
+   * array is the range of a direct call instead, other than a string literal, which is a value to any range of strings.
+   */
+  template <typename E>
+  concept closure_value =
+    (not range<E>) or
+    std::same_as<std::remove_extent_t<std::remove_reference_t<E>>, const char>;
+
   /// The base of every view. A view is cheap to move, and the iterators it
   /// hands out hold copies of what they use, so they stay valid after the view
   /// itself is gone.

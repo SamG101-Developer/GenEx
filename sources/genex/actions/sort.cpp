@@ -11,7 +11,7 @@ import std;
 
 namespace genex::actions::detail::concepts {
   template <typename Rng, typename Comp, typename Proj>
-  concept can_sort_range =
+  concept sortable_range =
     random_access_range<Rng> and
     std::sortable<iterator_t<Rng>, Comp, Proj>;
 }
@@ -19,7 +19,7 @@ namespace genex::actions::detail::concepts {
 namespace genex::actions {
   struct sort_fn : pipe_closure {
     template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
-    requires detail::concepts::can_sort_range<Rng, Comp, Proj>
+    requires detail::concepts::sortable_range<Rng, Comp, Proj>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       auto sorter = [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
@@ -33,7 +33,7 @@ namespace genex::actions {
     }
 
     template <typename Comp = operations::lt, typename Proj = meta::identity>
-    requires (not range<Comp>)
+    requires closure_callable<Comp>
     GENEX_INLINE constexpr auto operator()(Comp comp, Proj proj = {}) const {
       return meta::bind_back(sort_fn{}, std::move(comp), std::move(proj));
     }
@@ -41,7 +41,7 @@ namespace genex::actions {
 
   struct stable_sort_fn : pipe_closure {
     template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
-    requires detail::concepts::can_sort_range<Rng, Comp, Proj>
+    requires detail::concepts::sortable_range<Rng, Comp, Proj>
     GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
       auto [first, last] = iterators::iter_pair(rng);
       auto sorter = [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
@@ -55,7 +55,7 @@ namespace genex::actions {
     }
 
     template <typename Comp = operations::lt, typename Proj = meta::identity>
-    requires (not range<Comp>)
+    requires closure_callable<Comp>
     GENEX_INLINE constexpr auto operator()(Comp comp, Proj proj = {}) const {
       return meta::bind_back(stable_sort_fn{}, std::move(comp), std::move(proj));
     }

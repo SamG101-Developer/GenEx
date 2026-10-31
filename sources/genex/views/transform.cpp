@@ -16,7 +16,9 @@ namespace genex::views::detail::concepts {
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
     std::indirectly_unary_invocable<Proj, I> and
-    std::indirectly_unary_invocable<F, std::projected<I, Proj>>;
+    std::indirectly_unary_invocable<F, std::projected<I, Proj>> and
+    std::move_constructible<F> and
+    std::move_constructible<Proj>;
 
   template <typename Rng, typename F, typename Proj = meta::identity>
   concept transformable_range =
@@ -135,7 +137,7 @@ namespace genex::views {
     }
 
     template <typename F, typename Proj = meta::identity>
-    requires (not range<F>)
+    requires closure_callable<F>
     GENEX_INLINE constexpr auto operator()(F f, Proj proj = {}) const noexcept(
       SAFE_CTOR(transform_fn) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
       return meta::bind_back(transform_fn{}, std::move(f), std::move(proj));
