@@ -15,8 +15,8 @@ namespace genex::detail {
   template <typename F, typename G>
   struct composed_adaptor : pipe_closure {
     // Not "GENEX_NO_UNIQUE_ADDRESS". Both of these and this struct share the
-    // "pipe_closure" base, and overlapping them gave MSVC a corrupted "g" when
-    // "f" was empty.
+    // "pipe_closure" base, and with them overlapping, "reverse | take(2)" threw
+    // "vector too long" on MSVC.
     F f;
     G g;
 
