@@ -30,7 +30,7 @@ namespace genex::algorithms::detail::impl {
   GENEX_INLINE constexpr auto do_contains(
     I first, S last, E &&elem, Proj proj) -> bool {
     auto it = genex::find(
-      std::move(first), std::move(last),
+      std::move(first), last,
       std::forward<E>(elem), std::move(proj));
     return it != last;
   }
