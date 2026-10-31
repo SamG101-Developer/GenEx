@@ -6,6 +6,8 @@ import genex.concepts;
 import genex.iterators.iter_pair;
 import genex.meta;
 import genex.operations.cmp;
+import genex.subrange;
+import genex.to_container;
 import std;
 
 namespace genex::algorithms::detail::concepts {
@@ -26,8 +28,7 @@ namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Comp, typename Proj>
     requires concepts::sortabled_iters<I, S, Comp, Proj>
   constexpr auto do_sorted(I first, S last, Comp &&comp, Proj &&proj) -> std::vector<iter_value_t<I>> {
-    auto vec = std::vector<iter_value_t<I>>();
-    for (; first != last; ++first) { vec.push_back(*first); }
+    auto vec = genex::to_base_fn<std::vector>(genex::subrange(std::move(first), std::move(last)));
     std::sort(vec.begin(), vec.end(), [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
       return meta::invoke(comp, meta::invoke(proj, std::forward<Lhs>(lhs)), meta::invoke(proj, std::forward<Rhs>(rhs)));
     });
