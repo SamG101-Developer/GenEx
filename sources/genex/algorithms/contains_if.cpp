@@ -28,10 +28,10 @@ namespace genex::algorithms::detail::impl {
   requires concepts::containable_if_iters<I, S, Pred, Proj>
   GENEX_INLINE constexpr auto do_contains_if(
     I first, S last, Pred pred, Proj proj) -> bool {
-    auto it = genex::find_if(
-      std::move(first), std::move(last),
-      std::move(pred), std::move(proj));
-    return it != last;
+    for (; first != last; ++first) {
+      if (meta::invoke(pred, meta::invoke(proj, *first))) { return true; }
+    }
+    return false;
   }
 }
 

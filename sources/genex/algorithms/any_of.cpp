@@ -2,7 +2,7 @@ module;
 #include <genex/detail/macros.hpp>
 
 export module genex.algorithms.any_of;
-import genex.algorithms.find_if;
+import genex.concepts;
 import genex.detail.algorithm_concepts;
 import genex.iterators.iter_pair;
 import genex.meta;
@@ -13,10 +13,10 @@ namespace genex::algorithms::detail::impl {
   requires concepts::quantifiable_iters<I, S, Pred, Proj>
   GENEX_INLINE constexpr auto do_any_of(
     I first, S last, Pred pred, Proj proj) -> bool {
-    auto it = genex::find_if(
-      std::move(first), last,
-      std::move(pred), std::move(proj));
-    return it != last;
+    for (; first != last; ++first) {
+      if (meta::invoke(pred, meta::invoke(proj, *first))) { return true; }
+    }
+    return false;
   }
 }
 

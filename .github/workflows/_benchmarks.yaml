@@ -13,6 +13,12 @@
 # and that decides which loops are vectorized. To match this job
 # locally, configure with -DCMAKE_CXX_FLAGS=-march=x86-64-v3.
 #
+# Loops are aligned to a cache line, as they otherwise land at
+# either the start or the middle of one depending on the size of
+# whatever comes before them. A loop that crosses a line can be 30%
+# slower on the runners' AMD CPUs than the same loop that doesn't,
+# so without this an unrelated edit could fail or pass a pair.
+#
 # To update the baseline, take baseline.json from this job's
 # artifact and commit it to benchmarks/ with the change that moved
 # the numbers, where it can be reviewed like anything else.
@@ -52,7 +58,7 @@ jobs:
       - name: Build
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DGENEX_BUILD_BENCHMARKS=ON \
-            -DCMAKE_CXX_FLAGS=-march=x86-64-v3
+            "-DCMAKE_CXX_FLAGS=-march=x86-64-v3 -falign-loops=64 -falign-jumps=64"
           cmake --build build --parallel --target GenExBenchmark
 
       # The versions go in with the results, as a baseline is only
