@@ -52,7 +52,8 @@ namespace genex {
       typename Rng, typename Comp = operations::gt,
       typename Proj = meta::identity>
     requires algorithms::detail::concepts::maxable_range<Rng, Comp, Proj>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {},
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Comp comp = {},
       Proj proj = {}) const -> borrowed_reference_t<Rng> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_max_element(

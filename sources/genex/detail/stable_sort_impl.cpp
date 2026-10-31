@@ -12,6 +12,9 @@ import std;
 
 export namespace genex::algorithms::detail {
   inline constexpr auto stable_insertion_sort_limit = 20;
+  inline constexpr auto stable_run_change_divisor = 3;
+  inline constexpr std::ptrdiff_t stable_run_window_size = 128;
+  inline constexpr std::ptrdiff_t stable_run_windows = 8;
 
   // These take the element as it's stored, so that a comparison taking non-const
   // references can be used, which going through a search taking a key can't do.
@@ -170,16 +173,44 @@ export namespace genex::algorithms::detail {
     merge_buffered(first, mid, last, less, buffer);
   }
 
+  /// Whether a branch on each comparison will mostly be predicted, going by how
+  /// often the data changes between rising and falling. It's the changes that
+  /// count, as a long falling stretch is as predictable as a long rising one. Only
+  /// a few windows spread across the data are looked at, as comparing can itself
+  /// involve the unpredictable branches this is trying to avoid.
+  template <typename I, typename Less>
+  requires cheap_elements<I>
+  auto has_long_runs(const I first, const I last, Less &less) -> bool {
+    using diff_t = iter_difference_t<I>;
+    const diff_t count = last - first;
+    const auto step = std::max(count / stable_run_windows, stable_run_window_size);
+    auto changes = diff_t{0};
+    auto compared = diff_t{0};
+    for (auto start = diff_t{0}; start < count - 1; start += step) {
+      const auto end = std::min(start + stable_run_window_size, count);
+      auto falling = static_cast<bool>(less(first[start + 1], first[start]));
+      for (auto i = start + 2; i < end; ++i) {
+        const bool now_falling = less(first[i], first[i - 1]);
+        changes += now_falling != falling;
+        falling = now_falling;
+      }
+      compared += end - start;
+    }
+    return changes < compared / stable_run_change_divisor;
+  }
+
   template <typename I, typename Less>
   constexpr auto stable_sort_any(const I first, const I last, Less &less) -> void {
     if (finish_if_one_run(first, last, less)) { return; }
 
     if constexpr (cheap_elements<I>) {
       if not consteval {
-        auto buffer = genex::detail::temporary_buffer<iter_value_t<I>>(static_cast<std::size_t>(last - first));
-        if (buffer.capacity() != 0) {
-          stable_sort_branchless(first, last, less, buffer.data());
-          return;
+        if (not has_long_runs(first, last, less)) {
+          auto buffer = genex::detail::temporary_buffer<iter_value_t<I>>(static_cast<std::size_t>(last - first));
+          if (buffer.capacity() != 0) {
+            stable_sort_branchless(first, last, less, buffer.data());
+            return;
+          }
         }
       }
     }

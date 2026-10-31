@@ -26,21 +26,28 @@ namespace genex::algorithms::detail::concepts {
 
 namespace genex {
   struct sort_fn {
-    template <typename I, typename S, typename Comp = operations::lt, typename Proj = meta::identity>
+    template <
+      typename I, typename S, typename Comp = operations::lt,
+      typename Proj = meta::identity>
     requires algorithms::detail::concepts::sortable_iters<I, S, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(I first, S last, Comp comp = {}, Proj proj = {}) const -> I {
+    GENEX_INLINE constexpr auto operator()(
+      I first, S last, Comp comp = {}, Proj proj = {}) const -> I {
       auto end = iterators::next(first, std::move(last));
       auto less = genex::detail::projected_less<Comp, Proj>{comp, proj};
       algorithms::detail::sort_any(std::move(first), end, less);
       return end;
     }
 
-    template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
+    template <
+      typename Rng, typename Comp = operations::lt,
+      typename Proj = meta::identity>
     requires algorithms::detail::concepts::sortable_range<Rng, Comp, Proj>
     GENEX_INLINE constexpr auto operator()(
-      Rng &&rng, Comp comp = {}, Proj proj = {}) const -> borrowed_iterator_t<Rng> {
+      Rng &&rng, Comp comp = {},
+      Proj proj = {}) const -> borrowed_iterator_t<Rng> {
       auto [first, last] = iterators::iter_pair(rng);
-      return (*this)(std::move(first), std::move(last), std::move(comp), std::move(proj));
+      return (*this)(
+        std::move(first), std::move(last), std::move(comp), std::move(proj));
     }
   };
 

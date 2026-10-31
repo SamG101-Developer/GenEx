@@ -3,6 +3,7 @@ module;
 
 export module genex.algorithms.equals;
 import genex.concepts;
+import genex.detail.libc_scan;
 import genex.iterators.iter_pair;
 import genex.meta;
 import genex.operations.cmp;
@@ -21,6 +22,13 @@ namespace genex::algorithms::detail::concepts {
       Comp, projected<I1, Proj1>, projected<I2, Proj2>>;
 
   template <
+    typename I1, typename S1, typename I2, typename S2,
+    typename Comp, typename Proj1, typename Proj2>
+  concept libc_equatable_iters =
+    equatable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2> and
+    genex::detail::libc_equal_usable<I1, S1, I2, S2, Comp, Proj1, Proj2>;
+
+  template <
     typename Rng1, typename Rng2, typename Comp, typename Proj1, typename Proj2>
   concept equatable_ranges =
     input_range<Rng1> and
@@ -34,15 +42,40 @@ namespace genex::algorithms::detail::impl {
   template <
     typename I1, typename S1, typename I2, typename S2, typename Comp,
     typename Proj1, typename Proj2>
-  requires concepts::equatable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
-  constexpr auto do_equals(
-    I1 first1, S1 last1, I2 first2, S2 last2, Comp comp,
-    Proj1 proj1, Proj2 proj2) -> bool {
+  GENEX_INLINE constexpr auto equals_by_element(
+    I1 first1, S1 last1, I2 first2, S2 last2, Comp &comp,
+    Proj1 &proj1, Proj2 &proj2) -> bool {
     for (; first1 != last1 and first2 != last2; ++first1, ++first2) {
       if (not meta::invoke(comp, meta::invoke(proj1, *first1), meta::invoke(proj2, *first2))) { return false; }
     }
     return first1 == last1
       and first2 == last2;
+  }
+
+  template <
+    typename I1, typename S1, typename I2, typename S2, typename Comp,
+    typename Proj1, typename Proj2>
+  requires concepts::equatable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
+  constexpr auto do_equals(
+    I1 first1, S1 last1, I2 first2, S2 last2, Comp comp,
+    Proj1 proj1, Proj2 proj2) -> bool {
+    return equals_by_element(first1, last1, first2, last2, comp, proj1, proj2);
+  }
+
+  // libc can't be called at compile time, which needs the elements comparing.
+  template <
+    typename I1, typename S1, typename I2, typename S2, typename Comp,
+    typename Proj1, typename Proj2>
+  requires concepts::libc_equatable_iters<I1, S1, I2, S2, Comp, Proj1, Proj2>
+  constexpr auto do_equals(
+    I1 first1, S1 last1, I2 first2, S2 last2, Comp comp,
+    Proj1 proj1, Proj2 proj2) -> bool {
+    if consteval {
+      return equals_by_element(first1, last1, first2, last2, comp, proj1, proj2);
+    }
+    else {
+      return genex::detail::libc_equal_iters(first1, last1, first2, last2);
+    }
   }
 }
 

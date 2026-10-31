@@ -23,21 +23,23 @@ namespace genex::algorithms::detail::concepts {
 
 namespace genex::algorithms::detail::impl {
   template <typename I>
+  requires std::bidirectional_iterator<I>
   constexpr auto do_reverse(I first, I last) -> void {
-    if constexpr (std::random_access_iterator<I>) {
-      // Knowing the count up front leaves a loop that can be vectorized.
-      const auto swaps = (last - first) / 2;
-      for (auto i = iter_difference_t<I>{0}; i < swaps; ++i) {
-        --last;
-        iterators::iter_swap(first, last);
-        ++first;
-      }
+    while (first != last and first != --last) {
+      iterators::iter_swap(first, last);
+      ++first;
     }
-    else {
-      while (first != last and first != --last) {
-        iterators::iter_swap(first, last);
-        ++first;
-      }
+  }
+
+  template <typename I>
+  requires std::random_access_iterator<I>
+  constexpr auto do_reverse(I first, I last) -> void {
+    // Knowing the count up front leaves a loop that can be vectorized.
+    const auto swaps = (last - first) / 2;
+    for (auto i = iter_difference_t<I>{0}; i < swaps; ++i) {
+      --last;
+      iterators::iter_swap(first, last);
+      ++first;
     }
   }
 }

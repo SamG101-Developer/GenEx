@@ -18,7 +18,8 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Pred, typename Proj>
   requires concepts::findable_if_iters<I, S, Pred, Proj>
-  constexpr auto do_find_if(I first, S last, Pred pred, Proj proj) -> I {
+  constexpr auto do_find_if(
+    I first, S last, Pred pred, Proj proj) -> I {
     for (; first != last; ++first) {
       if (meta::invoke(pred, meta::invoke(proj, *first))) { break; }
     }

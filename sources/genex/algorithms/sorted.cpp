@@ -42,8 +42,10 @@ namespace genex {
     template <
       typename I, typename S, typename Comp = operations::lt,
       typename Proj = meta::identity>
-    requires algorithms::detail::concepts::sorted_copyable_iters<I, S, Comp, Proj>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I first, S last, Comp comp = {},
+    requires algorithms::detail::concepts::sorted_copyable_iters<
+      I, S, Comp, Proj>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last, Comp comp = {},
       Proj proj = {}) const -> std::vector<iter_value_t<I>> {
       return algorithms::detail::impl::do_sorted(
         std::move(first), std::move(last),
@@ -53,8 +55,10 @@ namespace genex {
     template <
       typename Rng, typename Comp = operations::lt,
       typename Proj = meta::identity>
-    requires algorithms::detail::concepts::sorted_copyable_range<Rng, Comp, Proj>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {},
+    requires algorithms::detail::concepts::sorted_copyable_range<
+      Rng, Comp, Proj>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Comp comp = {},
       Proj proj = {}) const -> std::vector<range_value_t<Rng>> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_sorted(

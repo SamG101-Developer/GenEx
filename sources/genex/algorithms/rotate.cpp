@@ -29,13 +29,15 @@ namespace genex::algorithms::detail::impl {
   // Calling those directly gave GCC 16 an internal compiler error in Release, in
   // files that both "import std" and use this, on what looks to be the fortified
   // memmove that glibc's headers define inline.
-  GENEX_INLINE auto copy_bytes_forwards(void *const to, const void *const from, const std::size_t count) -> void {
+  GENEX_INLINE auto copy_bytes_forwards(
+    void *const to, const void *const from, const std::size_t count) -> void {
     auto *const out = static_cast<std::byte*>(to);
     const auto *const in = static_cast<const std::byte*>(from);
     for (auto i = 0uz; i < count; ++i) { out[i] = in[i]; }
   }
 
-  GENEX_INLINE auto copy_bytes_backwards(void *const to, const void *const from, const std::size_t count) -> void {
+  GENEX_INLINE auto copy_bytes_backwards(
+    void *const to, const void *const from, const std::size_t count) -> void {
     auto *const out = static_cast<std::byte*>(to);
     const auto *const in = static_cast<const std::byte*>(from);
     for (auto i = count; i > 0; --i) { out[i - 1] = in[i - 1]; }
@@ -52,7 +54,8 @@ namespace genex::algorithms::detail::impl {
   /// vectorized.
   template <typename I>
   requires std::random_access_iterator<I>
-  constexpr auto rotate_by_blocks(I first, I mid, I last) -> I {
+  constexpr auto rotate_by_blocks(
+    I first, I mid, I last) -> I {
     using diff_t = iter_difference_t<I>;
     auto left = mid - first;
     auto right = last - mid;
@@ -82,7 +85,8 @@ namespace genex::algorithms::detail::impl {
 
   template <typename I>
   requires std::bidirectional_iterator<I>
-  constexpr auto rotate_by_reversing(I first, I mid, I last) -> I {
+  constexpr auto rotate_by_reversing(
+    I first, I mid, I last) -> I {
     genex::reverse(first, mid);
     genex::reverse(mid, last);
     while (first != mid and mid != last) {
@@ -99,7 +103,8 @@ namespace genex::algorithms::detail::impl {
   }
 
   template <typename I>
-  constexpr auto rotate_forward(I first, I mid, const I last) -> I {
+  constexpr auto rotate_forward(
+    I first, I mid, const I last) -> I {
     auto next = mid;
     do {
       iterators::iter_swap(first, next);
@@ -121,7 +126,8 @@ namespace genex::algorithms::detail::impl {
   }
 
   template <typename I>
-  constexpr auto do_rotate(I first, I mid, I last) -> I {
+  constexpr auto do_rotate(
+    I first, I mid, I last) -> I {
     if (first == mid) { return last; }
     if (mid == last) { return first; }
 
@@ -168,7 +174,8 @@ namespace genex {
   struct rotate_fn {
     template <typename I, typename S>
     requires algorithms::detail::concepts::rotatable_iters<I, S>
-    GENEX_INLINE constexpr auto operator()(I first, I mid, S last) const -> I {
+    GENEX_INLINE constexpr auto operator()(
+      I first, I mid, S last) const -> I {
       auto end = iterators::next(mid, std::move(last));
       return algorithms::detail::impl::do_rotate(
         std::move(first), std::move(mid), std::move(end));

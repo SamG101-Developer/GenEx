@@ -31,7 +31,8 @@ namespace genex::algorithms::detail::impl {
   }
 
   template <typename I, typename E, typename Comp, typename Proj>
-  constexpr auto do_upper_bound(I first, I last, const E &elem, Comp &comp, Proj &proj) -> I {
+  constexpr auto do_upper_bound(
+    I first, I last, const E &elem, Comp &comp, Proj &proj) -> I {
     using diff_t = iter_difference_t<I>;
     if constexpr (std::random_access_iterator<I>) {
       auto count = last - first;
@@ -72,9 +73,11 @@ namespace genex {
     template <
       typename I, typename S, typename E, typename Comp = operations::lt,
       typename Proj = meta::identity>
-    requires algorithms::detail::concepts::upper_boundable_iters<I, S, E, Comp, Proj>
+    requires algorithms::detail::concepts::upper_boundable_iters<
+      I, S, E, Comp, Proj>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      I first, S last, const E &elem, Comp comp = {}, Proj proj = {}) const -> I {
+      I first, S last, const E &elem, Comp comp = {},
+      Proj proj = {}) const -> I {
       auto end = iterators::next(first, std::move(last));
       return algorithms::detail::impl::do_upper_bound(
         std::move(first), std::move(end), elem, comp, proj);
@@ -83,11 +86,15 @@ namespace genex {
     template <
       typename Rng, typename E, typename Comp = operations::lt,
       typename Proj = meta::identity>
-    requires algorithms::detail::concepts::upper_boundable_range<Rng, E, Comp, Proj>
+    requires algorithms::detail::concepts::upper_boundable_range<
+      Rng, E, Comp, Proj>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      Rng &&rng, const E &elem, Comp comp = {}, Proj proj = {}) const -> borrowed_iterator_t<Rng> {
+      Rng &&rng, const E &elem, Comp comp = {},
+      Proj proj = {}) const -> borrowed_iterator_t<Rng> {
       auto [first, last] = iterators::iter_pair(rng);
-      return (*this)(std::move(first), std::move(last), elem, std::move(comp), std::move(proj));
+      return (*this)(
+        std::move(first), std::move(last), elem,
+        std::move(comp), std::move(proj));
     }
   };
 

@@ -39,7 +39,8 @@ namespace genex::algorithms::detail::impl {
 
   template <typename I, typename S, typename E, typename Proj>
   requires concepts::findable_last_iters<I, S, E, Proj>
-  constexpr auto do_find_last(I first, S last, E &&elem, Proj proj) -> I {
+  constexpr auto do_find_last(
+    I first, S last, E &&elem, Proj proj) -> I {
     auto result = first;
     auto found = false;
     for (; first != last; ++first) {

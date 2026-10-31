@@ -24,19 +24,22 @@ namespace genex {
   struct for_each_fn {
     template <typename I, typename S, typename F>
     requires algorithms::detail::concepts::for_eachable_iters<I, S, F>
-    constexpr auto operator()(I first, S last, F f) const {
+    constexpr auto operator()(
+      I first, S last, F f) const {
       for (; first != last; ++first) { meta::invoke(f, *first); }
     }
 
     template <typename Rng, typename F>
     requires algorithms::detail::concepts::for_eachable_range<Rng, F>
-    constexpr auto operator()(Rng &&rng, F f) const {
+    constexpr auto operator()(
+      Rng &&rng, F f) const {
       for (auto &&it : rng) { meta::invoke(f, std::forward<decltype(it)>(it)); }
     }
 
     template <typename F>
     requires closure_callable<F>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(F f) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      F f) const noexcept(
       SAFE_CTOR(for_each_fn) and SAFE_MOVE(F)) {
       return meta::bind_back(for_each_fn{}, std::move(f));
     }

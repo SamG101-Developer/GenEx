@@ -26,8 +26,8 @@ namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::positionable_last_iters<I, S, Pred, Proj>
     and std::bidirectional_iterator<I> and std::convertible_to<S, I>
-  constexpr auto do_position_last(I first, S last, Pred pred, Proj proj)
-    -> std::optional<std::size_t> {
+  constexpr auto do_position_last(
+    I first, S last, Pred pred, Proj proj) -> std::optional<std::size_t> {
     const auto rend = std::reverse_iterator<I>(first);
     auto it = genex::find_if(
       std::reverse_iterator<I>(static_cast<I>(std::move(last))), rend,
@@ -38,8 +38,8 @@ namespace genex::algorithms::detail::impl {
 
   template <typename I, typename S, typename Pred, typename Proj>
   requires concepts::positionable_last_iters<I, S, Pred, Proj>
-  constexpr auto do_position_last(I first, S last, Pred pred, Proj proj)
-    -> std::optional<std::size_t> {
+  constexpr auto do_position_last(
+    I first, S last, Pred pred, Proj proj) -> std::optional<std::size_t> {
     auto pos = std::optional<std::size_t>();
     for (auto i = 0uz; first != last; ++first, ++i) {
       if (meta::invoke(pred, meta::invoke(proj, *first))) { pos = i; }
