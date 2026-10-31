@@ -161,7 +161,7 @@ namespace genex {
   struct to_template_fn : pipe_closure {
     template <typename Rng>
     requires input_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       return to_impl<typename to_element<Out, range_value_t<Rng>>::type>(rng);
     }
   };
@@ -170,7 +170,7 @@ namespace genex {
   struct to_type_fn : pipe_closure {
     template <typename Rng>
     requires input_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> Out {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> Out {
       return to_impl<Out>(rng);
     }
   };

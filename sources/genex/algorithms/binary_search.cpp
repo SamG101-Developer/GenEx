@@ -46,7 +46,7 @@ namespace genex {
       typename Proj = meta::identity>
     requires algorithms::detail::concepts::binary_searchable_iters<
       I, S, E, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, E &&elem, Comp comp = {},
       Proj proj = {}) const -> bool {
       return algorithms::detail::impl::do_binary_search(
@@ -59,7 +59,7 @@ namespace genex {
       typename Proj = meta::identity>
     requires algorithms::detail::concepts::binary_searchable_range<
       Rng, E, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, E &&elem, Comp comp = {}, Proj proj = {}) const -> bool {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_binary_search(

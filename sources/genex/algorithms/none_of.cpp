@@ -25,7 +25,7 @@ namespace genex {
     template <
       typename I, typename S, typename Pred, typename Proj = meta::identity>
     requires algorithms::detail::concepts::quantifiable_iters<I, S, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, Pred pred, Proj proj = {}) const -> bool {
       return algorithms::detail::impl::do_none_of(
         std::move(first), std::move(last),
@@ -34,7 +34,7 @@ namespace genex {
 
     template <typename Rng, typename Pred, typename Proj = meta::identity>
     requires algorithms::detail::concepts::quantifiable_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, Pred pred, Proj proj = {}) const -> bool {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_none_of(

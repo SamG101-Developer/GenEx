@@ -74,7 +74,7 @@ namespace genex::actions {
 
     template <typename I, typename E>
     requires (not range<I>)
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I it, E elem) const {
       return meta::bind_back(insert_fn{}, std::move(it), std::move(elem));
     }

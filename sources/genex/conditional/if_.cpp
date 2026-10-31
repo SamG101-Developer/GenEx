@@ -69,7 +69,7 @@ namespace genex {
 
     template <typename Pred, typename Then>
     requires closure_callable<Pred>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Pred pred, Then then) const -> auto {
       return meta::bind_back(
         if_fn{}, std::move(pred), std::move(then));
@@ -87,7 +87,7 @@ namespace genex {
 
     template <typename Pred, typename Then>
     requires closure_callable<Pred>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Pred pred, Then then) const -> auto {
       return meta::bind_back(
         if_not_fn{}, std::move(pred), std::move(then));
@@ -103,7 +103,7 @@ namespace genex {
     }
 
     template <typename Then>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Then then) const -> auto {
       return meta::bind_back(
         if_empty_fn{}, std::move(then));
@@ -119,7 +119,7 @@ namespace genex {
     }
 
     template <typename Then>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Then then) const -> auto {
       return meta::bind_back(
         if_not_empty_fn{}, std::move(then));

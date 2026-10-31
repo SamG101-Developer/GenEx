@@ -31,7 +31,7 @@ namespace genex {
   struct find_fn {
     template <typename I, typename S, typename E, typename Proj = meta::identity>
     requires algorithms::detail::concepts::findable_iters<I, S, E, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, E &&elem, Proj proj = {}) const -> I {
       return algorithms::detail::impl::do_find(
         std::move(first), std::move(last),
@@ -40,7 +40,7 @@ namespace genex {
 
     template <typename Rng, typename E, typename Proj = meta::identity>
     requires algorithms::detail::concepts::findable_range<Rng, E, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, E &&elem, Proj proj = {}) const -> borrowed_iterator_t<Rng> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_find(

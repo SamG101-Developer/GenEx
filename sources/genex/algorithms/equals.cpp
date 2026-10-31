@@ -53,7 +53,7 @@ namespace genex {
       typename Proj1 = meta::identity, typename Proj2 = meta::identity>
     requires algorithms::detail::concepts::equatable_ranges<
       Rng1, Rng2, Comp, Proj1, Proj2>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng1 &&rng1, Rng2 &&rng2, Comp comp = {}, Proj1 proj1 = {},
       Proj2 proj2 = {}) const -> bool {
       auto [first1, last1] = iterators::iter_pair(rng1);

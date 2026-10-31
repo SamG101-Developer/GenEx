@@ -71,14 +71,14 @@ namespace genex::iterators {
   struct begin_fn {
     template <typename Rng>
     requires detail::concepts::beginable_select_begin<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_NOEX(rng.begin())) {
       return rng.begin();
     }
 
     template <typename Rng>
     requires detail::concepts::beginable_select_std_begin<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_NOEX(std::begin(std::forward<Rng>(rng)))) {
       return std::begin(std::forward<Rng>(rng));
     }
@@ -87,14 +87,14 @@ namespace genex::iterators {
   struct end_fn {
     template <typename Rng>
     requires detail::concepts::endable_select_end<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_NOEX(rng.end())) {
       return rng.end();
     }
 
     template <typename Rng>
     requires detail::concepts::endable_select_std_end<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
       SAFE_NOEX(std::end(std::forward<Rng>(rng)))) {
       return std::end(std::forward<Rng>(rng));
     }
@@ -103,13 +103,13 @@ namespace genex::iterators {
   struct rbegin_fn {
     template <typename Rng>
     requires detail::concepts::reverse_beginable_select_rbegin<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       return rng.rbegin();
     }
 
     template <typename Rng>
     requires detail::concepts::reverse_beginable_select_std_rbegin<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       return std::rbegin(std::forward<Rng>(rng));
     }
   };
@@ -117,13 +117,13 @@ namespace genex::iterators {
   struct rend_fn {
     template <typename Rng>
     requires detail::concepts::reverse_endable_select_rend<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       return rng.rend();
     }
 
     template <typename Rng>
     requires detail::concepts::reverse_endable_select_std_rend<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       return std::rend(std::forward<Rng>(rng));
     }
   };

@@ -38,13 +38,13 @@ namespace genex::actions {
 
     template <typename Int>
     requires std::integral<Int>
-    GENEX_INLINE constexpr auto operator()(const Int from, const Int to) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(const Int from, const Int to) const {
       return meta::bind_back(slice_fn{}, from, to);
     }
 
     template <typename Int>
     requires std::integral<Int>
-    GENEX_INLINE constexpr auto operator()(const Int from) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(const Int from) const {
       return meta::bind_back(slice_fn{}, from);
     }
   };

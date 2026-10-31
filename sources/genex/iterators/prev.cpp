@@ -16,14 +16,14 @@ namespace genex::iterators {
   struct prev_fn {
     template <typename I>
     requires detail::concepts::prevable_iters<I> and std::copyable<I>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I it, const iter_difference_t<I> n = 1) const -> I {
       return iterators::advance(it, -n);
     }
 
     template <typename I>
     requires detail::concepts::prevable_iters<I> and std::copyable<I>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I it, const iter_difference_t<I> n, const I bound) const -> I {
       if (n <= 0) { return it; }
       if constexpr (std::random_access_iterator<I>) {

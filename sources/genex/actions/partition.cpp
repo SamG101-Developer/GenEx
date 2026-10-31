@@ -35,7 +35,7 @@ namespace genex::actions {
 
     template <typename Pred, typename Proj = meta::identity>
     requires closure_callable<Pred>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Pred pred, Proj proj = {}) const {
       return meta::bind_back(partition_fn{}, std::move(pred), std::move(proj));
     }
@@ -58,7 +58,7 @@ namespace genex::actions {
 
     template <typename Pred, typename Proj = meta::identity>
     requires closure_callable<Pred>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Pred pred, Proj proj = {}) const {
       return meta::bind_back(
         stable_partition_fn{}, std::move(pred), std::move(proj));

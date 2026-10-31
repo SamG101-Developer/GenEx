@@ -33,7 +33,7 @@ namespace genex::actions {
 
     template <typename Int>
     requires std::integral<Int>
-    GENEX_INLINE constexpr auto operator()(const Int n) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(const Int n) const {
       GENEX_ASSERT(n >= 0);
       return meta::bind_back(rotate_fn{}, n);
     }

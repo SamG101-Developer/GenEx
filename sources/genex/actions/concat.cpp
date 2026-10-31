@@ -21,7 +21,7 @@ namespace genex::actions {
   struct concat_fn : pipe_closure {
     template <typename Rng1, typename Rng2>
     requires detail::concepts::concatenatable_range<Rng1, Rng2>
-    constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> Rng1 {
+    [[nodiscard]] constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> Rng1 {
       using I = iterator_t<Rng2>;
       constexpr auto moves_elems = not (
         std::is_lvalue_reference_v<Rng2> or non_dangling_range<Rng2>);
@@ -65,7 +65,7 @@ namespace genex::actions {
 
     template <typename Rng2>
     requires detail::concepts::concatenatable_range<Rng2>
-    GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
       return genex::detail::bind_range_back(concat_fn{}, std::forward<Rng2>(rng2));
     }
   };

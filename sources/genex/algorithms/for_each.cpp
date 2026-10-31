@@ -36,7 +36,7 @@ namespace genex {
 
     template <typename F>
     requires closure_callable<F>
-    GENEX_INLINE constexpr auto operator()(F f) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(F f) const noexcept(
       SAFE_CTOR(for_each_fn) and SAFE_MOVE(F)) {
       return meta::bind_back(for_each_fn{}, std::move(f));
     }

@@ -49,7 +49,7 @@ namespace genex {
       typename I, typename S, typename Comp = operations::lt,
       typename Proj = meta::identity>
     requires algorithms::detail::concepts::sortable_iters<I, S, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(I first, S last, Comp comp = {},
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I first, S last, Comp comp = {},
       Proj proj = {}) const -> std::vector<iter_value_t<I>> {
       return algorithms::detail::impl::do_sorted(
         std::move(first), std::move(last),
@@ -60,7 +60,7 @@ namespace genex {
       typename Rng, typename Comp = operations::lt,
       typename Proj = meta::identity>
     requires algorithms::detail::concepts::sortable_range<Rng, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {},
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {},
       Proj proj = {}) const -> std::vector<range_value_t<Rng>> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_sorted(

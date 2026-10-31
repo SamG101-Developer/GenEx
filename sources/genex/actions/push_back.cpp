@@ -58,7 +58,7 @@ namespace genex::actions {
     }
 
     template <typename E>
-    GENEX_INLINE constexpr auto operator()(E elem) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(E elem) const {
       return meta::bind_back(push_back_fn{}, std::move(elem));
     }
   };

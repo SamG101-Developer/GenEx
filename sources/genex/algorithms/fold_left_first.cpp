@@ -42,14 +42,14 @@ namespace genex {
   struct fold_left_first_fn {
     template <typename I, typename S, typename F>
     requires algorithms::detail::concepts::left_foldable_first_iters<I, S, F>
-    GENEX_INLINE constexpr auto operator()(I first, S last, F f) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I first, S last, F f) const {
       return algorithms::detail::impl::do_fold_left_first(
         std::move(first), std::move(last), std::move(f));
     }
 
     template <typename Rng, typename F>
     requires algorithms::detail::concepts::left_foldable_first_range<Rng, F>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, F f) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng, F f) const {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_fold_left_first(
         std::move(first), std::move(last), std::move(f));

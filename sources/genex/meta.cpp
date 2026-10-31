@@ -17,14 +17,14 @@ namespace genex::meta {
   struct deref_fn {
     template <typename T>
     requires detail::concepts::dereferenceable<T>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       T &&t) const -> decltype(*std::declval<T&>()) {
       return *std::forward<T>(t);
     }
 
     template <typename T>
     requires (not detail::concepts::dereferenceable<T>)
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       T &&t) const -> T&& {
       return std::forward<T>(t);
     }
@@ -34,7 +34,7 @@ namespace genex::meta {
 
   export struct identity {
     template <typename T>
-    GENEX_INLINE constexpr auto operator()(T &&x) const -> T&& {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(T &&x) const -> T&& {
       return std::forward<T>(x);
     }
   };
@@ -299,7 +299,7 @@ namespace genex::meta::detail {
 namespace genex::meta {
   struct bind_back_fn {
     template <typename F, typename... BoundArgs>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       F &&f, BoundArgs &&... bound_args) const
       -> detail::bind_back_impl_fn<std::decay_t<F>, std::decay_t<BoundArgs>...> {
       return {{}, {std::forward<F>(f), std::forward<BoundArgs>(bound_args)...}};
@@ -323,7 +323,7 @@ namespace genex::meta {
 
   struct not_fn {
     template <typename F>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       F &&f) const -> not_impl_fn<std::decay_t<F>> {
       return {std::forward<F>(f)};
     }

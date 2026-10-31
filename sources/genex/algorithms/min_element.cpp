@@ -38,7 +38,7 @@ namespace genex {
   struct min_element_fn {
     template <typename I, typename S, typename Comp = operations::lt, typename Proj = meta::identity>
     requires algorithms::detail::concepts::minable_iters<I, S, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, Comp comp = {},
       Proj proj = {}) const -> iter_reference_t<I> {
       return algorithms::detail::impl::do_min_element(
@@ -48,7 +48,7 @@ namespace genex {
 
     template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
     requires algorithms::detail::concepts::minable_range<Rng, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {},
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {},
       Proj proj = {}) const -> borrowed_reference_t<Rng> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_min_element(

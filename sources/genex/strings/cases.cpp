@@ -25,7 +25,7 @@ namespace genex::strings::detail::impl {
   struct to_upper_fn {
     template <typename C>
     requires char_like<C>
-    GENEX_INLINE constexpr auto operator()(C c) const -> C {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(C c) const -> C {
       if constexpr (wide_char_like<C>) {
         return static_cast<C>(std::towupper(static_cast<std::wint_t>(c)));
       }
@@ -39,7 +39,7 @@ namespace genex::strings::detail::impl {
   struct to_lower_fn {
     template <typename C>
     requires char_like<C>
-    GENEX_INLINE constexpr auto operator()(C c) const -> C {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(C c) const -> C {
       if constexpr (wide_char_like<C>) {
         return static_cast<C>(std::towlower(static_cast<std::wint_t>(c)));
       }
@@ -55,14 +55,14 @@ namespace genex::strings {
   struct upper_case_fn : pipe_closure {
     template <typename I, typename S>
     requires detail::concepts::casable_iters<I, S>
-    GENEX_INLINE constexpr auto operator()(I first, S last) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I first, S last) const {
       return views::transform(
         std::move(first), std::move(last), detail::impl::to_upper_fn{});
     }
 
     template <typename Rng>
     requires detail::concepts::casable_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       return views::transform(
         std::forward<Rng>(rng), detail::impl::to_upper_fn{});
     }
@@ -71,14 +71,14 @@ namespace genex::strings {
   struct lower_case_fn : pipe_closure {
     template <typename I, typename S>
     requires detail::concepts::casable_iters<I, S>
-    GENEX_INLINE constexpr auto operator()(I first, S last) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I first, S last) const {
       return views::transform(
         std::move(first), std::move(last), detail::impl::to_lower_fn{});
     }
 
     template <typename Rng>
     requires detail::concepts::casable_range<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
       return views::transform(
         std::forward<Rng>(rng), detail::impl::to_lower_fn{});
     }

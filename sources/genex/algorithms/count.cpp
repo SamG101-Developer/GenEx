@@ -40,7 +40,7 @@ namespace genex {
     template <
       typename I, typename S, typename E, typename Proj = meta::identity>
     requires algorithms::detail::concepts::countable_iters<I, S, E, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, E &&elem, Proj proj = {}) const -> std::size_t {
       return algorithms::detail::impl::do_count(
         std::move(first), std::move(last),
@@ -49,7 +49,7 @@ namespace genex {
 
     template <typename Rng, typename E, typename Proj = meta::identity>
     requires algorithms::detail::concepts::countable_range<Rng, E, Proj>
-    GENEX_INLINE constexpr auto operator()(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, E &&elem, Proj proj = {}) const -> std::size_t {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_count(

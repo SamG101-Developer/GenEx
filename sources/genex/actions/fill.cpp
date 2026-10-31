@@ -27,7 +27,7 @@ namespace genex::actions {
 
     template <typename E>
     requires (not range<E>)
-    GENEX_INLINE constexpr auto operator()(E value) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(E value) const {
       return meta::bind_back(fill_fn{}, std::move(value));
     }
   };
