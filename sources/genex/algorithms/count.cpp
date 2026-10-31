@@ -25,11 +25,11 @@ namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename E, typename Proj>
     requires concepts::can_count_iters<I, S, E, Proj>
   constexpr auto do_count(I first, S last, E &&elem, Proj &&proj) -> std::size_t {
-    auto count = 0uz;
+    auto count = iter_difference_t<I>{0};
     for (; first != last; ++first) {
       if (meta::invoke(proj, *first) == elem) { ++count; }
     }
-    return count;
+    return static_cast<std::size_t>(count);
   }
 }
 
