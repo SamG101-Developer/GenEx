@@ -2,6 +2,7 @@ module;
 #include <genex/detail/macros.hpp>
 
 export module genex.algorithms.find_last;
+import genex.algorithms.find_if;
 import genex.concepts;
 import genex.iterators.iter_pair;
 import genex.iterators.prev;
@@ -29,10 +30,11 @@ namespace genex::algorithms::detail::impl {
     and std::bidirectional_iterator<I> and std::convertible_to<S, I>
   constexpr auto do_find_last(I first, S last, E &&elem, Proj proj) -> I {
     auto end = static_cast<I>(std::move(last));
-    for (auto it = end; it != first; --it) {
-      if (meta::invoke(proj, *iterators::prev(it)) == elem) { return iterators::prev(it); }
-    }
-    return end;
+    const auto rend = std::reverse_iterator<I>(std::move(first));
+    auto it = genex::find_if(
+      std::reverse_iterator<I>(end), rend,
+      [&elem](const auto &value) { return value == elem; }, std::move(proj));
+    return it == rend ? end : iterators::prev(it.base());
   }
 
   template <typename I, typename S, typename E, typename Proj>

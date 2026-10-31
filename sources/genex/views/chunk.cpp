@@ -59,14 +59,6 @@ namespace genex::views::detail::impl {
       return genex::subrange(it, end_it);
     }
 
-    GENEX_INLINE constexpr auto deref() const -> decltype(auto)
-      requires std::random_access_iterator<I> and
-      std::sized_sentinel_for<S, I> {
-      const auto n = std::min(
-        static_cast<iter_difference_t<I>>(chunk_size), st - it);
-      return genex::subrange(it, it + n);
-    }
-
     GENEX_INLINE friend constexpr auto operator==(
       const chunk_iterator &self,
       const chunk_iterator &that) -> bool {
@@ -77,6 +69,56 @@ namespace genex::views::detail::impl {
       const chunk_iterator &self,
       chunk_sentinel) -> bool {
       return self.it == self.st;
+    }
+  };
+
+  /// Stepping by an offset keeps each chunk independent of the last, where
+  /// clamping an iterator to the end ties them together with a conditional
+  /// move.
+  template <typename I, typename S, typename Int>
+  requires concepts::chunkable_iters<I, S, Int> and
+    std::random_access_iterator<I> and std::sized_sentinel_for<S, I>
+  struct chunk_iterator<I, S, Int> :
+    genex::detail::iterator_ops<chunk_iterator<I, S, Int>> {
+    I it;
+    iter_difference_t<I> offset;
+    iter_difference_t<I> total;
+    iter_difference_t<I> chunk_size;
+
+    using value_type = genex::subrange<I>;
+    using reference = genex::subrange<I>;
+    using difference_type = iter_difference_t<I>;
+    using iterator_category = std::forward_iterator_tag;
+    using iterator_concept = iterator_category;
+
+    GENEX_INLINE constexpr chunk_iterator() = default;
+
+    GENEX_INLINE constexpr chunk_iterator(I first, S last, Int size) :
+      it(std::move(first)), offset(0), total(last - it),
+      chunk_size(static_cast<iter_difference_t<I>>(size)) {
+    }
+
+    GENEX_INLINE constexpr auto next() -> void {
+      offset += chunk_size;
+    }
+
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      const auto first = it + offset;
+      return genex::subrange(
+        first, it + std::min(offset + chunk_size, total));
+    }
+
+    GENEX_INLINE friend constexpr auto operator==(
+      const chunk_iterator &self,
+      const chunk_iterator &that) -> bool {
+      return std::min(self.offset, self.total) ==
+        std::min(that.offset, that.total) and self.it == that.it;
+    }
+
+    GENEX_INLINE friend constexpr auto operator==(
+      const chunk_iterator &self,
+      chunk_sentinel) -> bool {
+      return self.offset >= self.total;
     }
   };
 

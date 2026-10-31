@@ -14,7 +14,7 @@ namespace genex::algorithms::detail::impl {
   GENEX_INLINE constexpr auto do_all_of(
     I first, S last, Pred pred, Proj proj) -> bool {
     auto it = genex::find_if_not(
-      std::move(first), std::move(last),
+      std::move(first), last,
       std::move(pred), std::move(proj));
     return it == last;
   }

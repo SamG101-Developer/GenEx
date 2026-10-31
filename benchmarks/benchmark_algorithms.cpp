@@ -65,8 +65,48 @@ namespace {
     int y;
   };
 
-  auto vec() -> std::vector<int> {
-    auto data = std::vector<int>(size);
+  // Vectorized loops can run several times slower or faster depending on how
+  // their data is aligned. malloc only promises 16 bytes, so landing on a
+  // 32-byte boundary would otherwise be an accident of what was allocated
+  // before, which can differ between the sides of a pair and change with any
+  // unrelated edit. This puts the data GENEX_BENCH_OFFSET bytes past a 64-byte
+  // boundary instead, and check_ratios.py runs each offset that malloc could
+  // give. Only the contiguous data is moved, as spacing out the nodes of a list
+  // would measure the spacing.
+  const auto data_offset = [] {
+    const auto *const text = std::getenv("GENEX_BENCH_OFFSET");
+    return text != nullptr ? static_cast<std::size_t>(std::atoi(text)) : 0uz;
+  }();
+
+  template <typename T>
+  struct offset_allocator {
+    using value_type = T;
+
+    offset_allocator() = default;
+
+    template <typename U>
+    offset_allocator(const offset_allocator<U> &) {
+    }
+
+    auto allocate(const std::size_t n) -> T* {
+      auto *const base = static_cast<std::byte*>(
+        ::operator new(n * sizeof(T) + data_offset, std::align_val_t{64}));
+      return reinterpret_cast<T*>(base + data_offset);
+    }
+
+    auto deallocate(T *const ptr, std::size_t) -> void {
+      ::operator delete(
+        reinterpret_cast<std::byte*>(ptr) - data_offset, std::align_val_t{64});
+    }
+
+    auto operator==(const offset_allocator &) const -> bool = default;
+  };
+
+  template <typename T>
+  using offset_vector = std::vector<T, offset_allocator<T>>;
+
+  auto vec() -> offset_vector<int> {
+    auto data = offset_vector<int>(size);
     std::iota(data.begin(), data.end(), 0);
     return data;
   }
@@ -78,7 +118,7 @@ namespace {
   }
 
   // Two separate ranges, as comparing one to itself lets the compiler skip the comparison altogether.
-  auto vec_pair() -> std::pair<std::vector<int>, std::vector<int>> {
+  auto vec_pair() -> std::pair<offset_vector<int>, offset_vector<int>> {
     return {vec(), vec()};
   }
 
@@ -87,7 +127,7 @@ namespace {
   }
 
   // Shuffled with a fixed seed, so a sort has real work to do and each run sees the same data.
-  auto shuffled() -> std::vector<int> {
+  auto shuffled() -> offset_vector<int> {
     auto data = vec();
     auto engine = std::mt19937(42);
     std::shuffle(data.begin(), data.end(), engine);
@@ -99,8 +139,8 @@ namespace {
     return {data.begin(), data.end()};
   }
 
-  auto points() -> std::vector<Point> {
-    auto data = std::vector<Point>(size);
+  auto points() -> offset_vector<Point> {
+    auto data = offset_vector<Point>(size);
     for (auto i = 0; i < size; ++i) { data[static_cast<std::size_t>(i)] = Point{i, -i}; }
     return data;
   }

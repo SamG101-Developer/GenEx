@@ -2,6 +2,7 @@ module;
 #include <genex/detail/macros.hpp>
 
 export module genex.algorithms.position_last;
+import genex.algorithms.find_if;
 import genex.concepts;
 import genex.iterators.distance;
 import genex.iterators.iter_pair;
@@ -24,16 +25,15 @@ namespace genex::algorithms::detail::concepts {
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Pred, typename Proj>
     requires concepts::positionable_last_iters<I, S, Pred, Proj>
-    and std::bidirectional_iterator<I>
+    and std::bidirectional_iterator<I> and std::convertible_to<S, I>
   constexpr auto do_position_last(I first, S last, Pred pred, Proj proj)
     -> std::optional<std::size_t> {
-    auto pos = static_cast<std::size_t>(iterators::distance(first, last));
-    while (first != last) {
-      --last;
-      --pos;
-      if (meta::invoke(pred, meta::invoke(proj, *last))) { return pos; }
-    }
-    return std::nullopt;
+    const auto rend = std::reverse_iterator<I>(first);
+    auto it = genex::find_if(
+      std::reverse_iterator<I>(static_cast<I>(std::move(last))), rend,
+      std::move(pred), std::move(proj));
+    if (it == rend) { return std::nullopt; }
+    return static_cast<std::size_t>(iterators::distance(first, it.base())) - 1;
   }
 
   template <typename I, typename S, typename Pred, typename Proj>

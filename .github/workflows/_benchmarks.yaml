@@ -7,6 +7,12 @@
 # action getting slower, and that rarely depends on the compiler.
 # It has its own job as other work on the runner distorts results.
 #
+# The architecture is set explicitly, as what the compiler defaults
+# to depends on which Ubuntu variant it was installed from: the
+# runners use amd64v3, which gets AVX2 where plain amd64 gets none,
+# and that decides which loops are vectorized. To match this job
+# locally, configure with -DCMAKE_CXX_FLAGS=-march=x86-64-v3.
+#
 # To update the baseline, take baseline.json from this job's
 # artifact and commit it to benchmarks/ with the change that moved
 # the numbers, where it can be reviewed like anything else.
@@ -45,7 +51,8 @@ jobs:
 
       - name: Build
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DGENEX_BUILD_BENCHMARKS=ON
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DGENEX_BUILD_BENCHMARKS=ON \
+            -DCMAKE_CXX_FLAGS=-march=x86-64-v3
           cmake --build build --parallel --target GenExBenchmark
 
       # The versions go in with the results, as a baseline is only

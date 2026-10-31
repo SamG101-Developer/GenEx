@@ -2,6 +2,7 @@ module;
 #include <genex/detail/macros.hpp>
 
 export module genex.algorithms.find_last_if_not;
+import genex.algorithms.find_if_not;
 import genex.concepts;
 import genex.detail.predicate_iters;
 import genex.iterators.iter_pair;
@@ -27,12 +28,11 @@ namespace genex::algorithms::detail::impl {
   constexpr auto do_find_last_if_not(
     I first, S last, Pred pred, Proj proj) -> I {
     auto end = static_cast<I>(std::move(last));
-    for (auto it = end; it != first; --it) {
-      if (not meta::invoke(pred, meta::invoke(proj, *iterators::prev(it)))) {
-        return iterators::prev(it);
-      }
-    }
-    return end;
+    const auto rend = std::reverse_iterator<I>(std::move(first));
+    auto it = genex::find_if_not(
+      std::reverse_iterator<I>(end), rend,
+      std::move(pred), std::move(proj));
+    return it == rend ? end : iterators::prev(it.base());
   }
 
   template <typename I, typename S, typename Pred, typename Proj>
