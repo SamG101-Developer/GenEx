@@ -83,7 +83,7 @@ namespace genex {
 
   template <typename Out, typename Rng>
   concept bulk_fillable =
-    (not self_appending<Out, Rng>) and
+    not self_appending<Out, Rng> and
     reserve_pushable<Out, Rng> and
     std::copy_constructible<iterator_t<Rng>> and
     std::constructible_from<
