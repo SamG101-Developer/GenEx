@@ -17,7 +17,7 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions::detail {
-  thread_local std::mt19937_64 default_random{std::random_device{}()};
+  inline thread_local std::mt19937_64 default_random{std::random_device{}()};
 }
 
 namespace genex::actions {

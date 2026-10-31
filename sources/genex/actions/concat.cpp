@@ -22,21 +22,19 @@ namespace genex::actions {
       requires detail::concepts::concatenatable_range<Rng1, Rng2>
     constexpr auto operator()(Rng1 &&rng1, Rng2 &&rng2) const -> Rng1 {
       using I = iterator_t<Rng2>;
+      constexpr auto moves_elements = not (std::is_lvalue_reference_v<Rng2> or non_dangling_range<Rng2>);
+      using Source = std::conditional_t<moves_elements, std::move_iterator<I>, I>;
+
       // Knowing the whole range up front means one allocation and one copy, instead of one insert per element.
       if constexpr (std::same_as<I, sentinel_t<Rng2>> and
         std::derived_from<typename std::iterator_traits<I>::iterator_category, std::forward_iterator_tag> and
-        requires(I i) { rng1.insert(iterators::end(rng1), i, i); }) {
-        if constexpr (std::is_lvalue_reference_v<Rng2> or non_dangling_range<Rng2>) {
-          rng1.insert(iterators::end(rng1), iterators::begin(rng2), iterators::end(rng2));
-        }
-        else {
-          rng1.insert(iterators::end(rng1),
-                      std::make_move_iterator(iterators::begin(rng2)), std::make_move_iterator(iterators::end(rng2)));
-        }
+        requires(Source source) { rng1.insert(iterators::end(rng1), source, source); }) {
+        rng1.insert(iterators::end(rng1), Source(iterators::begin(rng2)), Source(iterators::end(rng2)));
       }
       else {
         for (auto &&x : rng2) {
-          rng1 |= actions::insert(iterators::end(rng1), std::forward<decltype(x)>(x));
+          if constexpr (moves_elements) { rng1 |= actions::insert(iterators::end(rng1), std::move(x)); }
+          else { rng1 |= actions::insert(iterators::end(rng1), std::forward<decltype(x)>(x)); }
         }
       }
       return std::forward<Rng1>(rng1);
