@@ -65,6 +65,22 @@ namespace {
     return data;
   }
 
+  template <int Permille>
+  auto swapped_ints(const std::size_t count, const unsigned seed) -> std::vector<int> {
+    auto data = sorted_ints(count, 0);
+    auto engine = std::mt19937(seed);
+    for (auto i = 0uz; i < count * Permille / 1000; ++i) { std::swap(data[engine() % count], data[engine() % count]); }
+    return data;
+  }
+
+  // Half in order, half random.
+  auto half_random_ints(const std::size_t count, const unsigned seed) -> std::vector<int> {
+    auto data = sorted_ints(count, 0);
+    auto engine = std::mt19937(seed);
+    std::shuffle(data.begin() + static_cast<std::ptrdiff_t>(count / 2), data.end(), engine);
+    return data;
+  }
+
   auto organ_pipe_ints(const std::size_t count, const unsigned) -> std::vector<int> {
     auto data = sorted_ints(count, 0);
     std::reverse(data.begin() + static_cast<std::ptrdiff_t>(count / 2), data.end());
@@ -148,6 +164,13 @@ namespace {
   GENEX_BENCH_MUTATING(StableSort##Name, T, Make, Count, ranges::stable_sort(copy), genex::stable_sort(copy))
 
 GENEX_BENCH_SORTS(_Random_1k, int, random_ints, small);
+
+// Between ordered and random, on either side of where a stable sort changes how it merges. The extremes above would
+// still look fine with that decision made badly.
+GENEX_BENCH_MUTATING(StableSort_Swapped_100k, int, swapped_ints<75>, large, ranges::stable_sort(copy), genex::stable_sort(copy));
+GENEX_BENCH_MUTATING(StableSort_MoreSwapped_100k, int, swapped_ints<150>, large, ranges::stable_sort(copy), genex::stable_sort(copy));
+GENEX_BENCH_MUTATING(StableSort_HalfRandom_100k, int, half_random_ints, large, ranges::stable_sort(copy), genex::stable_sort(copy));
+
 GENEX_BENCH_SORTS(_Random_100k, int, random_ints, large);
 GENEX_BENCH_SORTS(_Sorted_100k, int, sorted_ints, large);
 GENEX_BENCH_SORTS(_Reversed_100k, int, reversed_ints, large);

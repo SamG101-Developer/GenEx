@@ -519,3 +519,39 @@ TEST(GenexSort, ThroughTheActionsAndSorted) {
   stable |= genex::actions::stable_sort({}, &keyed::key);
   EXPECT_EQ(stable, expect_stable);
 }
+
+// Stability on data either side of where it changes how it merges, with lengths
+// that have runs of every size. Equal keys have to stay in their original order.
+TEST(GenexStableSort, StableAcrossHowOrderedTheDataIs) {
+  using element = std::pair<int, int>;
+  const auto key = [](const element &x) { return x.first; };
+  const auto by_key = [](const element &a, const element &b) { return a.first < b.first; };
+
+  auto engine = std::mt19937(31);
+  for (const auto count : {2, 3, 20, 21, 32, 33, 64, 257, 1000, 5000}) {
+    for (const auto permille : {0, 5, 30, 75, 100, 150, 300, 1000}) {
+      for (const auto pattern : {0, 1, 2}) {
+        auto keys = std::vector<int>(static_cast<std::size_t>(count));
+        for (auto i = 0; i < count; ++i) { keys[static_cast<std::size_t>(i)] = i / 4; }
+        if (pattern == 1) { std::reverse(keys.begin() + count / 2, keys.end()); }
+        if (pattern == 2) {
+          auto middle = keys.begin() + count / 2;
+          std::shuffle(middle, keys.end(), engine);
+        }
+        const auto swaps = static_cast<std::size_t>(count) * static_cast<std::size_t>(permille) / 1000;
+        for (auto i = 0uz; i < swaps; ++i) {
+          std::swap(keys[engine() % keys.size()], keys[engine() % keys.size()]);
+        }
+
+        auto input = std::vector<element>(keys.size());
+        for (auto i = 0uz; i < keys.size(); ++i) { input[i] = {keys[i], static_cast<int>(i)}; }
+
+        auto expected = input;
+        std::stable_sort(expected.begin(), expected.end(), by_key);
+        auto actual = input;
+        genex::stable_sort(actual, {}, key);
+        EXPECT_EQ(actual, expected) << "count " << count << " permille " << permille << " pattern " << pattern;
+      }
+    }
+  }
+}

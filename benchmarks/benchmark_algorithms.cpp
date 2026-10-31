@@ -111,6 +111,26 @@ namespace {
     return data;
   }
 
+  template <int N>
+  auto vec_n() -> offset_vector<int> {
+    auto data = offset_vector<int>(N);
+    std::iota(data.begin(), data.end(), 0);
+    return data;
+  }
+
+  template <int N>
+  auto vec_pair_n() -> std::pair<offset_vector<int>, offset_vector<int>> {
+    return {vec_n<N>(), vec_n<N>()};
+  }
+
+  // Only the last byte is the one that's looked for.
+  template <int N>
+  auto bytes_n() -> offset_vector<char> {
+    auto data = offset_vector<char>(N, 'a');
+    data.back() = 'b';
+    return data;
+  }
+
   auto lst() -> std::list<int> {
     auto data = std::list<int>(size);
     std::iota(data.begin(), data.end(), 0);
@@ -198,6 +218,18 @@ GENEX_BENCH_ALGO(FindLast_List, lst, ranges::find(data | ranges::views::reverse,
 // range-v3 has no position either, so these find and then measure.
 GENEX_BENCH_ALGO(Position, vec, ranges::find_if(data, is_last) - data.begin(), genex::position(data, is_last));
 GENEX_BENCH_ALGO(PositionLast, vec, ranges::find_if(data | ranges::views::reverse, is_first).base() - data.begin(), genex::position_last(data, is_first));
+
+// Short ranges and bytes, for where calling into libc costs more or gains more than a loop does.
+GENEX_BENCH_ALGO(Find_Short4, vec_n<4>, ranges::find(data, 3), genex::find(data, 3));
+GENEX_BENCH_ALGO(Find_Short16, vec_n<16>, ranges::find(data, 15), genex::find(data, 15));
+GENEX_BENCH_ALGO(Find_Short64, vec_n<64>, ranges::find(data, 63), genex::find(data, 63));
+GENEX_BENCH_ALGO(FindByte, bytes_n<1000>, ranges::find(data, 'b'), genex::find(data, 'b'));
+GENEX_BENCH_ALGO(FindByte_Short4, bytes_n<4>, ranges::find(data, 'b'), genex::find(data, 'b'));
+GENEX_BENCH_ALGO(FindByte_Short16, bytes_n<16>, ranges::find(data, 'b'), genex::find(data, 'b'));
+GENEX_BENCH_ALGO(FindByte_Short64, bytes_n<64>, ranges::find(data, 'b'), genex::find(data, 'b'));
+GENEX_BENCH_ALGO(Equals_Short4, vec_pair_n<4>, ranges::equal(data.first, data.second), genex::equals(data.first, data.second));
+GENEX_BENCH_ALGO(Equals_Short16, vec_pair_n<16>, ranges::equal(data.first, data.second), genex::equals(data.first, data.second));
+GENEX_BENCH_ALGO(Equals_Short64, vec_pair_n<64>, ranges::equal(data.first, data.second), genex::equals(data.first, data.second));
 
 GENEX_BENCH_ALGO(FoldLeft, vec, ranges::fold_left(data, 0, plus), genex::fold_left(data, 0, plus));
 GENEX_BENCH_ALGO(FoldLeftFirst, vec, ranges::fold_left_first(data, plus), genex::fold_left_first(data, plus));
