@@ -22,7 +22,8 @@ namespace genex::views::detail::impl {
 
   template <typename F, bool Counted>
   requires concepts::generatable_fn<F>
-  struct generate_iterator : genex::detail::iterator_ops<generate_iterator<F, Counted>> {
+  struct generate_iterator :
+    genex::detail::iterator_ops<generate_iterator<F, Counted>> {
     GENEX_NO_UNIQUE_ADDRESS meta::box<F> f;
     std::ptrdiff_t count = 0;
     std::optional<std::remove_cvref_t<std::invoke_result_t<F&>>> cur;
@@ -88,7 +89,8 @@ namespace genex::views::detail::impl {
       else { return unreachable_sentinel(); }
     }
 
-    [[nodiscard]] GENEX_INLINE constexpr auto size() const -> std::size_t requires Counted {
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const -> std::size_t
+    requires Counted {
       return static_cast<std::size_t>(count);
     }
   };
@@ -98,7 +100,8 @@ namespace genex::views {
   struct generate_fn : pipe_closure {
     template <typename F>
     requires detail::concepts::generatable_fn<F>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(F f) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      F f) const noexcept(
       SAFE_CTOR(detail::impl::generate_view<F, false>, F, std::ptrdiff_t) and
       SAFE_MOVE(F)) {
       return detail::impl::generate_view<F, false>(
@@ -109,7 +112,8 @@ namespace genex::views {
   struct generate_n_fn : pipe_closure {
     template <typename F, typename Int>
     requires detail::concepts::generatable_fn<F> and std::integral<Int>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(F f, const Int count) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      F f, const Int count) const noexcept(
       SAFE_CTOR(detail::impl::generate_view<F, true>, F, std::ptrdiff_t) and
       SAFE_MOVE(F)) {
       GENEX_ASSERT(count >= 0);

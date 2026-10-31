@@ -87,9 +87,11 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS F f;
     GENEX_NO_UNIQUE_ADDRESS Proj proj;
 
-    GENEX_INLINE constexpr transform_view(I first, S last, F f, Proj proj) noexcept(
+    GENEX_INLINE constexpr transform_view(
+      I first, S last, F f, Proj proj) noexcept(
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) :
-      it(std::move(first)), st(std::move(last)), f(std::move(f)), proj(std::move(proj)) {
+      it(std::move(first)), st(std::move(last)),
+      f(std::move(f)), proj(std::move(proj)) {
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
@@ -97,7 +99,8 @@ namespace genex::views::detail::impl {
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto end() const
-      requires std::convertible_to<S, I> and std::semiregular<transform_iterator<I, S, F, Proj>> {
+      requires std::convertible_to<S, I>
+      and std::semiregular<transform_iterator<I, S, F, Proj>> {
       return transform_iterator<I, S, F, Proj>{st, f, proj};
     }
 
@@ -114,7 +117,8 @@ namespace genex::views::detail::impl {
 
 namespace genex::views {
   struct transform_fn : pipe_closure {
-    template <typename I, typename S, typename F, typename Proj = meta::identity>
+    template <
+      typename I, typename S, typename F, typename Proj = meta::identity>
     requires detail::concepts::transformable_iters<I, S, F, Proj>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, F f, Proj proj = {}) const noexcept(

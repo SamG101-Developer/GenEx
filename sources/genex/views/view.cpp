@@ -37,7 +37,8 @@ namespace genex::views {
 
     template <typename I, typename S>
     requires detail::concepts::viewable_iters<I, S>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last) const noexcept(
       SAFE_CTOR(genex::subrange<I, S>, I, S) and
       SAFE_MOVE(I) and SAFE_MOVE(S)) {
       return genex::subrange<I, S>(
@@ -48,7 +49,8 @@ namespace genex::views {
     requires detail::concepts::viewable_range<Rng>
       and std::contiguous_iterator<iterator_t<Rng>>
       and std::sized_sentinel_for<sentinel_t<Rng>, iterator_t<Rng>>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(genex::span<range_element_t<Rng>>, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);
@@ -58,7 +60,8 @@ namespace genex::views {
 
     template <typename Rng>
     requires detail::concepts::viewable_range<Rng>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(genex::subrange<iterator_t<Rng>, sentinel_t<Rng>>, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);

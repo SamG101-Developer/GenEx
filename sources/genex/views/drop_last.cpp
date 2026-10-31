@@ -57,7 +57,8 @@ namespace genex::views {
     template <typename I, typename S, typename Int>
     requires detail::concepts::droppable_last_iters<I, S, Int>
       and std::bidirectional_iterator<I> and std::same_as<I, S>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I first, S last, const Int n) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last, const Int n) const {
       auto stop = iterators::prev(
         std::move(last), static_cast<iter_difference_t<I>>(n), first);
       return genex::subrange<I, S>(std::move(first), std::move(stop));
@@ -65,7 +66,8 @@ namespace genex::views {
 
     template <typename I, typename S, typename Int>
     requires detail::concepts::droppable_last_iters<I, S, Int>
-    [[nodiscard]] constexpr auto operator()(I first, S last, const Int n) const {
+    [[nodiscard]] constexpr auto operator()(
+      I first, S last, const Int n) const {
       return detail::impl::drop_last_counted(
         std::move(first), std::move(last),
         static_cast<iter_difference_t<I>>(n));
@@ -75,7 +77,8 @@ namespace genex::views {
     requires detail::concepts::droppable_last_range<Rng, Int>
       and std::contiguous_iterator<iterator_t<Rng>>
       and std::same_as<iterator_t<Rng>, sentinel_t<Rng>>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, const Int n) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CTOR(genex::span<range_element_t<Rng>>, iterator_t<Rng>, iterator_t<Rng>) and
       SAFE_MOVE(Int)) {

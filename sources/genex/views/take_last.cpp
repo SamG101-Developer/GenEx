@@ -43,7 +43,8 @@ namespace genex::views {
     requires detail::concepts::takeable_last_iters<I, S, Int>
     [[nodiscard]] constexpr auto operator()(
       I first, S last, const Int n) const {
-      auto probe = iterators::next(first, static_cast<iter_difference_t<I>>(n), last);
+      auto probe = iterators::next(
+        first, static_cast<iter_difference_t<I>>(n), last);
       auto start = first;
       while (probe != last) {
         ++probe;

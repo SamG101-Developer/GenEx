@@ -129,7 +129,8 @@ namespace genex::views::detail::impl {
     S st;
     Int chunk_size;
 
-    GENEX_INLINE constexpr chunk_view(I first, S last, Int size) noexcept(
+    GENEX_INLINE constexpr chunk_view(
+      I first, S last, Int size) noexcept(
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_CTOR(Int, Int&)) :
       it(std::move(first)), st(std::move(last)), chunk_size(size) {
     }

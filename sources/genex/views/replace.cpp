@@ -104,7 +104,8 @@ namespace genex::views {
       I first, S last, Old old_value, New new_value,
       Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(replace_view, I, S, Old, New, Proj) and
-      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Old) and SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Old) and
+      SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
       return detail::impl::replace_view(
         std::move(first), std::move(last),
         std::move(old_value), std::move(new_value), std::move(proj));

@@ -26,7 +26,8 @@ namespace genex::views::detail::concepts {
 namespace genex::views::detail::impl {
   template <typename I, typename S>
   requires concepts::reversible_iters<I, S>
-  struct reverse_iterator : genex::detail::iterator_ops<reverse_iterator<I, S>> {
+  struct reverse_iterator :
+    genex::detail::iterator_ops<reverse_iterator<I, S>> {
     I it;
     S st;
 
@@ -62,7 +63,7 @@ namespace genex::views::detail::impl {
 
     GENEX_INLINE constexpr auto distance_to(
       const reverse_iterator &that) const -> difference_type
-      requires std::random_access_iterator<I> {
+    requires std::random_access_iterator<I> {
       return it - that.it;
     }
   };
@@ -105,7 +106,7 @@ namespace genex::views {
     }
 
     template <typename Rng>
-    requires detail::concepts::reversible_range<Rng>
+      requires detail::concepts::reversible_range<Rng>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and

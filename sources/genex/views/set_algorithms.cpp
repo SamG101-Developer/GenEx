@@ -12,7 +12,9 @@ import genex.operations.cmp;
 import std;
 
 namespace genex::views::detail::concepts {
-  template <typename I1, typename S1, typename I2, typename S2, typename Comp, typename Proj1, typename Proj2>
+  template <
+    typename I1, typename S1, typename I2, typename S2, typename Comp,
+    typename Proj1, typename Proj2>
   concept set_algorithmicable_iters =
     std::input_iterator<I1> and
     std::input_iterator<I2> and
@@ -23,7 +25,8 @@ namespace genex::views::detail::concepts {
     std::move_constructible<Proj1> and
     std::move_constructible<Proj2>;
 
-  template <typename Rng1, typename Rng2, typename Comp, typename Proj1, typename Proj2>
+  template <
+    typename Rng1, typename Rng2, typename Comp, typename Proj1, typename Proj2>
   concept set_algorithmicable_range =
     non_dangling_range<Rng1> and
     non_dangling_range<Rng2> and
@@ -44,7 +47,8 @@ namespace genex::views::detail::impl {
     typename Comp, typename Proj1, typename Proj2>
   requires concepts::set_algorithmicable_iters<
     I1, S1, I2, S2, Comp, Proj1, Proj2>
-  struct set_iterator : genex::detail::iterator_ops<set_iterator<Op, I1, S1, I2, S2, Comp, Proj1, Proj2>> {
+  struct set_iterator : genex::detail::iterator_ops<set_iterator<
+    Op, I1, S1, I2, S2, Comp, Proj1, Proj2>> {
     I1 it1;
     S1 st1;
     I2 it2;
@@ -98,10 +102,12 @@ namespace genex::views::detail::impl {
       cur_elem.reset();
 
       auto less12 = [&](auto const &a, auto const &b) {
-        return meta::invoke(comp, meta::invoke(proj1, a), meta::invoke(proj2, b));
+        return meta::invoke(
+          comp, meta::invoke(proj1, a), meta::invoke(proj2, b));
       };
       auto less21 = [&](auto const &a, auto const &b) {
-        return meta::invoke(comp, meta::invoke(proj2, b), meta::invoke(proj1, a));
+        return meta::invoke(
+          comp, meta::invoke(proj2, b), meta::invoke(proj1, a));
       };
 
       if constexpr (Op == set_op::difference) {
@@ -246,13 +252,15 @@ namespace genex::views {
       I1 first1, S1 last1, I2 first2, S2 last2, Comp comp = {},
       Proj1 proj1 = {}, Proj2 proj2 = {}) const noexcept(
       SAFE_CTOR(
-        detail::impl::set_algorithm_view<Op, I1, S1, I2, S2, Comp, Proj1, Proj2>,
+        detail::impl::set_algorithm_view<
+        Op, I1, S1, I2, S2, Comp, Proj1, Proj2>,
         I1, S1, I2, S2, Comp, Proj1, Proj2) and
       SAFE_MOVE(I1) and SAFE_MOVE(S1) and SAFE_MOVE(I2) and SAFE_MOVE(S2) and
       SAFE_MOVE(Comp) and SAFE_MOVE(Proj1) and SAFE_MOVE(Proj2)) {
-      return detail::impl::set_algorithm_view<Op, I1, S1, I2, S2, Comp, Proj1, Proj2>(
-        std::move(first1), std::move(last1), std::move(first2), std::move(last2), std::move(comp), std::move(proj1),
-        std::move(proj2));
+      return detail::impl::set_algorithm_view<
+        Op, I1, S1, I2, S2, Comp, Proj1, Proj2>(
+        std::move(first1), std::move(last1), std::move(first2),
+        std::move(last2), std::move(comp), std::move(proj1), std::move(proj2));
     }
 
     template <

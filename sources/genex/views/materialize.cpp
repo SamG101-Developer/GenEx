@@ -27,7 +27,8 @@ namespace genex::views::detail::concepts {
 namespace genex::views::detail::impl {
   template <template <typename> typename Cache, typename I, typename S>
   requires concepts::materializable_iters<Cache, I, S>
-  GENEX_INLINE constexpr auto do_materialize(I first, S last) -> Cache<iter_value_t<I>> {
+  GENEX_INLINE constexpr auto do_materialize(
+    I first, S last) -> Cache<iter_value_t<I>> {
     return genex::to<Cache>()(
       genex::subrange(std::move(first), std::move(last)));
   }
@@ -38,14 +39,16 @@ namespace genex::views {
   struct materialize_fn : pipe_closure {
     template <typename I, typename S>
     requires detail::concepts::materializable_iters<Cache, I, S>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I first, S last) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last) const {
       return detail::impl::do_materialize<Cache>(
         std::move(first), std::move(last));
     }
 
     template <typename Rng>
     requires detail::concepts::materializable_range<Cache, Rng>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const {
       auto [first, last] = iterators::iter_pair(rng);
       return detail::impl::do_materialize<Cache>(
         std::move(first), std::move(last));

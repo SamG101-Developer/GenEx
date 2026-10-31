@@ -69,7 +69,9 @@ namespace genex::views::detail::impl {
       it(std::move(first)), st(std::move(last)),
       op(std::move(op)), acc(std::move(seed)) {
       if (this->it == this->st) { this->acc.reset(); }
-      else if (this->acc.has_value()) { this->acc = meta::invoke(*this->op, *this->acc, *this->it); }
+      else if (this->acc.has_value()) {
+        this->acc = meta::invoke(*this->op, *this->acc, *this->it);
+      }
       else { this->acc.emplace(*this->it); }
     }
 
@@ -138,7 +140,8 @@ namespace genex::views {
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Init) and SAFE_MOVE(F)) {
       using acc_t = detail::concepts::scan_acc_t<I, F, Init>;
       return detail::impl::scan_view<I, S, F, acc_t>(
-        std::move(first), std::move(last), std::move(op), std::optional<acc_t>(std::move(init)));
+        std::move(first), std::move(last), std::move(op),
+        std::optional<acc_t>(std::move(init)));
     }
 
     template <typename Rng, typename Init, typename F = std::plus<>>
@@ -155,16 +158,20 @@ namespace genex::views {
       SAFE_MOVE(Init) and SAFE_MOVE(F)) {
       using acc_t = detail::concepts::scan_acc_t<iterator_t<Rng>, F, Init>;
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::scan_view<iterator_t<Rng>, sentinel_t<Rng>, F, acc_t>(
-        std::move(first), std::move(last), std::move(op), std::optional<acc_t>(std::move(init)));
+      return detail::impl::scan_view<
+        iterator_t<Rng>, sentinel_t<Rng>, F, acc_t>(
+        std::move(first), std::move(last), std::move(op),
+        std::optional<acc_t>(std::move(init)));
     }
 
     template <typename Init, typename F = std::plus<>>
     requires closure_value<Init>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Init &&init, F op = {}) const noexcept(
-      SAFE_CTOR(scan_fn) and SAFE_CTOR(std::decay_t<Init>, Init) and SAFE_MOVE(F)) {
-      return meta::bind_back(scan_fn{}, std::forward<Init>(init), std::move(op));
+      SAFE_CTOR(scan_fn) and SAFE_CTOR(std::decay_t<Init>, Init) and
+      SAFE_MOVE(F)) {
+      return meta::bind_back(
+        scan_fn{}, std::forward<Init>(init), std::move(op));
     }
   };
 
@@ -173,8 +180,7 @@ namespace genex::views {
     requires detail::concepts::summable_iters<I, S, F>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last, F op = {}) const noexcept(
-      SAFE_CTOR(
-        detail::impl::scan_view<I, S, F, iter_value_t<I>>, I, S, F, std::optional<iter_value_t<I>>) and
+      SAFE_CTOR(detail::impl::scan_view<I, S, F, iter_value_t<I>>, I, S, F, std::optional<iter_value_t<I>>) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(F)) {
       return detail::impl::scan_view<I, S, F, iter_value_t<I>>(
         std::move(first), std::move(last), std::move(op), std::nullopt);
@@ -190,7 +196,8 @@ namespace genex::views {
         iterator_t<Rng>, sentinel_t<Rng>, F, std::optional<range_value_t<Rng>>) and
       SAFE_MOVE(F)) {
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::scan_view<iterator_t<Rng>, sentinel_t<Rng>, F, range_value_t<Rng>>(
+      return detail::impl::scan_view<
+        iterator_t<Rng>, sentinel_t<Rng>, F, range_value_t<Rng>>(
         std::move(first), std::move(last), std::move(op), std::nullopt);
     }
 

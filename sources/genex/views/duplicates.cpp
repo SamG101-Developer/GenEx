@@ -80,7 +80,9 @@ namespace genex::views::detail::impl {
 
     GENEX_INLINE friend constexpr auto operator==(
       const duplicate_iterator &self, duplicate_sentinel) -> bool {
-      return self.it == self.st and not self.pending.has_value() and not self.cur_elem.has_value();
+      return self.it == self.st
+        and not self.pending.has_value()
+        and not self.cur_elem.has_value();
     }
 
   private:

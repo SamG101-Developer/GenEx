@@ -79,13 +79,13 @@ namespace genex::views::detail::impl {
 
     GENEX_INLINE constexpr auto advance_by(
       const difference_type n) -> void
-      requires (std::random_access_iterator<iterator_t<Rngs>> and ...) {
+    requires (std::random_access_iterator<iterator_t<Rngs>> and ...) {
       genex::detail::advance_tuple(its, n);
     }
 
     GENEX_INLINE constexpr auto distance_to(
       const zip_iterator &that) const -> difference_type
-      requires (std::random_access_iterator<iterator_t<Rngs>> and ...) {
+    requires (std::random_access_iterator<iterator_t<Rngs>> and ...) {
       return static_cast<difference_type>(
         genex::detail::distance_tuple(that.its, its));
     }
@@ -126,8 +126,10 @@ namespace genex::views::detail::impl {
     std::tuple<sentinel_t<Rngs>...> m_sts;
 
     GENEX_INLINE constexpr zip_view(
-      std::tuple<iterator_t<Rngs>...> its, std::tuple<sentinel_t<Rngs>...> sts) noexcept(
-      SAFE_MOVE(std::tuple<iterator_t<Rngs>...>) and SAFE_MOVE(std::tuple<sentinel_t<Rngs>...>)) :
+      std::tuple<iterator_t<Rngs>...> its,
+      std::tuple<sentinel_t<Rngs>...> sts) noexcept(
+      SAFE_MOVE(std::tuple<iterator_t<Rngs>...>) and
+      SAFE_MOVE(std::tuple<sentinel_t<Rngs>...>)) :
       m_its(std::move(its)), m_sts(std::move(sts)) {
     }
 
@@ -141,7 +143,8 @@ namespace genex::views::detail::impl {
 
     template <typename Self>
     requires (std::sized_sentinel_for<sentinel_t<Rngs>, iterator_t<Rngs>> and ...)
-    [[nodiscard]] GENEX_INLINE constexpr auto size(this Self &&self) -> std::size_t {
+    [[nodiscard]] GENEX_INLINE constexpr auto size(
+      this Self &&self) -> std::size_t {
       return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         return std::min({static_cast<std::size_t>(std::get<Is>(self.m_sts) - std::get<Is>(self.m_its))...});
       }(std::index_sequence_for<Rngs...>{});
@@ -162,10 +165,12 @@ namespace genex::views {
 
     template <typename... Rngs>
     requires (detail::concepts::zippable_range<Rngs...> and sizeof...(Rngs) > 1)
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rngs &&... ranges) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rngs &&... ranges) const noexcept(
       (SAFE_CALL(decltype(iterators::begin), Rngs&) and ...) and
       (SAFE_CALL(decltype(iterators::end), Rngs&) and ...) and
-      SAFE_MOVE(std::tuple<iterator_t<Rngs>...>) and SAFE_MOVE(std::tuple<sentinel_t<Rngs>...>)) {
+      SAFE_MOVE(std::tuple<iterator_t<Rngs>...>) and
+      SAFE_MOVE(std::tuple<sentinel_t<Rngs>...>)) {
       return detail::impl::zip_view<Rngs...>(
         std::make_tuple(iterators::begin(ranges)...),
         std::make_tuple(iterators::end(ranges)...));
@@ -173,7 +178,8 @@ namespace genex::views {
 
     template <typename Rng2>
     requires input_range<Rng2>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng2 &&rng2) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng2 &&rng2) const {
       return genex::detail::bind_range_back(zip_fn{}, std::forward<Rng2>(rng2));
     }
   };

@@ -46,7 +46,8 @@ namespace genex::views::detail::impl {
 
     GENEX_INLINE constexpr slide_iterator(I first, S last, Int window) :
       it(std::move(first)), back(it), st(std::move(last)) {
-      back = iterators::next(it, static_cast<iter_difference_t<I>>(window) - 1, st);
+      back = iterators::next(
+        it, static_cast<iter_difference_t<I>>(window) - 1, st);
     }
 
     GENEX_INLINE constexpr auto next() -> void {

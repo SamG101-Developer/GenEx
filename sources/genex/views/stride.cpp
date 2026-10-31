@@ -41,7 +41,8 @@ namespace genex::views::detail::impl {
       and std::same_as<I, S>
       and std::sized_sentinel_for<S, I>;
 
-    GENEX_NO_UNIQUE_ADDRESS std::conditional_t<has_last_step, I, std::type_identity<I>> last_step{};
+    GENEX_NO_UNIQUE_ADDRESS std::conditional_t<
+      has_last_step, I, std::type_identity<I>> last_step{};
 
     using value_type = iter_value_t<I>;
     using reference = iter_reference_t<I>;

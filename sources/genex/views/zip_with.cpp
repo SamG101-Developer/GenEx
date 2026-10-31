@@ -26,7 +26,8 @@ namespace genex::views::detail::impl {
     GENEX_NO_UNIQUE_ADDRESS F f;
 
     template <typename Tup>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Tup &&tup) const -> decltype(auto) {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Tup &&tup) const -> decltype(auto) {
       return std::apply(f, std::forward<Tup>(tup));
     }
   };

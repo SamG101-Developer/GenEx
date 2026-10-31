@@ -70,7 +70,8 @@ namespace genex::views {
       I first, S last) const {
       const auto total = static_cast<iter_difference_t<I>>(
         iterators::distance(first, last));
-      return detail::impl::divide_impl<N, I, S>(std::move(first), total);
+      return detail::impl::divide_impl<N, I, S>(
+        std::move(first), total);
     }
 
     template <typename Rng>
@@ -82,7 +83,8 @@ namespace genex::views {
         if constexpr (has_member_size<Rng>) { return static_cast<range_difference_t<Rng>>(rng.size()); }
         else { return static_cast<range_difference_t<Rng>>(iterators::distance(first, last)); }
       }();
-      return detail::impl::divide_impl<N, iterator_t<Rng>, sentinel_t<Rng>>(std::move(first), total);
+      return detail::impl::divide_impl<N, iterator_t<Rng>, sentinel_t<Rng>>(
+        std::move(first), total);
     }
 
     template <typename Rng>

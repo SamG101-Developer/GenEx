@@ -46,11 +46,13 @@ namespace genex::views::detail::impl {
       std::bidirectional_iterator<I>,
       std::bidirectional_iterator_tag,
       iter_strength_t<I>>;
-    using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
+    using iterator_category = legacy_iter_category_t<
+      reference, iterator_concept>;
 
     GENEX_INLINE constexpr intersperse_iterator() = default;
 
-    GENEX_INLINE constexpr intersperse_iterator(I first, S last, New new_val) :
+    GENEX_INLINE constexpr intersperse_iterator(
+      I first, S last, New new_val) :
       it(std::move(first)), st(std::move(last)),
       new_value(std::move(new_val)) {
     }
@@ -74,8 +76,8 @@ namespace genex::views::detail::impl {
         yield_new = false;
         return;
       }
-      // Backing out of the end lands on the last element, which owes no separator; every other
-      // element is preceded by one.
+      // Backing out of the end lands on the last element, which owes no
+      // separator; every other element is preceded by one.
       const auto from_end = it == st;
       --it;
       yield_new = not from_end;

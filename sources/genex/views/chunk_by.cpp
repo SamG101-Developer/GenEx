@@ -59,11 +59,14 @@ namespace genex::views::detail::impl {
     }
 
     GENEX_INLINE friend constexpr auto operator==(
-      const chunk_by_iterator &self, const chunk_by_iterator &that) -> bool {
+      const chunk_by_iterator &self,
+      const chunk_by_iterator &that) -> bool {
       return self.it == that.it;
     }
 
-    GENEX_INLINE friend constexpr auto operator==(const chunk_by_iterator &self, chunk_by_sentinel) -> bool {
+    GENEX_INLINE friend constexpr auto operator==(
+      const chunk_by_iterator &self,
+      chunk_by_sentinel) -> bool {
       return self.it == self.st;
     }
 
@@ -88,7 +91,8 @@ namespace genex::views::detail::impl {
     S st;
     GENEX_NO_UNIQUE_ADDRESS Pred pred;
 
-    GENEX_INLINE constexpr chunk_by_view(I first, S last, Pred pred) noexcept(
+    GENEX_INLINE constexpr chunk_by_view(
+      I first, S last, Pred pred) noexcept(
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred)) :
       it(std::move(first)), st(std::move(last)), pred(std::move(pred)) {
     }
@@ -129,7 +133,8 @@ namespace genex::views {
 
     template <typename Pred>
     requires closure_callable<Pred>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Pred pred) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Pred pred) const noexcept(
       SAFE_CTOR(chunk_by_fn) and SAFE_MOVE(Pred)) {
       return meta::bind_back(chunk_by_fn{}, std::move(pred));
     }

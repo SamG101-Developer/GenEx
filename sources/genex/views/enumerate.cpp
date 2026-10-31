@@ -30,7 +30,8 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S>
   requires concepts::enumerable_iters<I, S>
-  struct enumerate_iterator : genex::detail::adaptor_ops<enumerate_iterator<I, S>> {
+  struct enumerate_iterator :
+    genex::detail::adaptor_ops<enumerate_iterator<I, S>> {
     I it;
     std::size_t index = 0uz;
 
@@ -39,7 +40,8 @@ namespace genex::views::detail::impl {
     using pointer = void;
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
-    using iterator_category = legacy_iter_category_t<reference, iterator_concept>;
+    using iterator_category = legacy_iter_category_t<
+      reference, iterator_concept>;
 
     GENEX_INLINE constexpr enumerate_iterator() = default;
 
@@ -58,7 +60,8 @@ namespace genex::views::detail::impl {
       --index;
     }
 
-    GENEX_INLINE constexpr auto advance_by(const difference_type n) -> void
+    GENEX_INLINE constexpr auto advance_by(
+      const difference_type n) -> void
     requires std::random_access_iterator<I> {
       it += n;
       index += static_cast<std::size_t>(n);
@@ -69,7 +72,8 @@ namespace genex::views::detail::impl {
     }
 
     GENEX_INLINE friend constexpr auto operator==(
-      const enumerate_iterator &self, const enumerate_sentinel<S> &that) -> bool {
+      const enumerate_iterator &self,
+      const enumerate_sentinel<S> &that) -> bool {
       return self.it == that.st;
     }
   };
@@ -109,7 +113,8 @@ namespace genex::views {
   struct enumerate_fn : pipe_closure {
     template <typename I, typename S>
     requires detail::concepts::enumerable_iters<I, S>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I first, S last) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last) const noexcept(
       SAFE_IMPL_CTOR(enumerate_view, I, S) and
       SAFE_MOVE(I) and SAFE_MOVE(S)) {
       return detail::impl::enumerate_view(std::move(first), std::move(last));
@@ -117,7 +122,8 @@ namespace genex::views {
 
     template <typename Rng>
     requires detail::concepts::enumerable_range<Rng>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const noexcept(
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_IMPL_CTOR(enumerate_view, iterator_t<Rng>, sentinel_t<Rng>)) {
       auto [first, last] = iterators::iter_pair(rng);

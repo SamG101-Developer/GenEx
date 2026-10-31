@@ -112,7 +112,8 @@ namespace genex::views {
       I first, S last, Pred pred, Proj proj = {}) const noexcept(
       SAFE_IMPL_CTOR(remove_if_view, I, S, Pred, Proj) and
       SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
-      return detail::impl::remove_if_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
+      return detail::impl::remove_if_view(
+        std::move(first), std::move(last), std::move(pred), std::move(proj));
     }
 
     template <
@@ -124,7 +125,8 @@ namespace genex::views {
       SAFE_IMPL_CTOR(remove_if_view, iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj) and
       SAFE_MOVE(Pred) and SAFE_MOVE(Proj)) {
       auto [first, last] = iterators::iter_pair(rng);
-      return detail::impl::remove_if_view(std::move(first), std::move(last), std::move(pred), std::move(proj));
+      return detail::impl::remove_if_view(
+        std::move(first), std::move(last), std::move(pred), std::move(proj));
     }
 
     template <typename Pred, typename Proj = meta::identity>

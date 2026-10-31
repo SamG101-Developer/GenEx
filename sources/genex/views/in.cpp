@@ -70,7 +70,7 @@ namespace genex::views {
       auto pred = detail::impl::membership_pred<Negate, I2, S2, Proj2>{
         std::move(first2), std::move(last2), std::move(proj2)
       };
-      return genex::views::filter(
+      return filter(
         std::move(first1), std::move(last1), std::move(pred), std::move(proj1));
     }
 
@@ -92,7 +92,7 @@ namespace genex::views {
         Negate, iterator_t<Rng2>, sentinel_t<Rng2>, Proj2>{
         std::move(first2), std::move(last2), std::move(proj2)
       };
-      return genex::views::filter(
+      return filter(
         std::move(first1), std::move(last1), std::move(pred), std::move(proj1));
     }
 

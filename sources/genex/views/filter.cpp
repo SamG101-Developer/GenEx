@@ -29,7 +29,8 @@ namespace genex::views::detail::impl {
 
   template <typename I, typename S, typename Pred, typename Proj>
   requires concepts::filterable_iters<I, S, Pred, Proj>
-  struct filter_iterator : genex::detail::iterator_ops<filter_iterator<I, S, Pred, Proj>> {
+  struct filter_iterator :
+    genex::detail::iterator_ops<filter_iterator<I, S, Pred, Proj>> {
     I it;
     S st;
     GENEX_NO_UNIQUE_ADDRESS meta::box<Pred> pred;
