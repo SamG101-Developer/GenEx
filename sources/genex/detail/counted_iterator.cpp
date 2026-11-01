@@ -96,12 +96,18 @@ export namespace genex::detail {
 
     template <typename I>
     requires std::sized_sentinel_for<S, I>
-      or std::same_as<S, unreachable_sentinel>
     GENEX_INLINE friend constexpr auto operator-(
       const counted_sentinel &self,
       const counted_iterator<I> &it) -> iter_difference_t<I> {
-      if constexpr (std::same_as<S, unreachable_sentinel>) { return it.count(); }
-      else { return std::min(it.count(), self.st - it.base()); }
+      return std::min(it.count(), self.st - it.base());
+    }
+
+    template <typename I>
+    requires std::same_as<S, unreachable_sentinel>
+    GENEX_INLINE friend constexpr auto operator-(
+      const counted_sentinel &,
+      const counted_iterator<I> &it) -> iter_difference_t<I> {
+      return it.count();
     }
 
     template <typename I>

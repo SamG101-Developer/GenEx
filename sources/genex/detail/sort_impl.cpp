@@ -265,40 +265,41 @@ export namespace genex::algorithms::detail {
   /// returning where it ended up.
   template <bool Branchless, typename I, typename Less>
   constexpr auto partition_right(const I first, const I last, Less &less) -> partition_result<I> {
-    if constexpr (Branchless) {
-      iter_value_t<I> pivot = *first;
-      auto is_less = [&](auto &value) -> bool { return less(value, pivot); };
-      const auto boundary = partition_branchless(first + 1, last, is_less);
-      *first = *(boundary - 1);
-      *(boundary - 1) = pivot;
-      return {boundary - 1, false};
+    iter_value_t<I> pivot(std::move(*first));
+    auto left = first;
+    auto right = last;
+
+    // The median of three leaves something on each side to stop these.
+    while (less(*++left, pivot)) {}
+    if (left - 1 == first) {
+      while (left < right and not less(*--right, pivot)) {}
     }
     else {
-      iter_value_t<I> pivot(std::move(*first));
-      auto left = first;
-      auto right = last;
-
-      // The median of three leaves something on each side to stop these.
-      while (less(*++left, pivot)) {}
-      if (left - 1 == first) {
-        while (left < right and not less(*--right, pivot)) {}
-      }
-      else {
-        while (not less(*--right, pivot)) {}
-      }
-
-      const auto already_partitioned = left >= right;
-      while (left < right) {
-        iterators::iter_swap(left, right);
-        while (less(*++left, pivot)) {}
-        while (not less(*--right, pivot)) {}
-      }
-
-      const auto pivot_position = left - 1;
-      *first = std::move(*pivot_position);
-      *pivot_position = std::move(pivot);
-      return {pivot_position, already_partitioned};
+      while (not less(*--right, pivot)) {}
     }
+
+    const auto already_partitioned = left >= right;
+    while (left < right) {
+      iterators::iter_swap(left, right);
+      while (less(*++left, pivot)) {}
+      while (not less(*--right, pivot)) {}
+    }
+
+    const auto pivot_position = left - 1;
+    *first = std::move(*pivot_position);
+    *pivot_position = std::move(pivot);
+    return {pivot_position, already_partitioned};
+  }
+
+  template <bool Branchless, typename I, typename Less>
+  requires Branchless
+  constexpr auto partition_right(const I first, const I last, Less &less) -> partition_result<I> {
+    iter_value_t<I> pivot = *first;
+    auto is_less = [&](auto &value) -> bool { return less(value, pivot); };
+    const auto boundary = partition_branchless(first + 1, last, is_less);
+    *first = *(boundary - 1);
+    *(boundary - 1) = pivot;
+    return {boundary - 1, false};
   }
 
   /// Takes the pivot from @c first and puts everything not greater than it to the
@@ -306,37 +307,38 @@ export namespace genex::algorithms::detail {
   /// equal to it, so they're finished. This is what makes many duplicates linear.
   template <bool Branchless, typename I, typename Less>
   constexpr auto partition_left(const I first, const I last, Less &less) -> I {
-    if constexpr (Branchless) {
-      iter_value_t<I> pivot = *first;
-      auto not_greater = [&](auto &value) -> bool { return not less(pivot, value); };
-      const auto boundary = partition_branchless(first + 1, last, not_greater);
-      *first = *(boundary - 1);
-      *(boundary - 1) = pivot;
-      return boundary - 1;
+    iter_value_t<I> pivot(std::move(*first));
+    auto left = first;
+    auto right = last;
+
+    while (less(pivot, *--right)) {}
+    if (right + 1 == last) {
+      while (left < right and not less(pivot, *++left)) {}
     }
     else {
-      iter_value_t<I> pivot(std::move(*first));
-      auto left = first;
-      auto right = last;
-
-      while (less(pivot, *--right)) {}
-      if (right + 1 == last) {
-        while (left < right and not less(pivot, *++left)) {}
-      }
-      else {
-        while (not less(pivot, *++left)) {}
-      }
-
-      while (left < right) {
-        iterators::iter_swap(left, right);
-        while (less(pivot, *--right)) {}
-        while (not less(pivot, *++left)) {}
-      }
-
-      *first = std::move(*right);
-      *right = std::move(pivot);
-      return right;
+      while (not less(pivot, *++left)) {}
     }
+
+    while (left < right) {
+      iterators::iter_swap(left, right);
+      while (less(pivot, *--right)) {}
+      while (not less(pivot, *++left)) {}
+    }
+
+    *first = std::move(*right);
+    *right = std::move(pivot);
+    return right;
+  }
+
+  template <bool Branchless, typename I, typename Less>
+  requires Branchless
+  constexpr auto partition_left(const I first, const I last, Less &less) -> I {
+    iter_value_t<I> pivot = *first;
+    auto not_greater = [&](auto &value) -> bool { return not less(pivot, value); };
+    const auto boundary = partition_branchless(first + 1, last, not_greater);
+    *first = *(boundary - 1);
+    *(boundary - 1) = pivot;
+    return boundary - 1;
   }
 
   /// Moves a few elements around to break up whatever pattern made a partition
