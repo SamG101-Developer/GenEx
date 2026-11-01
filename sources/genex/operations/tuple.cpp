@@ -138,8 +138,29 @@ namespace genex {
     }
   };
 
+  /// Element "N" by value, for a tuple or pair that's about to be destroyed. An
+  /// element that's a reference refers to something else, so stays a reference.
+  template <std::size_t N>
+  struct get_by_value_fn {
+    template <typename Tpl, typename Element = std::tuple_element_t<N, std::remove_cvref_t<Tpl>>>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Tpl &&tpl) const noexcept(
+      SAFE_CTOR(Element, decltype(std::get<N>(std::forward<Tpl>(tpl))))) -> Element {
+      return std::get<N>(std::forward<Tpl>(tpl));
+    }
+  };
+
   export template <std::size_t N>
   inline constexpr get_fn<N> get{};
   export inline constexpr tuple_head_fn tuple_head{};
   export inline constexpr tuple_tail_fn tuple_tail{};
+}
+
+namespace genex::detail {
+  /// How a view gets element "N" of what its iterator's "Reference" gives. A
+  /// reference is to something that outlives the dereference, but anything else
+  /// is a temporary, so a reference into it would dangle.
+  export template <std::size_t N, typename Reference>
+  using get_element_t = std::conditional_t<
+    std::is_reference_v<Reference>, get_fn<N>, get_by_value_fn<N>>;
 }

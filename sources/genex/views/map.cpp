@@ -32,7 +32,9 @@ namespace genex::views {
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       I first, S last) const noexcept(
       SAFE_CALL(decltype(transform), I, S, meta::identity)) {
-      return transform(std::move(first), std::move(last), genex::get<N>);
+      return transform(
+        std::move(first), std::move(last),
+        genex::detail::get_element_t<N, iter_reference_t<I>>{});
     }
 
     template <typename Rng>
@@ -42,7 +44,9 @@ namespace genex::views {
       SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
       SAFE_CALL(decltype(transform), iterator_t<Rng>, sentinel_t<Rng>, meta::identity)) {
       auto [first, last] = iterators::iter_pair(rng);
-      return transform(std::move(first), std::move(last), genex::get<N>);
+      return transform(
+        std::move(first), std::move(last),
+        genex::detail::get_element_t<N, range_reference_t<Rng>>{});
     }
   };
 
