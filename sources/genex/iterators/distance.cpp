@@ -38,14 +38,19 @@ namespace genex::iterators {
     template <typename I, typename S>
     requires detail::concepts::sized_distancable_iters<I, S>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      I first, S last) const -> std::ptrdiff_t {
+      I first, S last) const noexcept(
+      SAFE_NOEX(static_cast<std::ptrdiff_t>(last - first)))
+      -> std::ptrdiff_t {
       return static_cast<std::ptrdiff_t>(last - first);
     }
 
     template <typename Rng>
     requires detail::concepts::distancable_range<Rng>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      Rng &&rng) const -> std::ptrdiff_t {
+      Rng &&rng) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
+      SAFE_CALL(const distance_fn, iterator_t<Rng>, sentinel_t<Rng>))
+      -> std::ptrdiff_t {
       auto [first, last] = iterators::iter_pair(rng);
       return (*this)(std::move(first), std::move(last));
     }

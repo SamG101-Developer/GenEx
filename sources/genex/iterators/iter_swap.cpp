@@ -10,7 +10,9 @@ namespace genex::iterators {
     template <typename I1, typename I2>
     requires std::indirectly_swappable<I1, I2>
     GENEX_INLINE constexpr auto operator()(
-      const I1 &a, const I2 &b) const -> void {
+      const I1 &a, const I2 &b) const noexcept(
+      SAFE_NOEX(*a) and SAFE_NOEX(*b) and
+      SAFE_SWAP(decltype(*a), decltype(*b))) -> void {
       using std::swap;
       swap(*a, *b);
     }

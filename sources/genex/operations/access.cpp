@@ -26,7 +26,9 @@ namespace genex::operations {
     template <typename Rng>
     requires detail::concepts::accessible_range<Rng>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      Rng &&rng, const std::size_t n) const -> borrowed_reference_t<Rng> {
+      Rng &&rng, const std::size_t n) const noexcept(
+      SAFE_NOEX(rng[n]) and SAFE_CTOR(borrowed_reference_t<Rng>, decltype(rng[n])))
+      -> borrowed_reference_t<Rng> {
       return rng[n];
     }
   };
@@ -35,7 +37,10 @@ namespace genex::operations {
     template <typename Rng>
     requires detail::concepts::frontable_range<Rng>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      Rng &&rng) const -> borrowed_reference_t<Rng> {
+      Rng &&rng) const noexcept(
+      SAFE_NOEX(*iterators::begin(rng)) and
+      SAFE_CTOR(borrowed_reference_t<Rng>, decltype(*iterators::begin(rng))))
+      -> borrowed_reference_t<Rng> {
       return *iterators::begin(rng);
     }
   };
@@ -44,7 +49,10 @@ namespace genex::operations {
     template <typename Rng>
     requires detail::concepts::backable_range<Rng>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      Rng &&rng) const -> borrowed_reference_t<Rng> {
+      Rng &&rng) const noexcept(
+      SAFE_NOEX(*iterators::prev(iterators::end(rng))) and
+      SAFE_CTOR(borrowed_reference_t<Rng>, decltype(*iterators::prev(iterators::end(rng)))))
+      -> borrowed_reference_t<Rng> {
       return *iterators::prev(iterators::end(rng));
     }
   };

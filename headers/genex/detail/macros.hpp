@@ -35,6 +35,9 @@
 #define SAFE_MOVE(T) \
   std::is_nothrow_move_constructible_v<T>
 
+#define SAFE_SWAP(T, U) \
+  std::is_nothrow_swappable_with_v<T, U>
+
 #define SAFE_CALL(F, ...) \
   std::is_nothrow_invocable_v<F __VA_OPT__(, __VA_ARGS__)>
 

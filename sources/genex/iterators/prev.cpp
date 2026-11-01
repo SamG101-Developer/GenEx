@@ -17,7 +17,8 @@ namespace genex::iterators {
     template <typename I>
     requires detail::concepts::prevable_iters<I> and std::copyable<I>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      I it, const iter_difference_t<I> n = 1) const -> I {
+      I it, const iter_difference_t<I> n = 1) const noexcept(
+      SAFE_CALL(decltype(iterators::advance), I&, iter_difference_t<I>)) -> I {
       return iterators::advance(it, -n);
     }
 
@@ -35,7 +36,8 @@ namespace genex::iterators {
     template <typename I>
     requires std::random_access_iterator<I>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      I it, const iter_difference_t<I> n, const I bound) const -> I {
+      I it, const iter_difference_t<I> n, const I bound) const noexcept(
+      SAFE_NOEX(it - bound) and SAFE_NOEX(it - n) and SAFE_MOVE(I)) -> I {
       if (n <= 0) { return it; }
       const auto remaining = it - bound;
       return it - (n < remaining ? n : remaining);

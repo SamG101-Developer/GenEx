@@ -34,7 +34,8 @@ namespace genex::iterators {
     template <typename I>
     requires std::random_access_iterator<I>
     GENEX_INLINE constexpr auto operator()(
-      I &it, const iter_difference_t<I> n = 1) const -> I {
+      I &it, const iter_difference_t<I> n = 1) const noexcept(
+      SAFE_NOEX(it += n) and SAFE_CTOR(I, I&)) -> I {
       it += n;
       return it;
     }

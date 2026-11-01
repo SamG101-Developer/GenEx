@@ -18,14 +18,17 @@ namespace genex::meta {
     template <typename T>
     requires detail::concepts::dereferenceable<T>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      T &&t) const -> decltype(*std::declval<T&>()) {
+      T &&t) const noexcept(
+      SAFE_NOEX(*std::forward<T>(t)))
+      -> decltype(*std::declval<T&>()) {
       return *std::forward<T>(t);
     }
 
     template <typename T>
     requires (not detail::concepts::dereferenceable<T>)
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      T &&t) const -> T&& {
+      T &&t) const noexcept
+      -> T&& {
       return std::forward<T>(t);
     }
   };
@@ -34,7 +37,8 @@ namespace genex::meta {
 
   export struct identity {
     template <typename T>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(T &&x) const -> T&& {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(T &&x) const noexcept
+      -> T&& {
       return std::forward<T>(x);
     }
   };
@@ -44,7 +48,8 @@ namespace genex::meta {
     /// callable: f(args...).
     template <typename F, typename... Args>
     GENEX_INLINE constexpr auto operator()(
-      F &&f, Args &&... args) const
+      F &&f, Args &&... args) const noexcept(
+      SAFE_NOEX(std::forward<F>(f)(std::forward<Args>(args)...)))
       -> decltype(std::forward<F>(f)(std::forward<Args>(args)...)) {
       return std::forward<F>(f)(std::forward<Args>(args)...);
     }
@@ -53,7 +58,9 @@ namespace genex::meta {
     /// an object: obj.*mp(args...) or obj->*mp(args...).
     template <typename T, typename C, typename Obj>
     GENEX_INLINE constexpr auto operator()(
-      T C::*f, Obj &&obj) const -> decltype(deref(std::forward<Obj>(obj)).*f) {
+      T C::*f, Obj &&obj) const noexcept(
+      SAFE_NOEX(deref(std::forward<Obj>(obj)).*f))
+      -> decltype(deref(std::forward<Obj>(obj)).*f) {
       return deref(std::forward<Obj>(obj)).*f;
     }
 
@@ -62,7 +69,8 @@ namespace genex::meta {
     /// (mp->*obj)(args...).
     template <typename R, typename C, typename Obj, typename... Args>
     GENEX_INLINE constexpr auto operator()(
-      R C::*f, Obj &&obj, Args &&... args) const
+      R C::*f, Obj &&obj, Args &&... args) const noexcept(
+      SAFE_NOEX((deref(std::forward<Obj>(obj)).*f)(std::forward<Args>(args)...)))
       -> decltype((deref(std::forward<Obj>(obj)).*f)(std::forward<Args>(args)...)) {
       return (deref(std::forward<Obj>(obj)).*f)(std::forward<Args>(args)...);
     }
@@ -154,7 +162,7 @@ namespace genex::meta {
     [[nodiscard]] GENEX_INLINE constexpr auto operator*(
       this Self &&self) noexcept -> decltype(auto) {
       if constexpr (store_direct) { return (std::forward<Self>(self).m_value); }
-      else { return (*std::forward<Self>(self).m_value); }
+      else { return *std::forward<Self>(self).m_value; }
     }
   };
 }

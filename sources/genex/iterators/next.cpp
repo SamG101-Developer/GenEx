@@ -31,7 +31,7 @@ namespace genex::iterators::detail::concepts {
   template <typename I, typename S>
   concept sized_nextable_iters =
     randomly_nextable_iters<I, S> and
-    (not std::same_as<I, S>);
+    not std::same_as<I, S>;
 }
 
 namespace genex::iterators {
@@ -39,7 +39,8 @@ namespace genex::iterators {
     template <typename I>
     requires detail::concepts::nextable_iters<I> and std::copyable<I>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      I it, const iter_difference_t<I> n = 1) const -> I {
+      I it, const iter_difference_t<I> n = 1) const noexcept(
+      SAFE_CALL(decltype(iterators::advance), I&, iter_difference_t<I>)) -> I {
       return iterators::advance(it, n);
     }
 
@@ -57,7 +58,8 @@ namespace genex::iterators {
     template <typename I, typename S>
     requires detail::concepts::randomly_nextable_iters<I, S>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      I it, const iter_difference_t<I> n, const S bound) const -> I {
+      I it, const iter_difference_t<I> n, const S bound) const noexcept(
+      SAFE_NOEX(it + n) and SAFE_NOEX(it + (bound - it)) and SAFE_MOVE(I)) -> I {
       if (n <= 0) { return it; }
       if (n < bound - it) [[likely]] { return it + n; }
       return it + (bound - it);
@@ -65,20 +67,25 @@ namespace genex::iterators {
 
     template <typename I, typename S>
     requires detail::concepts::boundedly_nextable_iters<I, S>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I it, S bound) const -> I {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I it, S bound) const -> I {
       for (; it != bound; ++it) {}
       return it;
     }
 
     template <typename I, typename S>
     requires detail::concepts::commonly_nextable_iters<I, S>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I, S bound) const -> I {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I, S bound) const noexcept(
+      SAFE_MOVE(S)) -> I {
       return bound;
     }
 
     template <typename I, typename S>
     requires detail::concepts::sized_nextable_iters<I, S>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(I it, S bound) const -> I {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I it, S bound) const noexcept(
+      SAFE_NOEX(it + (bound - it))) -> I {
       return it + (bound - it);
     }
   };

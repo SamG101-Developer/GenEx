@@ -1,5 +1,8 @@
+#include <forward_list>
 #include <gtest/gtest.h>
+#include <list>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -8,7 +11,16 @@ import genex.actions.filter;
 import genex.actions.pop_back;
 import genex.actions.remove;
 import genex.actions.take;
+import genex.iterators.distance;
+import genex.iterators.iter_swap;
+import genex.iterators.next;
+import genex.iterators.prev;
 import genex.meta;
+import genex.operations.access;
+import genex.operations.cmp;
+import genex.operations.empty;
+import genex.operations.size;
+import genex.operations.tuple;
 import genex.span;
 import genex.views.drop;
 import genex.views.filter;
@@ -54,7 +66,12 @@ namespace {
     auto end() noexcept -> int* { return nullptr; }
   };
 
+  struct ThrowingEq {
+    auto operator==(const ThrowingEq &) const -> bool { throw std::runtime_error("eq"); }
+  };
+
   using vec_ref = std::vector<int>&;
+  using list_iter = std::list<int>::iterator;
 }
 
 // Building a view only moves its arguments, so it stays noexcept over a range whose begin and end are.
@@ -84,6 +101,39 @@ static_assert(
 // A span built from a range calls its begin and end.
 static_assert(noexcept(genex::span<int>(std::declval<vec_ref>())));
 static_assert(not noexcept(genex::span<int>(std::declval<ThrowingBegin&>())));
+
+// Moving an iterator by more than a jump walks it, which can run anything.
+static_assert(noexcept(genex::iterators::next(std::declval<int*>())));
+static_assert(noexcept(genex::iterators::prev(std::declval<int*>())));
+static_assert(not noexcept(genex::iterators::next(std::declval<list_iter>())));
+static_assert(not noexcept(genex::iterators::prev(std::declval<list_iter>())));
+
+// The same goes for measuring a range.
+static_assert(noexcept(genex::iterators::distance(std::declval<int*>(), std::declval<int*>())));
+static_assert(noexcept(genex::iterators::distance(std::declval<vec_ref>())));
+static_assert(not noexcept(genex::iterators::distance(std::declval<std::list<int>&>())));
+static_assert(noexcept(genex::iterators::iter_swap(std::declval<int*>(), std::declval<int*>())));
+
+// Sizing a range only has to walk it if it can't say.
+static_assert(noexcept(genex::operations::size(std::declval<vec_ref>())));
+static_assert(noexcept(genex::operations::empty(std::declval<vec_ref>())));
+static_assert(not noexcept(genex::operations::size(std::declval<std::forward_list<int>&>())));
+
+// An element is a copy from an rvalue range, and a reference otherwise.
+static_assert(noexcept(genex::operations::at(std::declval<vec_ref>(), 0)) == noexcept(std::declval<vec_ref>()[0]));
+static_assert(not noexcept(genex::operations::front(std::declval<std::vector<ThrowsOnCopy>>())));
+
+// A comparison is as safe as the operator, and the projection if there is one.
+static_assert(noexcept(genex::operations::eq{}(1, 2)));
+static_assert(noexcept(genex::operations::eq{}(1, 2, genex::meta::identity{})));
+static_assert(noexcept(genex::operations::eq_fixed<int>{1}(2)));
+static_assert(not noexcept(genex::operations::eq{}(1, 2, keep)));
+static_assert(not noexcept(genex::operations::eq{}(std::declval<ThrowingEq&>(), std::declval<ThrowingEq&>())));
+
+// Getting from a tuple is a reference, but a pair's lvalue overloads copy.
+static_assert(noexcept(genex::get<0>(std::declval<std::tuple<ThrowsOnCopy>&>())));
+static_assert(noexcept(genex::get<0>(std::declval<std::pair<ThrowsOnCopy, int>>())));
+static_assert(not noexcept(genex::get<0>(std::declval<std::pair<ThrowsOnCopy, int>&>())));
 
 TEST(GenexNoexcept, ThrowingPredicateEscapesBegin) {
   auto vec = std::vector{1, 2, 3};
