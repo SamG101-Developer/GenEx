@@ -141,12 +141,10 @@ namespace genex::views::detail::impl {
       return zip_sentinel<Rngs...>{m_sts};
     }
 
-    template <typename Self>
-    requires (std::sized_sentinel_for<sentinel_t<Rngs>, iterator_t<Rngs>> and ...)
-    [[nodiscard]] GENEX_INLINE constexpr auto size(
-      this Self &&self) -> std::size_t {
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const -> std::size_t
+    requires (std::sized_sentinel_for<sentinel_t<Rngs>, iterator_t<Rngs>> and ...) {
       return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        return std::min({static_cast<std::size_t>(std::get<Is>(self.m_sts) - std::get<Is>(self.m_its))...});
+        return std::min({static_cast<std::size_t>(std::get<Is>(m_sts) - std::get<Is>(m_its))...});
       }(std::index_sequence_for<Rngs...>{});
     }
   };

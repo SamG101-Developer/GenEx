@@ -60,22 +60,16 @@ namespace genex {
       m_ptr(other.data()), m_size(other.size()) {
     }
 
-    template <typename Self>
-    [[nodiscard]] GENEX_INLINE constexpr auto data(
-      this Self &&self) noexcept -> T* {
-      return self.m_ptr;
+    [[nodiscard]] GENEX_INLINE constexpr auto data() const noexcept -> T* {
+      return m_ptr;
     }
 
-    template <typename Self>
-    [[nodiscard]] GENEX_INLINE constexpr auto size(
-      this Self &&self) noexcept -> std::size_t {
-      return self.m_size;
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const noexcept -> std::size_t {
+      return m_size;
     }
 
-    template <typename Self>
-    [[nodiscard]] GENEX_INLINE constexpr auto empty(
-      this Self &&self) noexcept -> bool {
-      return self.m_size == 0;
+    [[nodiscard]] GENEX_INLINE constexpr auto empty() const noexcept -> bool {
+      return m_size == 0;
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
@@ -86,22 +80,17 @@ namespace genex {
       return m_ptr + m_size;
     }
 
-    template <typename Self>
     [[nodiscard]] GENEX_INLINE constexpr auto operator[](
-      this Self &&self, const std::size_t index) noexcept -> T& {
-      return self.m_ptr[index];
+      const std::size_t index) const noexcept -> T& {
+      return m_ptr[index];
     }
 
-    template <typename Self>
-    [[nodiscard]] GENEX_INLINE constexpr auto front(
-      this Self &&self) noexcept -> T& {
-      return *self.m_ptr;
+    [[nodiscard]] GENEX_INLINE constexpr auto front() const noexcept -> T& {
+      return *m_ptr;
     }
 
-    template <typename Self>
-    [[nodiscard]] GENEX_INLINE constexpr auto back(
-      this Self &&self) noexcept -> T& {
-      return *(self.m_ptr + self.m_size - 1);
+    [[nodiscard]] GENEX_INLINE constexpr auto back() const noexcept -> T& {
+      return *(m_ptr + m_size - 1);
     }
 
     /// The first "count" elements.

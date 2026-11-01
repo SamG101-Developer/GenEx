@@ -67,15 +67,14 @@ namespace genex::views::detail::impl {
     GENEX_INLINE friend constexpr auto operator==(
       const transform_iterator &self,
       const transform_sentinel<S2> &that)-> bool {
-      return self.recursive_eq(self.it, that.st);
+      return recursive_eq(self.it, that.st);
     }
 
   private:
-    template <typename Self, typename I2, typename S2>
-    GENEX_INLINE constexpr auto recursive_eq(
-      this Self &&self, I2 i, S2 s) -> bool {
+    template <typename I2, typename S2>
+    GENEX_INLINE static constexpr auto recursive_eq(I2 i, S2 s) -> bool {
       if constexpr (requires { i == s; }) { return i == s; }
-      else { return self.recursive_eq(i.it, s); }
+      else { return recursive_eq(i.it, s); }
     }
   };
 

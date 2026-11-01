@@ -65,14 +65,14 @@ namespace genex::views::detail::impl {
     GENEX_INLINE constexpr scan_iterator() = default;
 
     GENEX_INLINE constexpr scan_iterator(
-      I first, S last, F op, std::optional<Acc> seed) :
+      I first, S last, F fn, std::optional<Acc> seed) :
       it(std::move(first)), st(std::move(last)),
-      op(std::move(op)), acc(std::move(seed)) {
-      if (this->it == this->st) { this->acc.reset(); }
-      else if (this->acc.has_value()) {
-        this->acc = meta::invoke(*this->op, *this->acc, *this->it);
+      op(std::move(fn)), acc(std::move(seed)) {
+      if (it == st) { acc.reset(); }
+      else if (acc.has_value()) {
+        acc = meta::invoke(*op, *acc, *it);
       }
-      else { this->acc.emplace(*this->it); }
+      else { acc.emplace(*it); }
     }
 
     GENEX_INLINE constexpr auto next() -> void {

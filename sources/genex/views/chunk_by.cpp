@@ -71,12 +71,11 @@ namespace genex::views::detail::impl {
     }
 
   private:
-    template <typename Self>
-    constexpr auto find_chunk_end(this Self &&self, I cur) -> I {
-      if (cur == self.st) { return cur; }
+    constexpr auto find_chunk_end(I cur) -> I {
+      if (cur == st) { return cur; }
       auto prev = cur;
       ++cur;
-      while (cur != self.st and meta::invoke(*self.pred, *prev, *cur)) {
+      while (cur != st and meta::invoke(*pred, *prev, *cur)) {
         prev = cur;
         ++cur;
       }

@@ -127,13 +127,11 @@ namespace genex::views::detail::impl {
       return interleave_iterator(st1, st1, st2, st2, extend);
     }
 
-    template <typename Self>
-    requires std::sized_sentinel_for<S1, I1> and std::sized_sentinel_for<S2, I2>
-    [[nodiscard]] GENEX_INLINE constexpr auto size(
-      this Self &&self) -> std::size_t {
-      const auto n1 = iterators::distance(self.it1, self.st1);
-      const auto n2 = iterators::distance(self.it2, self.st2);
-      return static_cast<std::size_t>(self.extend ? n1 + n2 : 2 * std::min(n1, n2));
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const -> std::size_t
+    requires std::sized_sentinel_for<S1, I1> and std::sized_sentinel_for<S2, I2> {
+      const auto n1 = iterators::distance(it1, st1);
+      const auto n2 = iterators::distance(it2, st2);
+      return static_cast<std::size_t>(extend ? n1 + n2 : 2 * std::min(n1, n2));
     }
   };
 }

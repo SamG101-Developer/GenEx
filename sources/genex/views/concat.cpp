@@ -87,35 +87,35 @@ namespace genex::views::detail::impl {
     }
 
   private:
-    template <std::size_t I, typename Self>
-    GENEX_INLINE constexpr auto deref_impl(this Self &&self) -> reference {
+    template <std::size_t I>
+    GENEX_INLINE constexpr auto deref_impl() const -> reference {
       if constexpr (I < sizeof...(Rngs)) {
-        if (self.active == I) { return *std::get<I>(self.its); }
-        return self.template deref_impl<I + 1>();
+        if (active == I) { return *std::get<I>(its); }
+        return deref_impl<I + 1>();
       }
       else {
         std::unreachable();
       }
     }
 
-    template <std::size_t I, typename Self>
-    GENEX_INLINE constexpr auto inc_impl(this Self &&self) -> void {
+    template <std::size_t I>
+    GENEX_INLINE constexpr auto inc_impl() -> void {
       if constexpr (I < sizeof...(Rngs)) {
-        if (self.active == I) {
-          ++std::get<I>(self.its);
-          self.template settle<I>();
+        if (active == I) {
+          ++std::get<I>(its);
+          settle<I>();
           return;
         }
-        self.template inc_impl<I + 1>();
+        inc_impl<I + 1>();
       }
     }
 
-    template <std::size_t I, typename Self>
-    GENEX_INLINE constexpr auto settle(this Self &&self) -> void {
+    template <std::size_t I>
+    GENEX_INLINE constexpr auto settle() -> void {
       if constexpr (I < sizeof...(Rngs)) {
-        if (std::get<I>(self.its) == std::get<I>(self.sts)) {
-          self.active = I + 1;
-          self.template settle<I + 1>();
+        if (std::get<I>(its) == std::get<I>(sts)) {
+          active = I + 1;
+          settle<I + 1>();
         }
       }
     }
@@ -141,10 +141,9 @@ namespace genex::views::detail::impl {
       return concat_sentinel{};
     }
 
-    template <typename Self>
-      requires (sized_range<Rngs> and ...)
-    [[nodiscard]] GENEX_INLINE constexpr auto size(this Self &&self) -> std::size_t {
-      return self.template size_impl<0>();
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const -> std::size_t
+    requires (sized_range<Rngs> and ...) {
+      return size_impl<0>();
     }
 
     /// Each range can be inserted in one go, which a single loop stepping
@@ -162,14 +161,15 @@ namespace genex::views::detail::impl {
     }
 
   private:
-    template <std::size_t I, typename Self>
+    template <std::size_t I>
     requires (sized_range<Rngs> and ...)
-    GENEX_INLINE constexpr auto size_impl(this Self &&self) -> std::size_t {
+    GENEX_INLINE constexpr auto size_impl() const -> std::size_t {
       if constexpr (I >= sizeof...(Rngs)) { return 0; }
       else {
-        auto const &it = std::get<I>(self.its);
-        auto const &st = std::get<I>(self.sts);
-        return static_cast<std::size_t>(iterators::distance(it, st)) + self.template size_impl<I + 1>();
+        auto const &it = std::get<I>(its);
+        auto const &st = std::get<I>(sts);
+        return static_cast<std::size_t>(
+          iterators::distance(it, st)) + size_impl<I + 1>();
       }
     }
   };

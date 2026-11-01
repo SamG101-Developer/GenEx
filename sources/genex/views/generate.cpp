@@ -37,9 +37,9 @@ namespace genex::views::detail::impl {
 
     GENEX_INLINE constexpr generate_iterator() = default;
 
-    GENEX_INLINE constexpr generate_iterator(F f, const std::ptrdiff_t count) :
-      f(std::move(f)), count(count) {
-      if (not Counted or count != 0) { cur.emplace(meta::invoke(*this->f)); }
+    GENEX_INLINE constexpr generate_iterator(F fn, const std::ptrdiff_t count) :
+      f(std::move(fn)), count(count) {
+      if (not Counted or count != 0) { cur.emplace(meta::invoke(*f)); }
     }
 
     GENEX_INLINE constexpr auto next() -> void {
