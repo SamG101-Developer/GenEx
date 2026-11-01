@@ -105,43 +105,55 @@ namespace genex {
     return out;
   }
 
+  /// Whether a container's own range constructor is the way to build it.
+  template <typename Out, typename Rng>
+  concept range_constructible =
+    not self_appending<Out, Rng> and
+    not reserve_pushable<Out, Rng> and
+    std::copyable<range_value_t<Rng>> and
+    requires(Rng &rng) { Out(iterators::begin(rng), iterators::end(rng)); };
+
   /// Builds a container from a range, by the fastest route that the two of them
   /// allow.
   template <typename Out, typename Rng>
   constexpr auto to_impl(Rng &rng) -> Out {
-    if constexpr (self_appending<Out, Rng>) {
-      return self_append<Out>(rng);
-    }
-    else if constexpr (bulk_fillable<Out, Rng>) {
-      return bulk_fill<Out>(rng);
-    }
-    else if constexpr (
-      std::copyable<range_value_t<Rng>>
-      and not reserve_pushable<Out, Rng> and
-      requires { Out(iterators::begin(rng), iterators::end(rng)); }) {
-      return Out(iterators::begin(rng), iterators::end(rng));
-    }
-    else {
-      auto out = Out();
-      auto [first, last] = iterators::iter_pair(rng);
-      if constexpr (has_member_reserve<Out>) {
-        if constexpr (has_member_size<Rng>) {
-          out.reserve(static_cast<std::size_t>(rng.size()));
-        }
-        else if constexpr (has_member_reserve_hint<Rng>) {
-          out.reserve(static_cast<std::size_t>(rng.reserve_hint()));
-        }
+    auto out = Out();
+    auto [first, last] = iterators::iter_pair(rng);
+    if constexpr (has_member_reserve<Out>) {
+      if constexpr (has_member_size<Rng>) {
+        out.reserve(static_cast<std::size_t>(rng.size()));
       }
-      for (; first != last; ++first) {
-        if constexpr (requires { out.push_back(*first); }) {
-          out.push_back(*first);
-        }
-        else {
-          out.insert(*first);
-        }
+      else if constexpr (has_member_reserve_hint<Rng>) {
+        out.reserve(static_cast<std::size_t>(rng.reserve_hint()));
       }
-      return out;
     }
+    for (; first != last; ++first) {
+      if constexpr (requires { out.push_back(*first); }) {
+        out.push_back(*first);
+      }
+      else {
+        out.insert(*first);
+      }
+    }
+    return out;
+  }
+
+  template <typename Out, typename Rng>
+  requires self_appending<Out, Rng>
+  constexpr auto to_impl(Rng &rng) -> Out {
+    return self_append<Out>(rng);
+  }
+
+  template <typename Out, typename Rng>
+  requires bulk_fillable<Out, Rng>
+  constexpr auto to_impl(Rng &rng) -> Out {
+    return bulk_fill<Out>(rng);
+  }
+
+  template <typename Out, typename Rng>
+  requires range_constructible<Out, Rng>
+  constexpr auto to_impl(Rng &rng) -> Out {
+    return Out(iterators::begin(rng), iterators::end(rng));
   }
 
   /// The container a template names for elements of type "T". Most take one
