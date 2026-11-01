@@ -10,13 +10,15 @@ namespace genex::operations::detail::concepts {
   concept comparable_with =
     std::invocable<Proj, T> and
     std::invocable<Proj, U> and
-    std::equality_comparable_with<std::invoke_result_t<Proj, T>, std::invoke_result_t<Proj, U>>;
+    std::equality_comparable_with<
+      std::invoke_result_t<Proj, T>, std::invoke_result_t<Proj, U>>;
 
   template <typename T, typename U, typename Proj = meta::identity>
   concept orderable_with =
     std::invocable<Proj, T> and
     std::invocable<Proj, U> and
-    std::totally_ordered_with<std::invoke_result_t<Proj, T>, std::invoke_result_t<Proj, U>>;
+    std::totally_ordered_with<
+      std::invoke_result_t<Proj, T>, std::invoke_result_t<Proj, U>>;
 }
 
 namespace genex::operations {
@@ -93,8 +95,7 @@ namespace genex::operations {
     requires detail::concepts::orderable_with<T, U, Proj>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       T &&a, U &&b, Proj proj) const noexcept(
-      SAFE_NOEX(static_cast<bool>(
-        meta::invoke(proj, std::forward<T>(a)) <= meta::invoke(proj, std::forward<U>(b))))) -> bool {
+      SAFE_NOEX(static_cast<bool>(meta::invoke(proj, std::forward<T>(a)) <= meta::invoke(proj, std::forward<U>(b))))) -> bool {
       return meta::invoke(
         proj, std::forward<T>(a)) <= meta::invoke(proj, std::forward<U>(b));
     }
@@ -238,7 +239,8 @@ namespace genex::operations {
 
     template <typename U>
     requires detail::concepts::orderable_with<T, U>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(U &&rhs) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      U &&rhs) const noexcept(
       SAFE_CALL(ge, const T&, U)) -> bool {
       return meta::invoke(
         ge{}, lhs, std::forward<U>(rhs));
@@ -246,7 +248,8 @@ namespace genex::operations {
 
     template <typename U, typename Proj>
     requires detail::concepts::orderable_with<T, U, Proj>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(U &&rhs, Proj proj) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      U &&rhs, Proj proj) const noexcept(
       SAFE_CALL(ge, const T&, U, Proj)) -> bool {
       return meta::invoke(
         ge{}, lhs, std::forward<U>(rhs), std::move(proj));
@@ -259,7 +262,8 @@ namespace genex::operations {
 
     template <typename U>
     requires detail::concepts::orderable_with<T, U>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(U &&rhs) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      U &&rhs) const noexcept(
       SAFE_CALL(le, const T&, U)) -> bool {
       return meta::invoke(
         le{}, lhs, std::forward<U>(rhs));
@@ -267,7 +271,8 @@ namespace genex::operations {
 
     template <typename U, typename Proj>
     requires detail::concepts::orderable_with<T, U, Proj>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(U &&rhs, Proj proj) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      U &&rhs, Proj proj) const noexcept(
       SAFE_CALL(le, const T&, U, Proj)) -> bool {
       return meta::invoke(
         le{}, lhs, std::forward<U>(rhs), std::move(proj));

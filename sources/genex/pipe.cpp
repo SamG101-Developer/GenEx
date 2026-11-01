@@ -78,13 +78,13 @@ namespace genex::detail {
     }
 
     template <typename Self>
-      requires requires(Self &s) { meta::invoke(s.m_adaptor, s.m_base).size(); }
+    requires requires(Self &s) { meta::invoke(s.m_adaptor, s.m_base).size(); }
     [[nodiscard]] GENEX_INLINE constexpr auto size(this Self &&self) {
       return meta::invoke(self.m_adaptor, self.m_base).size();
     }
 
     template <typename Self>
-      requires requires(Self &s) { meta::invoke(s.m_adaptor, s.m_base).reserve_hint(); }
+    requires requires(Self &s) { meta::invoke(s.m_adaptor, s.m_base).reserve_hint(); }
     [[nodiscard]] GENEX_INLINE constexpr auto reserve_hint(this Self &&self) {
       return meta::invoke(self.m_adaptor, self.m_base).reserve_hint();
     }

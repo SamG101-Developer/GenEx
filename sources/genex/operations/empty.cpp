@@ -25,14 +25,16 @@ namespace genex::operations {
   struct empty_fn {
     template <typename Rng>
     requires detail::concepts::emptyable_select_empty<Rng>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&r) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&r) const noexcept(
       SAFE_NOEX(static_cast<bool>(r.empty()))) -> bool {
       return r.empty();
     }
 
     template <typename Rng>
     requires detail::concepts::emptyable_select_size<Rng>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Rng &&rng) const noexcept(
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const noexcept(
       SAFE_NOEX(operations::size(rng))) -> bool {
       return operations::size(rng) == 0;
     }

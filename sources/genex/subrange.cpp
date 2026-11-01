@@ -56,24 +56,25 @@ namespace genex {
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto reserve_hint() const -> size_type
-      requires (not std::sized_sentinel_for<S, I>) and requires(const I &i) { i.count(); } {
+      requires (not std::sized_sentinel_for<S, I>) and
+      requires(const I &i) { i.count(); } {
       return static_cast<size_type>(m_it.count());
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto data() const noexcept
       -> std::add_pointer_t<iter_element_t<I>>
-      requires std::contiguous_iterator<I> {
+    requires std::contiguous_iterator<I> {
       return std::to_address(m_it);
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto front() const -> reference
-      requires std::forward_iterator<I> {
+    requires std::forward_iterator<I> {
       GENEX_ASSERT(not empty());
       return *m_it;
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto back() const -> reference
-      requires std::bidirectional_iterator<I> and std::same_as<I, S> {
+    requires std::bidirectional_iterator<I> and std::same_as<I, S> {
       GENEX_ASSERT(not empty());
       auto last = m_st;
       --last;
@@ -82,7 +83,7 @@ namespace genex {
 
     [[nodiscard]] GENEX_INLINE constexpr auto operator[](
       const difference_type n) const -> reference
-      requires std::random_access_iterator<I> {
+    requires std::random_access_iterator<I> {
       return m_it[n];
     }
   };

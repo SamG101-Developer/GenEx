@@ -38,11 +38,11 @@ namespace genex {
       m_size(static_cast<std::size_t>(end - begin)) {
     }
 
-    /// A view of a contiguous range's elements. An rvalue range must
-    /// outlive the span, so only a borrowed one, or a span of const
-    /// elements (bound for the length of a call), is allowed.
+    /// A view of a contiguous range's elements. An rvalue range must outlive
+    /// the span, so only a borrowed one, or a span of const elements (bound for
+    /// the length of a call), is allowed.
     template <typename Rng>
-      requires (not std::same_as<std::remove_cvref_t<Rng>, span>)
+    requires (not std::same_as<std::remove_cvref_t<Rng>, span>)
       and contiguous_range<Rng> and sized_range<Rng>
       and std::convertible_to<std::remove_reference_t<range_reference_t<Rng>>(*)[], T(*)[]>
       and (non_dangling_range<Rng> or std::is_const_v<T>)
@@ -61,17 +61,20 @@ namespace genex {
     }
 
     template <typename Self>
-    [[nodiscard]] GENEX_INLINE constexpr auto data(this Self &&self) noexcept -> T* {
+    [[nodiscard]] GENEX_INLINE constexpr auto data(
+      this Self &&self) noexcept -> T* {
       return self.m_ptr;
     }
 
     template <typename Self>
-    [[nodiscard]] GENEX_INLINE constexpr auto size(this Self &&self) noexcept -> std::size_t {
+    [[nodiscard]] GENEX_INLINE constexpr auto size(
+      this Self &&self) noexcept -> std::size_t {
       return self.m_size;
     }
 
     template <typename Self>
-    [[nodiscard]] GENEX_INLINE constexpr auto empty(this Self &&self) noexcept -> bool {
+    [[nodiscard]] GENEX_INLINE constexpr auto empty(
+      this Self &&self) noexcept -> bool {
       return self.m_size == 0;
     }
 
@@ -84,27 +87,32 @@ namespace genex {
     }
 
     template <typename Self>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator[](this Self &&self, const std::size_t index) noexcept -> T& {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator[](
+      this Self &&self, const std::size_t index) noexcept -> T& {
       return self.m_ptr[index];
     }
 
     template <typename Self>
-    [[nodiscard]] GENEX_INLINE constexpr auto front(this Self &&self) noexcept -> T& {
+    [[nodiscard]] GENEX_INLINE constexpr auto front(
+      this Self &&self) noexcept -> T& {
       return *self.m_ptr;
     }
 
     template <typename Self>
-    [[nodiscard]] GENEX_INLINE constexpr auto back(this Self &&self) noexcept -> T& {
+    [[nodiscard]] GENEX_INLINE constexpr auto back(
+      this Self &&self) noexcept -> T& {
       return *(self.m_ptr + self.m_size - 1);
     }
 
     /// The first "count" elements.
-    [[nodiscard]] GENEX_INLINE constexpr auto first(const std::size_t count) const noexcept -> span {
+    [[nodiscard]] GENEX_INLINE constexpr auto first(
+      const std::size_t count) const noexcept -> span {
       return span(m_ptr, count);
     }
 
     /// The last "count" elements.
-    [[nodiscard]] GENEX_INLINE constexpr auto last(const std::size_t count) const noexcept -> span {
+    [[nodiscard]] GENEX_INLINE constexpr auto last(
+      const std::size_t count) const noexcept -> span {
       return span(m_ptr + (m_size - count), count);
     }
 

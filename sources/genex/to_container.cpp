@@ -35,7 +35,8 @@ namespace genex::detail {
       --left;
     }
 
-    GENEX_INLINE constexpr auto prev() -> void requires std::bidirectional_iterator<I> {
+    GENEX_INLINE constexpr auto prev() -> void
+    requires std::bidirectional_iterator<I> {
       --it;
       ++left;
     }
@@ -166,7 +167,9 @@ namespace genex {
   template <template <typename...> typename Out, typename T>
   requires (not requires { typename Out<T>; }) and pair_like<T>
   struct to_element<Out, T> {
-    using type = Out<std::remove_const_t<std::tuple_element_t<0, T>>, std::tuple_element_t<1, T>>;
+    using type = Out<
+      std::remove_const_t<
+        std::tuple_element_t<0, T>>, std::tuple_element_t<1, T>>;
   };
 
   template <template <typename...> typename Out>

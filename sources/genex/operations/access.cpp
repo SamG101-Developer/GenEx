@@ -27,7 +27,8 @@ namespace genex::operations {
     requires detail::concepts::accessible_range<Rng>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       Rng &&rng, const std::size_t n) const noexcept(
-      SAFE_NOEX(rng[n]) and SAFE_CTOR(borrowed_reference_t<Rng>, decltype(rng[n])))
+      SAFE_NOEX(rng[n]) and
+      SAFE_CTOR(borrowed_reference_t<Rng>, decltype(rng[n])))
       -> borrowed_reference_t<Rng> {
       return rng[n];
     }
