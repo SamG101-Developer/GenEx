@@ -42,7 +42,8 @@ namespace genex::actions {
     template <typename Shuffler>
     requires std::uniform_random_bit_generator<std::remove_cvref_t<Shuffler>>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      Shuffler shuffler) const -> auto {
+      Shuffler shuffler) const noexcept(
+      SAFE_CTOR(shuffle_fn) and SAFE_MOVE(Shuffler)) -> auto {
       return meta::bind_back(shuffle_fn{}, std::move(shuffler));
     }
   };

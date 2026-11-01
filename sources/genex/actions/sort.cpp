@@ -32,7 +32,8 @@ namespace genex::actions {
     template <typename Comp = operations::lt, typename Proj = meta::identity>
     requires closure_callable<Comp>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      Comp comp, Proj proj = {}) const {
+      Comp comp, Proj proj = {}) const noexcept(
+      SAFE_CTOR(sort_fn) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {
       return meta::bind_back(sort_fn{}, std::move(comp), std::move(proj));
     }
   };
@@ -51,7 +52,8 @@ namespace genex::actions {
     template <typename Comp = operations::lt, typename Proj = meta::identity>
     requires closure_callable<Comp>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      Comp comp, Proj proj = {}) const {
+      Comp comp, Proj proj = {}) const noexcept(
+      SAFE_CTOR(stable_sort_fn) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {
       return meta::bind_back(
         stable_sort_fn{}, std::move(comp), std::move(proj));
     }

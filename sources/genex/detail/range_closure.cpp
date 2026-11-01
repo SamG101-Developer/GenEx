@@ -9,18 +9,17 @@ import genex.subrange;
 import std;
 
 export namespace genex::detail {
-  /**
-   * A closure holding a range by value. Any view it creates points into that range, so it must outlive the view.
-   */
+  /// A closure holding a range by value. Any view it creates points into that
+  /// range, so it must outlive the view.
   template <typename F>
   struct retained_closure : F {
   };
 
   template <typename F>
-  inline constexpr bool is_retained_closure_v = false;
+  inline constexpr auto is_retained_closure_v = false;
 
   template <typename F>
-  inline constexpr bool is_retained_closure_v<retained_closure<F>> = true;
+  inline constexpr auto is_retained_closure_v<retained_closure<F>> = true;
 
   /// Binds a second range to a closure without a dangling iterator. An lvalue
   /// is referred to rather than copied, a view or a borrowed range is safe to

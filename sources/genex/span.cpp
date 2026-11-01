@@ -32,7 +32,8 @@ namespace genex {
 
     template <typename It, typename St>
     requires std::contiguous_iterator<It> and std::sized_sentinel_for<St, It>
-    GENEX_INLINE constexpr span(It begin, St end) noexcept :
+    GENEX_INLINE constexpr span(It begin, St end) noexcept(
+      SAFE_NOEX(end - begin)) :
       m_ptr(std::to_address(begin)),
       m_size(static_cast<std::size_t>(end - begin)) {
     }
@@ -45,7 +46,10 @@ namespace genex {
       and contiguous_range<Rng> and sized_range<Rng>
       and std::convertible_to<std::remove_reference_t<range_reference_t<Rng>>(*)[], T(*)[]>
       and (non_dangling_range<Rng> or std::is_const_v<T>)
-    GENEX_INLINE constexpr span(Rng &&rng) noexcept :
+    GENEX_INLINE constexpr span(Rng &&rng) noexcept(
+      SAFE_CALL(decltype(iterators::begin), Rng&) and
+      SAFE_CALL(decltype(iterators::end), Rng&) and
+      SAFE_CTOR(span, iterator_t<Rng>, sentinel_t<Rng>)) :
       span(iterators::begin(rng), iterators::end(rng)) {
     }
 

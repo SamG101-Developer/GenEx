@@ -31,7 +31,7 @@ export namespace genex::detail {
 
     GENEX_INLINE constexpr counted_iterator(
       I first, const difference_type count) noexcept(
-      std::is_nothrow_move_constructible_v<I>) :
+      SAFE_MOVE(I)) :
       it(std::move(first)), n(count) {
     }
 

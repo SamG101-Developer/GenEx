@@ -62,7 +62,8 @@ namespace genex::actions {
 
     template <typename E>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      E elem) const {
+      E elem) const noexcept(
+      SAFE_CTOR(push_back_fn) and SAFE_MOVE(E)) {
       return meta::bind_back(push_back_fn{}, std::move(elem));
     }
   };

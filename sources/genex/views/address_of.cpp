@@ -39,11 +39,11 @@ namespace genex::views::detail::impl {
     using iterator_category = legacy_iter_category_t<
       reference, iterator_concept>;
 
-    GENEX_INLINE constexpr address_of_iterator() noexcept = default;
+    GENEX_INLINE constexpr address_of_iterator() = default;
 
     GENEX_INLINE constexpr explicit address_of_iterator(
       I first) noexcept(
-      std::is_nothrow_move_constructible_v<I>) :
+      SAFE_MOVE(I)) :
       it(std::move(first)) {
     }
 

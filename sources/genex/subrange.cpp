@@ -25,24 +25,24 @@ namespace genex {
     = default;
 
     GENEX_INLINE constexpr subrange(I first, S last) noexcept(
-      std::is_nothrow_move_constructible_v<I> and std::is_nothrow_move_constructible_v<S>) :
+      SAFE_MOVE(I) and SAFE_MOVE(S)) :
       m_it(std::move(first)), m_st(std::move(last)) {
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto begin() const noexcept(
-      std::is_nothrow_copy_constructible_v<I>) -> I
+      SAFE_CTOR(I, const I&)) -> I
       requires std::copyable<I> {
       return m_it;
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto begin() noexcept(
-      std::is_nothrow_move_constructible_v<I>) -> I
+      SAFE_MOVE(I)) -> I
       requires (not std::copyable<I>) {
       return std::move(m_it);
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto end() const noexcept(
-      std::is_nothrow_copy_constructible_v<S>) -> S {
+      SAFE_CTOR(S, const S&)) -> S {
       return m_st;
     }
 

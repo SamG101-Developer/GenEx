@@ -36,7 +36,8 @@ namespace genex::actions {
     template <typename F, typename Proj = meta::identity>
     requires closure_callable<F>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      F f, Proj proj = {}) const {
+      F f, Proj proj = {}) const noexcept(
+      SAFE_CTOR(transform_fn) and SAFE_MOVE(F) and SAFE_MOVE(Proj)) {
       return meta::bind_back(transform_fn{}, std::move(f), std::move(proj));
     }
   };

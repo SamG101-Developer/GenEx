@@ -79,7 +79,9 @@ namespace genex::actions {
 
     template <typename Comp = operations::eq, typename Proj = meta::identity>
     requires closure_callable<Comp>
-    [[nodiscard]] GENEX_INLINE constexpr auto operator()(Comp comp, Proj proj = {}) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Comp comp, Proj proj = {}) const noexcept(
+      SAFE_CTOR(unique_fn) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {
       return meta::bind_back(unique_fn{}, std::move(comp), std::move(proj));
     }
   };

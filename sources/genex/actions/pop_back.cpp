@@ -31,7 +31,8 @@ namespace genex::actions {
     template <typename Rng>
     requires detail::concepts::back_poppable_select_pop_back<Rng>
     GENEX_INLINE constexpr auto operator()(
-      Rng &&rng) const -> decltype(auto) {
+      Rng &&rng) const noexcept(
+      SAFE_NOEX(rng.pop_back())) -> decltype(auto) {
       return rng.pop_back();
     }
 

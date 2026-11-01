@@ -110,7 +110,7 @@ namespace genex::meta {
     box() = default;
 
     GENEX_INLINE constexpr box(T value) noexcept(
-      std::is_nothrow_move_constructible_v<T>) :
+      SAFE_MOVE(T)) :
       m_value(std::move(value)) {
     }
 
@@ -119,7 +119,7 @@ namespace genex::meta {
     ~box() = default;
 
     GENEX_INLINE constexpr auto operator=(const box &that) noexcept(
-      std::is_nothrow_copy_constructible_v<T>) -> box&
+      SAFE_CTOR(T, const T&)) -> box&
       requires std::copy_constructible<T> {
       if (this != std::addressof(that)) {
         if constexpr (store_direct) {
@@ -135,7 +135,7 @@ namespace genex::meta {
     }
 
     GENEX_INLINE constexpr auto operator=(box &&that) noexcept(
-      std::is_nothrow_move_constructible_v<T>) -> box& requires
+      SAFE_MOVE(T)) -> box& requires
       std::move_constructible<T> {
       if (this != std::addressof(that)) {
         if constexpr (store_direct) {

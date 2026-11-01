@@ -33,7 +33,8 @@ namespace genex::actions {
     template <typename Pred>
     requires closure_callable<Pred>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      Pred pred) const {
+      Pred pred) const noexcept(
+      SAFE_CTOR(drop_while_fn) and SAFE_MOVE(Pred)) {
       return meta::bind_back(drop_while_fn{}, std::move(pred));
     }
   };

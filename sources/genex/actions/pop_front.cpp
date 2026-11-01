@@ -29,7 +29,8 @@ namespace genex::actions {
     template <typename Rng>
     requires detail::concepts::front_poppable_select_pop_front<Rng>
     GENEX_INLINE constexpr auto operator()(
-      Rng &&rng) const -> decltype(auto) {
+      Rng &&rng) const noexcept(
+      SAFE_NOEX(rng.pop_front())) -> decltype(auto) {
       return rng.pop_front();
     }
 

@@ -3,7 +3,13 @@
 #include <utility>
 #include <vector>
 
+import genex.actions.clear;
+import genex.actions.filter;
+import genex.actions.pop_back;
+import genex.actions.remove;
+import genex.actions.take;
 import genex.meta;
+import genex.span;
 import genex.views.drop;
 import genex.views.filter;
 import genex.views.materialize;
@@ -43,6 +49,11 @@ namespace {
     ~CountedCopy() { --live; }
   };
 
+  struct ThrowingBegin {
+    auto begin() -> int* { throw std::runtime_error("begin"); }
+    auto end() noexcept -> int* { return nullptr; }
+  };
+
   using vec_ref = std::vector<int>&;
 }
 
@@ -56,6 +67,23 @@ static_assert(not noexcept(genex::views::filter(genex::views::filter(std::declva
 // Allocating, and copying a range into a closure.
 static_assert(not noexcept(genex::views::materialize(std::declval<vec_ref>())));
 static_assert(not noexcept(genex::views::zip(std::declval<vec_ref>())));
+
+// A partial action only stores its arguments.
+static_assert(noexcept(genex::actions::take(1)));
+static_assert(noexcept(genex::actions::filter(keep)));
+
+// A partial action moves an rvalue it's given, but has to copy an lvalue.
+static_assert(noexcept(genex::actions::remove(std::declval<ThrowsOnCopy>())));
+static_assert(not noexcept(genex::actions::remove(std::declval<ThrowsOnCopy&>())));
+
+// An action making one member call is as safe as that call.
+static_assert(noexcept(genex::actions::clear(std::declval<vec_ref>())));
+static_assert(
+  noexcept(genex::actions::pop_back(std::declval<vec_ref>())) == noexcept(std::declval<vec_ref>().pop_back()));
+
+// A span built from a range calls its begin and end.
+static_assert(noexcept(genex::span<int>(std::declval<vec_ref>())));
+static_assert(not noexcept(genex::span<int>(std::declval<ThrowingBegin&>())));
 
 TEST(GenexNoexcept, ThrowingPredicateEscapesBegin) {
   auto vec = std::vector{1, 2, 3};

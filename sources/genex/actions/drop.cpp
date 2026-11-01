@@ -36,7 +36,8 @@ namespace genex::actions {
     template <typename Int>
     requires std::integral<Int>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      const Int n) const {
+      const Int n) const noexcept(
+      SAFE_CTOR(drop_fn) and SAFE_MOVE(Int)) {
       GENEX_ASSERT(n >= 0);
       return meta::bind_back(drop_fn{}, n);
     }

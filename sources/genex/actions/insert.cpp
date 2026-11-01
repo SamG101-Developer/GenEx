@@ -91,7 +91,8 @@ namespace genex::actions {
     template <typename I, typename E>
     requires (not range<I>)
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      I it, E elem) const {
+      I it, E elem) const noexcept(
+      SAFE_CTOR(insert_fn) and SAFE_MOVE(I) and SAFE_MOVE(E)) {
       return meta::bind_back(insert_fn{}, std::move(it), std::move(elem));
     }
   };

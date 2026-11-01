@@ -20,7 +20,8 @@ namespace genex::actions {
     template <typename Rng>
     requires detail::concepts::clearable_range<Rng>
     GENEX_INLINE constexpr auto operator()(
-      Rng &&rng) const -> Rng {
+      Rng &&rng) const noexcept(
+      SAFE_NOEX(rng.clear()) and SAFE_CTOR(Rng, Rng)) -> Rng {
       rng.clear();
       return std::forward<Rng>(rng);
     }

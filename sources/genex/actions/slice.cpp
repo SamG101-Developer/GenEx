@@ -45,14 +45,16 @@ namespace genex::actions {
     template <typename Int>
     requires std::integral<Int>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      const Int from, const Int to) const {
+      const Int from, const Int to) const noexcept(
+      SAFE_CTOR(slice_fn) and SAFE_MOVE(Int)) {
       return meta::bind_back(slice_fn{}, from, to);
     }
 
     template <typename Int>
     requires std::integral<Int>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
-      const Int from) const {
+      const Int from) const noexcept(
+      SAFE_CTOR(slice_fn) and SAFE_MOVE(Int)) {
       return meta::bind_back(slice_fn{}, from);
     }
   };
