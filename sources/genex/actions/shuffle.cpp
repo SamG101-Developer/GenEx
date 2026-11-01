@@ -17,17 +17,23 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions::detail {
-  inline thread_local std::mt19937_64 default_random{std::random_device{}()};
+  // Non-inline so the module's object file holds the one definition: MSVC
+  // doesn't emit an inline thread_local variable defined in a module interface,
+  // which fails at link time (LNK2001).
+  auto default_random() -> std::mt19937_64& {
+    thread_local std::mt19937_64 engine{std::random_device{}()};
+    return engine;
+  }
 }
 
 namespace genex::actions {
   struct shuffle_fn : pipe_closure {
     template <typename Rng>
     requires detail::concepts::shufflable_range<
-      Rng, decltype(detail::default_random)&>
+      Rng, std::mt19937_64&>
     GENEX_INLINE auto operator()(
       Rng &&rng) const -> Rng {
-      genex::shuffle(rng, detail::default_random);
+      genex::shuffle(rng, detail::default_random());
       return std::forward<Rng>(rng);
     }
 
