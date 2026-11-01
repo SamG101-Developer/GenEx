@@ -33,3 +33,16 @@ TEST(GenexViewsVals, MapInput) {
   const auto exp = std::vector{5, 4, 1, 6, 3, 2};
   EXPECT_EQ(vals, exp);
 }
+
+TEST(GenexViewsKeys, RefersToTheMapsKeys) {
+  auto map = make_map();
+  auto keys = map | genex::views::keys;
+  EXPECT_EQ(&*keys.begin(), &map.begin()->first);
+}
+
+TEST(GenexViewsVals, WritesThroughToTheMap) {
+  auto map = make_map();
+  for (auto &val : map | genex::views::vals) { val *= 2; }
+  EXPECT_EQ(map.at("one"), 2);
+  EXPECT_EQ(map.at("six"), 12);
+}

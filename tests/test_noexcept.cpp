@@ -130,10 +130,11 @@ static_assert(noexcept(genex::operations::eq_fixed<int>{1}(2)));
 static_assert(not noexcept(genex::operations::eq{}(1, 2, keep)));
 static_assert(not noexcept(genex::operations::eq{}(std::declval<ThrowingEq&>(), std::declval<ThrowingEq&>())));
 
-// Getting from a tuple is a reference, but a pair's lvalue overloads copy.
+// Getting from a tuple or a pair is a reference, so nothing is copied.
 static_assert(noexcept(genex::get<0>(std::declval<std::tuple<ThrowsOnCopy>&>())));
 static_assert(noexcept(genex::get<0>(std::declval<std::pair<ThrowsOnCopy, int>>())));
-static_assert(not noexcept(genex::get<0>(std::declval<std::pair<ThrowsOnCopy, int>&>())));
+static_assert(noexcept(genex::get<0>(std::declval<std::pair<ThrowsOnCopy, int>&>())));
+static_assert(noexcept(genex::get<0>(std::declval<const std::pair<ThrowsOnCopy, int>&>())));
 
 TEST(GenexNoexcept, ThrowingPredicateEscapesBegin) {
   auto vec = std::vector{1, 2, 3};

@@ -106,18 +106,18 @@ namespace genex {
     requires (N == 0 or N == 1)
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       std::pair<T, U> &p) const noexcept(
-      SAFE_CTOR(std::tuple_element_t<N, std::pair<T, U>>, decltype(std::get<N>(p)))) -> decltype(auto) {
-      if constexpr (N == 0) { return p.first; }
-      else { return p.second; }
+      SAFE_NOEX(std::get<N>(p))) -> decltype(auto) {
+      if constexpr (N == 0) { return (p.first); }
+      else { return (p.second); }
     }
 
     template <typename T, typename U>
     requires (N == 0 or N == 1)
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       std::pair<T, U> const &p) const noexcept(
-      SAFE_CTOR(std::tuple_element_t<N, std::pair<T, U>>, decltype(std::get<N>(p)))) -> decltype(auto) {
-      if constexpr (N == 0) { return p.first; }
-      else { return p.second; }
+      SAFE_NOEX(std::get<N>(p))) -> decltype(auto) {
+      if constexpr (N == 0) { return (p.first); }
+      else { return (p.second); }
     }
 
     template <typename T, typename U>
