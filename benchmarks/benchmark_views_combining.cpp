@@ -67,7 +67,7 @@ GENEX_BENCH_VIEW(JoinWith, bench::nested, ranges::views::join(0), genex::views::
 GENEX_BENCH_VIEW(Intersperse, bench::ascending, ranges::views::intersperse(100), genex::views::intersperse(100));
 
 // ranges-v3 has no interleave view that takes a second range, so this has nothing to be compared to.
-static void BM_Genex_V2_Interleave(benchmark::State &state) {
+static void BM_Genex_V2_ViewInterleave(benchmark::State &state) {
   auto data1 = bench::ascending();
   auto data2 = bench::ascending();
   for (auto _ : state) {
@@ -76,10 +76,10 @@ static void BM_Genex_V2_Interleave(benchmark::State &state) {
   }
 }
 
-BENCHMARK(BM_Genex_V2_Interleave);
+BENCHMARK(BM_Genex_V2_ViewInterleave);
 
 // These read every element themselves, rather than collecting them in a benchmarked container.
-static void BM_StdRanges_Cycle(benchmark::State &state) {
+static void BM_StdRanges_ViewCycle(benchmark::State &state) {
   auto vec = bench::ascending();
   for (auto _ : state) {
     for (auto val : vec | ranges::views::cycle | ranges::views::take(2500) | ranges::to<std::vector>()) {
@@ -88,9 +88,9 @@ static void BM_StdRanges_Cycle(benchmark::State &state) {
   }
 }
 
-BENCHMARK(BM_StdRanges_Cycle);
+BENCHMARK(BM_StdRanges_ViewCycle);
 
-static void BM_Genex_V2_Cycle(benchmark::State &state) {
+static void BM_Genex_V2_ViewCycle(benchmark::State &state) {
   auto vec = bench::ascending();
   for (auto _ : state) {
     for (auto val : vec | genex::views::cycle | genex::views::take(2500) | genex::to<std::vector>()) {
@@ -99,4 +99,4 @@ static void BM_Genex_V2_Cycle(benchmark::State &state) {
   }
 }
 
-BENCHMARK(BM_Genex_V2_Cycle);
+BENCHMARK(BM_Genex_V2_ViewCycle);

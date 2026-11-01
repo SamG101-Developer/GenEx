@@ -9,7 +9,7 @@ import genex.views.transform;
 import genex.views.tuple_nth;
 import genex.views.zip;
 
-TEST(GenexViewsTupleN, VecInput) {
+TEST(GenexViewsTupleNth, VecInput) {
   auto vec = std::vector<std::tuple<int, int, int>>{
     {0, 10, 20},
     {1, 11, 21},
@@ -26,7 +26,7 @@ TEST(GenexViewsTupleN, VecInput) {
 }
 
 // Zipping makes a new tuple for each element, but of references to the originals.
-TEST(GenexViewsTupleN, TemporaryTupleOfReferencesStillRefersToTheElements) {
+TEST(GenexViewsTupleNth, TemporaryTupleOfReferencesStillRefersToTheElements) {
   auto first = std::vector{1, 2, 3};
   auto second = std::vector{4, 5, 6};
   auto rng = genex::views::zip(first, second) | genex::views::tuple_nth<0>;
@@ -38,7 +38,7 @@ TEST(GenexViewsTupleN, TemporaryTupleOfReferencesStillRefersToTheElements) {
 }
 
 // Long enough to be on the heap, so that a dangling reference doesn't read back as the right string by luck.
-TEST(GenexViewsTupleN, TemporaryTupleInput) {
+TEST(GenexViewsTupleNth, TemporaryTupleInput) {
   const auto exp = std::vector<std::string>{"the first string, too long to be small", "the second string, also too long"};
   auto rng = exp
     | genex::views::transform([](const std::string &str) { return std::make_tuple(0, str); })

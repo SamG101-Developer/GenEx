@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <concepts>
+#include <string>
 #include <tuple>
 #include <utility>
 
@@ -49,4 +50,48 @@ TEST(GenexOperationsGet, WritesThroughATupleLvalue) {
   auto tuple = int_tuple{1, 2};
   genex::get<0>(tuple) = 10;
   EXPECT_EQ(tuple, (int_tuple{10, 2}));
+}
+
+TEST(GenexTupleHead, OfArguments) {
+  EXPECT_EQ(genex::tuple_head(1, 2, 3), 1);
+  EXPECT_EQ(genex::tuple_head(std::string("a")), "a");
+
+  auto first = 1;
+  auto second = 2;
+  EXPECT_EQ(&genex::tuple_head(first, second), &first);
+}
+
+TEST(GenexTupleHead, OfATuple) {
+  const auto constant = std::tuple{1, 2L};
+  EXPECT_EQ(genex::tuple_head(constant), 1);
+
+  auto mutable_tuple = std::tuple{3, 4L};
+  EXPECT_EQ(genex::tuple_head(mutable_tuple), 3);
+
+  EXPECT_EQ(genex::tuple_head(std::tuple{5, 6L}), 5);
+}
+
+static_assert(std::same_as<decltype(genex::tuple_head(std::declval<const int_tuple&>())), const int&>);
+static_assert(std::same_as<decltype(genex::tuple_head(std::declval<int_tuple&>())), int&>);
+static_assert(std::same_as<decltype(genex::tuple_head(std::declval<int_tuple>())), int&&>);
+
+TEST(GenexTupleTail, OfArguments) {
+  EXPECT_EQ(genex::tuple_tail(1, 2L, 'c'), (std::tuple{2L, 'c'}));
+  EXPECT_EQ(genex::tuple_tail(1, 2L), (std::tuple{2L}));
+}
+
+TEST(GenexTupleTail, OfATuple) {
+  const auto constant = std::tuple{1, 2L, 'c'};
+  EXPECT_EQ(genex::tuple_tail(constant), (std::tuple{2L, 'c'}));
+
+  auto mutable_tuple = std::tuple{1, 2L};
+  EXPECT_EQ(genex::tuple_tail(mutable_tuple), (std::tuple{2L}));
+
+  EXPECT_EQ(genex::tuple_tail(std::tuple{1, std::string("a")}), (std::tuple{std::string("a")}));
+}
+
+TEST(GenexTupleTail, OfASingleElementTupleIsEmpty) {
+  const auto constant = std::tuple{1};
+  EXPECT_EQ(genex::tuple_tail(constant), std::tuple<>{});
+  EXPECT_EQ(genex::tuple_tail(std::tuple{1}), std::tuple<>{});
 }

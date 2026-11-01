@@ -153,8 +153,8 @@ namespace {
   BENCHMARK(Prefix##Name)
 
 #define GENEX_BENCH_ON(Name, Container, T, Make, Count, RangesCall, GenexCall)                 \
-  GENEX_BENCH_ON_SIDE(BM_StdRanges_, Name, Container, T, Make, Count, RangesCall);             \
-  GENEX_BENCH_ON_SIDE(BM_Genex_V2_, Name, Container, T, Make, Count, GenexCall)
+  GENEX_BENCH_ON_SIDE(BM_StdRanges_Detail, Name, Container, T, Make, Count, RangesCall);             \
+  GENEX_BENCH_ON_SIDE(BM_Genex_V2_Detail, Name, Container, T, Make, Count, GenexCall)
 
 #define GENEX_BENCH_MUTATING(Name, T, Make, Count, RangesCall, GenexCall) \
   GENEX_BENCH_ON(Name, std::vector<T>, T, Make, Count, RangesCall, GenexCall)
@@ -285,9 +285,9 @@ GENEX_BENCH_MUTATING(
   }                                                                     \
   BENCHMARK(Name)
 
-GENEX_BENCH_SEARCH(BM_StdRanges_LowerBound_1k, small, ranges, lower_bound);
-GENEX_BENCH_SEARCH(BM_Genex_V2_LowerBound_1k, small, genex, lower_bound);
-GENEX_BENCH_SEARCH(BM_StdRanges_LowerBound_1M, large * 10, ranges, lower_bound);
-GENEX_BENCH_SEARCH(BM_Genex_V2_LowerBound_1M, large * 10, genex, lower_bound);
-GENEX_BENCH_SEARCH(BM_StdRanges_UpperBound_1k, small, ranges, upper_bound);
-GENEX_BENCH_SEARCH(BM_Genex_V2_UpperBound_1k, small, genex, upper_bound);
+GENEX_BENCH_SEARCH(BM_StdRanges_DetailLowerBound_1k, small, ranges, lower_bound);
+GENEX_BENCH_SEARCH(BM_Genex_V2_DetailLowerBound_1k, small, genex, lower_bound);
+GENEX_BENCH_SEARCH(BM_StdRanges_DetailLowerBound_1M, large * 10, ranges, lower_bound);
+GENEX_BENCH_SEARCH(BM_Genex_V2_DetailLowerBound_1M, large * 10, genex, lower_bound);
+GENEX_BENCH_SEARCH(BM_StdRanges_DetailUpperBound_1k, small, ranges, upper_bound);
+GENEX_BENCH_SEARCH(BM_Genex_V2_DetailUpperBound_1k, small, genex, upper_bound);

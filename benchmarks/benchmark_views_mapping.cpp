@@ -141,7 +141,7 @@ GENEX_BENCH_MOVING_VIEW(Move, ranges::views::move, genex::views::move);
 GENEX_BENCH_MOVING_VIEW(MoveReverse, ranges::views::reverse | ranges::views::move, genex::views::move_reverse);
 
 // These read every element themselves, rather than collecting them in a benchmarked container.
-static void BM_StdRanges_Enumerate(benchmark::State &state) {
+static void BM_StdRanges_ViewEnumerate(benchmark::State &state) {
   auto vec = bench::ascending();
   for (auto _ : state) {
     for (auto [i, val] : vec | ranges::views::enumerate | ranges::to<std::vector>()) {
@@ -151,9 +151,9 @@ static void BM_StdRanges_Enumerate(benchmark::State &state) {
   }
 }
 
-BENCHMARK(BM_StdRanges_Enumerate);
+BENCHMARK(BM_StdRanges_ViewEnumerate);
 
-static void BM_Genex_V2_Enumerate(benchmark::State &state) {
+static void BM_Genex_V2_ViewEnumerate(benchmark::State &state) {
   auto vec = bench::ascending();
   for (auto _ : state) {
     for (auto [i, val] : vec | genex::views::enumerate | genex::to<std::vector>()) {
@@ -163,4 +163,4 @@ static void BM_Genex_V2_Enumerate(benchmark::State &state) {
   }
 }
 
-BENCHMARK(BM_Genex_V2_Enumerate);
+BENCHMARK(BM_Genex_V2_ViewEnumerate);

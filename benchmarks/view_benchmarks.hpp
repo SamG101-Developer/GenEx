@@ -15,25 +15,25 @@
 #include <vector>
 
 // A pair of benchmarks for the same pipeline, one over each library, named so results can be compared side by side:
-// BM_StdRanges_<Name> and BM_Genex_V2_<Name>. Data is a function returning what they run over, which is set up outside
+// BM_StdRanges_View<Name> and BM_Genex_V2_View<Name>. Data is a function returning what they run over, which is set up outside
 // of the timed loop. Each iteration only has what's in its expression timed.
 #define GENEX_BENCH_EXPR(Name, Data, RangesExpr, GenexExpr)      \
-  static void BM_StdRanges_##Name(benchmark::State &state) {     \
+  static void BM_StdRanges_View##Name(benchmark::State &state) {     \
     auto data = Data();                                          \
     for (auto _ : state) {                                       \
       auto result = RangesExpr;                                  \
       benchmark::DoNotOptimize(result);                          \
     }                                                            \
   }                                                              \
-  BENCHMARK(BM_StdRanges_##Name);                                \
-  static void BM_Genex_V2_##Name(benchmark::State &state) {      \
+  BENCHMARK(BM_StdRanges_View##Name);                                \
+  static void BM_Genex_V2_View##Name(benchmark::State &state) {      \
     auto data = Data();                                          \
     for (auto _ : state) {                                       \
       auto result = GenexExpr;                                   \
       benchmark::DoNotOptimize(result);                          \
     }                                                            \
   }                                                              \
-  BENCHMARK(BM_Genex_V2_##Name)
+  BENCHMARK(BM_Genex_V2_View##Name)
 
 // The usual case: pipe the data through a view, and collect what comes out.
 #define GENEX_BENCH_VIEW(Name, Data, RangesView, GenexView) \
