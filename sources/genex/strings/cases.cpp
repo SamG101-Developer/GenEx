@@ -23,30 +23,44 @@ namespace genex::strings::detail::concepts {
 
 namespace genex::strings::detail::impl {
   struct to_upper_fn {
+    // No locale-independent case mapping for UTF code units.
     template <typename C>
     requires char_like<C>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(C c) const -> C {
-      if constexpr (wide_char_like<C>) {
-        return static_cast<C>(std::towupper(static_cast<std::wint_t>(c)));
-      }
-      else if constexpr (strict_char_like<C>) {
-        return static_cast<C>(std::toupper(static_cast<unsigned char>(c)));
-      }
-      else { return c; } // no locale-independent case mapping for UTF code units
+      return c;
+    }
+
+    template <typename C>
+    requires wide_char_like<C>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(C c) const -> C {
+      return static_cast<C>(std::towupper(static_cast<std::wint_t>(c)));
+    }
+
+    template <typename C>
+    requires strict_char_like<C>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(C c) const -> C {
+      return static_cast<C>(std::toupper(static_cast<unsigned char>(c)));
     }
   };
 
   struct to_lower_fn {
+    // No locale-independent case mapping for UTF code units.
     template <typename C>
     requires char_like<C>
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(C c) const -> C {
-      if constexpr (wide_char_like<C>) {
-        return static_cast<C>(std::towlower(static_cast<std::wint_t>(c)));
-      }
-      else if constexpr (strict_char_like<C>) {
-        return static_cast<C>(std::tolower(static_cast<unsigned char>(c)));
-      }
-      else { return c; } // no locale-independent case mapping for UTF code units
+      return c;
+    }
+
+    template <typename C>
+    requires wide_char_like<C>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(C c) const -> C {
+      return static_cast<C>(std::towlower(static_cast<std::wint_t>(c)));
+    }
+
+    template <typename C>
+    requires strict_char_like<C>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(C c) const -> C {
+      return static_cast<C>(std::tolower(static_cast<unsigned char>(c)));
     }
   };
 }

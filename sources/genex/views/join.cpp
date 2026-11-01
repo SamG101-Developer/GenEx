@@ -82,13 +82,13 @@ namespace genex::views::detail::impl {
 
   private:
     GENEX_INLINE constexpr auto satisfy_inner() -> decltype(auto) {
-      if constexpr (ref_is_glvalue) {
-        return (*it);
-      }
-      else {
-        inner_cache = std::make_shared<iter_value_t<I>>(*it);
-        return (*inner_cache);
-      }
+      inner_cache = std::make_shared<iter_value_t<I>>(*it);
+      return (*inner_cache);
+    }
+
+    GENEX_INLINE constexpr auto satisfy_inner() -> decltype(auto)
+    requires ref_is_glvalue {
+      return (*it);
     }
 
     constexpr auto fwd_to_valid() -> void {

@@ -61,8 +61,13 @@ namespace genex::views::detail::impl {
 
     GENEX_INLINE friend constexpr auto operator==(
       const iota_iterator &self, const iota_iterator &that) -> bool {
-      if constexpr (std::integral<Int>) { return self.it == that.it; }
-      else { return self.it == that.it or (self.it >= self.hi and that.it >= that.hi); }
+      return self.it == that.it or (self.it >= self.hi and that.it >= that.hi);
+    }
+
+    GENEX_INLINE friend constexpr auto operator==(
+      const iota_iterator &self, const iota_iterator &that) -> bool
+      requires std::integral<Int> {
+      return self.it == that.it;
     }
   };
 
@@ -84,14 +89,16 @@ namespace genex::views::detail::impl {
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto end() const {
-      if constexpr (std::integral<Int>) {
-        const auto last = static_cast<Int>(
-          static_cast<std::ptrdiff_t>(lo) +
-          static_cast<std::ptrdiff_t>(size()) *
-          static_cast<std::ptrdiff_t>(step));
-        return iota_iterator<Int>(last, last, step);
-      }
-      else { return iota_iterator<Int>(hi, hi, step); }
+      return iota_iterator<Int>(hi, hi, step);
+    }
+
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const
+      requires std::integral<Int> {
+      const auto last = static_cast<Int>(
+        static_cast<std::ptrdiff_t>(lo) +
+        static_cast<std::ptrdiff_t>(size()) *
+        static_cast<std::ptrdiff_t>(step));
+      return iota_iterator<Int>(last, last, step);
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto size() const -> std::size_t

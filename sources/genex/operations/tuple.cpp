@@ -103,30 +103,51 @@ namespace genex {
     }
 
     template <typename T, typename U>
-    requires (N == 0 or N == 1)
+    requires (N == 0)
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       std::pair<T, U> &p) const noexcept(
       SAFE_NOEX(std::get<N>(p))) -> decltype(auto) {
-      if constexpr (N == 0) { return (p.first); }
-      else { return (p.second); }
+      return (p.first);
     }
 
     template <typename T, typename U>
-    requires (N == 0 or N == 1)
+    requires (N == 1)
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      std::pair<T, U> &p) const noexcept(
+      SAFE_NOEX(std::get<N>(p))) -> decltype(auto) {
+      return (p.second);
+    }
+
+    template <typename T, typename U>
+    requires (N == 0)
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       std::pair<T, U> const &p) const noexcept(
       SAFE_NOEX(std::get<N>(p))) -> decltype(auto) {
-      if constexpr (N == 0) { return (p.first); }
-      else { return (p.second); }
+      return (p.first);
     }
 
     template <typename T, typename U>
-    requires (N == 0 or N == 1)
+    requires (N == 1)
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      std::pair<T, U> const &p) const noexcept(
+      SAFE_NOEX(std::get<N>(p))) -> decltype(auto) {
+      return (p.second);
+    }
+
+    template <typename T, typename U>
+    requires (N == 0)
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       std::pair<T, U> &&p) const noexcept(
       SAFE_NOEX(std::get<N>(std::move(p)))) -> decltype(auto) {
-      if constexpr (N == 0) { return std::move(p.first); }
-      else { return std::move(p.second); }
+      return std::move(p.first);
+    }
+
+    template <typename T, typename U>
+    requires (N == 1)
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      std::pair<T, U> &&p) const noexcept(
+      SAFE_NOEX(std::get<N>(std::move(p)))) -> decltype(auto) {
+      return std::move(p.second);
     }
 
     template <typename... Ts>

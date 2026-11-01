@@ -98,7 +98,8 @@ namespace genex::views::detail::impl {
     }
 
   private:
-    GENEX_INLINE constexpr auto fwd_to_valid() -> void {
+    GENEX_INLINE constexpr auto fwd_to_valid() -> void
+    requires (Op == set_op::difference) {
       cur_elem.reset();
 
       auto less12 = [&](auto const &a, auto const &b) {
@@ -110,96 +111,126 @@ namespace genex::views::detail::impl {
           comp, meta::invoke(proj2, b), meta::invoke(proj1, a));
       };
 
-      if constexpr (Op == set_op::difference) {
-        while (it1 != st1) {
-          if (it2 == st2 or less12(*it1, *it2)) {
-            cur_elem = *it1;
-            ++it1;
-            return;
-          }
-          if (less21(*it1, *it2)) {
-            ++it2;
-            continue;
-          }
-          ++it1;
-          ++it2;
-        }
-        return;
-      }
-
-      if constexpr (Op == set_op::intersection) {
-        while (it1 != st1 and it2 != st2) {
-          if (less12(*it1, *it2)) {
-            ++it1;
-            continue;
-          }
-          if (less21(*it1, *it2)) {
-            ++it2;
-            continue;
-          }
+      while (it1 != st1) {
+        if (it2 == st2 or less12(*it1, *it2)) {
           cur_elem = *it1;
           ++it1;
+          return;
+        }
+        if (less21(*it1, *it2)) {
+          ++it2;
+          continue;
+        }
+        ++it1;
+        ++it2;
+      }
+    }
+
+    GENEX_INLINE constexpr auto fwd_to_valid() -> void
+    requires (Op == set_op::intersection) {
+      cur_elem.reset();
+
+      auto less12 = [&](auto const &a, auto const &b) {
+        return meta::invoke(
+          comp, meta::invoke(proj1, a), meta::invoke(proj2, b));
+      };
+      auto less21 = [&](auto const &a, auto const &b) {
+        return meta::invoke(
+          comp, meta::invoke(proj2, b), meta::invoke(proj1, a));
+      };
+
+      while (it1 != st1 and it2 != st2) {
+        if (less12(*it1, *it2)) {
+          ++it1;
+          continue;
+        }
+        if (less21(*it1, *it2)) {
+          ++it2;
+          continue;
+        }
+        cur_elem = *it1;
+        ++it1;
+        ++it2;
+        return;
+      }
+    }
+
+    GENEX_INLINE constexpr auto fwd_to_valid() -> void
+    requires (Op == set_op::symmetric_difference) {
+      cur_elem.reset();
+
+      auto less12 = [&](auto const &a, auto const &b) {
+        return meta::invoke(
+          comp, meta::invoke(proj1, a), meta::invoke(proj2, b));
+      };
+      auto less21 = [&](auto const &a, auto const &b) {
+        return meta::invoke(
+          comp, meta::invoke(proj2, b), meta::invoke(proj1, a));
+      };
+
+      while (it1 != st1 or it2 != st2) {
+        if (it1 == st1) {
+          cur_elem = *it2;
           ++it2;
           return;
         }
-        return;
-      }
-
-      if constexpr (Op == set_op::symmetric_difference) {
-        while (it1 != st1 or it2 != st2) {
-          if (it1 == st1) {
-            cur_elem = *it2;
-            ++it2;
-            return;
-          }
-          if (it2 == st2) {
-            cur_elem = *it1;
-            ++it1;
-            return;
-          }
-          if (less12(*it1, *it2)) {
-            cur_elem = *it1;
-            ++it1;
-            return;
-          }
-          if (less21(*it1, *it2)) {
-            cur_elem = *it2;
-            ++it2;
-            return;
-          }
-          ++it1;
-          ++it2;
-        }
-        return;
-      }
-
-      if constexpr (Op == set_op::union_) {
-        while (it1 != st1 or it2 != st2) {
-          if (it1 == st1) {
-            cur_elem = *it2;
-            ++it2;
-            return;
-          }
-          if (it2 == st2) {
-            cur_elem = *it1;
-            ++it1;
-            return;
-          }
-          if (less12(*it1, *it2)) {
-            cur_elem = *it1;
-            ++it1;
-            return;
-          }
-          if (less21(*it1, *it2)) {
-            cur_elem = *it2;
-            ++it2;
-            return;
-          }
+        if (it2 == st2) {
           cur_elem = *it1;
           ++it1;
+          return;
+        }
+        if (less12(*it1, *it2)) {
+          cur_elem = *it1;
+          ++it1;
+          return;
+        }
+        if (less21(*it1, *it2)) {
+          cur_elem = *it2;
           ++it2;
           return;
         }
+        ++it1;
+        ++it2;
+      }
+    }
+
+    GENEX_INLINE constexpr auto fwd_to_valid() -> void
+    requires (Op == set_op::union_) {
+      cur_elem.reset();
+
+      auto less12 = [&](auto const &a, auto const &b) {
+        return meta::invoke(
+          comp, meta::invoke(proj1, a), meta::invoke(proj2, b));
+      };
+      auto less21 = [&](auto const &a, auto const &b) {
+        return meta::invoke(
+          comp, meta::invoke(proj2, b), meta::invoke(proj1, a));
+      };
+
+      while (it1 != st1 or it2 != st2) {
+        if (it1 == st1) {
+          cur_elem = *it2;
+          ++it2;
+          return;
+        }
+        if (it2 == st2) {
+          cur_elem = *it1;
+          ++it1;
+          return;
+        }
+        if (less12(*it1, *it2)) {
+          cur_elem = *it1;
+          ++it1;
+          return;
+        }
+        if (less21(*it1, *it2)) {
+          cur_elem = *it2;
+          ++it2;
+          return;
+        }
+        cur_elem = *it1;
+        ++it1;
+        ++it2;
         return;
       }
     }

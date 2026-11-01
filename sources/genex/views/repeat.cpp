@@ -66,8 +66,12 @@ namespace genex::views::detail::impl {
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto end() const {
-      if constexpr (Counted) { return repeat_sentinel(); }
-      else { return unreachable_sentinel(); }
+      return unreachable_sentinel();
+    }
+
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const
+    requires Counted {
+      return repeat_sentinel();
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto size() const -> std::size_t

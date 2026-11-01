@@ -21,6 +21,11 @@ export namespace genex::detail {
   template <typename F>
   inline constexpr auto is_retained_closure_v<retained_closure<F>> = true;
 
+  template <typename Rng>
+  concept referable_range =
+    non_dangling_range<Rng> and
+    std::is_lvalue_reference_v<Rng>;
+
   /// Binds a second range to a closure without a dangling iterator. An lvalue
   /// is referred to rather than copied, a view or a borrowed range is safe to
   /// hold as is, and any other rvalue is moved into a closure the pipe will
@@ -28,22 +33,28 @@ export namespace genex::detail {
   template <typename Fn, typename Rng, typename... Args>
   GENEX_INLINE constexpr auto bind_range_back(
     Fn fn, Rng &&rng, Args &&... args) {
-    if constexpr (std::is_lvalue_reference_v<Rng>) {
-      return meta::bind_back(
-        std::move(fn),
-        genex::subrange(
-          iterators::begin(rng),
-          iterators::end(rng)),
-          std::forward<Args>(args)...);
-    }
-    else if constexpr (non_dangling_range<Rng>) {
-      return meta::bind_back(
-        std::move(fn), std::forward<Rng>(rng), std::forward<Args>(args)...);
-    }
-    else {
-      auto closure = meta::bind_back(
-        std::move(fn), std::forward<Rng>(rng), std::forward<Args>(args)...);
-      return retained_closure<decltype(closure)>{std::move(closure)};
-    }
+    auto closure = meta::bind_back(
+      std::move(fn), std::forward<Rng>(rng), std::forward<Args>(args)...);
+    return retained_closure<decltype(closure)>{std::move(closure)};
+  }
+
+  template <typename Fn, typename Rng, typename... Args>
+  requires non_dangling_range<Rng>
+  GENEX_INLINE constexpr auto bind_range_back(
+    Fn fn, Rng &&rng, Args &&... args) {
+    return meta::bind_back(
+      std::move(fn), std::forward<Rng>(rng), std::forward<Args>(args)...);
+  }
+
+  template <typename Fn, typename Rng, typename... Args>
+  requires referable_range<Rng>
+  GENEX_INLINE constexpr auto bind_range_back(
+    Fn fn, Rng &&rng, Args &&... args) {
+    return meta::bind_back(
+      std::move(fn),
+      genex::subrange(
+        iterators::begin(rng),
+        iterators::end(rng)),
+        std::forward<Args>(args)...);
   }
 }

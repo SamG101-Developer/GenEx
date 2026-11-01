@@ -161,8 +161,14 @@ namespace genex::meta {
     template <typename Self>
     [[nodiscard]] GENEX_INLINE constexpr auto operator*(
       this Self &&self) noexcept -> decltype(auto) {
-      if constexpr (store_direct) { return (std::forward<Self>(self).m_value); }
-      else { return *std::forward<Self>(self).m_value; }
+      return *std::forward<Self>(self).m_value;
+    }
+
+    template <typename Self>
+    requires store_direct
+    [[nodiscard]] GENEX_INLINE constexpr auto operator*(
+      this Self &&self) noexcept -> decltype(auto) {
+      return (std::forward<Self>(self).m_value);
     }
   };
 }
