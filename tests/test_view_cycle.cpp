@@ -1,9 +1,8 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.cycle;
-import genex.views2.take;
+import genex.views.cycle;
+import genex.views.take;
 
 TEST(GenexViewsCycle, VecInput) {
   auto vec = std::vector{0, 1, 2};

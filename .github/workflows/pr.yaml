@@ -1,0 +1,67 @@
+# On a PR into master: build and test GenEx with every compiler,
+# so a change that breaks one is seen before it is merged.
+
+name: PR
+
+on:
+  pull_request:
+    branches: [ master ]
+    types: [ opened, synchronize, reopened ]
+  workflow_dispatch: { }
+
+permissions: { }
+
+concurrency:
+  # One group per PR branch / dispatch ref: a push to a PR
+  # replaces its run still in progress.
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_build.yaml
+
+  # Not one of ci-success's needs, so this can't block a merge
+  # while its thresholds are still being tuned against real runs.
+  benchmarks:
+    name: Benchmarks
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_benchmarks.yaml
+
+  # One of the two required status checks for branch
+  # protection, the other being "PR Title Format" from
+  # pr_title.yaml. A target with "required: false" shows red on
+  # its own, but is "continue-on-error", so it does not fail
+  # "build" and never blocks a merge here.
+  ci-success:
+    name: CI Success
+    if: ${{ always() }}
+    needs: [ build ]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: { }
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2  # v2.22.2
+        with:
+          egress-policy: block
+          disable-sudo: true
+          allowed-endpoints: >
+            api.github.com:443
+            objects.githubusercontent.com:443
+            release-assets.githubusercontent.com:443
+
+      # Inline: a script would need a checkout, and this job
+      # holds no "contents: read".
+      - name: Verify all required jobs passed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          echo "One or more required jobs did not succeed:"
+          echo "$NEEDS_JSON"
+          exit 1

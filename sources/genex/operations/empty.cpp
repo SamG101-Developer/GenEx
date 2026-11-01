@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.operations.empty;
 import genex.concepts;
@@ -24,14 +24,18 @@ namespace genex::operations::detail::concepts {
 namespace genex::operations {
   struct empty_fn {
     template <typename Rng>
-      requires detail::concepts::emptyable_select_empty<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&r) const -> bool {
+    requires detail::concepts::emptyable_select_empty<Rng>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&r) const noexcept(
+      SAFE_NOEX(static_cast<bool>(r.empty()))) -> bool {
       return r.empty();
     }
 
     template <typename Rng>
-      requires detail::concepts::emptyable_select_size<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> bool {
+    requires detail::concepts::emptyable_select_size<Rng>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const noexcept(
+      SAFE_NOEX(operations::size(rng))) -> bool {
       return operations::size(rng) == 0;
     }
   };

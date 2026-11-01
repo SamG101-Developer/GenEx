@@ -8,9 +8,6 @@ export namespace genex {
   template <typename Rng>
   struct sentinel;
 
-  template <typename T>
-  struct deref_value;
-
   template <typename I>
   using iter_value_t = std::iter_value_t<I>;
 
@@ -22,9 +19,6 @@ export namespace genex {
 
   template <typename Rng>
   using sentinel_t = sentinel<Rng>::type;
-
-  template <typename T>
-  using deref_value_t = deref_value<T>::type;
 
   template <typename T>
   using iter_reference_t = std::iter_reference_t<T>;
@@ -47,27 +41,27 @@ export namespace genex {
 
 export namespace genex {
   template <typename Rng>
-  concept has_std_begin = requires(Rng &rng)
-  {
+  concept has_std_begin = requires(Rng &rng) {
     { std::begin(std::forward<Rng>(rng)) } -> std::input_or_output_iterator;
   };
 
   template <typename Rng>
-  concept has_std_end = requires(Rng &rng)
-  {
-    { std::end(std::forward<Rng>(rng)) } -> std::sentinel_for<decltype(std::begin(std::forward<Rng>(rng)))>;
+  concept has_std_end = requires(Rng &rng) {
+    {
+      std::end(std::forward<Rng>(rng))
+    } -> std::sentinel_for<decltype(std::begin(std::forward<Rng>(rng)))>;
   };
 
   template <typename Rng>
-  concept has_std_rbegin = requires(Rng &rng)
-  {
+  concept has_std_rbegin = requires(Rng &rng) {
     { std::rbegin(std::forward<Rng>(rng)) } -> std::input_or_output_iterator;
   };
 
   template <typename Rng>
-  concept has_std_rend = requires(Rng &rng)
-  {
-    { std::rend(std::forward<Rng>(rng)) } -> std::sentinel_for<decltype(std::rbegin(std::forward<Rng>(rng)))>;
+  concept has_std_rend = requires(Rng &rng) {
+    {
+      std::rend(std::forward<Rng>(rng))
+    } -> std::sentinel_for<decltype(std::rbegin(std::forward<Rng>(rng)))>;
   };
 
   template <typename Rng>
@@ -89,7 +83,9 @@ export namespace genex {
   concept has_member_size = requires(Rng &rng) { rng.size(); };
 
   template <typename Rng>
-  concept has_member_reserve = requires(Rng &rng) { rng.reserve(std::declval<std::size_t>()); };
+  concept has_member_reserve = requires(Rng &rng) {
+    rng.reserve(std::declval<std::size_t>());
+  };
 
   template <typename Rng>
   concept has_member_reserve_hint = requires(Rng &rng) { rng.reserve_hint(); };
@@ -98,33 +94,41 @@ export namespace genex {
   concept has_member_empty = requires(Rng &rng) { rng.empty(); };
 
   template <typename Rng>
-  concept has_member_push_back = requires(Rng &rng) { rng.push_back(std::declval<range_value_t<Rng>>()); };
-
-  template <typename Rng>
-  concept has_member_emplace_back = requires(Rng &rng) { rng.emplace_back(std::declval<range_value_t<Rng>>()); };
-
-  template <typename Rng>
-  concept has_member_push_front = requires(Rng &rng) { rng.push_front(std::declval<range_value_t<Rng>>()); };
-
-  template <typename Rng>
-  concept has_member_emplace_front = requires(Rng &rng) { rng.emplace_front(std::declval<range_value_t<Rng>>()); };
-
-  template <typename Rng>
-  concept has_member_push = requires(Rng &rng)
-  {
-    rng.push(std::declval<iterator_t<Rng>>(), std::declval<range_value_t<Rng>>());
+  concept has_member_push_back = requires(Rng &rng) {
+    rng.push_back(std::declval<range_value_t<Rng>>());
   };
 
   template <typename Rng>
-  concept has_member_emplace = requires(Rng &rng)
-  {
-    rng.emplace(std::declval<iterator_t<Rng>>(), std::declval<range_value_t<Rng>>());
+  concept has_member_emplace_back = requires(Rng &rng) {
+    rng.emplace_back(std::declval<range_value_t<Rng>>());
   };
 
   template <typename Rng>
-  concept has_member_insert = requires(Rng &rng)
-  {
-    rng.insert(std::declval<iterator_t<Rng>>(), std::declval<range_value_t<Rng>>());
+  concept has_member_push_front = requires(Rng &rng) {
+    rng.push_front(std::declval<range_value_t<Rng>>());
+  };
+
+  template <typename Rng>
+  concept has_member_emplace_front = requires(Rng &rng) {
+    rng.emplace_front(std::declval<range_value_t<Rng>>());
+  };
+
+  template <typename Rng>
+  concept has_member_push = requires(Rng &rng) {
+    rng.push(std::declval<iterator_t<Rng>>(),
+             std::declval<range_value_t<Rng>>());
+  };
+
+  template <typename Rng>
+  concept has_member_emplace = requires(Rng &rng) {
+    rng.emplace(std::declval<iterator_t<Rng>>(),
+                std::declval<range_value_t<Rng>>());
+  };
+
+  template <typename Rng>
+  concept has_member_insert = requires(Rng &rng) {
+    rng.insert(std::declval<iterator_t<Rng>>(),
+               std::declval<range_value_t<Rng>>());
   };
 
   template <typename Rng>
@@ -134,10 +138,9 @@ export namespace genex {
   concept has_member_pop_front = requires(Rng &rng) { rng.pop_front(); };
 
   template <typename Rng>
-  concept has_member_pop = requires(Rng &rng) { rng.pop(std::declval<std::size_t>()); };
-
-  template <typename Rng>
-  concept has_member_erase = requires(Rng &rng) { rng.erase(std::declval<iterator_t<Rng>>()); };
+  concept has_member_erase = requires(Rng &rng) {
+    rng.erase(std::declval<iterator_t<Rng>>());
+  };
 
   template <typename Rng>
   concept has_member_clear = requires(Rng &rng) { rng.clear(); };
@@ -148,11 +151,122 @@ export namespace genex {
   concept range =
     (has_std_begin<Rng> or has_member_begin<Rng>) and
     (has_std_end<Rng> or has_member_end<Rng>);
-}
 
-export namespace genex::views::detail {
-  template <typename Rng> requires range<Rng>
-  struct view_base;
+  /// What a closure can take as its callable. A parameter by value decays an
+  /// array, so without the check on pointers, calling
+  /// "views::transform(array,f)" directly would also match the closure taking
+  /// "f" as a projection.
+  template <typename F>
+  concept closure_callable =
+    (not range<F>) and
+    (not std::is_pointer_v<F> or std::is_function_v<std::remove_pointer_t<F>>);
+
+  /// What a closure can take as a value, which it has to see before any decay
+  /// as a pointer is a perfectly good value. An array is the range of a direct
+  /// call instead, other than a string literal, which is a value to any range
+  /// of strings.
+  template <typename E>
+  concept closure_value =
+    (not range<E>) or
+    std::same_as<std::remove_extent_t<std::remove_reference_t<E>>, const char>;
+
+  /// The base of every view. A view is cheap to move, and the iterators it
+  /// hands out hold copies of what they use, so they stay valid after the view
+  /// itself is gone.
+  struct view_base {};
+
+  template <typename T>
+  inline constexpr bool enable_view = std::derived_from<T, view_base>;
+
+  template <typename CharT, typename Traits>
+  inline constexpr bool enable_view<std::basic_string_view<CharT, Traits>> = true;
+
+  template <typename T, std::size_t Extent>
+  inline constexpr bool enable_view<std::span<T, Extent>> = true;
+
+  /// Whether a range's iterators stay valid after the range itself is gone,
+  /// because it does not own what they point to.
+  template <typename T>
+  inline constexpr bool enable_borrowed_range = false;
+
+  template <typename CharT, typename Traits>
+  inline constexpr bool enable_borrowed_range<std::basic_string_view<CharT, Traits>> = true;
+
+  template <typename T, std::size_t Extent>
+  inline constexpr bool enable_borrowed_range<std::span<T, Extent>> = true;
+
+  /// A range a view can safely point into: an lvalue, or a range whose
+  /// iterators do not depend on it staying alive. Any other rvalue would
+  /// dangle, so a view takes one through the pipe operator, which keeps it
+  /// alive.
+  template <typename Rng>
+  concept non_dangling_range =
+    std::is_lvalue_reference_v<Rng> or
+    enable_view<std::remove_cvref_t<Rng>> or
+    enable_borrowed_range<std::remove_cvref_t<Rng>>;
+
+  /// What an algorithm returns instead of an iterator into an rvalue range that
+  /// is about to be destroyed. It can't be dereferenced, so misusing it is a
+  /// compile error.
+  struct dangling {
+    constexpr dangling() noexcept = default;
+
+    template <typename... Args>
+    constexpr dangling(Args &&...) noexcept {
+    }
+  };
+
+  template <typename Rng>
+  using borrowed_iterator_t = std::conditional_t<
+    non_dangling_range<Rng>, iterator_t<Rng>, dangling>;
+
+  /// An element of a range: a reference where the range outlives the call,
+  /// otherwise a copy.
+  template <typename Rng>
+  using borrowed_reference_t = std::conditional_t<
+    non_dangling_range<Rng>, range_reference_t<Rng>, range_value_t<Rng>>;
+
+  /// The end of a range with no end of its own, which compares unequal to
+  /// everything. Having its own type means a loop over one has no end check at
+  /// all, and an adaptor that does end it, like "take", knows exactly how long
+  /// it is.
+  struct unreachable_sentinel {
+    template <std::input_or_output_iterator I>
+    constexpr friend auto operator==(
+      const I &, unreachable_sentinel) noexcept -> bool {
+      return false;
+    }
+  };
+
+  /// A container that can be sized up front and written to directly, with
+  /// elements that cost nothing to overwrite. A view's "append_to" can use this
+  /// to write elements with an indexed loop, which the compiler can vectorize.
+  template <typename Out, typename Reference>
+  concept overwritable_with =
+    std::is_trivially_copyable_v<typename Out::value_type> and
+    std::assignable_from<typename Out::value_type&, Reference> and
+    requires(Out &out, std::size_t n) {
+      out.resize(n);
+      { out.data() } -> std::same_as<typename Out::value_type*>;
+    };
+
+  /// The strongest tag an iterator models, for an adaptor's "iterator_concept".
+  template <typename I>
+  using iter_strength_t =
+    std::conditional_t<std::random_access_iterator<I>, std::random_access_iterator_tag,
+    std::conditional_t<std::bidirectional_iterator<I>, std::bidirectional_iterator_tag,
+    std::conditional_t<std::forward_iterator<I>, std::forward_iterator_tag, std::input_iterator_tag>>>;
+
+  /// An adaptor's "iterator_category", which legacy algorithms dispatch on.
+  /// Legacy forward iterators and above must return a true reference, so an
+  /// iterator returning a prvalue can only claim to be an input iterator there,
+  /// whatever "iterator_concept" says it models.
+  template <typename Reference, typename Concept>
+  using legacy_iter_category_t =
+    std::conditional_t<std::is_lvalue_reference_v<Reference>, Concept, std::input_iterator_tag>;
+
+  template <typename I>
+  using iter_category_t = std::iterator_traits<I>::iterator_category;
 }
 
 export namespace genex {
@@ -182,75 +296,6 @@ export namespace genex {
 }
 
 export namespace genex {
-  template <std::size_t I = 0, typename... Ts, typename... Us>
-    requires (I <= sizeof...(Ts) and sizeof...(Ts) == sizeof...(Us))
-  constexpr auto any_iterator_finished(const std::tuple<Ts...> &starts, const std::tuple<Us...> &ends) -> bool {
-    if constexpr (I < sizeof...(Ts)) {
-      return std::get<I>(starts) == std::get<I>(ends) or any_iterator_finished<I + 1>(starts, ends);
-    }
-    else {
-      return false;
-    }
-  }
-
-  template <typename Tuple, std::size_t... Is>
-  constexpr auto deref_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> auto {
-    return std::tuple<iter_reference_t<std::tuple_element_t<Is, Tuple>>...>{(*std::get<Is>(t))...};
-  }
-
-  template <typename Tuple>
-  constexpr auto deref_tuple(Tuple &t) -> auto {
-    return deref_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-  }
-
-  template <typename Tuple, std::size_t... Is>
-  constexpr auto advance_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> void {
-    ((++std::get<Is>(t)), ...);
-  }
-
-  template <typename Tuple>
-  constexpr auto advance_tuple(Tuple &t) -> void {
-    advance_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-  }
-
-  template <typename Tuple, typename Diff, std::size_t... Is>
-  constexpr auto advance_tuple_impl(Tuple &t, Diff n, std::index_sequence<Is...>) -> void {
-    ((std::get<Is>(t) += n), ...);
-  }
-
-  template <typename Tuple, typename Diff>
-  constexpr auto advance_tuple(Tuple &t, Diff n) -> void {
-    advance_tuple_impl(t, n, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-  }
-
-  template <typename Tuple, std::size_t... Is>
-  constexpr auto retreat_tuple_impl(Tuple &t, std::index_sequence<Is...>) -> void {
-    ((--std::get<Is>(t)), ...);
-  }
-
-  template <typename Tuple>
-  constexpr auto retreat_tuple(Tuple &t) -> void {
-    retreat_tuple_impl(t, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-  }
-
-  template <typename Tuple, typename Diff, std::size_t... Is>
-  constexpr auto retreat_tuple_impl(Tuple &t, Diff n, std::index_sequence<Is...>) -> void {
-    ((std::get<Is>(t) -= n), ...);
-  }
-
-  template <typename Tuple, typename Diff>
-  constexpr auto retreat_tuple(Tuple &t, Diff n) -> void {
-    retreat_tuple_impl(t, n, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-  }
-
-  template <typename Tuple>
-    requires (std::tuple_size_v<Tuple> > 0)
-  constexpr auto distance_tuple(const Tuple &a, const Tuple &b) -> auto {
-    return std::get<0>(a) - std::get<0>(b);
-  }
-}
-
-export namespace genex {
   template <typename T>
   struct is_unique_ptr : std::false_type {
   };
@@ -260,7 +305,7 @@ export namespace genex {
   };
 
   template <typename T>
-  concept unique_ptr = is_unique_ptr<std::remove_cvref_t<T>>::value;
+  concept unique_ptr_like = is_unique_ptr<std::remove_cvref_t<T>>::value;
 
   template <typename T>
   struct is_shared_ptr : std::false_type {
@@ -271,18 +316,7 @@ export namespace genex {
   };
 
   template <typename T>
-  concept shared_ptr = is_shared_ptr<std::remove_cvref_t<T>>::value;
-
-  template <typename T>
-  struct is_weak_ptr : std::false_type {
-  };
-
-  template <typename T>
-  struct is_weak_ptr<std::weak_ptr<T>> : std::true_type {
-  };
-
-  template <typename T>
-  concept weak_ptr = is_weak_ptr<std::remove_cvref_t<T>>::value;
+  concept shared_ptr_like = is_shared_ptr<std::remove_cvref_t<T>>::value;
 
   template <typename T>
   struct is_tuple_like : std::false_type {
@@ -294,9 +328,6 @@ export namespace genex {
 
   template <typename T>
   concept tuple_like = is_tuple_like<std::remove_cvref_t<T>>::value;
-
-  template <typename T>
-  concept integer_like = std::is_integral_v<std::remove_cvref_t<T>>;
 
   template <typename C>
   concept strict_char_like =
@@ -336,27 +367,128 @@ export namespace genex {
 
 template <typename Rng> requires genex::has_std_begin<Rng>
 struct genex::iterator<Rng> {
-  using type = decltype(std::begin(std::declval<Rng>()));
+  using type = decltype(std::begin(std::declval<Rng&>()));
 };
 
 template <typename Rng>
   requires (not genex::has_std_begin<Rng> and genex::has_member_begin<Rng>)
 struct genex::iterator<Rng> {
-  using type = decltype(std::declval<Rng>().begin());
+  using type = decltype(std::declval<Rng&>().begin());
 };
 
 template <typename Rng> requires genex::has_std_end<Rng>
 struct genex::sentinel<Rng> {
-  using type = decltype(std::end(std::declval<Rng>()));
+  using type = decltype(std::end(std::declval<Rng&>()));
 };
 
 template <typename Rng>
   requires (not genex::has_std_end<Rng> and genex::has_member_end<Rng>)
 struct genex::sentinel<Rng> {
-  using type = decltype(std::declval<Rng>().end());
+  using type = decltype(std::declval<Rng&>().end());
 };
 
-template <typename T> requires requires(T &&t) { *std::declval<T>(); }
-struct genex::deref_value<T> {
-  using type = decltype(*std::declval<T>());
-};
+export namespace genex {
+  /// What a callable taking a copy of an iterator's element is given, as opposed
+  /// to what dereferencing the iterator gives it. A callable has to accept both.
+  template <typename I>
+  struct indirect_value {
+    using type = iter_value_t<I>&;
+  };
+
+  template <typename I>
+  requires requires { typename I::indirect_value_type; }
+  struct indirect_value<I> {
+    using type = I::indirect_value_type;
+  };
+
+  template <typename I>
+  using indirect_value_t = indirect_value<I>::type;
+
+  template <typename F, typename I>
+  concept indirectly_unary_invocable =
+    std::indirectly_readable<I> and
+    std::copy_constructible<F> and
+    std::invocable<F&, indirect_value_t<I>> and
+    std::invocable<F&, iter_reference_t<I>> and
+    std::common_reference_with<
+      std::invoke_result_t<F&, indirect_value_t<I>>,
+      std::invoke_result_t<F&, iter_reference_t<I>>>;
+
+  template <typename F, typename I>
+  concept indirectly_regular_unary_invocable =
+    indirectly_unary_invocable<F, I> and
+    std::regular_invocable<F&, indirect_value_t<I>> and
+    std::regular_invocable<F&, iter_reference_t<I>>;
+
+  /// Nested so that it doesn't have "I" and "Proj" as template arguments. If it
+  /// did, argument dependent lookup through it would look inside them, which
+  /// needs them complete and can find their friends.
+  template <typename I, typename Proj>
+  struct projected_impl {
+    struct type {
+      using value_type = std::remove_cvref_t<std::invoke_result_t<Proj&, iter_reference_t<I>>>;
+      using indirect_value_type = std::invoke_result_t<Proj&, indirect_value_t<I>>;
+      auto operator*() const -> std::invoke_result_t<Proj&, iter_reference_t<I>>;
+    };
+  };
+
+  /// Stands in for "I" with "Proj" applied to what it reads, for a concept to
+  /// check a callable against. It's never actually dereferenced.
+  template <typename I, typename Proj>
+  requires std::indirectly_readable<I> and indirectly_regular_unary_invocable<Proj, I>
+  using projected = projected_impl<I, Proj>::type;
+
+  template <typename F, typename I>
+  concept indirect_unary_predicate =
+    std::indirectly_readable<I> and
+    std::copy_constructible<F> and
+    std::predicate<F&, indirect_value_t<I>> and
+    std::predicate<F&, iter_reference_t<I>>;
+
+  template <typename F, typename I1, typename I2>
+  concept indirect_binary_predicate =
+    std::indirectly_readable<I1> and
+    std::indirectly_readable<I2> and
+    std::copy_constructible<F> and
+    std::predicate<F&, indirect_value_t<I1>, indirect_value_t<I2>> and
+    std::predicate<F&, indirect_value_t<I1>, iter_reference_t<I2>> and
+    std::predicate<F&, iter_reference_t<I1>, indirect_value_t<I2>> and
+    std::predicate<F&, iter_reference_t<I1>, iter_reference_t<I2>>;
+
+  template <typename F, typename I1, typename I2 = I1>
+  concept indirect_equivalence_relation =
+    std::indirectly_readable<I1> and
+    std::indirectly_readable<I2> and
+    std::copy_constructible<F> and
+    std::equivalence_relation<F&, indirect_value_t<I1>, indirect_value_t<I2>> and
+    std::equivalence_relation<F&, indirect_value_t<I1>, iter_reference_t<I2>> and
+    std::equivalence_relation<F&, iter_reference_t<I1>, indirect_value_t<I2>> and
+    std::equivalence_relation<F&, iter_reference_t<I1>, iter_reference_t<I2>>;
+
+  template <typename F, typename I1, typename I2 = I1>
+  concept indirect_strict_weak_order =
+    std::indirectly_readable<I1> and
+    std::indirectly_readable<I2> and
+    std::copy_constructible<F> and
+    std::strict_weak_order<F&, indirect_value_t<I1>, indirect_value_t<I2>> and
+    std::strict_weak_order<F&, indirect_value_t<I1>, iter_reference_t<I2>> and
+    std::strict_weak_order<F&, iter_reference_t<I1>, indirect_value_t<I2>> and
+    std::strict_weak_order<F&, iter_reference_t<I1>, iter_reference_t<I2>>;
+
+  template <typename I1, typename I2, typename Comp, typename Proj1, typename Proj2>
+  concept indirectly_comparable =
+    indirect_binary_predicate<Comp, projected<I1, Proj1>, projected<I2, Proj2>>;
+
+  /// Elements can be moved and swapped between positions, without changing what
+  /// they are. A @c std::set 's can't, as they can't be assigned to.
+  template <typename I>
+  concept permutable =
+    std::forward_iterator<I> and
+    std::indirectly_movable_storable<I, I> and
+    std::indirectly_swappable<I, I>;
+
+  template <typename I, typename Comp, typename Proj>
+  concept sortable =
+    permutable<I> and
+    indirect_strict_weak_order<Comp, projected<I, Proj>>;
+}

@@ -1,4 +1,3 @@
-#include <coroutine>
 #include <gtest/gtest.h>
 
 import genex.algorithms.find;
@@ -8,8 +7,8 @@ import genex.algorithms.find_last_if;
 import genex.algorithms.find_if_not;
 import genex.algorithms.find_last_if_not;
 import genex.iterators.distance;
-import genex.views2.view;
-import genex.views2.materialize;
+import genex.views.view;
+import genex.views.materialize;
 
 TEST(GenexAlgosFind, FindElementExists) {
   auto vec = std::vector{1, 2, 3, 4, 5, 6};

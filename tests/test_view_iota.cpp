@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.iota;
+import genex.views.iota;
 
 TEST(GenexViewsIota, StandardRange) {
   const auto it = genex::views::iota(10uz, 16uz, 2uz)

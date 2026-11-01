@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.enumerate;
+import genex.views.enumerate;
 
 TEST(GenexViewsEnumerate, VecInput) {
   auto vec1 = std::vector{8, 9};

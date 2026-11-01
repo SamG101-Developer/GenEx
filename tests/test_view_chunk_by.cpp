@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.chunk_by;
+import genex.views.chunk_by;
 
 TEST(GenexViewsChunkBy, RunsOfEqualElements) {
   auto vec = std::vector{1, 1, 2, 3, 3, 3};

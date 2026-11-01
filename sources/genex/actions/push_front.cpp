@@ -1,12 +1,12 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.push_front;
 export import genex.pipe;
-import genex.concepts;
-import genex.meta;
 import genex.actions.insert;
+import genex.concepts;
 import genex.iterators.access;
+import genex.meta;
 import std;
 
 namespace genex::actions::detail::concepts {
@@ -35,30 +35,35 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct push_front_fn {
+  struct push_front_fn : pipe_closure {
     template <typename Rng, typename E>
-      requires detail::concepts::front_insertable_select_emplace_front<Rng, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> decltype(auto) {
+    requires detail::concepts::front_insertable_select_emplace_front<Rng, E>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, E elem) const -> Rng {
       rng.emplace_front(std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename Rng, typename E>
-      requires detail::concepts::front_insertable_select_push_front<Rng, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> decltype(auto) {
+    requires detail::concepts::front_insertable_select_push_front<Rng, E>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, E elem) const -> Rng {
       rng.push_front(std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename Rng, typename E>
-      requires detail::concepts::front_insertable_select_insert<Rng, E>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, E elem) const -> decltype(auto) {
+    requires detail::concepts::front_insertable_select_insert<Rng, E>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, E elem) const -> Rng {
       actions::insert(rng, iterators::begin(rng), std::move(elem));
       return std::forward<Rng>(rng);
     }
 
     template <typename E>
-    GENEX_INLINE constexpr auto operator()(E elem) const {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      E elem) const noexcept(
+      SAFE_CTOR(push_front_fn) and SAFE_MOVE(E)) {
       return meta::bind_back(push_front_fn{}, std::move(elem));
     }
   };

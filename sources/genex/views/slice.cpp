@@ -1,0 +1,98 @@
+module;
+#include <genex/detail/macros.hpp>
+
+export module genex.views.slice;
+export import genex.pipe;
+import genex.concepts;
+import genex.detail.counted_iterator;
+import genex.iterators.iter_pair;
+import genex.iterators.next;
+import genex.meta;
+import genex.span;
+import genex.subrange;
+import std;
+
+namespace genex::views::detail::concepts {
+  template <typename I, typename S, typename Int>
+  concept sliceable_iters =
+    std::input_iterator<I> and
+    std::sentinel_for<S, I> and
+    std::integral<Int>;
+
+  template <typename Rng, typename Int>
+  concept sliceable_range =
+    non_dangling_range<Rng> and
+    input_range<Rng> and
+    sliceable_iters<iterator_t<Rng>, sentinel_t<Rng>, Int>;
+}
+
+namespace genex::views {
+  struct slice_fn : pipe_closure {
+    template <typename I, typename S, typename Int>
+    requires detail::concepts::sliceable_iters<I, S, Int>
+      and std::contiguous_iterator<I> and std::sized_sentinel_for<S, I>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last, const Int n, const Int m) const noexcept(
+      SAFE_CTOR(genex::span<iter_element_t<I>>, I, I) and
+      SAFE_MOVE(I) and SAFE_MOVE(S) and SAFE_MOVE(Int)) {
+      const auto size = last - first;
+      const auto lo = std::min(static_cast<iter_difference_t<I>>(n), size);
+      const auto hi = std::clamp(static_cast<iter_difference_t<I>>(m), lo, size);
+      return genex::span<iter_element_t<I>>(first + lo, first + hi);
+    }
+
+    template <typename I, typename S, typename Int>
+    requires detail::concepts::sliceable_iters<I, S, Int>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last, const Int n, const Int m) const {
+      const auto lo = static_cast<iter_difference_t<I>>(n);
+      const auto hi = static_cast<iter_difference_t<I>>(m);
+      return genex::subrange(
+        genex::detail::counted_iterator(
+          iterators::next(std::move(first), lo, last),
+          std::max(hi - lo, iter_difference_t<I>{0})),
+        genex::detail::counted_sentinel<S>{std::move(last)});
+    }
+
+    template <typename Rng, typename Int>
+    requires detail::concepts::sliceable_range<Rng, Int>
+      and std::contiguous_iterator<iterator_t<Rng>>
+      and std::sized_sentinel_for<sentinel_t<Rng>, iterator_t<Rng>>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, const Int n, const Int m) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
+      SAFE_CTOR(genex::span<range_element_t<Rng>>, iterator_t<Rng>, iterator_t<Rng>) and
+      SAFE_MOVE(Int)) {
+      auto [first, last] = iterators::iter_pair(rng);
+      const auto size = last - first;
+      const auto lo = std::min(static_cast<range_difference_t<Rng>>(n), size);
+      const auto hi = std::clamp(
+        static_cast<range_difference_t<Rng>>(m), lo, size);
+      return genex::span<range_element_t<Rng>>(first + lo, first + hi);
+    }
+
+    template <typename Rng, typename Int>
+    requires detail::concepts::sliceable_range<Rng, Int>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, const Int n, const Int m) const {
+      auto [first, last] = iterators::iter_pair(rng);
+      const auto lo = static_cast<range_difference_t<Rng>>(n);
+      const auto hi = static_cast<range_difference_t<Rng>>(m);
+      return genex::subrange(
+        genex::detail::counted_iterator(
+          iterators::next(std::move(first), lo, last),
+          std::max(hi - lo, range_difference_t<Rng>{0})),
+        genex::detail::counted_sentinel<sentinel_t<Rng>>{std::move(last)});
+    }
+
+    template <typename Int>
+    requires std::integral<Int>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      const Int n, const Int m) const noexcept(
+      SAFE_CTOR(slice_fn) and SAFE_MOVE(Int)) {
+      return meta::bind_back(slice_fn{}, n, m);
+    }
+  };
+
+  export inline constexpr slice_fn slice{};
+}

@@ -1,9 +1,8 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.meta;
 import genex.to_container;
-import genex.views2.duplicates;
+import genex.views.duplicates;
 
 TEST(GenexViewsDuplicates, Duplicates) {
   auto vec = std::vector{1, 2, 3, 4, 1, 2};

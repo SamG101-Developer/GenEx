@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 import genex.to_container;
-import genex.views2.in;
+import genex.views.in;
 
 TEST(GenexViewsIn, BasicIn) {
   const auto vec = std::vector{10, 20, 30, 40, 50};

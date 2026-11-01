@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.subrange;
 import genex.concepts;
@@ -7,7 +7,7 @@ import std;
 
 namespace genex {
   export template <typename I, typename S = I>
-    requires std::input_or_output_iterator<I> and std::sentinel_for<S, I>
+  requires std::input_or_output_iterator<I> and std::sentinel_for<S, I>
   class subrange {
     GENEX_NO_UNIQUE_ADDRESS I m_it{};
     GENEX_NO_UNIQUE_ADDRESS S m_st{};
@@ -21,64 +21,69 @@ namespace genex {
     using size_type = std::make_unsigned_t<difference_type>;
 
     subrange()
-      requires std::default_initializable<I> and std::default_initializable<S>
+    requires std::default_initializable<I> and std::default_initializable<S>
     = default;
 
     GENEX_INLINE constexpr subrange(I first, S last) noexcept(
-      std::is_nothrow_move_constructible_v<I> and std::is_nothrow_move_constructible_v<S>) :
+      SAFE_MOVE(I) and SAFE_MOVE(S)) :
       m_it(std::move(first)), m_st(std::move(last)) {
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto begin() const noexcept(
-      std::is_nothrow_copy_constructible_v<I>) -> I
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const noexcept(
+      SAFE_CTOR(I, const I&)) -> I
       requires std::copyable<I> {
       return m_it;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto begin() noexcept(
-      std::is_nothrow_move_constructible_v<I>) -> I
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() noexcept(
+      SAFE_MOVE(I)) -> I
       requires (not std::copyable<I>) {
       return std::move(m_it);
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto end() const noexcept(
-      std::is_nothrow_copy_constructible_v<S>) -> S {
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const noexcept(
+      SAFE_CTOR(S, const S&)) -> S {
       return m_st;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto empty() const -> bool {
+    [[nodiscard]] GENEX_INLINE constexpr auto empty() const -> bool {
       return m_it == m_st;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto size() const -> size_type
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const -> size_type
       requires std::sized_sentinel_for<S, I> {
       return static_cast<size_type>(m_st - m_it);
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto reserve_hint() const -> size_type
-      requires (not std::sized_sentinel_for<S, I>) and requires(const I &i) { i.count(); } {
+    [[nodiscard]] GENEX_INLINE constexpr auto reserve_hint() const -> size_type
+      requires (not std::sized_sentinel_for<S, I>) and
+      requires(const I &i) { i.count(); } {
       return static_cast<size_type>(m_it.count());
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto data() const noexcept -> std::add_pointer_t<iter_element_t<I>>
-      requires std::contiguous_iterator<I> {
+    [[nodiscard]] GENEX_INLINE constexpr auto data() const noexcept
+      -> std::add_pointer_t<iter_element_t<I>>
+    requires std::contiguous_iterator<I> {
       return std::to_address(m_it);
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto front() const -> reference
-      requires std::forward_iterator<I> {
-      GENEX_ASSERT(std::out_of_range, not empty());
+    [[nodiscard]] GENEX_INLINE constexpr auto front() const -> reference
+    requires std::forward_iterator<I> {
+      GENEX_ASSERT(not empty());
       return *m_it;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto back() const -> reference
-      requires std::bidirectional_iterator<I> and std::same_as<I, S> {
-      GENEX_ASSERT(std::out_of_range, not empty());
-      return *std::prev(m_st);
+    [[nodiscard]] GENEX_INLINE constexpr auto back() const -> reference
+    requires std::bidirectional_iterator<I> and std::same_as<I, S> {
+      GENEX_ASSERT(not empty());
+      auto last = m_st;
+      --last;
+      return *last;
     }
 
-    GENEX_NODISCARD GENEX_INLINE constexpr auto operator[](const difference_type n) const -> reference
-      requires std::random_access_iterator<I> {
+    [[nodiscard]] GENEX_INLINE constexpr auto operator[](
+      const difference_type n) const -> reference
+    requires std::random_access_iterator<I> {
       return m_it[n];
     }
   };
@@ -88,7 +93,7 @@ namespace genex {
 }
 
 template <typename I, typename S>
-inline constexpr auto std::ranges::enable_borrowed_range<genex::subrange<I, S>> = true;
+inline constexpr auto genex::enable_borrowed_range<genex::subrange<I, S>> = true;
 
 template <typename I, typename S>
-inline constexpr auto std::ranges::enable_view<genex::subrange<I, S>> = true;
+inline constexpr auto genex::enable_view<genex::subrange<I, S>> = true;

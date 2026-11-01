@@ -1,10 +1,9 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.filter;
-import genex.views2.reverse;
-import genex.views2.transform;
+import genex.views.filter;
+import genex.views.reverse;
+import genex.views.transform;
 
 TEST(GenexViewsReverse, VecInput) {
   auto vec = std::vector{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};

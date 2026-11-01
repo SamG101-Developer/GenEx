@@ -1,11 +1,11 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.replace;
 export import genex.pipe;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.access;
+import genex.meta;
 import genex.operations.cmp;
 import std;
 
@@ -13,30 +13,38 @@ namespace genex::actions::detail::concepts {
   template <typename Rng, typename Old, typename New, typename Proj>
   concept replaceable_range =
     forward_range<Rng> and
-    std::permutable<iterator_t<Rng>> and
-    std::indirect_equivalence_relation<
+    permutable<iterator_t<Rng>> and
+    indirect_equivalence_relation<
       operations::eq,
-      std::projected<iterator_t<Rng>, Proj>,
+      projected<iterator_t<Rng>, Proj>,
       std::remove_cvref_t<Old> const*> and
     std::convertible_to<New, range_value_t<Rng>>;
 }
 
 namespace genex::actions {
-  struct replace_fn {
-    template <typename Rng, typename Old, typename New, typename Proj = meta::identity>
-      requires detail::concepts::replaceable_range<Rng, Old, New, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Old old_val, New new_val,
-      Proj proj = {}) const -> decltype(auto) {
+  struct replace_fn : pipe_closure {
+    template <
+      typename Rng, typename Old, typename New, typename Proj = meta::identity>
+    requires detail::concepts::replaceable_range<Rng, Old, New, Proj>
+    constexpr auto operator()(
+      Rng &&rng, Old old_val, New new_val, Proj proj = {}) const -> Rng {
       for (auto it = iterators::begin(rng); it != iterators::end(rng); ++it) {
-        if (operations::eq{}(meta::invoke(proj, *it), old_val)) { *it = new_val; }
+        if (operations::eq{}(meta::invoke(proj, *it), old_val)) {
+          *it = new_val;
+        }
       }
       return std::forward<Rng>(rng);
     }
 
     template <typename Old, typename New, typename Proj = meta::identity>
-      requires (not range<Old>)
-    GENEX_INLINE constexpr auto operator()(Old old_val, New new_val, Proj proj = {}) const {
-      return meta::bind_back(replace_fn{}, std::move(old_val), std::move(new_val), std::move(proj));
+    requires closure_value<Old>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Old &&old_val, New new_val, Proj proj = {}) const noexcept(
+      SAFE_CTOR(replace_fn) and SAFE_CTOR(std::decay_t<Old>, Old) and
+      SAFE_MOVE(New) and SAFE_MOVE(Proj)) {
+      return meta::bind_back(
+        replace_fn{}, std::forward<Old>(old_val), std::move(new_val),
+        std::move(proj));
     }
   };
 

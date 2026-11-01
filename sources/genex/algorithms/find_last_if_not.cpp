@@ -1,44 +1,45 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.find_last_if_not;
+import genex.algorithms.find_if_not;
 import genex.concepts;
-import genex.meta;
+import genex.detail.predicate_iters;
 import genex.iterators.iter_pair;
 import genex.iterators.prev;
+import genex.meta;
 import std;
 
 namespace genex::algorithms::detail::concepts {
   template <typename I, typename S, typename Pred, typename Proj>
   concept findable_last_if_not_iters =
-    std::input_iterator<I> and
-    std::sentinel_for<S, I> and
-    std::indirect_unary_predicate<Pred, std::projected<I, Proj>>;
+    genex::detail::predicate_iters<I, S, Pred, Proj>;
 
-  template <typename Rng, typename E, typename Proj>
+  template <typename Rng, typename Pred, typename Proj>
   concept findable_last_if_not_range =
     input_range<Rng> and
-    findable_last_if_not_iters<iterator_t<Rng>, sentinel_t<Rng>, E, Proj>;
+    findable_last_if_not_iters<iterator_t<Rng>, sentinel_t<Rng>, Pred, Proj>;
 }
 
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Pred, typename Proj>
-    requires concepts::findable_last_if_not_iters<I, S, Pred, Proj>
+  requires concepts::findable_last_if_not_iters<I, S, Pred, Proj>
     and std::bidirectional_iterator<I> and std::convertible_to<S, I>
-
-  GENEX_INLINE constexpr auto do_find_last_if_not(I first, S last, Pred &&pred, Proj &&proj) -> I {
+  constexpr auto do_find_last_if_not(
+    I first, S last, Pred pred, Proj proj) -> I {
     auto end = static_cast<I>(std::move(last));
-    for (auto it = end; it != first; --it) {
-      if (not meta::invoke(pred, meta::invoke(proj, *iterators::prev(it)))) { return iterators::prev(it); }
-    }
-    return end;
+    const auto rend = std::reverse_iterator<I>(std::move(first));
+    auto it = genex::find_if_not(
+      std::reverse_iterator<I>(end), rend,
+      std::move(pred), std::move(proj));
+    return it == rend ? end : iterators::prev(it.base());
   }
 
   template <typename I, typename S, typename Pred, typename Proj>
-    requires concepts::findable_last_if_not_iters<I, S, Pred, Proj>
+  requires concepts::findable_last_if_not_iters<I, S, Pred, Proj>
     and (not (std::bidirectional_iterator<I> and std::convertible_to<S, I>))
-
-  GENEX_INLINE constexpr auto do_find_last_if_not(I first, S last, Pred &&pred, Proj &&proj) -> I {
+  constexpr auto do_find_last_if_not(
+    I first, S last, Pred pred, Proj proj) -> I {
     auto result = first;
     auto found = false;
     for (; first != last; ++first) {
@@ -53,19 +54,26 @@ namespace genex::algorithms::detail::impl {
 
 namespace genex {
   struct find_last_if_not_fn {
-    template <typename I, typename S, typename Pred, typename Proj = meta::identity>
-      requires algorithms::detail::concepts::findable_last_if_not_iters<I, S, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(I first, S last, Pred &&pred, Proj &&proj = {}) const -> I {
+    template <
+      typename I, typename S, typename Pred, typename Proj = meta::identity>
+    requires algorithms::detail::concepts::findable_last_if_not_iters<
+      I, S, Pred, Proj>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last, Pred pred, Proj proj = {}) const -> I {
       return algorithms::detail::impl::do_find_last_if_not(
-        std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+        std::move(first), std::move(last),
+        std::move(pred), std::move(proj));
     }
 
     template <typename Rng, typename Pred, typename Proj = meta::identity>
-      requires algorithms::detail::concepts::findable_last_if_not_range<Rng, Pred, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Pred &&pred, Proj &&proj = {}) const -> iterator_t<Rng> {
+    requires algorithms::detail::concepts::findable_last_if_not_range<
+      Rng, Pred, Proj>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Pred pred, Proj proj = {}) const -> borrowed_iterator_t<Rng> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_find_last_if_not(
-        std::move(first), std::move(last), std::forward<Pred>(pred), std::forward<Proj>(proj));
+        std::move(first), std::move(last),
+        std::move(pred), std::move(proj));
     }
   };
 

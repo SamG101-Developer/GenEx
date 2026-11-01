@@ -1,9 +1,8 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.generate;
-import genex.views2.take;
+import genex.views.generate;
+import genex.views.take;
 
 TEST(GenexViewsGenerateN, CountedGenerate) {
   auto next = 0;

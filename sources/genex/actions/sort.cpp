@@ -1,63 +1,61 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.sort;
 export import genex.pipe;
+import genex.algorithms.sort;
+import genex.algorithms.stable_sort;
 import genex.concepts;
-import genex.iterators.iter_pair;
 import genex.meta;
 import genex.operations.cmp;
 import std;
 
 namespace genex::actions::detail::concepts {
   template <typename Rng, typename Comp, typename Proj>
-  concept can_sort_range =
+  concept sortable_range =
     random_access_range<Rng> and
-    std::sortable<iterator_t<Rng>, Comp, Proj>;
+    sortable<iterator_t<Rng>, Comp, Proj>;
 }
 
 namespace genex::actions {
-  struct sort_fn {
-    template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
-      requires detail::concepts::can_sort_range<Rng, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> decltype(auto) {
-      auto [first, last] = iterators::iter_pair(rng);
-      auto sorter = [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
-        return meta::invoke(
-          comp,
-          meta::invoke(proj, std::forward<Lhs>(lhs)),
-          meta::invoke(proj, std::forward<Rhs>(rhs)));
-      };
-      std::sort(std::move(first), std::move(last), std::move(sorter));
+  struct sort_fn : pipe_closure {
+    template <
+      typename Rng, typename Comp = operations::lt,
+      typename Proj = meta::identity>
+    requires detail::concepts::sortable_range<Rng, Comp, Proj>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
+      genex::sort(rng, std::move(comp), std::move(proj));
       return std::forward<Rng>(rng);
     }
 
     template <typename Comp = operations::lt, typename Proj = meta::identity>
-      requires (not range<Comp>)
-    GENEX_INLINE constexpr auto operator()(Comp comp = {}, Proj proj = {}) const {
+    requires closure_callable<Comp>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Comp comp, Proj proj = {}) const noexcept(
+      SAFE_CTOR(sort_fn) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {
       return meta::bind_back(sort_fn{}, std::move(comp), std::move(proj));
     }
   };
 
-  struct stable_sort_fn {
-    template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
-      requires detail::concepts::can_sort_range<Rng, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp comp = {}, Proj proj = {}) const -> decltype(auto) {
-      auto [first, last] = iterators::iter_pair(rng);
-      auto sorter = [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
-        return meta::invoke(
-          comp,
-          meta::invoke(proj, std::forward<Lhs>(lhs)),
-          meta::invoke(proj, std::forward<Rhs>(rhs)));
-      };
-      std::stable_sort(std::move(first), std::move(last), std::move(sorter));
+  struct stable_sort_fn : pipe_closure {
+    template <
+      typename Rng, typename Comp = operations::lt,
+      typename Proj = meta::identity>
+    requires detail::concepts::sortable_range<Rng, Comp, Proj>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Comp comp = {}, Proj proj = {}) const -> Rng {
+      genex::stable_sort(rng, std::move(comp), std::move(proj));
       return std::forward<Rng>(rng);
     }
 
     template <typename Comp = operations::lt, typename Proj = meta::identity>
-      requires (not range<Comp>)
-    GENEX_INLINE constexpr auto operator()(Comp comp = {}, Proj proj = {}) const {
-      return meta::bind_back(stable_sort_fn{}, std::move(comp), std::move(proj));
+    requires closure_callable<Comp>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Comp comp, Proj proj = {}) const noexcept(
+      SAFE_CTOR(stable_sort_fn) and SAFE_MOVE(Comp) and SAFE_MOVE(Proj)) {
+      return meta::bind_back(
+        stable_sort_fn{}, std::move(comp), std::move(proj));
     }
   };
 

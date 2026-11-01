@@ -1,57 +1,69 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.algorithms.sorted;
+import genex.algorithms.sort;
 import genex.concepts;
-import genex.meta;
 import genex.iterators.iter_pair;
+import genex.meta;
 import genex.operations.cmp;
+import genex.subrange;
+import genex.to_container;
 import std;
 
 namespace genex::algorithms::detail::concepts {
   template <typename I, typename S, typename Comp, typename Proj>
-  concept sortabled_iters =
+  concept sorted_copyable_iters =
     std::input_iterator<I> and
     std::sentinel_for<S, I> and
     std::copy_constructible<iter_value_t<I>> and
-    std::sortable<typename std::vector<iter_value_t<I>>::iterator, Comp, Proj>;
+    sortable<typename std::vector<iter_value_t<I>>::iterator, Comp, Proj>;
 
   template <typename Rng, typename Comp, typename Proj>
-  concept sortabled_range =
+  concept sorted_copyable_range =
     input_range<Rng> and
-    sortabled_iters<iterator_t<Rng>, sentinel_t<Rng>, Comp, Proj>;
+    sorted_copyable_iters<iterator_t<Rng>, sentinel_t<Rng>, Comp, Proj>;
 }
 
 namespace genex::algorithms::detail::impl {
   template <typename I, typename S, typename Comp, typename Proj>
-    requires concepts::sortabled_iters<I, S, Comp, Proj>
-  GENEX_INLINE constexpr auto do_sorted(I first, S last, Comp &&comp, Proj &&proj) -> std::vector<iter_value_t<I>> {
-    auto vec = std::vector<iter_value_t<I>>();
-    for (; first != last; ++first) { vec.push_back(*first); }
-    std::sort(vec.begin(), vec.end(), [&]<typename Lhs, typename Rhs>(Lhs &&lhs, Rhs &&rhs) {
-      return meta::invoke(comp, meta::invoke(proj, std::forward<Lhs>(lhs)), meta::invoke(proj, std::forward<Rhs>(rhs)));
-    });
+  requires concepts::sorted_copyable_iters<I, S, Comp, Proj>
+  constexpr auto do_sorted(
+    I first, S last, Comp comp, Proj proj) -> std::vector<iter_value_t<I>> {
+    auto vec = genex::to<std::vector>()(
+      genex::subrange(std::move(first), std::move(last)));
+    genex::sort(vec, std::move(comp), std::move(proj));
     return vec;
   }
 }
 
 namespace genex {
   struct sorted_fn {
-    template <typename I, typename S, typename Comp = operations::lt, typename Proj = meta::identity>
-      requires algorithms::detail::concepts::sortabled_iters<I, S, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(I first, S last, Comp &&comp = {},
-      Proj &&proj = {}) const -> std::vector<iter_value_t<I>> {
+    template <
+      typename I, typename S, typename Comp = operations::lt,
+      typename Proj = meta::identity>
+    requires algorithms::detail::concepts::sorted_copyable_iters<
+      I, S, Comp, Proj>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last, Comp comp = {},
+      Proj proj = {}) const -> std::vector<iter_value_t<I>> {
       return algorithms::detail::impl::do_sorted(
-        std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
+        std::move(first), std::move(last),
+        std::move(comp), std::move(proj));
     }
 
-    template <typename Rng, typename Comp = operations::lt, typename Proj = meta::identity>
-      requires algorithms::detail::concepts::sortabled_range<Rng, Comp, Proj>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, Comp &&comp = {},
-      Proj &&proj = {}) const -> std::vector<range_value_t<Rng>> {
+    template <
+      typename Rng, typename Comp = operations::lt,
+      typename Proj = meta::identity>
+    requires algorithms::detail::concepts::sorted_copyable_range<
+      Rng, Comp, Proj>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, Comp comp = {},
+      Proj proj = {}) const -> std::vector<range_value_t<Rng>> {
       auto [first, last] = iterators::iter_pair(rng);
       return algorithms::detail::impl::do_sorted(
-        std::move(first), std::move(last), std::forward<Comp>(comp), std::forward<Proj>(proj));
+        std::move(first), std::move(last),
+        std::move(comp), std::move(proj));
     }
   };
 

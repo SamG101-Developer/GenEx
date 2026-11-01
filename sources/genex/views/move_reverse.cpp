@@ -1,0 +1,118 @@
+module;
+#include <genex/detail/macros.hpp>
+
+export module genex.views.move_reverse;
+export import genex.pipe;
+import genex.concepts;
+import genex.detail.iterator_ops;
+import genex.iterators.distance;
+import genex.iterators.iter_pair;
+import genex.iterators.prev;
+import std;
+
+namespace genex::views::detail::concepts {
+  template <typename I, typename S>
+  concept move_reversible_iters =
+    std::bidirectional_iterator<I> and
+    std::sentinel_for<S, I> and
+    std::movable<iter_value_t<I>>;
+
+  template <typename Rng>
+  concept move_reversible_range =
+    non_dangling_range<Rng> and
+    bidirectional_range<Rng> and
+    move_reversible_iters<iterator_t<Rng>, sentinel_t<Rng>>;
+}
+
+namespace genex::views::detail::impl {
+  template <typename I, typename S>
+  requires concepts::move_reversible_iters<I, S>
+  struct move_reverse_iterator :
+    genex::detail::iterator_ops<move_reverse_iterator<I, S>> {
+    I it;
+    S st;
+
+    using value_type = iter_value_t<I>;
+    using difference_type = iter_difference_t<I>;
+    using iterator_category = std::bidirectional_iterator_tag;
+    using iterator_concept = iterator_category;
+
+    using reference = iter_value_t<I>&&;
+    using pointer = void;
+
+    GENEX_INLINE constexpr move_reverse_iterator() = default;
+
+    GENEX_INLINE constexpr move_reverse_iterator(I first, S last) :
+      it(std::move(first)), st(std::move(last)) {
+    }
+
+    GENEX_INLINE constexpr auto next() -> void {
+      --it;
+    }
+
+    GENEX_INLINE constexpr auto prev() -> void
+    requires std::bidirectional_iterator<decltype(it)> {
+      ++it;
+    }
+
+    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
+      return std::move(*iterators::prev(it));
+    }
+
+    GENEX_INLINE friend constexpr auto operator==(
+      const move_reverse_iterator &self,
+      const move_reverse_iterator &that) -> bool {
+      return self.it == that.it;
+    }
+  };
+
+  template <typename I, typename S>
+  requires concepts::move_reversible_iters<I, S>
+  struct move_reverse_view : view_base {
+    I it;
+    S st;
+
+    GENEX_INLINE constexpr move_reverse_view(I first, S last) noexcept(
+      SAFE_MOVE(I) and SAFE_MOVE(S)) :
+      it(std::move(first)), st(std::move(last)) {
+    }
+
+    [[nodiscard]] GENEX_INLINE constexpr auto begin() const {
+      return move_reverse_iterator(st, it);
+    }
+
+    [[nodiscard]] GENEX_INLINE constexpr auto end() const {
+      return move_reverse_iterator(it, it);
+    }
+
+    [[nodiscard]] GENEX_INLINE constexpr auto size() const
+      requires requires { iterators::distance(it, st); } {
+      return iterators::distance(it, st);
+    }
+  };
+}
+
+namespace genex::views {
+  struct move_reverse_fn : pipe_closure {
+    template <typename I, typename S>
+    requires detail::concepts::move_reversible_iters<I, S>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last) const noexcept(
+      SAFE_IMPL_CTOR(move_reverse_view, I, S) and
+      SAFE_MOVE(I) and SAFE_MOVE(S)) {
+      return detail::impl::move_reverse_view(std::move(first), std::move(last));
+    }
+
+    template <typename Rng>
+    requires detail::concepts::move_reversible_range<Rng>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
+      SAFE_IMPL_CTOR(move_reverse_view, iterator_t<Rng>, sentinel_t<Rng>)) {
+      auto [first, last] = iterators::iter_pair(rng);
+      return detail::impl::move_reverse_view(std::move(first), std::move(last));
+    }
+  };
+
+  export inline constexpr move_reverse_fn move_reverse{};
+}

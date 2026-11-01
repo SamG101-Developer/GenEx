@@ -1,4 +1,3 @@
-#include <coroutine>
 #include <gtest/gtest.h>
 
 import genex.algorithms.min_element;
@@ -18,13 +17,6 @@ TEST(GenexAlgosMinMax, MinVec1Elem) {
   EXPECT_EQ(res, 42);
 }
 
-// TEST(GenexAlgosMinMax, MinVecEmptyWithDef) {
-//     auto vec = std::vector<int>{};
-//
-//     const auto res = genex::min_element(vec, {}, {}, 42);
-//     EXPECT_EQ(res, 42);
-// }
-
 TEST(GenexAlgosMinMax, MaxVec) {
   auto vec = std::vector{5, 3, 8, 1, 4, 7, 2, 6};
 
@@ -38,10 +30,3 @@ TEST(GenexAlgosMinMax, MaxVec1Elem) {
   const auto res = genex::max_element(vec);
   EXPECT_EQ(res, 42);
 }
-
-// TEST(GenexAlgosMinMax, MaxVecEmptyWithDef) {
-//     auto vec = std::vector<int>{};
-//
-//     const auto res = genex::max_element(vec, {}, {}, 42);
-//     EXPECT_EQ(res, 42);
-// }

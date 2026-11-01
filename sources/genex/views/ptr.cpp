@@ -1,0 +1,53 @@
+module;
+#include <genex/detail/macros.hpp>
+
+export module genex.views.ptr;
+export import genex.pipe;
+import genex.concepts;
+import genex.iterators.iter_pair;
+import genex.meta;
+import genex.views.transform;
+import std;
+
+namespace genex::views::detail::concepts {
+  template <typename I, typename S>
+  concept ptr_gettable_iters =
+    std::input_iterator<I> and
+    std::sentinel_for<S, I> and
+    (unique_ptr_like<iter_value_t<I>> or shared_ptr_like<iter_value_t<I>>);
+
+  template <typename Rng>
+  concept ptr_gettable_range =
+    non_dangling_range<Rng> and
+    input_range<Rng> and
+    ptr_gettable_iters<iterator_t<Rng>, sentinel_t<Rng>>;
+}
+
+namespace genex::views {
+  struct ptr_fn : pipe_closure {
+    template <typename I, typename S>
+    requires detail::concepts::ptr_gettable_iters<I, S>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I first, S last) const noexcept(
+      SAFE_CALL(decltype(transform), I, S, meta::identity) and
+      SAFE_MOVE(I) and SAFE_MOVE(S)) {
+      return transform(
+        std::move(first), std::move(last),
+        [](auto &&ptr) { return ptr.get(); });
+    }
+
+    template <typename Rng>
+    requires detail::concepts::ptr_gettable_range<Rng>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const noexcept(
+      SAFE_CALL(decltype(iterators::iter_pair), Rng&) and
+      SAFE_CALL(decltype(transform), iterator_t<Rng>, sentinel_t<Rng>, meta::identity)) {
+      auto [first, last] = iterators::iter_pair(rng);
+      return transform(
+        std::move(first), std::move(last),
+        [](auto &&ptr) { return ptr.get(); });
+    }
+  };
+
+  export inline constexpr ptr_fn ptr{};
+}

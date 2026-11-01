@@ -1,5 +1,5 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.erase;
 export import genex.pipe;
@@ -17,16 +17,18 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct erase_fn final {
+  struct erase_fn final : pipe_closure {
     template <typename Rng, typename I, typename S>
-      requires detail::concepts::erasable_range<Rng, I, S>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, I it, S end) const -> decltype(auto) {
+    requires detail::concepts::erasable_range<Rng, I, S>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, I it, S end) const -> decltype(auto) {
       return rng.erase(std::move(it), std::move(end));
     }
 
     template <typename Rng, typename I>
-      requires detail::concepts::erasable_range<Rng, I, sentinel_t<Rng>>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, I it) const {
+    requires detail::concepts::erasable_range<Rng, I, sentinel_t<Rng>>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, I it) const {
       return rng.erase(std::move(it));
     }
   };

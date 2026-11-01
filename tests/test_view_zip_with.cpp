@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
-#include <coroutine>
 
 import genex.to_container;
-import genex.views2.zip_with;
+import genex.views.zip_with;
 
 TEST(GenexViewsZipWith, VecInput) {
   auto vec1 = std::vector{1, 2, 3};

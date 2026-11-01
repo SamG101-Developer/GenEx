@@ -1,27 +1,15 @@
 # GenEx
 
-GenEx (generator extensions) is a C++ library inspired by `ranges-v3` that provides a set of utilities for working with
-ranges and iterators. It is designed with a generator interface, which allows for lazy evaluation of operations on
-ranges. Concepts are used to restrict the operations that can be performed on which types; for example, reversing a
-range will require the range be bidirectional.
-
-**Since the creation of this library, the implementation has shifted from generator based implementations to iterator
-based implementations, for vast performance gains.**
-
-## Views
-
-GenEx provides a set of views that can be used to transform and filter ranges. These views are lazily evaluated, meaning
-they do not actually perform the operation until the range is iterated over. This allows for efficient chaining of
-operations on ranges.
-
-### Examples
+GenEx is a C++ ranges library, inspired by `range-v3` and built entirely on C++ modules. It has lazy views, in-place
+actions and algorithms, all of which can be composed with pipes. Concepts restrict what each operation accepts; for
+example, reversing a range requires the range to be bidirectional.
 
 ```cpp
-import genex
-
+import genex;
+import std;
 
 auto main() -> int {
-  auto vec = std::vector<int>{1, 2, 3, 4, 5};
+  auto vec = std::vector{1, 2, 3, 4, 5};
 
   auto result = vec
     | genex::views::transform([](const int i) { return i * 2; })
@@ -30,33 +18,64 @@ auto main() -> int {
     | genex::views::reverse
     | genex::to<std::vector>();
 
-  for (auto i : result) {
-    std::cout << i << ", ";
-  }
-
-  return 0;
+  // result is {8, 4}
 }
 ```
 
-In this example, the range is transformed to double each element and then filtered to only include elements that are
-divisible by 4. That range cannot be reversed, because generators cannot be reversed, so instead, the `materialize` view
-is used, which doesn't immediately unroll the generator into a vector, but will yield into a vector when iterated over,
-allowing the bidirectional `reverse` view to be applied. Finally, the range is converted to a vector using the `to`
-view.
+A filtered range can't be reversed, so `materialize` first collects it into a container. `to` then builds the final
+vector, and it works with other containers too, such as `std::set` and `std::map`.
+
+## Requirements
+
+GenEx needs CMake 4.4 and a compiler with `import std`. CI builds it with GCC 16, Homebrew's LLVM and MSVC.
+
+Set `GENEX_BUILD_TESTS` or `GENEX_BUILD_BENCHMARKS` to build the tests or the benchmarks.
+
+## Views
+
+Views are lazy: they do nothing until the range is iterated over. Closures can be composed into a reusable step:
+
+```cpp
+const auto evens_doubled = genex::views::filter([](const int i) { return i % 2 == 0; })
+  | genex::views::transform([](const int i) { return i * 2; });
+
+auto result = vec | evens_doubled | genex::to<std::vector>();
+```
 
 ## Actions
 
-Actions are similar to views, but they perform the operation on the inputted range, mutating it in place. Actions are
-eagerly evaluated, meaning they perform the operation immediately.
+Actions change the range they're given, and run immediately.
+
+```cpp
+vec |= genex::actions::sort | genex::actions::unique;
+```
 
 ## Algorithms
 
-There are a number of algorithms designed to be used with ranges. Whilst the algorithms are designed to be used with the
-views, they can be used with almost any container. These are effectively functions over ranges that don't return a view,
-such as `any_of` or `fold_left`.
+Algorithms are functions over ranges that don't return a view. They work with the views and with most containers.
+
+```cpp
+const auto any_even = genex::any_of(vec, [](const int i) { return i % 2 == 0; });
+const auto total = genex::fold_left(vec, 0, std::plus{});
+```
+
+## Parallel
+
+`genex::parallel` holds threaded versions of the sequential algorithms. It's a separate namespace rather than an
+execution policy argument, because parallelism always has a cost and should be chosen explicitly.
+
+```cpp
+vec | genex::parallel::for_each([](auto &x) { x = expensive(x); });
+
+// With the defaults overridden.
+vec | genex::parallel::for_each(f, genex::parallel::params{.threads = 4, .threshold = 0});
+```
 
 ## Iterators
 
-The iterator abstraction layer provides a common interface to access key iteration members, such as `begin`, `end`,
-`data` etc. There are multiple specialisations of `begin` for example, allowing for different ways to access the data
-depending on the design of the container.
+`genex::iterators` provides a common way to reach a range's iterators, such as `begin` and `end`, whichever way the
+container provides them.
+
+## License
+
+GenEx is licensed under the [Boost Software License 1.0](LICENSE).

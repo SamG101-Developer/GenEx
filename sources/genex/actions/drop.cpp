@@ -1,28 +1,29 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.drop;
 export import genex.pipe;
-import genex.meta;
-import genex.concepts;
 import genex.actions.erase;
+import genex.concepts;
 import genex.iterators.access;
 import genex.iterators.next;
+import genex.meta;
 import std;
 
 namespace genex::actions::detail::concepts {
   template <typename Rng, typename Int>
   concept droppable_range =
     forward_range<Rng> and
-    std::weakly_incrementable<Int>;
+    std::integral<Int>;
 }
 
 namespace genex::actions {
-  struct drop_fn {
+  struct drop_fn : pipe_closure {
     template <typename Rng, typename Int>
-      requires detail::concepts::droppable_range<Rng, Int>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng, const Int n) const -> decltype(auto) {
-      GENEX_ASSERT(std::out_of_range, n >= 0);
+    requires detail::concepts::droppable_range<Rng, Int>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng, const Int n) const -> Rng {
+      GENEX_ASSERT(n >= 0);
       actions::erase(
         rng, iterators::begin(rng),
         iterators::next(
@@ -33,12 +34,18 @@ namespace genex::actions {
     }
 
     template <typename Int>
-      requires std::weakly_incrementable<Int>
-    GENEX_INLINE constexpr auto operator()(const Int n) const {
-      GENEX_ASSERT(std::out_of_range, n >= 0);
+    requires std::integral<Int>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      const Int n) const noexcept(
+      SAFE_CTOR(drop_fn) and SAFE_MOVE(Int)) {
+      GENEX_ASSERT(n >= 0);
       return meta::bind_back(drop_fn{}, n);
     }
   };
 
+  /// The "drop" action drops n elements from the range being applied to.
+  /// Used as "range |= genex::actions::drop(1)" or
+  /// "genex:actions::drop(range, 1)". The range itself must be a forward range
+  /// and an integral index.
   export inline constexpr drop_fn drop{};
 }

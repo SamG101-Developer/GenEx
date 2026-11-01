@@ -1,11 +1,10 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.actions.pop_front;
 export import genex.pipe;
-import genex.concepts;
-import genex.meta;
 import genex.actions.erase;
+import genex.concepts;
 import genex.iterators.access;
 
 namespace genex::actions::detail::concepts {
@@ -26,21 +25,20 @@ namespace genex::actions::detail::concepts {
 }
 
 namespace genex::actions {
-  struct pop_front_fn {
+  struct pop_front_fn : pipe_closure {
     template <typename Rng>
-      requires detail::concepts::front_poppable_select_pop_front<Rng>
-    GENEX_INLINE constexpr auto operator()(Rng &&rng) const -> decltype(auto) {
+    requires detail::concepts::front_poppable_select_pop_front<Rng>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const noexcept(
+      SAFE_NOEX(rng.pop_front())) -> decltype(auto) {
       return rng.pop_front();
     }
 
     template <typename Rng>
-      requires detail::concepts::front_poppable_select_erase<Rng>
-    GENEX_INLINE auto operator()(Rng &&rng) const -> decltype(auto) {
+    requires detail::concepts::front_poppable_select_erase<Rng>
+    GENEX_INLINE constexpr auto operator()(
+      Rng &&rng) const -> decltype(auto) {
       return actions::erase(rng, iterators::begin(rng));
-    }
-
-    GENEX_INLINE constexpr auto operator()() const {
-      return meta::bind_back(pop_front_fn{});
     }
   };
 

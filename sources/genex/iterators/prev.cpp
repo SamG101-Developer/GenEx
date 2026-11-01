@@ -1,8 +1,9 @@
 module;
-#include <genex/macros.hpp>
+#include <genex/detail/macros.hpp>
 
 export module genex.iterators.prev;
 import genex.concepts;
+import genex.iterators.advance;
 import std;
 
 namespace genex::iterators::detail::concepts {
@@ -14,23 +15,32 @@ namespace genex::iterators::detail::concepts {
 namespace genex::iterators {
   struct prev_fn {
     template <typename I>
-      requires detail::concepts::prevable_iters<I> and std::copyable<I>
-    GENEX_INLINE constexpr auto operator()(I it, const iter_difference_t<I> n = 1) const -> I {
-      return std::prev(std::move(it), n);
+    requires detail::concepts::prevable_iters<I> and std::copyable<I>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I it, const iter_difference_t<I> n = 1) const noexcept(
+      SAFE_CALL(decltype(iterators::advance), I&, iter_difference_t<I>)) -> I {
+      return iterators::advance(it, -n);
     }
 
     template <typename I>
-      requires detail::concepts::prevable_iters<I> and std::copyable<I>
-    GENEX_INLINE constexpr auto operator()(I it, const iter_difference_t<I> n, const I bound) const -> I {
+    requires detail::concepts::prevable_iters<I> and std::copyable<I>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I it, const iter_difference_t<I> n, const I bound) const -> I {
       if (n <= 0) { return it; }
-      if constexpr (std::random_access_iterator<I>) {
-        const auto remaining = it - bound;
-        return it - (n < remaining ? n : remaining);
+      for (auto i = iter_difference_t<I>{0}; i < n and it != bound; ++i) {
+        --it;
       }
-      else {
-        for (auto i = iter_difference_t<I>{0}; i < n and it != bound; ++i) { --it; }
-        return it;
-      }
+      return it;
+    }
+
+    template <typename I>
+    requires std::random_access_iterator<I>
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      I it, const iter_difference_t<I> n, const I bound) const noexcept(
+      SAFE_NOEX(it - bound) and SAFE_NOEX(it - n) and SAFE_MOVE(I)) -> I {
+      if (n <= 0) { return it; }
+      const auto remaining = it - bound;
+      return it - (n < remaining ? n : remaining);
     }
   };
 
