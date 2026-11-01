@@ -17,6 +17,14 @@ namespace genex {
     template <typename... Ts>
     requires (sizeof...(Ts) > 0)
     [[nodiscard]] GENEX_INLINE constexpr auto operator()(
+      std::tuple<Ts...> &tpl) const noexcept(
+      SAFE_NOEX(std::get<0>(tpl))) -> decltype(auto) {
+      return std::get<0>(tpl);
+    }
+
+    template <typename... Ts>
+    requires (sizeof...(Ts) > 0)
+    [[nodiscard]] GENEX_INLINE constexpr auto operator()(
       std::tuple<Ts...> const &tpl) const noexcept(
       SAFE_NOEX(std::get<0>(tpl))) -> decltype(auto) {
       return std::get<0>(tpl);

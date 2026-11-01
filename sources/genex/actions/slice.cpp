@@ -27,7 +27,8 @@ namespace genex::actions {
         rng, iterators::begin(rng),
         iterators::next(iterators::begin(rng), from, iterators::end(rng)));
       actions::erase(
-        rng, iterators::next(iterators::begin(rng), to - from),
+        rng, iterators::next(
+          iterators::begin(rng), to - from, iterators::end(rng)),
         iterators::end(rng));
       return std::forward<Rng>(rng);
     }
