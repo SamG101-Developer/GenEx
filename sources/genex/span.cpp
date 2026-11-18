@@ -113,6 +113,18 @@ namespace genex {
   };
 }
 
+namespace genex {
+  /// The element type from what a span is made of, as "std::span"'s guides:
+  /// "span(vec)" is a "span<int>", "span(const_vec)" a "span<int const>".
+  export template <typename It, typename St>
+  requires std::contiguous_iterator<It> and std::sized_sentinel_for<St, It>
+  span(It, St) -> span<std::remove_reference_t<std::iter_reference_t<It>>>;
+
+  export template <typename Rng>
+  requires contiguous_range<Rng> and sized_range<Rng>
+  span(Rng &&) -> span<std::remove_reference_t<range_reference_t<Rng>>>;
+}
+
 template <typename T>
 inline constexpr auto genex::enable_borrowed_range<genex::span<T>> = true;
 
