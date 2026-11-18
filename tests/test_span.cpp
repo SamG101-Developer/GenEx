@@ -62,3 +62,32 @@ TEST(GenexSpan, IsAContiguousRange) {
   for (const auto x : s) { sum += x; }
   EXPECT_EQ(sum, 6);
 }
+
+TEST(GenexSpan, DeducesFromARange) {
+  auto vec = std::vector{1, 2, 3};
+  const auto s = genex::span(vec);
+  EXPECT_TRUE((std::same_as<decltype(s), const genex::span<int>>));
+  EXPECT_EQ(s.data(), vec.data());
+
+  const auto &cref = vec;
+  const auto c = genex::span(cref);
+  EXPECT_TRUE((std::same_as<decltype(c), const genex::span<int const>>));
+  EXPECT_EQ(c.subspan(1, 1).front(), 2);
+
+  auto arr = std::array{4, 5};
+  EXPECT_TRUE((std::same_as<decltype(genex::span(arr)), genex::span<int>>));
+}
+
+TEST(GenexSpan, DeducesFromIterators) {
+  auto vec = std::vector{1, 2, 3};
+  const auto s = genex::span(vec.begin() + 1, vec.end());
+  EXPECT_TRUE((std::same_as<decltype(s), const genex::span<int>>));
+  EXPECT_EQ(s.size(), 2uz);
+  EXPECT_EQ(s.front(), 2);
+  EXPECT_TRUE((std::same_as<decltype(genex::span(vec.cbegin(), vec.cend())), genex::span<int const>>));
+}
+
+TEST(GenexSpan, DeducesFromPointerAndSize) {
+  auto arr = std::array{1, 2, 3};
+  EXPECT_TRUE((std::same_as<decltype(genex::span(arr.data(), arr.size())), genex::span<int>>));
+}

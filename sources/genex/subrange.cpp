@@ -3,6 +3,7 @@ module;
 
 export module genex.subrange;
 import genex.concepts;
+import genex.iterators.access;
 import std;
 
 namespace genex {
@@ -27,6 +28,18 @@ namespace genex {
     GENEX_INLINE constexpr subrange(I first, S last) noexcept(
       SAFE_MOVE(I) and SAFE_MOVE(S)) :
       m_it(std::move(first)), m_st(std::move(last)) {
+    }
+
+    /// A whole range's iterators. Only one that does not dangle (an lvalue,
+    /// or a borrowed range), as the subrange holds no range of its own.
+    template <typename Rng>
+    requires (not std::same_as<std::remove_cvref_t<Rng>, subrange>)
+      and non_dangling_range<Rng>
+      and std::convertible_to<iterator_t<Rng>, I> and std::convertible_to<sentinel_t<Rng>, S>
+    GENEX_INLINE constexpr subrange(Rng &&rng) noexcept(
+      SAFE_CALL(decltype(iterators::begin), Rng&) and
+      SAFE_CALL(decltype(iterators::end), Rng&)) :
+      m_it(iterators::begin(rng)), m_st(iterators::end(rng)) {
     }
 
     [[nodiscard]] GENEX_INLINE constexpr auto begin() const noexcept(
@@ -90,6 +103,10 @@ namespace genex {
 
   export template <typename I, typename S>
   subrange(I, S) -> subrange<I, S>;
+
+  export template <typename Rng>
+  requires non_dangling_range<Rng>
+  subrange(Rng &&) -> subrange<iterator_t<Rng>, sentinel_t<Rng>>;
 }
 
 template <typename I, typename S>
