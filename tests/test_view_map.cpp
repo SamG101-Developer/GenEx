@@ -10,6 +10,7 @@ import genex.to_container;
 import genex.views.enumerate;
 import genex.views.map;
 import genex.views.move;
+import genex.views.transform;
 
 namespace {
   auto make_map() -> std::map<std::string, int> {
@@ -67,11 +68,24 @@ TEST(GenexViewsVals, TemporaryPairInput) {
   const auto exp = std::vector<std::string>{"the first string, too long to be small", "the second string, also too long"};
   auto vec = exp;
   auto rng = vec | genex::views::enumerate | genex::views::vals;
-  static_assert(std::same_as<decltype(*rng.begin()), std::string>);
+  static_assert(std::same_as<decltype(*rng.begin()), std::string&>);
 
   const auto vals = rng | genex::to<std::vector>();
   EXPECT_EQ(vals, exp);
   EXPECT_EQ(vec, exp);
+}
+
+// Enumerating a view that yields values gives pairs holding values, so each is taken out of a temporary pair by value.
+TEST(GenexViewsVals, TemporaryPairOfValuesInput) {
+  const auto exp = std::vector<std::string>{"the first string, too long to be small", "the second string, also too long"};
+  auto rng = exp
+    | genex::views::transform([](std::string const &s) { return s; })
+    | genex::views::enumerate
+    | genex::views::vals;
+  static_assert(std::same_as<decltype(*rng.begin()), std::string>);
+
+  const auto vals = rng | genex::to<std::vector>();
+  EXPECT_EQ(vals, exp);
 }
 
 // A reference to a pair isn't a temporary, even as an rvalue, so dereferencing can't take anything from it.

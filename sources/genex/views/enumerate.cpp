@@ -36,7 +36,7 @@ namespace genex::views::detail::impl {
     std::size_t index = 0uz;
 
     using value_type = std::pair<std::size_t, iter_value_t<I>>;
-    using reference = value_type;
+    using reference = std::pair<std::size_t, iter_reference_t<I>>;
     using pointer = void;
     using difference_type = iter_difference_t<I>;
     using iterator_concept = iter_strength_t<I>;
@@ -67,8 +67,8 @@ namespace genex::views::detail::impl {
       index += static_cast<std::size_t>(n);
     }
 
-    GENEX_INLINE constexpr auto deref() const -> decltype(auto) {
-      return std::make_pair(index, *it);
+    GENEX_INLINE constexpr auto deref() const -> reference {
+      return reference(index, *it);
     }
 
     GENEX_INLINE friend constexpr auto operator==(
